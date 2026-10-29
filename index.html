@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Silver Throne</title>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;700&family=Alegreya+SC:wght@500;700&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--hh:64px;--bg:#0b0e10;--panel:#161b1e;--panel2:#1d2427;--ink:#e9e1cf;--mute:#9b9483;--line:#4e4224;--gold:#c9a24b;--gold2:#f0d27a;--acc:#4fa35e;--ember:#d99a3a;--blood:#d4564f;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.4 Alegreya,Georgia,serif}
+body{background:radial-gradient(1200px 600px at 50% -10%,#1f282b 0,transparent 70%) fixed,repeating-linear-gradient(45deg,#0d1113 0 6px,#0b0e10 6px 12px) fixed;padding:env(safe-area-inset-top,0px) 0 calc(84px + env(safe-area-inset-bottom,0px))}
+h1,h2,h3{font-family:Cinzel,"Alegreya SC",Georgia,serif;margin:0;font-weight:700}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:8px 16px;background:linear-gradient(180deg,#1b2124,#101416);border-bottom:2px solid var(--gold);box-shadow:0 2px 12px #000c}
+header h1{font-size:22px;letter-spacing:.08em;color:var(--gold2);text-shadow:0 1px 0 #000,0 0 12px #c9a24b55;white-space:nowrap;display:flex;align-items:center;gap:8px;text-transform:uppercase}
+header h1 .cr{font-size:20px}
+.hs{display:flex;gap:8px;flex:1;justify-content:flex-end;align-items:center;min-width:0}
+.rc,.lvb{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 8px;background:linear-gradient(180deg,#0e1214,#161b1e);border:1px solid var(--line);border-radius:6px;box-shadow:inset 0 0 0 1px #000;white-space:nowrap}
+.rc svg{width:28px;height:28px;flex:none}
+.rc b,.lvb b{display:block;font-size:17px;line-height:1.1;color:var(--ink)}
+.rc small,.lvb small{display:block;font-size:12px;color:var(--mute);line-height:1.1}
+.xpb{display:block;height:5px;background:#000;margin-top:3px;border:1px solid var(--line)}
+.xpb i{display:block;height:100%;background:linear-gradient(90deg,#b8860b,var(--gold2))}
+main{max-width:860px;margin:0 auto;padding:14px}
+section{position:relative;background:linear-gradient(180deg,#1d2427,#141a1c);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:4px;padding:12px 14px;margin:0 0 14px;box-shadow:inset 0 0 0 1px #000,inset 0 0 24px #0008,0 3px 10px #0008}
+section h2{font-size:18px;letter-spacing:.05em;color:var(--gold2);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid;border-image:linear-gradient(90deg,var(--gold),transparent) 1}
+section>.row{padding:8px 0;border-bottom:1px solid #ffffff0d;margin:0}
+section>.row:last-child{border-bottom:0}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:6px 0}
+button,select{font:inherit;color:var(--ink);background:linear-gradient(180deg,#2a3236,#171d20);border:1px solid #6b5a30;padding:7px 12px;border-radius:4px;box-shadow:inset 0 1px 0 #ffffff14,0 1px 2px #000a}
+select option{background:#14191b;color:var(--ink)}
+button{cursor:pointer}
+button:hover:not(:disabled){filter:brightness(1.2);border-color:var(--gold)}
+button.p{background:linear-gradient(180deg,#4fa35e,#2d6b3a);border-color:#8fd19b;color:#fff;font-weight:700;text-shadow:0 1px 1px #000a}
+button.d{border-color:var(--blood);color:#ff9d96;background:linear-gradient(180deg,#34201f,#1d1212)}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
+input{font:inherit;color:var(--ink);background:#0b0e10;border:1px solid var(--line);padding:7px 10px;border-radius:4px;width:9em}
+.bar{height:8px;background:#05080a;border:1px solid var(--line);margin:3px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#2d6b3a,#5fbf70)}
+.bar.e i{background:linear-gradient(90deg,#7d2420,var(--blood))}
+.mute{color:var(--mute);font-size:15px}
+.msg{border:1px solid var(--ember);border-left:4px solid var(--ember);background:linear-gradient(180deg,#2a2112,#171209);padding:8px 12px;margin:0 0 14px;border-radius:4px}
+.log{font-size:15px;color:var(--mute);margin:6px 0}
+.log div:last-child{color:var(--ink)}
+.en{width:100%;text-align:left;margin:4px 0;display:block}
+.en.t{border-color:var(--ember);box-shadow:inset 3px 0 var(--ember)}
+.r1{color:#c4bfae}.r2{color:#5fc470}.r3{color:var(--ember)}.r4{color:var(--blood)}
+.tabs{display:flex;gap:4px;overflow-x:auto;margin:0 0 14px;padding-bottom:0;border-bottom:1px solid var(--gold);scrollbar-width:thin}
+.tabs button{flex:none;border-radius:4px 4px 0 0;font-family:Cinzel,serif;font-weight:700;font-size:13px;color:var(--mute);background:linear-gradient(180deg,#181e21,#0e1214)}
+.tabs button.p{background:linear-gradient(180deg,#4a3b17,#241c0b);color:var(--gold2);border-color:var(--gold);text-shadow:none}
+.hero{position:relative;min-height:190px;margin:0 0 14px;border:1px solid var(--gold);border-radius:4px;display:flex;flex-direction:column;justify-content:space-between;gap:70px;padding:12px;background:linear-gradient(180deg,#0003 0,#000b 100%),radial-gradient(circle at 70% 30%,#3b4a3f,#12181a 70%);box-shadow:inset 0 0 0 1px #000,0 4px 14px #000a}
+.hero-in{display:flex;align-items:center;gap:10px;align-self:flex-start;padding:6px 14px 6px 8px;background:#0b0e10cc;border:1px solid var(--gold);border-radius:6px}
+.crest{font-size:30px;line-height:1}
+.hero-in b{display:block;font-family:Cinzel,serif;color:var(--gold2);font-size:18px;line-height:1.2}
+.hero-in small{color:var(--mute)}
+.hero-cta{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 12px;background:#0b0e10cc;border:1px solid var(--line);border-radius:4px}
+.hero-cta>span:first-child{font-family:Cinzel,serif;font-weight:700;color:var(--gold2)}
+.ico{position:relative;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;margin-right:6px;vertical-align:middle;background:#0b0e10;border:1px solid var(--line);border-radius:4px;font-size:16px;overflow:hidden}
+.ico img{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;object-fit:cover}
+.ico.q1{border-color:var(--acc)}.ico.q2{border-color:var(--ember)}.ico.q3{border-color:var(--blood)}
+.avw{position:relative;display:inline-block;flex:none;border-radius:50%;overflow:hidden}
+.avw>svg{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%}
+.avw img{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid var(--gold)}
+.bl{display:flex;align-items:center;gap:10px}
+.thumb{position:relative;flex:none;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:26px;background:linear-gradient(135deg,#2c3a30,#12181a);border:1px solid var(--gold);border-radius:4px;overflow:hidden}
+.thumb img{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;object-fit:cover}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:linear-gradient(180deg,#1b2124,#0e1214);border-top:2px solid var(--gold);padding-bottom:env(safe-area-inset-bottom,0px);z-index:6}
+nav button{flex:1;border:0;border-radius:0;background:none;box-shadow:none;padding:8px 4px;font-family:Cinzel,serif;font-weight:700;font-size:12px;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:2px}
+nav .ni{font-size:22px;line-height:1}
+nav button.on{color:var(--gold2);background:linear-gradient(180deg,#3a2f15,#1a1608);box-shadow:inset 0 3px var(--gold)}
+#auth-toggle{position:fixed;top:10px;right:10px;z-index:10000;padding:6px 12px;font-family:Cinzel,serif;font-weight:700;font-size:13px;color:var(--gold2);background:linear-gradient(180deg,#2a2412,#15110a);border:1px solid var(--gold);border-radius:6px}
+#auth-panel{top:52px!important;right:10px!important;background:linear-gradient(180deg,#1c2225,#12171a)!important;border:1px solid var(--gold);border-radius:8px!important;max-width:calc(100vw - 20px);font:15px Alegreya,Georgia,serif!important;color:var(--ink)!important}
+#auth-panel input{width:100%;background:#0b0e10;color:var(--ink);border:1px solid var(--line);border-radius:4px}
+.auth-hidden{display:none!important}
+@media (max-width:959px){
+header{flex-wrap:wrap;padding:6px 10px;padding-right:84px;gap:4px}
+header h1{font-size:17px}
+.hs{flex:1 1 100%;justify-content:flex-start;overflow-x:auto;padding-bottom:2px}
+.rc{padding:3px 8px 3px 6px;gap:5px}.rc svg{width:22px;height:22px}
+.rc b,.lvb b{font-size:15px}.lvb b{display:none}.lvb{padding:3px 8px 3px 6px}
+main{padding:10px}
+.hero{min-height:150px;gap:40px}
+}
+@media (min-width:960px){
+body{padding:calc(var(--hh) + 14px) 0 24px 210px}
+header{position:fixed;left:0;right:0;height:var(--hh);padding-right:110px}
+nav{top:var(--hh);right:auto;bottom:0;width:210px;flex-direction:column;justify-content:flex-start;gap:6px;padding:14px 10px;border-top:0;border-right:2px solid var(--gold);background:linear-gradient(90deg,#1b2124,#101416)}
+nav button{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;padding:12px 14px;font-size:16px;border:1px solid var(--line);border-radius:4px;background:linear-gradient(180deg,#181e21,#0e1214)}
+nav button.on{box-shadow:inset 4px 0 var(--gold);border-color:var(--gold)}
+main{padding:8px 24px;max-width:940px}
+}
+/* ===== Legendary items + premium hero (efecte vizuale) ===== */
+[data-fx=runic]{--c1:#f0d27a;--c2:#49b6ff}
+/* exemplu pentru un viitor legendar: [data-fx=ember]{--c1:#ffb35a;--c2:#ff4d2e} */
+.rl{color:#f0d27a;text-shadow:0 0 8px #c9a24b66}
+.ico.lg{width:46px;height:46px;cursor:pointer;isolation:isolate;overflow:visible;border:1px solid var(--c1);background:#141416;animation:lgGlow 3.2s ease-in-out infinite;-webkit-tap-highlight-color:transparent}
+.ico.lg::before{content:"";position:absolute;top:-4px;right:-4px;bottom:-4px;left:-4px;border-radius:8px;background:conic-gradient(from 0deg,var(--c1),transparent 28%,var(--c2),transparent 62%,var(--c1));opacity:.55;filter:blur(3px);z-index:-1;animation:lgSpin 7s linear infinite}
+.ico.lg .lgi{border-radius:3px;z-index:1}.ico.lg .rn{z-index:2;opacity:.8}.ico.lg .pt{z-index:3}
+.ico.lg .rn{position:absolute;left:50%;top:50%;width:70%;height:70%;translate:-50% -50%;border-radius:50%;background:radial-gradient(closest-side,rgba(73,182,255,.55),transparent);mix-blend-mode:screen;pointer-events:none;animation:lgPulse 2.4s ease-in-out infinite}
+.pt{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--c2);box-shadow:0 0 5px var(--c2);opacity:0;pointer-events:none;--rise:-34px;animation:lgRise 3.4s ease-in infinite}
+.pt.a{left:20%;bottom:8%}.pt.b{left:52%;bottom:14%;animation-delay:1.1s;--dx:6px}.pt.c{left:80%;bottom:6%;animation-delay:2.2s;--dx:-5px}
+.pt.d{left:34%;bottom:20%;animation-delay:.6s;--dx:-8px}.pt.e{left:66%;bottom:10%;animation-delay:1.7s;--dx:9px}.pt.f{left:46%;bottom:4%;animation-delay:2.8s}
+.ico.lg .pt.d,.ico.lg .pt.e,.ico.lg .pt.f{display:none}
+.ico.lg.sel{animation:lgPop .6s cubic-bezier(.2,.8,.2,1),lgGlow 3.2s ease-in-out infinite}
+.lgm{position:fixed;top:0;right:0;bottom:0;left:0;z-index:10001;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(circle at 50% 40%,#0c1a2a99,#000d);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);animation:lgIn .25s ease-out}
+.lgm.out{animation:lgOut .2s ease-in forwards}
+.lgm-b{position:relative;width:min(92vw,380px);max-height:92vh;overflow:auto;text-align:center;padding:18px 16px;border:1px solid var(--gold);border-radius:10px;background:linear-gradient(180deg,#1d2427,#0f1315);box-shadow:0 0 40px #49b6ff33,inset 0 0 0 1px #000}
+.lgm-b.pv{width:auto;padding:10px;background:none;border:0;box-shadow:none;overflow:visible}
+.lgm-b h3{color:var(--gold2);font-size:22px;letter-spacing:.05em;margin-top:6px;text-shadow:0 0 14px #c9a24b66}
+.lgm-d{margin-top:6px;color:#9ad7ff}
+.lgm-x{position:absolute;top:8px;right:8px;z-index:3;padding:2px 9px}
+.lgm-st{position:relative;height:min(46vh,380px);display:flex;align-items:center;justify-content:center;margin-top:8px}
+.lgm-aura{z-index:0;position:absolute;top:6%;right:18%;bottom:6%;left:18%;background:radial-gradient(closest-side,rgba(73,182,255,.38),rgba(240,210,122,.12) 55%,transparent);filter:blur(6px);animation:lgPulse 3s ease-in-out infinite}
+.lgm-img{position:relative;height:100%;width:auto;max-width:100%;object-fit:contain;z-index:1;animation:lgFloat 5s ease-in-out infinite}
+.lgm-st .rn{position:absolute;left:50%;top:32%;width:90px;height:22%;translate:-50% 0;border-radius:50%;background:radial-gradient(closest-side,rgba(90,200,255,.6),transparent);mix-blend-mode:screen;pointer-events:none;animation:lgPulse 2.2s ease-in-out infinite}
+.lgm-st .rn{z-index:2}.lgm-st .pt{z-index:3;--rise:-230px;width:4px;height:4px;animation-duration:5s}
+.lgm-st .pt.a{left:40%;bottom:12%}.lgm-st .pt.b{left:56%;bottom:20%}.lgm-st .pt.c{left:48%;bottom:8%}
+.pcard{--px:0;--py:0;position:relative;width:min(100%,360px);aspect-ratio:848/1264;margin:12px auto;border:1px solid var(--gold);border-radius:12px;overflow:hidden;background:#05080b;box-shadow:0 0 0 1px #000,0 8px 30px #000b,0 0 28px #49b6ff22;isolation:isolate;touch-action:pan-y}
+.pcard.big{width:min(92vw,calc(86vh*848/1264),520px)}
+.pc-bg{z-index:0;position:absolute;top:-10%;right:-10%;bottom:-10%;left:-10%;background:center/cover no-repeat;filter:saturate(1.25) brightness(.8);translate:calc(var(--px)*-16px) calc(var(--py)*-12px);transition:translate .35s ease-out;animation:pcDrift 18s ease-in-out infinite alternate}
+.pc-fig{z-index:1;position:absolute;top:0;right:0;bottom:0;left:0;translate:calc(var(--px)*9px) calc(var(--py)*7px);transition:translate .25s ease-out;animation:pcBreathe 14s ease-in-out infinite alternate;}
+.pc-fig img{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;object-fit:cover;display:block}
+.pc-g{position:absolute;pointer-events:none;mix-blend-mode:screen;border-radius:50%;animation:pcPulse 3.4s ease-in-out infinite}
+.pc-g.eyes{left:38%;top:15.5%;width:26%;height:8%;background:radial-gradient(closest-side,rgba(150,230,255,.9),transparent)}
+.pc-g.rune{left:36%;top:40%;width:38%;height:18%;background:radial-gradient(closest-side,rgba(60,170,255,.55),transparent);animation-delay:.7s}
+.pc-g.blade{left:0;top:68%;width:100%;height:28%;background:radial-gradient(closest-side,rgba(70,180,255,.4),transparent);animation-delay:1.4s}
+.pc-g.tl{left:-6%;top:22%;width:26%;height:18%;background:radial-gradient(closest-side,rgba(255,160,60,.55),transparent);animation:pcFlick 1.7s ease-in-out infinite}
+.pc-g.tr{left:80%;top:23%;width:26%;height:18%;background:radial-gradient(closest-side,rgba(255,160,60,.55),transparent);animation:pcFlick 2.1s ease-in-out infinite .4s}
+.pc-cv{z-index:2;position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;pointer-events:none;translate:calc(var(--px)*18px) calc(var(--py)*14px);transition:translate .2s ease-out}
+.pc-shine{z-index:2;position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;mix-blend-mode:screen;background:linear-gradient(105deg,transparent 40%,rgba(180,230,255,.22) 50%,transparent 60%);translate:-120% 0;animation:pcShine 7s ease-in-out infinite}
+.pc-cap{z-index:3;position:absolute;left:0;right:0;bottom:0;padding:38px 12px 10px;text-align:center;background:linear-gradient(0deg,#000d,transparent);pointer-events:none}
+.pc-cap b{display:block;font-family:Cinzel,serif;color:var(--gold2);font-size:19px;letter-spacing:.06em;text-shadow:0 0 12px #c9a24b88}
+.pc-cap small{color:#9ad7ff}
+
+.pcard::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse 88% 92% at 50% 48%,transparent 64%,rgba(3,6,9,.65) 100%)}
+@supports not (aspect-ratio:1){.pcard{height:0;padding-bottom:149%}}
+.pcard.miss::before,.ico.miss::before{outline:0}
+.pcard.miss{outline:2px solid var(--blood)}
+.ico.lg.miss{border-color:var(--blood)}
+#miss{position:fixed;left:8px;right:8px;bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:10002;background:#3a1210;border:1px solid var(--blood);color:#ffd2cc;padding:8px 40px 8px 12px;border-radius:6px;font-size:14px;line-height:1.35;word-break:break-all;box-shadow:0 4px 18px #000b}
+#miss button{position:absolute;top:6px;right:6px;padding:0 8px}
+@media (min-width:960px){#miss{left:220px;bottom:12px}}
+@keyframes lgGlow{0%,100%{box-shadow:0 0 6px 1px rgba(240,210,122,.3),0 0 14px 2px rgba(73,182,255,.18)}50%{box-shadow:0 0 10px 2px rgba(240,210,122,.55),0 0 22px 4px rgba(73,182,255,.38)}}
+@keyframes lgSpin{to{transform:rotate(360deg)}}
+@keyframes lgPulse{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes lgRise{0%{translate:0 0;opacity:0}15%{opacity:.9}100%{translate:var(--dx,0) var(--rise);opacity:0}}
+@keyframes lgPop{0%{transform:scale(1)}35%{transform:scale(1.22);filter:brightness(1.7)}100%{transform:scale(1)}}
+@keyframes lgIn{from{opacity:0}to{opacity:1}}
+@keyframes lgOut{to{opacity:0}}
+@keyframes lgFloat{0%,100%{translate:0 0}50%{translate:0 -8px}}
+@keyframes pcDrift{from{scale:1.08;rotate:-.4deg}to{scale:1.14;rotate:.4deg}}
+@keyframes pcBreathe{from{scale:1.02}to{scale:1.06}}
+@keyframes pcPulse{0%,100%{opacity:.3}50%{opacity:.95}}
+@keyframes pcFlick{0%,100%{opacity:.5}20%{opacity:.85}40%{opacity:.4}60%{opacity:.95}80%{opacity:.6}}
+@keyframes pcShine{0%,55%{translate:-120% 0}100%{translate:120% 0}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.pc-cv,.pt,.pc-shine{display:none!important}.pc-g{opacity:.5}.ico.lg .rn{opacity:.5}}
+.st-map{position:relative;border:1px solid var(--line);box-shadow:inset 0 0 0 1px #000,0 2px 10px #000a;background:#1f2a22;line-height:0;overflow:hidden;user-select:none;-webkit-user-select:none}
+#stmap{display:block;cursor:grab}
+#stmap:active{cursor:grabbing}
+.st-v{cursor:pointer;outline:none}
+.st-sel{opacity:0;transition:opacity .15s}
+.st-v.on .st-sel,.st-v:focus-visible .st-sel{opacity:1}
+.st-v:hover .st-sel{opacity:.6}
+.st-v.on:hover .st-sel{opacity:1}
+.st-nm{opacity:0;transition:opacity .15s;pointer-events:none}
+.st-v.on .st-nm,.st-v:hover .st-nm,.st-v:focus-visible .st-nm{opacity:1}
+.st-zc{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:4px;line-height:1}
+.st-zb{width:34px;height:34px;padding:0;font-size:18px;background:#0b0e10cc}
+.st-lg{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;font-size:13px;color:var(--mute)}
+.st-lg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+@keyframes st-sk{0%{transform:translate(0,0) scale(.7);opacity:.55}100%{transform:translate(2px,-11px) scale(1.7);opacity:0}}
+@keyframes st-fl{0%,100%{transform:skewY(0) scaleX(1)}50%{transform:skewY(-6deg) scaleX(.86)}}
+@keyframes st-rt{to{stroke-dashoffset:-18}}
+@keyframes st-wv{to{stroke-dashoffset:-32}}
+.st-sk{animation:st-sk 4.2s linear infinite;transform-box:fill-box;transform-origin:center}
+.st-fl{animation:st-fl 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:0 50%}
+.st-rt{animation:st-rt 1.2s linear infinite}
+.st-wv{animation:st-wv 5s linear infinite}
+@media (prefers-reduced-motion:reduce){.st-sk,.st-fl,.st-rt,.st-wv{animation:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="world-data.js"></script>
+<script src="tron-logic.js"></script>
+<script src="cladiri-art.js"></script>
+<script src="teritorii.js"></script>
+<script src="inventar.js"></script>
+<script src="panou.js"></script>
+<script src="tron.js"></script>
+</head>
+<body>
+<header><h1><span class="cr">♛</span> Silver Throne</h1><div class="hs" id="hs"></div></header>
+<main id="v"></main>
+<nav id="nv"></nav>
+<script>
+const SUPABASE_URL = 'https://qzrelarnmvnwzvfddbrv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_8Ds3XwQm1HJWzCah-6N0Ww_VbvV-Oy4';
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+const KEY='mina-cenusie-v1',PT=360000,MAXP0=30;
+const q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
+const R=(a,b)=>a+Math.random()*(b-a),RI=(a,b)=>Math.floor(R(a,b+1)),P=a=>a[RI(0,a.length-1)];
+const RAR=[{n:'Comun',pen:0,aff:0,cost:3,t:20,m:1},{n:'Magic',pen:5,aff:1,cost:6,t:45,m:1.1},{n:'Rar',pen:10,aff:2,cost:10,t:90,m:1.2},{n:'Epic',pen:20,aff:2,cost:16,t:180,m:1.4}];
+const CL={'Războinic':{hp:40,atk:6,sp:'Spargere',d:'lovitură grea, poate amețea'},'Arcaș':{hp:28,atk:7,sp:'Săgeată zimțată',d:'provoacă sângerare'},'Paznic':{hp:50,atk:4,sp:'Bubuitură',d:'lovește toți inamicii'},'Mag':{hp:26,atk:8,sp:'Flacără',d:'ignoră apărarea inamicului'},'Vraci':{hp:30,atk:4,sp:'Vindecare',d:'vindecă aliatul cel mai rănit; arma dă putere vindecării'},'Campion':{hp:45,atk:6,sp:'Lovitura campionului',d:'lovitură puternică care provoacă sângerare'},'Gardian':{hp:60,atk:5,sp:'Strajă',d:'apără satul, nu luptă în mină'}};
+const BW=['Topor','Sabie','Ghioagă'],BA=['Pieptar','Cămașă de zale','Scut-pieptar'],BJ=['Inel','Amuletă','Brățară'],BH=['Coif','Cască','Coroană de fier'],BB=['Cizme','Cizme întărite','Jambiere'];
+const PW=[{n:'Zimțat',dmg:3,m:'zim'},{n:'Sângeros',bleed:30,m:'sng'},{n:'Străjuitor',dmg:2,vd:4,m:'pia'},{n:'Ascuțit',lv:6,dmg:2,crit:6,m:'fie'},{n:'Otrăvit',lv:12,dmg:2,bleed:45,m:'ven'},{n:'Pustiitor',lv:20,dmg:6,pd:4,m:'cen'},{n:'Fărâmător',lv:30,dmg:5,pd:8,crit:4,m:'osn'},{n:'Sfâșietor',lv:16,dmg:3,bleed:35,m:'sng'},{n:'Nimicitor',lv:40,dmg:8,pd:10,crit:6,m:'cen'}],PA=[{n:'Blindat',def:2,m:'bli'},{n:'Călit',hp:10,m:'cal'},{n:'Fortificat',def:1,vd:5,m:'pia'},{n:'Masiv',lv:8,hp:14,def:1,m:'fie'},{n:'Întărit',lv:14,def:3,pf:3,m:'fie'},{n:'Vindecător',lv:18,hp:8,heal:12,m:'izv'},{n:'Neînduplecat',lv:28,def:4,pf:6,ph:4,m:'cen'},{n:'Oțelit',lv:22,def:4,hp:12,m:'bli'},{n:'Inexpugnabil',lv:40,def:6,pf:9,ph:6,m:'cen'}],PJ=[{n:'Fermecat',crit:5},{n:'Strălucitor',bleed:20},{n:'Ocrotitor',vd:6},{n:'Înstărit',lv:6,loot:12},{n:'Izvorât',lv:10,heal:10},{n:'Regal',lv:25,pd:5,ph:5},{n:'Vrăjit',lv:15,crit:8,heal:8},{n:'Imperial',lv:40,pd:8,ph:8,pf:4}];
+const SF=[{n:'al Vulturului',crit:10,m:'vul'},{n:'al Prăzii',loot:20,m:'pra'},{n:'al Răbdării',hp:6,m:'rab'},{n:'al Izvorului',heal:20,m:'izv'},{n:'al Zidarului',vd:8,m:'pia'},{n:'al Lupului',lv:5,dmg:2,crit:5,m:'osn'},{n:'al Titanului',lv:10,hp:12,ph:3,m:'fie'},{n:'al Furiei',lv:15,dmg:3,bleed:20,m:'sng'},{n:'al Păzitorului',lv:20,def:3,pf:4,m:'bli'},{n:'al Eternității',lv:35,pd:6,ph:6,pf:6,m:'cen'},{n:'al Săgeții',lv:12,crit:12,pd:2,m:'vul'},{n:'al Lunii',lv:25,heal:30,ph:3,m:'izv'},{n:'al Zeilor',lv:42,pd:8,ph:8,pf:8,heal:15,m:'cen'}];
+const DR={l:'Se aud arme în sală',c:'O lumină aurie în depărtare',x:'Podea suspectă, cu pietre slăbite',o:'Un foc mic de tabără'};
+let S;
+const mk=(n,c)=>({n,c,hp:CL[c].hp,sc:0});
+function fresh(){return{lvl:1,xp:0,gold:40,ore:24,pts:MXP(),ptsT:Date.now(),slots:4,forge:[null,null,null,null],inv:[],pity:0,tab:'a',ui:{t:'w',l:1,r:0,p:0,s:0,q:0},fs:[{...mk('Eroul','Campion'),h:1},mk('Elena','Arcaș'),mk('Toma','Paznic')],d:null,msg:'',rs:[],tu:0,pool:{t:0,c:[]},mat:{zim:6,sng:6,bli:6,cal:6,vul:6,pra:6,rab:6,izv:6,jwf0:4,jwb0:2,esf0:1}}}
+function load(){try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}if(!S||!S.fs)S=fresh();S.rs=S.rs||[];S.pool=S.pool||{t:0,c:[]};{const m=S.mat||(S.mat={});['jwf','jwb','esf'].forEach(k=>{if(m[k]){m[k+'0']=(m[k+'0']||0)+m[k];delete m[k]}})}S.ui.q=S.ui.q||0;if(S.tu===undefined)S.tu=-1;if(S.tab=='t')S.tab='a';S.ui.p=S.ui.p||0;S.ui.s=S.ui.s||0;if(S.eq){if(S.fs[0])S.fs[0].eq=S.eq;delete S.eq}{const a=[...S.fs,...S.rs];if(!a.some(f=>f.h)){a[0].h=1;a[0].c='Campion'}if(!S.fs.some(f=>f.h)){const i=S.rs.findIndex(f=>f.h),h=S.rs.splice(i,1)[0];S.fs.unshift(h);if(S.fs.length>3)S.rs.push(S.fs.pop())}}}
+let cloudSaveTimer = null;
+let cloudUserId = null;
+let cloudLoading = false;
+
+function save(){
+  try {
+    localStorage.setItem(KEY, JSON.stringify(S));
+  } catch(e) {}
+
+  if (!cloudUserId || cloudLoading) return;
+
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer = setTimeout(async function(){
+    try {
+      const { error } = await supabaseClient
+        .from('game_saves')
+        .upsert({
+          user_id: cloudUserId,
+          game_data: S,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Eroare la salvarea online:', error.message);
+      }
+    } catch(e) {
+      console.error('Eroare la salvarea online:', e);
+    }
+  }, 1200);
+}
+function sync(){const n=Date.now();if(S.pts>=MXP()){S.pts=Math.max(S.pts,MXP());S.ptsT=n;return}const k=Math.floor((n-S.ptsT)/PT);if(k>0){S.pts=Math.min(MXP(),S.pts+k);S.ptsT+=k*PT;if(S.pts>=MXP())S.ptsT=n}}
+function spend(k){if(S.pts>=MXP())S.ptsT=Date.now();S.pts-=k}
+const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const BL=()=>{const b=S.bl||(S.bl={f:0,i:0,b:0});if(b.d==null)b.d=0;if(b.z==null)b.z=0;return b},rp=c=>Math.round(c.p*Math.pow(.97,BL().b)),ST=()=>S.st||(S.st={f:0,r:0,a:0,p:0,n:0}),E=f=>f.eq||(f.eq={w:null,a:null}),roster=()=>[...S.fs,...S.rs,...(S.gd||[])],cur=()=>{const r=roster();return r[S.sel]||r[0]};
+function bon(f){const b={dmg:0,def:0,hp:0,bleed:0,crit:0,loot:0,heal:0,vd:0,pd:0,ph:0,pf:0};if(f){for(const k of SL){const it=E(f)[k];if(it)for(const x in b)b[x]+=it.s[x]||0}tBuf(b)}return b}
+const el=()=>S.lvl<=20?S.lvl:20+(S.lvl-20)*.7,need=L=>ST_W.need(L);
+const TR=[{n:'Curajos',atk:.15,d:'+15% atac'},{n:'Robust',hp:.2,d:'+20% viață'},{n:'Precis',crit:10,d:'+10% critic'},{n:'Pielea groasă',def:2,d:'+2 apărare'},{n:'Fricos',hp:.1,atk:-.1,d:'+10% viață, -10% atac'},{n:'Bețiv',atk:.2,hp:-.1,d:'+20% atac, -10% viață'},{n:'Norocos',loot:15,d:'+15% aur'}],NMS=['Radu','Vlad','Ilinca','Matei','Sorin','Anca','Dragoș','Lia','Petru','Ioana','Costea','Dana'],tr=(f,k)=>(f.t||[]).reduce((s,x)=>s+(x[k]||0),0);
+const mhp=f=>Math.max(5,Math.round((CL[f.c].hp+4*(el()-1)+bon(f).hp)*(1+tr(f,'hp')+(f.h?ST().r*.03:0)+bon(f).ph/100+(f.rk||0)*.15))-3*f.sc);
+const atkOf=f=>(CL[f.c].atk+1.2*(el()-1)+bon(f).dmg)*(1+tr(f,'atk')+(f.h?ST().f*.02:0)+bon(f).pd/100+(f.rk||0)*.15);
+function mkItem(t,l,r,pi,si,q){const m=RAR[r].m*(1+.1*(q||0)),s={dmg:0,def:0,hp:0,bleed:0,crit:0,loot:0,heal:0,vd:0,pd:0,ph:0,pf:0};
+ if(t=='w')s.dmg=Math.round((2+l*1.4)*m);else if(t=='j')s.hp=Math.round(2*l*m);else if(t=='h'){s.def=Math.round((1+l*.4)*m);s.hp=Math.round(2*l*m)}else if(t=='b'){s.hp=Math.round(2.5*l*m);s.def=Math.round((.5+l*.25)*m)}else{s.def=Math.round((1+l*.7)*m);s.hp=Math.round(3*l*m)}
+ const PL=t=='w'?PW:t=='j'?PJ:PA,pf=pi!=null?PL[pi]:P(PL.filter(x=>(x.lv||1)<=l)),sf=si!=null?SF[si]:P(SF.filter(x=>(x.lv||1)<=l));let name=P(t=='w'?BW:t=='j'?BJ:t=='h'?BH:t=='b'?BB:BA);
+ const add=a=>{for(const k in a)if(k!='n'&&k!='m'&&k!='lv')s[k]+=['dmg','def','hp'].includes(k)?Math.round(a[k]*(1+l*.15)):a[k]};
+ if(RAR[r].aff>=1){add(pf);name=pf.n+' '+name}
+ if(RAR[r].aff>=2){add(sf);name+=' '+sf.n}
+ return{t,l,r,q:q||0,name,s,m:[RAR[r].aff>=1?pf.m:null,RAR[r].aff>=2?sf.m:null].filter(Boolean)}}
+ function panouStatistici(f){
+  const b=bon(f);
+  const t=k=>tr(f,k);
+  return `<div class="mute" style="margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:10px">
+  <b>📊 Statistici complete</b><br>
+  ❤️ Viață: ${Math.min(f.hp,mhp(f))}/${mhp(f)}<br>
+  ⚔️ Atac: ${Math.round(atkOf(f))}<br>
+  🛡️ Apărare: ${bon(f).def+t('def')}<br>
+  🎯 Critic: ${b.crit}<br>
+  🩸 Sângerare: ${b.bleed}<br>
+  💰 Bonus aur: ${b.loot}<br>
+  ✨ Vindecare: ${b.heal}<br>
+  🏰 Apărarea satului: ${b.vd}
+  </div>`;
+}
+function desc(it){const L={dmg:'atac',def:'apărare',hp:'viață',bleed:'% sângerare',crit:'% critic',loot:'% aur',heal:'% vindecare',vd:'% apărarea satului',pd:'% atac',ph:'% viață',pf:'% apărare'},o=[];for(const k in it.s)if(it.s[k])o.push('+'+it.s[k]+(k[0]=='d'||k=='hp'?' ':' ')+L[k]);return o.join(', ')}
+const iname=it=>`${iic(it)}<span class="${it.lg?'rl':'r'+(it.r+1)}">${it.name}</span> <span class="mute">(niv. ${it.l}, ${it.lg?'Legendar':RAR[it.r].n}${it.q?', '+QN[it.q]:''})</span>`;
+function chance(l,r,q){const d=l-S.lvl;let b=d>0?Math.max(10,40-5*(d-1)):d==0?55:70;const sk=25*(1-Math.pow(.97,ST().p)),cap=[75,70,65,55][r];return Math.max(5,Math.min(95,Math.min(cap,b-RAR[r].pen+sk)-(r?q||0:0)*6+S.pity*5))}
+const cost=(l,r)=>Math.round(RAR[r].cost*(1+l*.3));
+function craft(){const u=S.ui,nn=nd(u),i=S.forge.findIndex(x=>!x);S.msg='';
+ if(i<0)S.msg='Toate sloturile sunt ocupate.';else if(Object.keys(nn).some(k=>have(k)<nn[k]))S.msg='Nu ai destule materiale.';
+ else{cn('f');for(const k in nn)take(k,nn[k]);const ok=Math.random()*100<chance(u.l,u.r,u.q);if(ok)S.pity=0;else S.pity++;S.forge[i]={end:Date.now()+RAR[u.r].t*1000*Math.pow(.96,BL().f)*(1-terB('forge')/100),ok,cm:nn,item:ok?mkItem(u.t,u.l,u.r,u.p,u.s,u.q):null,label:SLN[u.t]+' '+RAR[u.r].n+' niv. '+u.l}}
+ go()}
+function collect(i){cn('c');const s=S.forge[i];if(s.ok){S.inv.push(s.item);S.msg='Reușit: '+s.item.name+'.'}else{const cm=s.cm||{ore:s.c||0};for(const k in cm)give(k,Math.floor(cm[k]/2));S.msg='Forjarea a eșuat. Recuperezi jumătate din materiale.'}S.forge[i]=null;go()}
+function ui(k,v){S.ui[k]=k=='t'?v:+v;S.msg='';go()}
+function sel(i){S.sel=i;S.msg='';go()}
+function equip(i){cn('e');const f=cur(),it=S.inv[i],k=it.t,e=E(f);S.inv.splice(i,1);if(e[k])S.inv.push(e[k]);e[k]=it;S.msg='';go()}
+function unequip(k){const e=E(cur());S.inv.push(e[k]);e[k]=null;go()}
+function sell(i){const it=S.inv[i];if(!it)return go();if(it.lk){S.msg='Obiect blocat 🔒. Deblochează-l mai întâi.';return go()}if(it.lg&&!confirm('Acesta este un obiect legendar. Sigur îl vinzi?'))return;S.gold+=4+it.l*3*(it.r+1);S.inv.splice(i,1);S.msg='';go()}
+function dis(i){const it=S.inv[i];if(!it)return go();if(it.lk){S.msg='Obiect blocat 🔒. Deblochează-l mai întâi.';return go()}if(it.lg&&!confirm('Acesta este un obiect legendar. Sigur îl dezmembrezi?'))return;const o=Math.floor(cost(it.l,it.r)/2);S.ore+=o;(it.m||[]).forEach(k=>give(k,1));S.inv.splice(i,1);S.msg=`Dezmembrat: +${o} minereu.`;go()}
+function heal(){const c=Math.round(6*S.lvl*Math.pow(.96,BL().i)),al=[...S.fs,...S.rs].filter(f=>f.hp>0&&f.hp<mhp(f));if(!al.length)S.msg='Nimeni nu are nevoie de vindecare.';else if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;al.forEach(f=>f.hp=mhp(f));S.msg='Răniții au fost bandajați.'}go()}
+function revive(i,k){const c=Math.round(15*S.lvl*Math.pow(.96,BL().i)),f=(k?S.rs:S.fs)[i];if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;f.sc++;f.hp=Math.ceil(mhp(f)/2);S.msg=f.n+' revine cu o cicatrice (-3 viață maximă).'}go()}
+function startD(i){const g=DG[i||0];if(S.lvl<g.lv){S.msg='Cerință: nivel '+g.lv+'.';return go()}if(!S.fs.some(f=>f.hp>0)){S.msg='Toți luptătorii sunt căzuți. Du-te la infirmerie.';return go()}if(g.ev){const e=evs();if(e.k<=0){S.msg='Nu mai ai chei pentru evenimentul acestei săptămâni.';return go()}e.k--}const kk=g.ev?1.4+S.lvl*.055:g.k;S.d={room:0,rooms:g.rooms,k:kk,rw:1+(kk-1)*.6,bn:g.bn,di:i||0,ev:g.ev?1:0,loot:{gold:0,ore:0,xp:0,m:{}},f:null,done:false};S.d.doors=doors();S.fl=null;S.msg='';cn('d');go()}
+function doors(){const d=S.d;if(d.fx&&d.room!=d.rooms-1)return[{t:'l'}];return d.room==d.rooms-1?[{t:'b'}]:[{t:P(['l','l','c','x','o'])},{t:P(['l','l','c','x','o'])}]}
+function door(i){const d=S.d,t=d.doors[i].t,c=t=='b'?(d.raid!=null?1:3):1;S.msg='';if(S.pts<c){S.msg='Îți trebuie '+c+(c>1?' puncte.':' punct.')+' Se regenerează câte unul la 6 minute.';return go()}
+ spend(c);d.room++;
+ if(t=='l'||t=='b'){startF(t=='b');if(S.auto!==false){autoRun();return}}
+ else{if(t=='c'){const g=Math.round((RI(8,14)+S.lvl*4)*(d.rw||1)),o=RI(3,6)+S.lvl;d.loot.gold+=g;d.loot.ore+=o;lm(pm(),RI(1,2));rdrop(false);S.msg=`Comoară: +${g} aur, +${o} minereu și materiale.`}
+  else if(t=='x'){const al=S.fs.filter(f=>f.hp>0),f=P(al),dm=Math.max(3,Math.round(mhp(f)*.15));f.hp=Math.max(1,f.hp-dm);S.msg=`Capcană! ${f.n} pierde ${dm} viață.`}
+  else{S.fs.forEach(f=>{if(f.hp>0)f.hp=Math.min(mhp(f),f.hp+Math.round(mhp(f)*.3))});lm(P(['rab','izv']),1);S.msg='Te odihnești la foc. Echipa se vindecă parțial și găsești ceva util.'}
+  d.doors=doors()}
+ go()}
+function startF(b){const d=S.d,n=b?1:RI(1,2)+(S.lvl>3?1:0)+terXn(d),es=[],NM=[['Bandit','pra'],['Ghoul de mină','sng'],['Pază corupt','bli'],['Lup de peșteră','zim']];
+ for(let i=0;i<n;i++)es.push({n:b?(d.bn||'Căpitanul Cenușii'):P(NM)[0],hp:0,atk:Math.round((3+S.lvl*1.1+d.room*.5)*(b?1.4:1)*(d.k||1)),def:Math.floor(S.lvl/3*Math.sqrt(d.k||1)),bl:0,st:0,b});
+ es.forEach(e=>{e.dm=(NM.find(z=>z[0]==e.n)||[])[1];e.mh=e.hp=Math.round((12+5*S.lvl+d.room*3)*(e.b?2.4:1)*(d.k||1))});if(d.em)terEm(es,d);
+ S.fs.forEach(x=>x.cd=0);d.f={es,i:S.fs.findIndex(f=>f.hp>0),t:0,log:[b?(d.bn||'Căpitanul Cenușii')+' îți iese în cale.':'Inamicii apar din umbră.']}}
+function tgt(i){S.d.f.t=i;go()}
+function hit(a,e,m,L){const bo=bon(a);let dm=Math.round(atkOf(a)*m*R(.85,1.15));if(Math.random()<.05+(bo.crit+tr(a,'crit')+(a.h?ST().a*.8:0))/100){dm=Math.round(dm*1.5);L.push('Lovitură critică!')}dm=Math.max(1,dm-e.def);e.hp-=dm;L.push(`${a.n} lovește ${e.n} (-${dm}).`)}
+function step(k){const f=S.d.f,a=S.fs[f.i],L=[],al=f.es.filter(e=>e.hp>0),cd=a.cd||0;let e=f.es[f.t];if(!e||e.hp<=0)e=al[0];if(k=='s'&&cd>0)k='n';if(k=='s')a.cd=a.c=='Vraci'?1:2;else if(cd>0)a.cd=cd-1;
+ if(k=='n'){hit(a,e,1,L);if(RI(1,100)<=bon(a).bleed&&e.hp>0){e.bl=3;L.push(e.n+' sângerează.')}}
+ else if(a.c=='Războinic'){hit(a,e,1.5,L);if(e.hp>0&&Math.random()<.35){e.st=1;L.push(e.n+' e amețit.')}}
+ else if(a.c=='Arcaș'){hit(a,e,1,L);if(e.hp>0){e.bl=3;L.push(e.n+' sângerează.')}}
+ else if(a.c=='Campion'){hit(a,e,1.8,L);if(e.hp>0){e.bl=3;L.push(e.n+' sângerează.')}}
+ else if(a.c=='Mag'){const o=e.def;e.def=0;hit(a,e,1.4,L);e.def=o}
+ else if(a.c=='Vraci'){const t=S.fs.filter(x=>x.hp>0).sort((x,y)=>x.hp/mhp(x)-y.hp/mhp(y))[0],h=Math.round(atkOf(a)*2.2*(1+bon(a).heal/100));t.hp=Math.min(mhp(t),t.hp+h);L.push(a.n+' vindecă '+t.n+' (+'+h+').')}
+ else al.forEach(x=>hit(a,x,.8,L));
+ f.log.push(L.join(' '));
+ if(!f.es.some(x=>x.hp>0))return win(1);
+ let n=f.i+1;while(n<S.fs.length&&S.fs[n].hp<=0)n++;
+ if(n<S.fs.length)f.i=n;else{enemy();if(S.d&&S.d.f)f.i=S.fs.findIndex(x=>x.hp>0)}
+ f.t=0}
+function act(k){step(k);go()}
+function enemy(){const f=S.d.f,L=[];
+ for(const e of f.es){if(e.hp<=0)continue;
+  if(e.bl>0){e.hp-=2+Math.floor(S.lvl/2);e.bl--;if(e.hp<=0){L.push(e.n+' sângerează până cade.');continue}}
+  if(e.st>0){e.st--;L.push(e.n+' e amețit și pierde tura.');continue}
+  const al=S.fs.filter(x=>x.hp>0);if(!al.length)break;const pz=al.find(x=>x.c=='Paznic'),t=pz&&Math.random()<.5?pz:P(al),dm=Math.max(1,Math.round(e.atk*R(.8,1.2))-bon(t).def*(1+bon(t).pf/100)-tr(t,'def'));t.hp=Math.max(0,t.hp-dm);L.push(`${e.n} lovește ${t.n} (-${dm}).`+(t.hp==0?' '+t.n+' cade!':''))}
+ f.log.push(L.join(' '));
+ if(!S.fs.some(x=>x.hp>0)){const l=S.d.loot;S.gold+=Math.floor(l.gold/2);S.ore+=Math.floor(l.ore/2);{const h={ore:0,m:{}};for(const k in(l.m||{}))h.m[k]=Math.floor(l.m[k]/2);stash(h)}S.d=null;S.msg='Echipa a căzut în adânc. Ai salvat doar jumătate din pradă. Du-i la infirmerie.'}else if(!f.es.some(x=>x.hp>0))win(1)}
+function win(q){cn('w');const d=S.d,b=d.f.es[0].b,m=b?3:1;d.loot.gold+=Math.round((RI(6,12)+S.lvl*3)*m*(d.rw||1));d.loot.ore+=RI(2,4)+Math.floor(S.lvl/2)+(b?8:0);d.f.es.forEach(e=>{if(e.dm)lm(e.dm,1)});rdrop(b);if(b){lm(pm(),2);if(d.ev){if(Math.random()<.6)relic(1)}else if(Math.random()<.35)relic()};d.loot.xp+=Math.round((8+S.lvl*4)*m*(d.rw||1));d.f=null;
+ if(b){d.done=true;d.doors=[];if(d.raid!=null)rl(d);else campBoss(d);S.msg=(d.cm?d.cm+' ':'')+'Căpitanul a căzut! Ieși cu prada.'}else{d.doors=doors();S.msg='Victorie.'}if(!q)go()}
+function flee(){const d=S.d,g=Math.floor(d.loot.gold/2),o=Math.floor(d.loot.ore/2);S.gold+=g;S.ore+=o;{const h={ore:0,m:{}};for(const k in(d.loot.m||{}))h.m[k]=Math.floor(d.loot.m[k]/2);stash(h)}S.d=null;S.msg=`Ai fugit din mină cu ${g} aur și ${o} minereu. Experiența din coborâre s-a pierdut.`;go()}
+function leave(){const d=S.d;terLeave(d);const g=Math.round(d.loot.gold*(1+(S.fs.reduce((s,f)=>s+tr(f,'loot')+bon(f).loot,0)+ST().n)/100));S.gold+=g;const lost=stash(d.loot);(d.loot.it||[]).forEach(x=>S.inv.push(x));S.xp+=d.loot.xp;let up=0;while(S.xp>=need(S.lvl)){S.xp-=need(S.lvl);S.lvl++;up++;S.pts=MXP();S.ptsT=Date.now()}
+ S.msg=`Ieși cu ${g} aur, ${d.loot.ore} minereu și ${d.loot.xp} experiență.`+(lost?` Depozitul e plin: ai pierdut ${lost} materiale.`:'')+(up?` Nivel nou: ${S.lvl}! Punctele s-au umplut (${MXP()}/${MXP()}).`:'');cn('l');S.d=null;if(d.xm)S.msg+=' '+d.xm;go()}
+function opt(k,v){if(k=='slots'){S.slots=+v;while(S.forge.length<S.slots)S.forge.push(null);S.forge.length=Math.max(S.slots,S.forge.findLastIndex(x=>x)+1)}if(k=='pts')S.pts+=10;if(k=='gold')S.gold+=1000;if(k=='ore')S.ore+=100;if(k=='lvl'){S.lvl++;S.xp=0;S.pts=MXP();S.ptsT=Date.now()}if(k=='lvl5'){S.lvl+=5;S.xp=0;S.pts=MXP();S.ptsT=Date.now()}if(k=='prem')S.prem=!S.prem;if(k=='tu'){S.tu=0;S.cn={}}if(k=='mats'){for(const x of AFM)give(x,20);for(const r of[1,2,3])for(let q=0;q<5;q++)give(RM[r]+q,5)}if(k=='lg'){S.inv.push(mkLegendary('runic',S.lvl))}if(k=='reset'){if(S.cf&&S.cf.k=='reset'&&Date.now()-S.cf.t<4000)S=fresh();else{S.cf={k:'reset',t:Date.now()};S.msg='Apasă din nou în 4 secunde ca să ștergi tot progresul.';go();return}}S.msg='';go()}
+function cand(){const rk=(m=>Math.random()<.5?RI(0,m):m)(Math.min(4,Math.floor(S.lvl/10)));const t=[P(TR)];if(Math.random()<.45){const x=P(TR);if(x!=t[0])t.push(x)}return{rk,n:P(NMS),c:P(Object.keys(CL).filter(x=>x!='Campion'&&x!='Gardian')),t,p:Math.round((25+12*S.lvl*t.length)*(1+.6*rk))}}
+function pool(){const p=S.pool;if(Date.now()>p.t||!p.c.length){p.c=[cand(),cand(),cand()];p.t=Date.now()+18e5}return p}
+function roll(){const c=8*S.lvl;if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;S.pool.t=0;S.msg='Au venit alți candidați.'}go()}
+function hire(i){const p=S.pool,c=p.c[i];if(S.gold<rp(c))S.msg='Îți trebuie '+rp(c)+' aur.';else if(S.fs.length+S.rs.length>=8)S.msg='Barăcile sunt pline (8 luptători).';else{cn('h');S.gold-=rp(c);p.c.splice(i,1);const f={n:c.n,c:c.c,hp:0,sc:0,t:c.t,rk:c.rk||0};f.hp=mhp(f);(S.fs.length<3&&!S.d?S.fs:S.rs).push(f);S.msg=c.n+' s-a alăturat'+(S.fs.includes(f)?' echipei.':' la bancă.')}go()}
+function toBench(i){if(S.d)S.msg='Nu poți schimba echipa în timpul coborârii.';else if(S.fs[i].h)S.msg='Eroul rămâne mereu în echipă.';else if(S.fs.length<2)S.msg='Ai nevoie de cel puțin un luptător în echipă.';else{S.rs.push(S.fs.splice(i,1)[0]);S.msg=''}go()}
+function toParty(i){if(S.d)S.msg='Nu poți schimba echipa în timpul coborârii.';else if(S.fs.length>=3)S.msg='Echipa are deja 3 luptători. Mută pe cineva la bancă mai întâi.';else{S.fs.push(S.rs.splice(i,1)[0]);S.msg=''}go()}
+function fire(i){const k='f'+i;if(S.cf&&S.cf.k==k&&Date.now()-S.cf.t<4000){S.rs.splice(i,1);S.cf=null;S.msg='Luptătorul a fost concediat.'}else{S.cf={k,t:Date.now()};S.msg='Apasă din nou în 4 secunde ca să concediezi luptătorul.'}go()}
+function vB(){const p=pool(),tn=f=>(f.t||[]).map(x=>x.n).join(', ')||'fără trăsături';
+ let h=`<section><h2>Hanul mercenarilor</h2><div class="mute">În mină: ${S.fs.length}/3. La bancă: ${S.rs.length}. Maxim 8 luptători. Rangul (Recrut...Legendă) dă +15% atac și viață pe treaptă; pe măsură ce urci în nivel apar candidați de rang mai mare.</div>`;
+ h+=S.fs.map((f,i)=>`<div class="row"><span>${f.n} <span class="mute">${f.c}</span></span>${f.h?'<span class="mute">Erou</span>':`<button onclick="toBench(${i})">La bancă</button>`}</div>`).join('');
+ h+=S.rs.map((f,i)=>`<div class="row"><span>${f.n} <span class="mute">${f.c}, ${tn(f)}${f.hp<=0?', căzut':', '+f.hp+'/'+mhp(f)}</span></span><span>${f.hp<=0?`<button class="d" onclick="revive(${i},1)">Ridică</button> `:''}<button onclick="toParty(${i})">În echipă</button> <button class="d" onclick="fire(${i})">Concediază</button></span></div>`).join('');
+ h+=`</section><section><h2>Recrutare</h2><div class="mute">Candidații se schimbă la 30 de minute. Trăsăturile se aplică doar luptătorului.</div>`;
+ h+=p.c.map((c,i)=>`<div class="row"><span style="display:flex;gap:10px;align-items:center">${av(c)}<span><b>${c.n}</b> <span class="mute">${c.rk?RK[c.rk]+' ':''}${c.c}<br>${c.t.map(x=>x.n+' ('+x.d+')').join(', ')}</span></span></span><button class="p" onclick="hire(${i})">${rp(c)} aur</button></div>`).join('')||'<p class="mute">Niciun candidat.</p>';
+ return h+`<div class="row"><span class="mute">Alți candidați</span><button onclick="roll()">${8*S.lvl} aur</button></div></section>`}
+const STS=[['f','Forță','+2% atac pe rang, doar pentru erou'],['r','Rezistență','+3% viață pe rang, doar pentru erou'],['a','Agilitate','+0,8% șansă de critic pe rang, doar pentru erou'],['p','Pricepere','șansă la forjare, cu randament descrescător (maxim +25%)'],['n','Negoț','+1% aur din coborâri pe rang']];
+const stc=n=>Math.round(30*Math.pow(1.22,n)),smax=()=>3+2*S.lvl;
+function train(k){const s=ST(),c=stc(s[k]);if(s[k]>=smax())S.msg='Rangul maxim la nivelul tău e '+smax()+'. Crește în nivel ca să antrenezi mai departe.';else if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;s[k]++;cn('t');S.msg=''}go()}
+function vT(){const s=ST();return vScene()+`<section><h2>Antrenament</h2><div class="mute">Aurul antrenează eroul tău. Pricepere și Negoț ajută întreaga echipă. Rang maxim la nivelul ${S.lvl}: ${smax()}.</div>${STS.map(([k,n,d])=>`<div class="row"><span><b>${n}</b>, rang ${s[k]}<br><span class="mute">${d}</span></span><button class="p" onclick="train('${k}')"${s[k]>=smax()?' disabled':''}>${stc(s[k])} aur</button></div>`).join('')}</section>${vK2()}`}
+const BN=[['f','Topitorie','timere de forjare -4% pe nivel'],['i','Infirmerie','vindecare și ridicare -4% cost pe nivel'],['b','Hanul mercenarilor','recrutare -3% cost pe nivel'],['d','Depozit','+50 capacitate pe material pe nivel'],['z','Zid','+8% apărarea satului pe nivel, cu randament descrescător']];
+const bc=n=>Math.round(80*Math.pow(1.25,n)),bmax=()=>2+S.lvl;
+function build(k){const b=BL(),c=bcc(b[k]);if(b[k]>=bmax())S.msg='Nivelul maxim al clădirii la nivelul tău e '+bmax()+'.';else if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;b[k]++;S.msg=bUpMsg(k,b[k])}go()}
+function vK(){const b=BL();return`<section><h2>Clădiri</h2><div class="mute">Nivel maxim al clădirilor la nivelul tău: ${bmax()}.</div>${BN.map(([k,n,d])=>`<div class="row"><span class="bl">${bth(k)}<span><b>${n}</b>, nivel ${b[k]}<br><span class="mute">${d}</span></span></span><button class="p" onclick="build('${k}')"${b[k]>=bmax()?' disabled':''}>${bcc(b[k])} aur</button></div>`).join('')}</section>`}
+function rn(v){const f=S.fs.find(x=>x.h)||S.fs[0];f.n=v.replace(/[<>"&]/g,'').trim().slice(0,14)||f.n;go()}
+const AG={'Campion':'M10 32L10 16 18 24 24 12 30 24 38 16 38 32z','Războinic':'M22 8h4v24h-4zM15 30h18v4H15zM22 34h4v7h-4z','Arcaș':'M15 8Q37 24 15 40Q25 24 15 8zM11 22h28v4H11z','Paznic':'M12 10h24v14c0 8-12 14-12 14S12 32 12 24z','Mag':'M24 8l4.7 10.6 11.3 1-8.6 7.5 2.6 11.1L24 32l-10 6.2 2.6-11.1L8 19.6l11.3-1z','Vraci':'M20 8h8v12h12v8H28v12h-8V28H8v-8h12z'};
+/* Imagini avatar: AV['Campion']={s:'data:image/webp;base64,...' (static),a:'data:image/webp;base64,...' (animat, doar premium)} */
+const AV={};
+const AVF={'Campion':'campion','Arcaș':'arcasa','Paznic':'paznic','Războinic':'razboinic','Mag':'mag','Vraci':'vraci','Gardian':'gardian'};
+function av(f,z){z=z||44;const i=AV[f.c];if(i&&(S.prem&&i.a?i.a:i.s))return av0(f,z);return`<span class="avw" style="width:${z}px;height:${z}px">${av0(f,z)}<img src="${skinOn(f)?HS.umbra.av:'imagini/'+(f.h?'erou':AVF[f.c])+'.jpeg'}" alt="" onerror="${skinOn(f)?'imgMiss(this)':"this.style.display='none'"}"></span>`}
+const IC={g:'<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#d9a82e" stroke="#7a5a10" stroke-width="2"/><circle cx="16" cy="16" r="8.5" fill="none" stroke="#fff1b8" stroke-width="1.6"/></svg>',o:'<svg viewBox="0 0 32 32"><path d="M16 3l11 8-4 17H9L5 11z" fill="#8c98a0" stroke="#3a444a" stroke-width="2" stroke-linejoin="round"/><path d="M16 3l-4 25M16 3l4 25M5 11h22" stroke="#d7dee2" stroke-width="1" fill="none"/></svg>',p:'<svg viewBox="0 0 32 32"><path d="M18 2L6 18h8l-2 12 14-18h-8z" fill="#e0953f" stroke="#7a4310" stroke-width="2" stroke-linejoin="round"/></svg>'};
+const IG={w:'⚔️',a:'🛡️',h:'🪖',b:'👢',j:'💍',r:'🔮'},iic=it=>it.lg&&LG[it.lg]?lgIco(it):`<span class="ico q${it.r}">${IG[it.t]||'◆'}<img src="imagini/obiecte/${it.t}.png" alt="" loading="lazy" onerror="this.style.display='none'"></span>`;
+const BFILE={f:'topitorie',i:'infirmerie',b:'han',d:'depozit',z:'zid'},BGL={f:'⚒️',i:'⚕️',b:'🍺',d:'📦',z:'🧱'},bth=k=>bthHtml(k);
+
+/* ===== Legendary items: registru extensibil =====
+   Adaugi un legendar nou: o intrare în LG + un bloc [data-fx=...] în CSS cu --c1/--c2.
+   Creezi itemul cu mkLegendary('id',nivel); câmpul it.lg se salvează odată cu itemul. */
+
+/* raportare vizibilă pentru imagini lipsă (nu se înlocuiește nimic în tăcere) */
+const MISS=new Set();
+function imgMiss(el){let u=el.currentSrc||el.src||'';try{u=decodeURI(new URL(u,location.href).pathname).replace(/^\//,'')}catch(e){}if(!u)return;const c=el.closest&&el.closest('.pcard,.ico,.lgm-st');if(c)c.classList.add('miss');if(!MISS.has(u)){MISS.add(u);console.error('Imagine lipsă sau imposibil de încărcat: '+u)}missShow()}
+function missShow(){let b=q('#miss');if(!b){b=document.createElement('div');b.id='miss';b.setAttribute('role','alert');document.body.appendChild(b)}b.innerHTML='<b>Lipsesc din folderul publicat:</b><br>'+[...MISS].join('<br>')+'<button onclick="this.parentNode.remove()" aria-label="Închide">✕</button>'}
+const LG={runic:{n:'Sabia Runelor',t:'w',fx:'runic',img:'imagini/arma-legendara.png',ico:'imagini/arma-legendara-icon.png'}};
+function mkLegendary(id,l){const d=LG[id];if(!d)return null;const it=mkItem(d.t,Math.max(1,l||S.lvl),3,null,null,2);it.lg=id;it.name=d.n;it.m=[];it.s.dmg=Math.round(it.s.dmg*1.35);it.s.crit+=8;it.s.pd+=6;return it}
+const lgPt='<i class="pt a"></i><i class="pt b"></i><i class="pt c"></i><i class="pt d"></i><i class="pt e"></i><i class="pt f"></i>';
+const lgIco=it=>{const d=LG[it.lg];return`<span class="ico lg" data-fx="${d.fx}" data-lg="${it.lg}" data-n="${it.name}" data-d="${desc(it)}" role="button" tabindex="0" aria-label="Detalii ${it.name}"><img class="lgi" src="${d.ico}" alt="${it.name}" onerror="imgMiss(this)"><i class="rn"></i>${lgPt}</span>`};
+function lgPick(el){qa('.ico.lg.sel').forEach(x=>x.classList.remove('sel'));void el.offsetWidth;el.classList.add('sel');lgOpen(el.dataset)}
+function lgOpen(ds){const d=LG[ds.lg];if(!d)return;mdl(`<div class="lgm-st"><span class="lgm-aura"></span><img class="lgm-img" src="${d.img}" alt="${ds.n}" onerror="imgMiss(this)"><i class="rn"></i>${lgPt}</div><h3>${ds.n}</h3><div class="mute">Obiect legendar</div><div class="lgm-d">${ds.d||''}</div>`,'',d.fx)}
+function mdl(h,cls,fx){const o=q('#lgm');if(o)o.remove();const m=document.createElement('div');m.id='lgm';m.className='lgm';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.innerHTML=`<div class="lgm-b ${cls||''}"${fx?` data-fx="${fx}"`:''}><button class="lgm-x" aria-label="Închide" onclick="lgClose()">✕</button>${h}</div>`;m.addEventListener('click',e=>{if(e.target===m)lgClose()});document.body.appendChild(m);fxScan();const x=m.querySelector('.lgm-x');if(x)x.focus()}
+function lgClose(){const m=q('#lgm');if(!m)return;m.classList.add('out');setTimeout(()=>{m.remove();fxScan()},200)}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('.ico.lg');if(t)lgPick(t)});
+document.addEventListener('keydown',e=>{if(e.key=='Escape')lgClose();const t=e.target;if((e.key=='Enter'||e.key==' ')&&t.classList&&t.classList.contains('lg')&&t.classList.contains('ico')){e.preventDefault();lgPick(t)}});
+/* ===== Erou premium: card cinematic 2D (imagine statică + straturi de lumină) ===== */
+const HS={umbra:{n:'Umbra Runelor',img:'imagini/erou-premium.jpg',bg:'imagini/erou-premium-bg.jpg',av:'imagini/erou-premium-avatar.jpg'}};
+const skinOn=f=>!!(f&&f.h&&S.prem&&S.skin!='clasic');
+function pcard(k,big){const d=HS[k];return`<div class="pcard${big?' big':''}"><div class="pc-bg" style="background-image:url(${d.bg})"></div><div class="pc-fig"><img src="${d.img}" alt="${d.n}" onerror="imgMiss(this)"><i class="pc-g eyes"></i><i class="pc-g rune"></i><i class="pc-g blade"></i><i class="pc-g tl"></i><i class="pc-g tr"></i></div><canvas class="pc-cv" aria-hidden="true"></canvas><i class="pc-shine"></i><div class="pc-cap"><b>${d.n}</b><small>Skin premium</small></div></div>`}
+function portrait(f){if(!f.h)return'';if(skinOn(f))return pcard('umbra')+'<div class="row" style="justify-content:center"><button onclick="skinView()">Ecran complet</button> <button onclick="skinSet(\'clasic\')">Skin clasic</button></div>';return portrait0(f)+'<div class="row" style="justify-content:center">'+(S.prem?'<button class="p" onclick="skinSet(\'umbra\')">Echipează skinul Umbra Runelor</button>':'<button onclick="skinView()">Previzualizează skinul premium</button>')+'</div>'}
+function skinSet(v){S.skin=v;go()}
+function skinView(){mdl(pcard('umbra',1)+`<div class="mute" style="text-align:center;margin-top:8px">${S.prem?'Skin premium activ':'Previzualizare · disponibil cu Premium'}</div>`,'pv')}
+/* motor de particule: o singură buclă, pornită doar când există carduri vizibile */
+const RDM=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
+let fxL=[],fxRaf=0,fxLast=0;
+function fxMake(el){const cv=el.querySelector('.pc-cv');if(!cv)return null;const o={el,cv,cx:cv.getContext('2d'),ps:[],vis:true,w:0,h:0,d:1};if(window.IntersectionObserver){o.io=new IntersectionObserver(es=>{o.vis=es[0].isIntersecting});o.io.observe(el)}
+ el.addEventListener('pointermove',ev=>{const r=el.getBoundingClientRect();el.style.setProperty('--px',((ev.clientX-r.left)/r.width-.5).toFixed(3));el.style.setProperty('--py',((ev.clientY-r.top)/r.height-.5).toFixed(3))});
+ el.addEventListener('pointerleave',()=>{el.style.setProperty('--px',0);el.style.setProperty('--py',0)});return o}
+function fxSize(o){const r=o.el.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,1.5);o.w=r.width;o.h=r.height;o.d=d;o.cv.width=Math.round(r.width*d);o.cv.height=Math.round(r.height*d)}
+function fxSpawn(o,init){const warm=Math.random()<.2;return{x:Math.random()*o.w,y:init?Math.random()*o.h:o.h+8,r:R(.8,2.2),vy:R(8,22),vx:R(-6,6),ph:Math.random()*6.28,a:R(.35,.9),c:warm?'255,170,80':'120,210,255'}}
+function fxTick(t){if(!fxL.length){fxRaf=0;return}fxRaf=requestAnimationFrame(fxTick);if(document.hidden)return;const mob=innerWidth<700;if(t-fxLast<(mob?33:16))return;const dt=Math.min(.06,(t-fxLast)/1000);fxLast=t;
+ for(const o of fxL){if(!o.vis||!o.el.isConnected)continue;if(!o.w)fxSize(o);if(!o.w)continue;if(!o.ps.length)for(let i=0;i<(mob?12:22);i++)o.ps.push(fxSpawn(o,1));
+  const c=o.cx;c.setTransform(o.d,0,0,o.d,0,0);c.clearRect(0,0,o.w,o.h);c.globalCompositeOperation='lighter';
+  for(const p of o.ps){p.y-=p.vy*dt;p.x+=(p.vx+Math.sin(t/900+p.ph)*5)*dt;if(p.y<-8||p.x<-8||p.x>o.w+8)Object.assign(p,fxSpawn(o,0));const tw=.55+.45*Math.sin(t/500+p.ph);c.beginPath();c.fillStyle='rgba('+p.c+','+(p.a*tw).toFixed(2)+')';c.arc(p.x,p.y,p.r,0,6.283);c.fill()}}}
+function fxScan(){fxL.forEach(o=>o.io&&o.io.disconnect());fxL=qa('.pcard').map(fxMake).filter(Boolean);if(RDM()||!fxL.length)return;if(!fxRaf)fxRaf=requestAnimationFrame(fxTick)}
+addEventListener('resize',()=>fxL.forEach(o=>o.w=0));
+function hero(){return`<div class="hero">${heroBg()}<div class="hero-in"><span class="crest">🏰</span><span><b>Capitala</b><small>Nivel ${S.lvl} · ${terStage()}</small></span></div><div class="hero-cta"><span>Cucerește noi teritorii</span><span><button class="p" onclick="tab('m')">Vezi harta</button> <button onclick="tab('c')">Coboară</button></span></div></div>`}
+function av0(f,z){z=z||44;const i=AV[f.c];if(i){const u=S.prem&&i.a?i.a:i.s;if(u)return`<img src="${u}" width="${z}" height="${z}" alt="${f.c}" style="border-radius:50%;object-fit:cover;flex:none">`}
+ return`<svg viewBox="0 0 48 48" width="${z}" height="${z}" style="flex:none" role="img" aria-label="${f.c}"><circle cx="24" cy="24" r="22.5" style="fill:var(--bg);stroke:${f.h?'var(--ember)':'var(--line)'};stroke-width:3"/><path d="${AG[f.c]||AG['Campion']}" style="fill:var(--acc)" transform="translate(7.2 7.2) scale(.7)"/></svg>`}
+const MA={zim:'Colți zimțati',sng:'Sânge închegat',bli:'Plăci de oțel',cal:'Cărbune de forjă',vul:'Pene de vultur',pra:'Monede vechi',rab:'Rășină',izv:'Apă de izvor',pia:'Piatră cioplită',ven:'Venin de viperă',fie:'Fier negru',cen:'Cenușă vie',osn:'Oase de monstru',jwf:'Cristal pal',jwb:'Cristal albastru',esf:'Esență de foc'};
+const MU={ore:'bază pentru orice forjare',zim:'prefix Zimțat',sng:'prefix Sângeros',bli:'prefix Blindat',cal:'prefix Călit',vul:'sufix al Vulturului',pra:'sufix al Prăzii',rab:'sufix al Răbdării',izv:'sufix al Izvorului',ven:'prefix Otrăvit',fie:'afixe de oțel: Ascuțit, Masiv, Întrit, al Titanului',cen:'afixe de nivel mare (20+)',osn:'afixe: Fărâmător, al Lupului',pia:'iteme de apărare a satului',jwf:'raritate Magic',jwb:'raritate Rar',esf:'raritate Epic'};
+const AFM=['zim','sng','bli','cal','vul','pra','rab','izv','pia','ven','fie','cen','osn'],RM=[null,'jwf','jwb','esf'];
+const MT=()=>S.mat||(S.mat={}),have=k=>k=='ore'?S.ore:(MT()[k]||0),give=(k,n)=>{if(k=='ore')S.ore+=n;else MT()[k]=(MT()[k]||0)+n},take=(k,n)=>give(k,-n),cap=()=>100+50*(BL().d||0),pls=u=>u.t=='w'?PW:PA;
+function lm(k,n){const l=S.d.loot,m=l.m||(l.m={});m[k]=(m[k]||0)+n}
+function nd(u){const o={ore:cost(u.l,u.r)},R=RAR[u.r],n=2+Math.floor(u.l/5),a=pls(u)[u.p||0],b=SF[u.s||0];if(R.aff>=1)o[a.m]=n;if(R.aff>=2)o[b.m]=(o[b.m]||0)+n;if(u.r>0)o[RM[u.r]+(u.q||0)]=u.r;return o}
+const nh=u=>Object.entries(nd(u)).map(([k,n])=>`<span class="${have(k)<n?'r4':''}">${mn(k)} ${have(k)}/${n}</span>`).join(' · ');
+function stash(l){let lost=0;const a=Object.assign({},l.m||{});a.ore=(a.ore||0)+(l.ore||0);for(const k in a){const n=Math.min(a[k],Math.max(0,cap()-have(k)));give(k,n);lost+=a[k]-n}return lost}
+const SH=[['w','Armurierul'],['a','Fierarul de armuri'],['h','Coifarul'],['b','Cizmarul'],['j','Bijutierul']],ip=it=>Math.round((25+it.l*14)*(1+it.r*1.1));
+function shop(){const s=S.shop||(S.shop={t:0,w:[],a:[],j:[]});if(Date.now()>s.t||!s.w.length||!s.h){for(const [k] of SH){s[k]=[];for(let i=0;i<3;i++)s[k].push(mkItem(k,Math.max(1,S.lvl+RI(-1,1)),P([0,1,1,1,2,2,3])))}s.t=Date.now()+12e5}return s}
+function buy(k,i){const s=shop(),it=s[k][i],c=ip(it);if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;s[k].splice(i,1);S.inv.push(it);S.msg='Ai cumpărat '+it.name+'.'}go()}
+function reshop(){const c=15*S.lvl;if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;S.shop.t=0;S.msg='Negustorii au adus marfă nouă.'}go()}
+function vP(){const s=shop();return SH.map(([k,n])=>`<section><h2>${n}</h2>${s[k].length?s[k].map((it,i)=>`<div class="row"><span>${iname(it)}<br><span class="mute">${desc(it)}</span></span><button class="p" onclick="buy('${k}',${i})">${ip(it)} aur</button></div>`).join(''):'<p class="mute">Stoc epuizat.</p>'}</section>`).join('')+`<div class="row"><span class="mute">Marfa se schimbă la 20 de minute</span><button onclick="reshop()">${15*S.lvl} aur</button></div>`}
+function vD(){const rows=[['ore','Minereu',S.ore],...AFM.map(k=>[k,MA[k],MT()[k]||0])];return`<section><h2>Depozit</h2><div class="mute">Capacitate: ${cap()} din fiecare material. O poți mări la Curte. Dezmembrarea îi dă înapoi materialele afixelor.</div>${rows.map(([k,n,v])=>`<div class="row"><span>${n}<br><span class="mute">${MU[k]}</span></span><span><b>${v}</b>/${cap()}</span></div>${bar(v,cap())}`).join('')}${[1,2,3].map(r=>`<div class="row"><span>${MA[RM[r]]}<br><span class="mute">raritate ${RAR[r].n}</span></span><span>${QN.map((n,q)=>`${n} <b>${MT()[RM[r]+q]||0}</b>`).join(' · ')}</span></div>`).join('')}</section>`}
+const VL=[['a','Topitorie'],['h','Han'],['p','Piață'],['l','Negustor'],['d','Depozit'],['z','Apărare'],['q','Bot'],['x','Misiuni'],['t','Curte']];
+function vil(k){S.vil=k;S.msg='';go()}
+function vV(){const k=S.vil||'a';return`<div class="tabs">${VL.map(([x,n])=>`<button${x==k?' class="p"':''} onclick="vil('${x}')">${n}${x=='x'&&dmReady()?' ●':''}</button>`).join('')}</div>`+(k=='a'?vA():k=='h'?vB():k=='p'?vP():k=='l'?vLux():k=='d'?vD():k=='z'?vZ():k=='q'?vBot():k=='x'?vMis():vT())}
+const QN=['alb','verde','albastru','mov','roșu'];
+const DG=[{n:'Mina Cenușie',lv:1,k:1,rooms:6,w:[100],rm:1,bn:'Căpitanul Cenușii'},{n:'Catacombele Uitate',lv:8,k:1.5,rooms:8,w:[60,30,10],rm:2,bn:'Regele Oaselor'},{n:'Cetatea Scufundată',lv:18,k:2.1,rooms:10,w:[35,35,20,10],rm:3,bn:'Căpitanul Înecat'},{n:'Abisul Cenușiu',lv:30,k:3,rooms:12,w:[15,25,30,20,10],rm:3,bn:'Stăpânul Abisului'}];
+const mn=k=>/\d$/.test(k)?MA[k.slice(0,-1)]+' ('+QN[+k.slice(-1)]+')':(k=='ore'?'Minereu':MA[k]);
+function rdrop(b){const g=DG[S.d.di||0],qs=g.w,t=(r,p)=>{if(Math.random()<p){let x=Math.random()*100,q=0;for(;q<qs.length-1&&x>=qs[q];q++)x-=qs[q];lm(RM[r]+q,1)}};t(1,b?.9:.2);if(g.rm>=2)t(2,b?.7:.08);if(g.rm>=3)t(3,b?.5:.04)}
+DG.push({n:'Peștera Lupilor',lv:4,k:1.25,rooms:6,w:[100],rm:1,bn:'Alfa Haitei'},{n:'Fortul Părăsit',lv:13,k:1.8,rooms:8,w:[50,35,15],rm:2,bn:'Comandantul Fantomă'},{n:'Mlaștina Putredă',lv:24,k:2.6,rooms:10,w:[25,35,25,15],rm:3,bn:'Hidra Mlaștinii'},{n:'Forja Veche',lv:38,k:3.8,rooms:12,w:[10,20,30,25,15],rm:3,bn:'Fierarul Ars'},{n:'Tronul Cenușiu',lv:46,k:4.8,rooms:14,w:[5,15,25,30,25],rm:3,bn:'Regele Cenușiu'});
+const MPV=()=>{const m=S.map||(S.map=mapGen());m.vs.forEach(v=>{if(!v.st){v.st=P(['agr','neg','zid']);v.gd=0;v.r=+(v.st=='neg'?1.1+Math.random()*.5:v.st=='zid'?.9+Math.random()*.4:.7+Math.random()*.5).toFixed(2)}});return m},wf=v=>Math.min(1,(Date.now()-v.t)/18e5),dst=v=>Math.max(Math.abs(v.x-3),Math.abs(v.y-2));
+function mapGen(){const NV=['Valea Cenușie','Pârâul Lung','Stânca Neagră','Moara Veche','Dealul Corbilor','Podul Rupt','Fântâna Seacă','Plaiul Pustiu'],NB=['Arnulf','Brenna','Corvin','Dagmar','Eskil','Freya','Gunnar','Hilda'],u=new Set(['3,2']),vs=[];for(let i=0;i<8;i++){let x,y;do{x=RI(0,6);y=RI(0,4)}while(u.has(x+','+y));u.add(x+','+y);vs.push({id:i,n:NV[i],b:NB[i],x,y,dl:RI(-3,5),r:+(.7+Math.random()*.8).toFixed(2),t:0})}return{vs}}
+function mv(i){S.msel=null;S.mv=i;S.msg='';go()}
+function raid(id){const v=MPV().vs.find(x=>x.id===id),c=trv(v);if(v.o==='p'){S.msg='Satul îți aparține.';return go()}if(S.d){S.msg='Ești deja într-o coborâre.';return go()}if(!S.fs.some(f=>f.hp>0)){S.msg='Toți luptătorii sunt căzuți. Du-te la infirmerie.';return go()}if(S.pts<c){S.msg='Îți trebuie '+c+' puncte.';return go()}
+ cn('r');spend(c);const f=wf(v),k=vk(v);v.t=Date.now();v.gd=Math.min(5,(v.gd||0)+1);S.d={room:1,rooms:2,k,rw:1+(k-1)*.6,bn:'Căpitanul gărzii',di:0,raid:v.id,rn:v.n,rf:f,loot:{gold:0,ore:0,xp:0,m:{}},f:null,done:false};startF(false);S.tab='c';S.msg='Ai ajuns la '+v.n+'. Gărzile te așteaptă.';if(S.auto!==false){autoRun();return}go()}
+function rl(d){if(d.conq||d.camp||d.fort||d.tron)return terRl(d);const v=MPV().vs.find(x=>x.id===d.raid),f=d.rf,vl=Math.max(1,S.lvl+v.dl),w=f*v.r;terRaidStat(v);d.loot.gold+=Math.round((60+30*vl)*w*(1+terB('gold')/100));d.loot.ore+=Math.round((6+vl*.8)*w);d.loot.xp+=Math.round((20+8*vl)*f);for(let i=0,n=Math.round(RI(2,4)*w);i<n;i++)lm(pm(),1);if(Math.random()<.5*f)rdrop(false)}
+function vMold(){const m=MPV(),sv=m.vs.find(v=>v.id===S.mv);let g='<svg viewBox="0 0 280 200" width="100%" style="display:block;background:var(--panel);border:1px solid var(--line)">';
+ for(let x=0;x<7;x++)for(let y=0;y<5;y++)g+=`<rect x="${x*40}" y="${y*40}" width="40" height="40" style="fill:none;stroke:var(--line);stroke-width:.5"/>`;
+ g+='<circle cx="140" cy="100" r="12" style="fill:var(--ember)"/><text x="140" y="104" text-anchor="middle" style="fill:#fff;font:700 10px sans-serif">Tu</text>';
+ m.vs.forEach(v=>{g+=`<g onclick="mv(${v.id})" style="cursor:pointer"><circle cx="${v.x*40+20}" cy="${v.y*40+20}" r="${v.id===S.mv?14:11}" style="fill:${wf(v)>.5?'var(--acc)':'var(--mute)'};stroke:var(--ink);stroke-width:${v.id===S.mv?2:0}"/><text x="${v.x*40+20}" y="${v.y*40+24}" text-anchor="middle" style="fill:#fff;font:700 11px sans-serif">${Math.max(1,S.lvl+v.dl)}</text></g>`});
+ g+='</svg>';
+ return`<section><h2>Harta</h2><div class="mute">Satele boturilor, cu nivelul lor. Verde: bogat, gri: încă jefuit recent. Tu ești în centru.</div>${g}</section>`+(sv?`<section><h2>${sv.n}</h2><div class="row"><span>Bot: ${sv.b}, nivel ${Math.max(1,S.lvl+sv.dl)}</span><span>Bogăție ${Math.round(wf(sv)*100)}%</span></div>${svInfo(sv)}${terVilInfo(sv)}<div class="row"><span class="mute">Drum: ${dst(sv)} ${dst(sv)==1?'zonă':'zone'}</span>${terVilBtns(sv)}</div></section>`:'<p class="mute">Atinge un sat ca să-l vezi.</p>')}
+/* ===== Hartă ilustrată (doar randare). Logica jocului (mapGen, mv, raid, scout, dst, wf, svInfo) rămâne neschimbată. ===== */
+const SMW=420,SMH=300,SMCL=60,SMN=[210,150],SMP=['#3a5036','#2b3c2a','#445a3a','#4a3f2c','#304532'];
+var SMC={x:0,y:0,w:SMW,h:SMH},SMT={k:'',d:null};
+const smRng=s=>()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296},smXY=v=>[v.x*SMCL+SMCL/2,v.y*SMCL+SMCL/2],smF=n=>+n.toFixed(1);
+const SMDEFS=`<linearGradient id="st-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2e4030"/><stop offset="1" stop-color="#263428"/></linearGradient>`
++SMP.map((c,i)=>`<radialGradient id="st-p${i}"><stop offset="0" stop-color="${c}" stop-opacity=".8"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></radialGradient>`).join('')
++`<radialGradient id="st-hl" cx=".4" cy=".35"><stop offset="0" stop-color="#5a7a4c" stop-opacity=".75"/><stop offset="1" stop-color="#5a7a4c" stop-opacity="0"/></radialGradient>
+<radialGradient id="st-gr"><stop offset=".55" stop-color="#5b4b33" stop-opacity=".9"/><stop offset="1" stop-color="#5b4b33" stop-opacity="0"/></radialGradient>
+<radialGradient id="st-gl"><stop offset="0" stop-color="#f0d27a" stop-opacity=".32"/><stop offset="1" stop-color="#f0d27a" stop-opacity="0"/></radialGradient>
+<radialGradient id="st-vg" cx=".5" cy=".5" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></radialGradient>
+<pattern id="st-fd" width="3" height="3" patternUnits="userSpaceOnUse"><rect width="3" height="3" fill="#5f5f30"/><rect width="1.5" height="3" fill="#77763c"/></pattern>
+<g id="st-t0"><ellipse cx="1.1" cy="1.5" rx="3.6" ry="2.8" fill="#000" fill-opacity=".35"/><path d="M0-4.2L1.2-1.4 4-1.6 2-.1 3.6 2.6 .8 1.6 0 4.4-.8 1.6-3.6 2.6-2-.1-4-1.6-1.2-1.4z" fill="#15392a"/><circle r="1.3" fill="#24593f"/></g>
+<g id="st-t1"><ellipse cx="1.1" cy="1.5" rx="3.6" ry="2.8" fill="#000" fill-opacity=".35"/><circle r="3.5" fill="#1d4a2d"/><circle cx="-.8" cy="-.9" r="2.2" fill="#2d6a3e"/><circle cx="-1.3" cy="-1.4" r=".9" fill="#4a8a54" fill-opacity=".6"/></g>
+<g id="st-t2"><ellipse cx="1.1" cy="1.5" rx="3.6" ry="2.8" fill="#000" fill-opacity=".35"/><circle r="3.4" fill="#2c4a26"/><circle cx="-.8" cy="-.9" r="2.1" fill="#41682f"/><circle cx="-1.3" cy="-1.4" r=".9" fill="#6a8a48" fill-opacity=".55"/></g>
+<g id="st-t3"><ellipse cx="1.1" cy="1.5" rx="3.6" ry="2.8" fill="#000" fill-opacity=".35"/><circle r="3.5" fill="#17403a"/><circle cx="-.8" cy="-.9" r="2.2" fill="#26574d"/><circle cx="-1.3" cy="-1.4" r=".9" fill="#418070" fill-opacity=".55"/></g>
+<g id="st-m"><path d="M-9 6L10 6 13 8.4-6 8.4z" fill="#000" fill-opacity=".3"/><path d="M0-9L-9 6H0z" fill="#80878d"/><path d="M0-9L10 6H0z" fill="#50575d"/><path d="M0-9L-2.6-4.2-1-5 0-3.6 1.2-5 2.8-4.2z" fill="#d3d9dc" fill-opacity=".85"/><path d="M-9 6L0-9 10 6z" fill="none" stroke="#23282b" stroke-width=".7" stroke-linejoin="round"/></g>
+<g id="st-r"><path d="M-2.4 1.2L-1.6-1.6 .6-2.2 2.4-.6 2 1.4z" fill="#6b7075" stroke="#2a2e31" stroke-width=".5"/><path d="M-1.6-1.6L.6-2.2 1-.4-1 0z" fill="#8c9297"/></g>
+<g id="st-ru"><path d="M-8 3L10 3 12 4.6-6 4.6z" fill="#000" fill-opacity=".3"/><rect x="-7" y="-1" width="9" height="2.6" fill="#62676b" stroke="#2a2d30" stroke-width=".5"/><rect x="-7" y="-1" width="3" height="5" fill="#70767a" stroke="#2a2d30" stroke-width=".5"/><rect x="4" y="-4" width="2.6" height="7" fill="#70767a" stroke="#2a2d30" stroke-width=".5"/><circle cx="1" cy="3" r="1" fill="#555a5e"/><circle cx="-2" cy="4" r=".8" fill="#555a5e"/></g>
+<g id="st-h1"><rect x="-4.6" y="-3.4" width="9.2" height="7" fill="#000" fill-opacity=".35" transform="translate(1 1.3)"/><rect x="-4" y="-3" width="8" height="6" fill="#7a4a2e"/><rect x="-4" y="-3" width="8" height="3" fill="#97603c"/><path d="M-4 0H4" stroke="#3b2316" stroke-width=".6"/><rect x="1.6" y="-2.6" width="1.4" height="1.4" fill="#3a3330"/></g>
+<g id="st-h2"><rect x="-4.6" y="-3.4" width="9.2" height="7" fill="#000" fill-opacity=".35" transform="translate(1 1.3)"/><rect x="-4" y="-3" width="8" height="6" fill="#56626b"/><rect x="-4" y="-3" width="8" height="3" fill="#71808a"/><path d="M-4 0H4" stroke="#283138" stroke-width=".6"/><rect x="-3" y="-2.6" width="1.4" height="1.4" fill="#3a3330"/></g>
+<g id="st-h3"><rect x="-4.6" y="-3.4" width="9.2" height="7" fill="#000" fill-opacity=".35" transform="translate(1 1.3)"/><rect x="-4" y="-3" width="8" height="6" fill="#86703c"/><rect x="-4" y="-3" width="8" height="3" fill="#a48c4e"/><path d="M-4 0H4" stroke="#473a1a" stroke-width=".6"/><rect x="1.6" y="1.2" width="1.4" height="1.4" fill="#3a3330"/></g>`;
+
+function smTerrain(m){
+ const key=m.vs.map(v=>v.x+','+v.y).join('|');if(SMT.k==key)return SMT.d;
+ const R=smRng([...key].reduce((a,c)=>(a*31+c.charCodeAt(0))|0,7)),rr=(a,b)=>a+(b-a)*R(),hy=Math.hypot,f=smF,nodes=[SMN,...m.vs.map(smXY)];
+ /* drumuri: de la capitală la fiecare sat (doar desen; costul rămâne dst()) */
+ const roads={},rp=[];
+ m.vs.forEach(v=>{const a=SMN,b=smXY(v),L=hy(b[0]-a[0],b[1]-a[1])||1,nx=-(b[1]-a[1])/L,ny=(b[0]-a[0])/L,o=(R()-.5)*L*.3,c=[(a[0]+b[0])/2+nx*o,(a[1]+b[1])/2+ny*o],pts=[];
+  for(let i=0;i<=24;i++){const t=i/24,u=1-t;pts.push([u*u*a[0]+2*u*t*c[0]+t*t*b[0],u*u*a[1]+2*u*t*c[1]+t*t*b[1]])}
+  roads[v.id]={d:`M${f(a[0])} ${f(a[1])}Q${f(c[0])} ${f(c[1])} ${f(b[0])} ${f(b[1])}`,pts,mid:pts[12]};rp.push(...pts)});
+ /* râu: alegem traseul cel mai îndepărtat de așezări */
+ let river=null,best=-1;
+ for(let k=0;k<40;k++){const h=R()<.5,A=h?[-6,rr(30,270)]:[rr(40,380),-6],B=h?[SMW+6,rr(30,270)]:[rr(40,380),SMH+6],dx=B[0]-A[0],dy=B[1]-A[1],L=hy(dx,dy),nx=-dy/L,ny=dx/L,am=rr(18,42),fq=rr(1,1.7),p1=rr(0,6.28),p2=rr(0,6.28),pts=[];
+  for(let i=0;i<=90;i++){const t=i/90,o=am*(Math.sin(t*6.283*fq+p1)*.7+Math.sin(t*6.283*fq*2.3+p2)*.3)*Math.sqrt(Math.sin(Math.PI*t));pts.push([A[0]+dx*t+nx*o,A[1]+dy*t+ny*o])}
+  const md=Math.min(...pts.map(p=>Math.min(...nodes.map(n=>hy(p[0]-n[0],p[1]-n[1])))));if(md>best){best=md;river=pts}}
+ /* lac */
+ let lake=null,lb=-1,lx=0,ly=0;
+ for(let k=0;k<60;k++){const x=rr(35,SMW-35),y=rr(30,SMH-30),md=Math.min(...nodes.map(n=>hy(x-n[0],y-n[1])),...rp.map(p=>hy(x-p[0],y-p[1])+14),...river.map(p=>hy(x-p[0],y-p[1])+6));if(md>lb){lb=md;lx=x;ly=y}}
+ const lr=Math.min(rr(15,22),lb-8);if(lr>=9)lake={x:lx,y:ly,rx:lr,ry:lr*rr(.55,.7),ph:rr(0,6)};
+ const ok=(x,y,r,n=22)=>x>r&&y>r&&x<SMW-r&&y<SMH-r&&nodes.every(p=>hy(x-p[0],y-p[1])>r+n)&&rp.every(p=>hy(x-p[0],y-p[1])>r+3)&&river.every(p=>hy(x-p[0],y-p[1])>r+6)&&(!lake||((x-lake.x)/(lake.rx+r+3))**2+((y-lake.y)/(lake.ry+r+3))**2>1);
+ const lpoly=k=>{let s='';for(let i=0;i<20;i++){const a=i/20*6.283,w=1+.14*Math.sin(a*3+lake.ph)+.08*Math.sin(a*5);s+=(i?'L':'M')+f(lake.x+Math.cos(a)*lake.rx*w*k)+' '+f(lake.y+Math.sin(a)*lake.ry*w*k)}return s+'Z'};
+ let s=`<rect width="${SMW}" height="${SMH}" fill="url(#st-bg)"/>`;
+ for(let i=0;i<55;i++){const x=rr(0,SMW),y=rr(0,SMH),k=R()*5|0;s+=`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(rr(25,60))}" ry="${f(rr(18,40))}" fill="url(#st-p${k})"/>`}
+ let tf='';for(let i=0,a=0;i<260&&a<600;a++){const x=rr(3,SMW-3),y=rr(4,SMH-2);if(!ok(x,y,1,6))continue;i++;tf+=`M${f(x)} ${f(y)}l-.9-2.2M${f(x)} ${f(y)}l.9-2.4M${f(x)} ${f(y)}v-2.6`}
+ /* păduri, munți, stânci */
+ const things=[],floors=[];
+ for(let c=0,t=0;c<6&&t<80;t++){const x=rr(15,SMW-15),y=rr(15,SMH-15);if(!ok(x,y,10,26))continue;c++;const n=14+(R()*10|0),rad=rr(14,24);floors.push([x,y,rad]);
+  for(let i=0,a=0;i<n&&a<60;a++){const g=R()*6.283,d=rad*Math.sqrt(R()),tx=x+Math.cos(g)*d*1.3,ty=y+Math.sin(g)*d;if(!ok(tx,ty,3,24))continue;i++;things.push([ty,`<use href="#st-t${R()<.3?0:1+(R()*3|0)}" transform="translate(${f(tx)} ${f(ty)}) scale(${f(rr(.8,1.3))})"/>`])}}
+ for(let i=0,a=0;i<28&&a<200;a++){const x=rr(8,SMW-8),y=rr(8,SMH-8);if(!ok(x,y,3,22))continue;i++;things.push([y,`<use href="#st-t${1+(R()*3|0)}" transform="translate(${f(x)} ${f(y)}) scale(${f(rr(.75,1.15))})"/>`])}
+ for(let c=0,t=0;c<3&&t<120;t++){const x=rr(20,SMW-20),y=rr(20,SMH-20);if(Math.min(x,SMW-x,y,SMH-y)>80||!ok(x,y,14,26))continue;c++;const n=4+(R()*3|0);
+  for(let i=0,a=0;i<n&&a<40;a++){const tx=x+rr(-22,22),ty=y+rr(-12,12);if(!ok(tx,ty,6,20))continue;i++;things.push([ty+6,`<use href="#st-m" transform="translate(${f(tx)} ${f(ty)}) scale(${f(rr(.8,1.4))})"/>`])}}
+ for(let i=0,a=0;i<16&&a<200;a++){const x=rr(6,SMW-6),y=rr(6,SMH-6);if(!ok(x,y,2,18))continue;i++;things.push([y,`<use href="#st-r" transform="translate(${f(x)} ${f(y)}) scale(${f(rr(.8,1.6))})"/>`])}
+ for(let i=0,a=0;i<2&&a<100;a++){const x=rr(15,SMW-15),y=rr(15,SMH-15);if(!ok(x,y,8,24))continue;i++;things.push([y,`<use href="#st-ru" transform="translate(${f(x)} ${f(y)})"/>`])}
+ floors.forEach(([x,y,r])=>s+=`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(r*1.7)}" ry="${f(r*1.25)}" fill="url(#st-p1)"/>`);
+ s+=`<path d="${tf}" stroke="#587a4e" stroke-opacity=".55" stroke-width=".5" fill="none" stroke-linecap="round"/>`;
+ for(let i=0,a=0;i<9&&a<100;a++){const x=rr(15,SMW-15),y=rr(15,SMH-15);if(!ok(x,y,12,10))continue;i++;s+=`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(rr(14,22))}" ry="${f(rr(8,12))}" fill="url(#st-hl)"/>`}
+ if(lake)s+=`<path d="${lpoly(1.2)}" fill="#2c4a55" fill-opacity=".6"/><path d="${lpoly(1)}" fill="#35596a" stroke="#1d2f33" stroke-width="1.2" stroke-linejoin="round"/><path d="M${f(lake.x-lake.rx*.5)} ${f(lake.y-lake.ry*.2)}q${f(lake.rx*.3)}-2 ${f(lake.rx*.6)} 0" stroke="#7ba0b3" stroke-opacity=".6" stroke-width=".6" fill="none"/>`;
+ const rd='M'+river.map(p=>f(p[0])+' '+f(p[1])).join('L');
+ s+=`<path d="${rd}" fill="none" stroke="#1d2f33" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="${rd}" fill="none" stroke="#35596a" stroke-width="7.4" stroke-linecap="round" stroke-linejoin="round"/><path class="st-wv" d="${rd}" fill="none" stroke="#8db3c4" stroke-opacity=".5" stroke-width=".9" stroke-dasharray="6 10" stroke-linecap="round"/>`;
+ /* ogoare lângă sate */
+ m.vs.forEach(v=>{const [cx,cy]=smXY(v),a=R()*6.283,x=cx+Math.cos(a)*24,y=cy+Math.sin(a)*22;if(x>10&&y>8&&x<SMW-10&&y<SMH-8&&river.every(p=>hy(x-p[0],y-p[1])>12)&&rp.every(p=>hy(x-p[0],y-p[1])>9)&&(!lake||((x-lake.x)/(lake.rx+9))**2+((y-lake.y)/(lake.ry+9))**2>1))s+=`<rect x="-8" y="-5.5" width="16" height="11" fill="url(#st-fd)" stroke="#2a2316" stroke-width=".4" transform="translate(${f(x)} ${f(y)}) rotate(${f(rr(-30,30))})"/>`});
+ /* drumuri + poduri */
+ let br='';
+ Object.values(roads).forEach(r=>{s+=`<path d="${r.d}" fill="none" stroke="#1e160c" stroke-opacity=".55" stroke-width="5.2" stroke-linecap="round"/><path d="${r.d}" fill="none" stroke="#8a7348" stroke-width="3.2" stroke-linecap="round"/><path d="${r.d}" fill="none" stroke="#b09a6a" stroke-opacity=".8" stroke-width=".7" stroke-dasharray="3 4"/>`;
+  let was=false;r.pts.forEach((p,i)=>{const nr=i>0&&i<24&&river.some(q=>hy(p[0]-q[0],p[1]-q[1])<6);if(nr&&!was){const a=r.pts[i-1],b=r.pts[i+1],ang=Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI;br+=`<g transform="translate(${f(p[0])} ${f(p[1])}) rotate(${f(ang)})"><rect x="-6.4" y="-3.4" width="12.8" height="6.8" fill="#6a4a2c" stroke="#2a1c10" stroke-width=".7"/><path d="M-6.4-1.1H6.4M-6.4 1.1H6.4" stroke="#3a2815" stroke-width=".5"/></g>`}was=nr})});
+ s+=br;
+ things.sort((a,b)=>a[0]-b[0]);s+=things.map(t=>t[1]).join('');
+ SMT={k:key,d:{s,roads}};return SMT.d;
+}
+
+function smCapital(){const [x,y]=SMN;let t='';[[-12,-12],[12,-12],[-12,12],[12,12]].forEach(([a,b])=>t+=`<circle cx="${a}" cy="${b}" r="4.4" fill="#8a9096" stroke="#25292c" stroke-width="1"/><circle cx="${a}" cy="${b}" r="2.4" fill="#b3b9bd"/>`);
+ return `<g transform="translate(${x} ${y})" pointer-events="none"><circle r="38" fill="url(#st-gl)"/><circle r="27" fill="#c9a24b" fill-opacity=".05" stroke="#f0d27a" stroke-opacity=".6" stroke-width="1.1" stroke-dasharray="6 3"/><circle r="19" fill="url(#st-gr)"/><rect x="-12" y="-12" width="24" height="24" fill="#000" fill-opacity=".35" transform="translate(1.5 2)"/><rect x="-12" y="-12" width="24" height="24" fill="#6f7479" stroke="#25292c" stroke-width="1"/><rect x="-9" y="-9" width="18" height="18" fill="#454a4e"/><rect x="-9" y="-9" width="18" height="18" fill="none" stroke="#8a9096" stroke-width=".6" stroke-dasharray="1.6 1.2"/><rect x="-5.5" y="-5.5" width="11" height="11" fill="#5b3a2f" stroke="#1d1210" stroke-width=".8"/><rect x="-5.5" y="-5.5" width="11" height="5.5" fill="#6d4637" fill-opacity=".8"/><path d="M-5.5-5.5L5.5 5.5M5.5-5.5L-5.5 5.5" stroke="#3a241c" stroke-width=".5"/>${t}<rect x="-2.6" y="10" width="5.2" height="4" fill="#1b130a"/><g class="st-fl"><path d="M0-5.5V-17" stroke="#1d1210" stroke-width="1"/><path d="M0-17l9 3-9 3z" fill="#f0d27a" stroke="#6b4a06" stroke-width=".6"/></g><g transform="translate(0 25)"><rect x="-22" y="-7" width="44" height="12" rx="3" fill="#0b0e10" fill-opacity=".86" stroke="#c9a24b" stroke-opacity=".7" stroke-width=".7"/><text y="1.8" text-anchor="middle" fill="#f0d27a" style="font:700 8px Cinzel,Georgia,serif">Tu · Capitala</text></g></g>`}
+
+function smVillage(v,sel){
+ const [cx,cy]=smXY(v),vl=Math.max(1,S.lvl+v.dl),sc=v.sc&&Date.now()-v.sc<18e5,rich=wf(v)>.5,rg=smRng(v.id*977+13),n=Math.max(3,Math.min(8,3+Math.round((v.dl+3)*5/8))),sz=.92+(n-3)*.03,st=sc?v.st:'',
+  col={agr:'#c0504a',neg:'#d9a23a',zid:'#8fb0c8'}[st]||'#9a947e',ph=rg()*6.28,H=[];
+ for(let i=0;i<n;i++){const a=i*2.39996+ph,r=4.6*Math.sqrt(i+.6);H.push([Math.cos(a)*r,Math.sin(a)*r*.9,(rg()-.5)*26,1+(rg()*3|0)])}
+ H.sort((a,b)=>a[1]-b[1]);
+ let h=`<g class="st-v${sel?' on':''}" onclick="mv(${v.id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();mv(${v.id})}" tabindex="0" role="button" aria-label="${v.n}, nivel ${vl}${sc?', '+STN[v.st]:''}" transform="translate(${cx} ${cy})"><circle r="26" fill="transparent"/>`;
+ h+=`<circle r="27" fill="${col}" fill-opacity=".06" stroke="${col}" stroke-opacity=".55" stroke-width="1" stroke-dasharray="${sc?'5 3':'2 4'}"/><circle r="19" fill="url(#st-gr)"/>`;
+ h+=st=='zid'?`<circle r="17.5" fill="none" stroke="#2a1d10" stroke-width="3.6"/><circle r="17.5" fill="none" stroke="#8a6a3e" stroke-width="2.6" stroke-dasharray="2.2 .8"/><rect x="-3" y="-21" width="6" height="6" fill="#6b4a2c" stroke="#24180c" stroke-width=".8"/><rect x="-1.6" y="-19.6" width="3.2" height="3.2" fill="#a77b48"/><rect x="-2.4" y="14.5" width="4.8" height="3.6" fill="#1b130a"/>`:`<circle r="17" fill="none" stroke="#6b5434" stroke-width="1.1" stroke-dasharray="1.2 1.8"/>`;
+ if(st=='neg')h+=[[-14,11],[14,10]].map(([x,y])=>`<g transform="translate(${x} ${y})"><rect x="-3.4" y="-2.4" width="6.8" height="4.8" fill="#d9a23a" stroke="#4a3410" stroke-width=".5"/><path d="M-1.7-2.4v4.8M0-2.4v4.8M1.7-2.4v4.8" stroke="#f4e3b0" stroke-width=".6"/></g>`).join('');
+ if(st=='agr')h+=[[15,5],[-15,9]].map(([x,y])=>`<g class="st-fl" transform="translate(${x} ${y})"><path d="M0 0v-9" stroke="#2a1d10" stroke-width=".9"/><path d="M0-9l6 2.3-6 2.3z" fill="#c0504a" stroke="#4a1512" stroke-width=".4"/></g>`).join('');
+ H.forEach(([x,y,r,k])=>h+=`<use href="#st-h${k}" transform="translate(${smF(x)} ${smF(y)}) rotate(${smF(r)}) scale(${smF(sz)})"/>`);
+ h+=`<circle class="st-sk" style="animation-delay:-${v.id*.7}s" cx="${smF(H[0][0]+1.5)}" cy="${smF(H[0][1]-2)}" r="${rich?1.6:2.2}" fill="${rich?'#c9c3b3':'#6a6862'}"/>`;
+ h+=`<g class="st-fl" transform="translate(-14 -6)"><path d="M0 0V-9" stroke="#2a1d10" stroke-width=".9"/><path d="M0-9l6 2.2-6 2.2z" fill="${rich?'#4fa35e':'#7b7f82'}" stroke="#12181a" stroke-width=".4"/></g>`;
+ h+=`<g transform="translate(15 -15)"><circle r="6.8" fill="#12181a" stroke="#c9a24b" stroke-width="1.1"/><text y="3.3" text-anchor="middle" fill="#f0d27a" style="font:700 9px Cinzel,Georgia,serif">${vl}</text></g>`;
+ h+=`<circle class="st-sel" r="23" fill="none" stroke="#f0d27a" stroke-opacity=".28" stroke-width="5"/><circle class="st-sel" r="23" fill="none" stroke="#f0d27a" stroke-width="1.5"/>`;
+ const w=v.n.length*5.1+12,ly=cy>SMH-48?-34:30;
+ return h+`<g class="st-nm" transform="translate(0 ${ly})"><rect x="${smF(-w/2)}" y="-8" width="${smF(w)}" height="13" rx="3" fill="#0b0e10" fill-opacity=".88" stroke="#c9a24b" stroke-opacity=".7" stroke-width=".7"/><text y="1.8" text-anchor="middle" fill="#e9e1cf" style="font:600 8.4px Alegreya,Georgia,serif">${v.n}</text></g></g>`}
+
+function smRoute(m,sv){if(!sv)return'';const r=smTerrain(m).roads[sv.id],d=dst(sv),t=d+' '+(d==1?'zonă':'zone'),w=t.length*4.6+10;
+ return `<g pointer-events="none"><path d="${r.d}" fill="none" stroke="#f0d27a" stroke-opacity=".28" stroke-width="6.5" stroke-linecap="round"/><path class="st-rt" d="${r.d}" fill="none" stroke="#f0d27a" stroke-width="1.6" stroke-dasharray="5 4" stroke-linecap="round"/><g transform="translate(${smF(r.mid[0])} ${smF(r.mid[1])})"><rect x="${smF(-w/2)}" y="-7" width="${smF(w)}" height="12" rx="3" fill="#0b0e10" fill-opacity=".88" stroke="#f0d27a" stroke-width=".7"/><text y="1.6" text-anchor="middle" fill="#f0d27a" style="font:700 8px Alegreya,Georgia,serif">${t}</text></g></g>`}
+
+function vMnew(){const m=MPV(),sv=m.vs.find(v=>v.id===S.mv),T=smTerrain(m),vs=[...m.vs].sort((a,b)=>(a.id===S.mv)-(b.id===S.mv)||a.y-b.y);
+ const g=`<div class="st-map"><svg id="stmap" class="st-an" viewBox="${smF(SMC.x)} ${smF(SMC.y)} ${smF(SMC.w)} ${smF(SMC.h)}" width="100%" role="group" aria-label="Harta lumii" style="touch-action:${SMC.w<SMW-.5?'none':'pan-y'}"><defs>${SMDEFS}</defs>${T.s}${smRoute(m,sv)}${terFog()}${smCapital()}${vs.map(v=>terVil(v,smVillage(v,v.id===S.mv))).join('')}${terMarks()}<rect width="${SMW}" height="${SMH}" fill="url(#st-vg)" pointer-events="none"/></svg><div class="st-zc"><button class="st-zb" onclick="mZoom(1.35)" aria-label="Mărește">+</button><button class="st-zb" onclick="mZoom(1/1.35)" aria-label="Micșorează">−</button><button class="st-zb" onclick="mReset()" aria-label="Vedere generală" title="Vedere generală">⌂</button></div></div>`;
+ return`<section><h2>Harta</h2><div class="mute">Satele boturilor, cu nivelul lor. Steag verde: bogat, gri: încă jefuit recent. Tu ești în centru. Trage de hartă ca s-o muți; rotița sau butoanele o măresc.</div>${g}<div class="st-lg"><span><i style="background:#f0d27a"></i>Teritoriul tău</span><span><i style="background:#4fa35e"></i>Bogat</span><span><i style="background:#7b7f82"></i>Jefuit recent</span><span>După iscodire: <b style="color:#c0504a">agresiv</b> · <b style="color:#d9a23a">negustor</b> · <b style="color:#8fb0c8">zidar</b></span></div></section>`+(sv?`<section><h2>${sv.n}</h2><div class="row"><span>Bot: ${sv.b}, nivel ${Math.max(1,S.lvl+sv.dl)}</span><span>Bogăție ${Math.round(wf(sv)*100)}%</span></div>${svInfo(sv)}${terVilInfo(sv)}<div class="row"><span class="mute">Drum: ${dst(sv)} ${dst(sv)==1?'zonă':'zone'}</span>${terVilBtns(sv)}</div></section>`:'<p class="mute">Atinge un sat ca să-l vezi.</p>')}
+function vMmap(){try{return vMnew()}catch(e){console.error('Harta ilustrată a eșuat, folosesc harta veche:',e);return vMold()}}
+
+/* cameră: zoom/pan doar vizual; coordonatele logice ale satelor nu se modifică */
+function smApply(){const s=document.getElementById('stmap');if(s){s.setAttribute('viewBox',`${smF(SMC.x)} ${smF(SMC.y)} ${smF(SMC.w)} ${smF(SMC.h)}`);s.style.touchAction=SMC.w<SMW-.5?'none':'pan-y'}}
+function smClamp(){SMC.w=Math.min(SMW,Math.max(SMW/4,SMC.w));SMC.h=SMC.w*SMH/SMW;SMC.x=Math.min(SMW-SMC.w,Math.max(0,SMC.x));SMC.y=Math.min(SMH-SMC.h,Math.max(0,SMC.y))}
+function smZoom(k,fx=.5,fy=.5){const px=SMC.x+fx*SMC.w,py=SMC.y+fy*SMC.h;SMC.w/=k;SMC.h=SMC.w*SMH/SMW;SMC.x=px-fx*SMC.w;SMC.y=py-fy*SMC.h;smClamp();smApply()}
+function mZoom(k){smZoom(k)}
+function mReset(){SMC.x=0;SMC.y=0;SMC.w=SMW;SMC.h=SMH;smApply()}
+(()=>{const P=new Map();let dg=null,pd=0,drag=false;const el=()=>document.getElementById('stmap');
+ document.addEventListener('pointerdown',e=>{const s=el();if(!s||!s.contains(e.target)||(e.pointerType==='mouse'&&e.button!==0))return;P.set(e.pointerId,[e.clientX,e.clientY]);drag=false;
+  if(P.size===1)dg={x:e.clientX,y:e.clientY,cx:SMC.x,cy:SMC.y};else if(P.size===2){const[a,b]=[...P.values()];pd=Math.hypot(a[0]-b[0],a[1]-b[1]);dg=null}});
+ window.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;P.set(e.pointerId,[e.clientX,e.clientY]);const s=el();if(!s)return;const r=s.getBoundingClientRect();
+  if(P.size===2){const[a,b]=[...P.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pd>0){smZoom(d/pd,((a[0]+b[0])/2-r.left)/r.width,((a[1]+b[1])/2-r.top)/r.height);drag=true}pd=d;return}
+  if(dg){const dx=e.clientX-dg.x,dy=e.clientY-dg.y;if(drag||Math.hypot(dx,dy)>5){drag=true;SMC.x=dg.cx-dx/r.width*SMC.w;SMC.y=dg.cy-dy/r.height*SMC.h;smClamp();smApply()}}});
+ const up=e=>{if(!P.delete(e.pointerId))return;dg=null;if(P.size===1){const[p]=[...P.values()];dg={x:p[0],y:p[1],cx:SMC.x,cy:SMC.y}}setTimeout(()=>{if(!P.size)drag=false},60)};
+ window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
+ /* după o tragere, nu declanșa selectarea unui sat */
+ document.addEventListener('click',e=>{const s=el();if(drag&&s&&s.contains(e.target)){e.stopPropagation();e.preventDefault();drag=false}},true);
+ document.addEventListener('wheel',e=>{const s=el();if(!s||!s.contains(e.target))return;if(SMC.w>=SMW-.5&&e.deltaY>0)return;e.preventDefault();const r=s.getBoundingClientRect();smZoom(e.deltaY<0?1.2:1/1.2,(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height)},{passive:false});
+})();
+function dpw(){const gd=S.gd||[],wl=60*(1-Math.pow(.92,BL().z)),vd=gd.reduce((s,g)=>s+bon(g).vd,0),b=gd.reduce((s,g)=>s+atkOf(g)*3+mhp(g)*.4+bon(g).def*10,0)+20+4*S.lvl+wl*(30+14*S.lvl)/100*TP.wallFlat;return Math.round(b*Math.min(2.2,1+(wl+vd)/100))}
+function atkCheck(){const n=Date.now();if(!S.na)S.na=n+36e5;let c=0;while(S.na<=n&&c<3){c++;const v=wv(),vl=Math.max(1,S.lvl+v.dl),A=(30+14*vl)*R(.8,1.2)*(v.st=='agr'?1.15:1)*(1+Math.min(.5,(v.gd||0)*.1)),D=dpw(),p=Math.min(.9,Math.max(.1,D/(D+A)));let m;if(Math.random()<p){const g=10+8*vl;S.gold+=g;m=`${v.b} din ${v.n} a atacat satul${(v.gd||0)>=2?' din răzbunare':''} și a fost respins. Tribut: +${g} aur.`}else{const g=Math.round(Math.min(S.gold*.1,60+30*vl)),o=Math.floor(S.ore*.05);S.gold-=g;S.ore-=o;m=`${v.b} din ${v.n} a spart apărarea${(v.gd||0)>=2?' (răzbunare)':''} și a luat ${g} aur și ${o} minereu.`;m+=terSeize(v)}(S.al||(S.al=[])).unshift(m);S.al.length=Math.min(5,S.al.length);S.msg=m;S.na+=(40+RI(0,30))*6e4}if(S.na<=n)S.na=n+36e5}
+function hireG(){const c=100+60*S.lvl,g=S.gd||(S.gd=[]);if(g.length>=2)S.msg='Ai deja 2 străjeri.';else if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;const f={n:P(NMS),c:'Gardian',hp:0,sc:0,t:[P(TR)]};f.hp=mhp(f);g.push(f);S.msg=f.n+' păzește acum satul.'}go()}
+function vZ(){const gd=S.gd||[],wl=Math.round(60*(1-Math.pow(.92,BL().z))),c=100+60*S.lvl;return`<section><h2>Apărarea satului</h2><div class="mute">Putere: <b>${dpw()}</b> · Zid: +${wl}% · Următorul atac peste ${fmt((S.na||Date.now())-Date.now())}. Un atac nu e niciodată sigur, nici imposibil: șansa ta de a-l respinge e între 10% și 90%.</div></section><section><h2>Străjeri (${gd.length}/2)</h2>${gd.map(g=>`<div class="row"><span><b>${g.n}</b> <span class="mute">${(g.t||[]).map(x=>x.n).join(', ')}</span></span><span class="mute">Echipează-l din fila Echipă</span></div>`).join('')}${gd.length<2?`<div class="row"><span class="mute">Străjerii nu luptă în mină, doar apară satul. Pune pe ei iteme cu „apărarea satului”.</span><button class="p" onclick="hireG()">${c} aur</button></div>`:''}</section><section><h2>Atacuri recente</h2>${(S.al||[]).map(x=>`<div class="mute">${x}</div>`).join('')||'<p class="mute">Niciun atac încă.</p>'}</section>`}
+const SL=['w','a','h','b','j','r'],SLN={w:'Armă',a:'Armură',h:'Coif',b:'Cizme',j:'Bijuterie',r:'Relicvă'},RK=['Recrut','Veteran','Elită','Maestru','Legendă'];
+function relic(ev){const g=ev?{lv:Math.max(8,S.lvl),w:[0,70,20,8,2]}:DG[S.d.di||0];if(g.lv<8)return;let x=Math.random()*100,q=0;for(;q<g.w.length-1&&x>=g.w[q];q++)x-=g.w[q];const ks=['pd','ph','heal','pf'].sort(()=>Math.random()-.5).slice(0,2),s={},v=Math.round((3+g.lv*.18)*(1+.1*q));ks.forEach(k=>s[k]=v);(S.d.loot.it||(S.d.loot.it=[])).push({t:'r',l:g.lv,r:3,q,name:P(['Ochiul Cenușii','Colții Haitei','Inima Mlaștinii','Cenușa Veche','Pecetea Regelui','Lacrima Izvorului']),s,m:[]})}
+function auto1(){const f=S.d.f,a=S.fs[f.i],al=f.es.map((e,i)=>[e,i]).filter(([e])=>e.hp>0),r=S.rule||'weak';al.sort(r=='strong'?(x,y)=>y[0].hp-x[0].hp:r=='first'?(x,y)=>x[1]-y[1]:(x,y)=>x[0].hp-y[0].hp);f.t=al[0][1];let k='n';if(!(a.cd>0)){if(a.c=='Vraci'){if(S.fs.some(x=>x.hp>0&&x.hp<mhp(x)*.6))k='s'}else if(a.c!='Paznic'||al.length>1)k='s'}return k}
+function autoRun(){if(!S.d||!S.d.f)return;const lg=S.d.f.log;for(let g=0;g<300&&S.d&&S.d.f;g++)step(auto1());S.fl=lg.slice(-6);go()}
+function tg(k,v){if(k=='auto')S.auto=S.auto===false;else S[k]=v;go()}
+const BT=()=>S.bt||(S.bt={on:0,d:1,di:-1,r:1,f:1,ft:'all',fr:1,eq:1,hl:1}),FT=[['all','Toate tipurile'],['w','Arme'],['a','Armuri'],['h','Coifuri'],['b','Cizme']];
+const hpp=()=>{const t=S.fs.reduce((a,f)=>a+mhp(f),0);return S.fs.reduce((a,f)=>a+Math.min(f.hp,mhp(f)),0)/t};
+function bl(m){(S.bg||(S.bg=[])).unshift(m);S.bg.length=Math.min(6,S.bg.length)}
+function btog(k){const b=BT();b[k]=b[k]?0:1;go()}
+function bval(k,v){BT()[k]=k=='ft'?v:+v;go()}
+function bsc(it,f){const s=it.s,w={dmg:3,def:3,hp:1,heal:1,crit:2,bleed:1,pd:6,ph:6,pf:6,loot:.5,vd:0};if(f.c=='Vraci'){w.heal=6;w.dmg=2}if(f.c=='Paznic'){w.def=6;w.hp=2;w.pf=10;w.ph=8;w.dmg=1;w.pd=2}if(f.c=='Gardian')w.vd=4;let t=0;for(const k in w)t+=(s[k]||0)*w[k];return t}
+function bequip(){for(const f of[...S.fs,...(S.gd||[])])for(let i=0;i<S.inv.length;i++){const it=S.inv[i],c=E(f)[it.t];if(!c||bsc(it,f)>bsc(c,f)*1.02){const e=E(f);S.inv.splice(i,1);if(c)S.inv.push(c);e[it.t]=it;bl('Echipat '+it.name+' pe '+f.n);go();return 1}}return 0}
+function bheal(){const a=S.fs,d=a.findIndex(f=>f.hp<=0),rc=Math.round(15*S.lvl*Math.pow(.96,BL().i)),hc=Math.round(6*S.lvl*Math.pow(.96,BL().i));if(d>=0&&S.gold>=rc){revive(d);bl('Ridicat: '+a[d].n);return 1}if(a.some(f=>f.hp>0&&f.hp<mhp(f)*.9)&&S.gold>=hc){heal();bl('Vindecare echipă');return 1}return 0}
+function bcraft(){const b=BT();if(S.forge.findIndex(x=>!x)<0)return 0;const ts=b.ft=='all'?['w','a','h','b']:[b.ft],t=ts[(S.bn2=(S.bn2||0)+1)%ts.length],PL=t=='w'?PW:PA;let p=0,s=0;PL.forEach((x,i)=>{if(x.lv<=S.lvl&&have(x.m)>have(PL[p].m))p=i});SF.forEach((x,i)=>{if(x.lv<=S.lvl&&have(x.m)>have(SF[s].m))s=i});
+ for(let r=+b.fr;r>=0;r--)for(let q=0;q<5;q++){const u={t,l:S.lvl,r,p,s,q:r?q:0},nn=nd(u);if(Object.keys(nn).every(k=>have(k)>=nn[k])){const o=S.ui;S.ui=u;craft();S.ui=o;bl('Forjare: '+SLN[t]+' '+RAR[r].n+' niv. '+S.lvl);return 1}}return 0}
+function braid(){if(S.pts<3||hpp()<.7||S.fs.some(f=>f.hp<=0))return 0;const m=MPV().vs.filter(v=>v.o!=='p'&&wf(v)>=.6&&v.dl<=2&&est(v)>=EB&&S.pts>=2+dst(v)).sort((a,b)=>wf(b)*b.r-wf(a)*a.r);if(!m.length)return 0;const v=m[0],t0=S.tab;raid(v.id);S.tab=t0;if(S.d&&S.d.f)autoRun();bl('Raid: '+v.n);return 1}
+function bdown(){const b=BT();if(hpp()<.8||S.fs.some(f=>f.hp<=0))return 0;let i=b.di;if(i<0){DG.forEach((g,j)=>{if(!g.ev&&g.lv<=Math.max(1,S.lvl-2)&&(i<0||g.lv>DG[i].lv))i=j})}const g=DG[i];if(!g||S.lvl<g.lv||S.pts<Math.min(MXP(),g.rooms+2))return 0;startD(i);bl('Coborâre: '+g.n);return 1}
+function bdesc(){const d=S.d;if(d.f){autoRun();return 1}if(d.done){leave();bl('Ieșit cu prada din '+(d.raid!=null?'raid':DG[d.di||0].n));return 1}const h=hpp();if(h<.35){leave();bl('Retragere: echipa e rănită');return 1}
+ const pr=h<.7?['o','c','l','x','b']:['c','l','o','x','b'],ds=d.doors.map((x,i)=>[x,i]).filter(([x])=>x.t!='b'||h>=.5).sort((a,b)=>pr.indexOf(a[0].t)-pr.indexOf(b[0].t));if(!ds.length){leave();bl('Retragere înainte de căpitan');return 1}const [x,i]=ds[0],c=x.t=='b'?(d.raid!=null?1:3):1;if(S.pts<c)return 0;door(i);return 1}
+function botTick0(){const b=BT(),n=Date.now();if(!b.on||!S.prem||n-(S.bn||0)<1500)return;S.bn=n;if(S.d&&bdesc())return;
+ if(b.f)for(let i=0;i<S.forge.length;i++){const s=S.forge[i];if(s&&n>=s.end){collect(i);bl(s.ok?'Forjat: '+s.item.name:'Forjare eșuată');return}}
+ if(b.eq&&bequip())return;if(!S.d&&b.hl&&bheal())return;if(b.f&&bcraft())return;if(!S.d){if(b.r&&braid())return;if(b.d&&bdown())return}}
+function vBot(){const b=BT(),on=b.on&&S.prem,chk=(k,n)=>`<div class="row"><span>${n}</span><button${b[k]?' class="p"':''} onclick="btog('${k}')">${b[k]?'Da':'Nu'}</button></div>`;
+ return`<section><h2>Bot de joc</h2><div class="mute">Joacă în locul tău cât timp pagina e deschisă, cu aceleași puncte și resurse. Funcție premium.</div>${S.prem?`<div class="row"><b>Stare: ${on?'pornit':'oprit'}</b><button class="p" onclick="btog('on')">${b.on?'Oprește':'Pornește'}</button></div>`:'<p class="mute">Disponibil doar pentru premium.</p><button class="p" onclick="opt(\'prem\')">Activează Premium (test)</button>'}</section><section><h2>Ce face botul</h2>${chk('d','Coboară în temnițe')}<div class="row"><span>Temniță</span><select onchange="bval('di',this.value)"><option value="-1"${b.di<0?' selected':''}>Cea mai bună posibilă</option>${DG.map((g,i)=>g.ev?'':`<option value="${i}"${b.di==i?' selected':''}>${g.n} (nv. ${g.lv})</option>`).join('')}</select></div>${chk('r','Atacă sate')}${chk('f','Forjează iteme')}<div class="row"><span>Forjează</span><span><select onchange="bval('ft',this.value)">${FT.map(([v,n])=>`<option value="${v}"${b.ft==v?' selected':''}>${n}</option>`).join('')}</select> <select onchange="bval('fr',this.value)">${RAR.map((r,i)=>`<option value="${i}"${b.fr==i?' selected':''}>${r.n}</option>`).join('')}</select></span></div>${chk('eq','Echipează automat')}${chk('hl','Vindecă automat')}</section><section><h2>Jurnal</h2>${(S.bg||[]).map(x=>`<div class="mute">${x}</div>`).join('')||'<p class="mute">Nimic încă.</p>'}</section>`}
+function cn(k){const c=S.cn||(S.cn={});c[k]=(c[k]||0)+1;if(!S.ib)dm().list.forEach(x=>{if(x.k==k&&x.g<x.n)x.g++})}
+const C=k=>(S.cn&&S.cn[k])||0,TU=[
+{t:'Bine ai venit!',d:'Ești eroul unui sat. Aici îți aduni echipa, forjezi echipament și cobori în temnițe. Ghidul te duce prin primii pași, iar recompensele te ajută să începi.',n:1},
+{t:'Prima coborâre',d:'Mergi la Coborâre și intră în Mina Cenușie. Fiecare ușă costă un punct, iar punctele se regenerează în timp.',go:['c'],c:()=>C('d')>=1},
+{t:'Apasă pe uși',d:'Alege ușile (luptă, comoară, odihnă). Luptele se dau automat. Când vrei să te oprești, apasă „Ieși cu prada”.',go:['c'],c:()=>C('l')>=1,r:{g:30,o:15}},
+{t:'Forjează un obiect',d:'În Sat, la Topitorie, alege Armă, raritate Comun și apasă „Forjează”. Timerul curge și în timp ce faci altceva.',go:['a','a'],c:()=>C('f')>=1,r:{o:15}},
+{t:'Ridică obiectul',d:'Când timerul se termină, apasă „Ridică”. Dacă forjarea a eșuat, primești jumătate din materiale și mai încerci o dată; șansa crește după fiecare eșec.',go:['a','a'],c:()=>S.inv.length>0||roster().some(f=>SL.some(k=>E(f)[k]))},
+{t:'Echipează-l',d:'În fila Echipă, alege un luptător și apasă „Pune pe...” lângă obiect. Fiecare luptător are propriile sloturi.',go:['e'],c:()=>C('e')>=1,r:{g:60}},
+{t:'Antrenează eroul',d:'În Sat, la Curte, aurul se investește în Forță, Rezistență sau Agilitate. Antrenează o dată.',go:['a','t'],c:()=>C('t')>=1,r:{g:60}},
+{t:'Recrutează un mercenar',d:'În Sat, la Han, alege un candidat și angajează-l. Echipa din mină are 3 locuri, iar cei în plus stă la bancă.',go:['a','h'],c:()=>C('h')>=1,r:{g:40}},
+{t:'Jefuiește un sat',d:'Pe Hartă, alege un sat și apasă „Jefuiește”. Prada crește cu bogăția satului.',go:['m'],c:()=>C('r')>=1,r:{g:80,o:20}},
+{t:'Ești pregătit',d:'De aici mai departe: urcă în nivel, deblochează temnițe noi (Peștera Lupilor la nivelul 4), strange materiale pentru afixe, apără-ți satul cu străjeri și zid. Mult succes!',e:1}];
+function tuChk(){if(S.tu==null)S.tu=0;if(S.tu<0)return;const st=TU[S.tu];if(st&&st.c&&st.c()){const r=st.r||{};S.gold+=r.g||0;S.ore+=r.o||0;S.tu++;S.msg=(S.msg?S.msg+' ':'')+'Ghid: pas terminat'+(r.g||r.o?` (+${r.g||0} aur, +${r.o||0} minereu)`:'')+'.'}}
+function tuGo(){const g=TU[S.tu].go;S.tab=g[0];if(g[1])S.vil=g[1];S.msg='';go()}
+function tuNext(){S.tu++;go()}
+function tuSkip(){S.tu=-1;go()}
+function tuH(){if(S.tu==null||S.tu<0)return'';const st=TU[S.tu];if(!st)return'';return`<section style="border-left-color:var(--ember)"><h2>Ghid${S.tu>0&&!st.e?' '+S.tu+'/'+(TU.length-2):''}: ${st.t}</h2><div>${st.d}</div><div class="row">${st.go?`<button class="p" onclick="tuGo()">Du-mă acolo</button>`:st.e?`<button class="p" onclick="tuSkip()">Închide ghidul</button>`:`<button class="p" onclick="tuNext()">Începe</button>`}${st.e?'':`<button onclick="tuSkip()">Sari peste ghid</button>`}</div></section>`}
+function botCard(){return S.prem?`<div class="row"><span>Bot de joc: <b>${BT().on?'pornit':'oprit'}</b></span><span><button class="p" onclick="btog('on')">${BT().on?'Oprește':'Pornește'}</button> <button onclick="tab('a');vil('q')">Setări</button></span></div>`:`<div class="row"><span class="mute">Botul joacă singur (premium)</span><button onclick="tab('a');vil('q')">Detalii</button></div>`}
+const MLV={osn:5,fie:6,ven:12,cen:20},pm=()=>{const L=S.d.raid!=null?S.lvl:DG[S.d.di||0].lv;return P(AFM.filter(k=>(MLV[k]||0)<=L))},nxt=u=>{const x=[...pls(u),...SF].filter(y=>(y.lv||1)>u.l).sort((a,b)=>a.lv-b.lv)[0];return x?' Următorul: '+x.n+' (obiect de nivel '+x.lv+').':''};
+const AL={dmg:'atac',def:'apărare',hp:'viață',bleed:'% sângerare',crit:'% critic',loot:'% aur',heal:'% vindecare',vd:'% apărare sat',pd:'% atac',ph:'% viață',pf:'% apărare'},ad=x=>Object.keys(x).filter(k=>AL[k]&&x[k]).map(k=>'+'+x[k]+' '+AL[k]).join(', ');
+function botTick(){S.ib=1;try{botTick0()}finally{S.ib=0}}
+const dk=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()},MQ=[['w',4,8],['d',1,2],['l',1,2],['f',2,3],['r',1,1]],mqt=(k,n)=>k=='w'?`Câștigă ${n} lupte`:k=='d'?(n==1?'Intră într-o temniță':`Intră în ${n} temnițe`):k=='l'?(n==1?'Ieși o dată cu prada':`Ieși cu prada de ${n} ori`):k=='f'?`Forjează ${n} obiecte`:'Jefuiește un sat';
+function dm(){if(!S.dm||S.dm.day!=dk()){const q=[...MQ].sort(()=>Math.random()-.5).slice(0,3);S.dm={day:dk(),bonus:0,list:q.map(([k,a,b])=>{const n=RI(a,b);return{k,n,t:mqt(k,n),g:0,c:0}})}}return S.dm}
+const dmReady=()=>{const m=dm();return m.list.filter(x=>!x.c&&x.g>=x.n).length+(m.list.every(x=>x.c)&&!m.bonus?1:0)};
+function rw(big){const L=S.lvl,g=(30+8*L)*(big?2:1),o=Math.round((4+L*.5)*(big?2:1));S.gold+=g;S.ore+=o;let m=`+${g} aur, +${o} minereu`;if(big||Math.random()<.35){const k=P(AFM.filter(k=>(MLV[k]||0)<=L)),n=RI(2,3);give(k,n);m+=`, ${n} × ${MA[k]}`}if(Math.random()<(big?.3:.1)){const it=mkItem(P(['w','a','h','b']),L,big?2:1);S.inv.push(it);m+=`, obiect: ${it.name}`}return m}
+function claim(i){const x=dm().list[i];if(x.g>=x.n&&!x.c){x.c=1;S.msg='Misiune îndeplinită: '+rw(false)}go()}
+function claimB(){const m=dm();if(m.list.every(x=>x.c)&&!m.bonus){m.bonus=1;S.msg='Bonus zilnic: '+rw(true)}go()}
+function vMis(){const m=dm();return`<section><h2>Misiuni zilnice</h2><div class="mute">3 misiuni noi în fiecare zi. Botul nu le avansează. Recompensele cresc cu nivelul tău: aur, minereu, uneori materiale sau un obiect.</div>${m.list.map((x,i)=>`<div class="row"><span>${x.t}<br><span class="mute">${Math.min(x.g,x.n)}/${x.n}</span></span>${x.c?'<span class="mute">Revendicat</span>':x.g>=x.n?`<button class="p" onclick="claim(${i})">Revendică</button>`:''}</div>${bar(Math.min(x.g,x.n),x.n)}`).join('')}${m.list.every(x=>x.c)?(m.bonus?'<div class="mute">Bonus revendicat. Revino mâine.</div>':'<div class="row"><span>Toate 3 făcute: bonus</span><button class="p" onclick="claimB()">Revendică bonusul</button></div>'):''}</section>`}
+DG.push({n:'Cripta Furtunii',lv:8,k:1,rooms:8,w:[60,30,10],rm:2,bn:'Străjerul Furtunii',ev:1});
+const wkk=()=>{const d=new Date(),o=(d.getDay()+6)%7,m=new Date(d.getFullYear(),d.getMonth(),d.getDate()-o);return m.getFullYear()+'-'+(m.getMonth()+1)+'-'+m.getDate()},evLeft=()=>7-(new Date().getDay()+6)%7;
+function evs(){const k=wkk();if(!S.ev||S.ev.w!=k)S.ev={w:k,k:3};return S.ev}
+function evCard(){const e=evs(),i=DG.findIndex(g=>g.ev),ok=S.lvl>=DG[i].lv;return`<section style="border-left-color:var(--ember)"><h2>Eveniment săptămânal: ${DG[i].n}</h2><div class="mute">Cripta păstrează Cheia Furtunii și face parte din campania Tronului Cenușiu (capitolul 4). Ai ${e.k} din 3 chei, iar cheile se refac peste ${evLeft()} ${evLeft()==1?'zi':'zile'}. O intrare costă o cheie. La căpitan ai 60% șansă la o relicvă de nivelul tău: verde 70%, albastru 20%, mov 8%, roșu 2%.</div><button class="p" onclick="startD(${i})"${ok&&e.k>0?'':' disabled'}>Intră (1 cheie)${ok?'':', nivel '+DG[i].lv}</button></section>`}
+const vk=v=>Math.max(.7,1+v.dl*.12)*(v.st=='zid'?1.3:v.st=='neg'?.8:1),EZ=1.6,EB=1,STN={agr:'agresiv',neg:'negustor',zid:'zidar'},STD={agr:'te atacă des, apărare medie',neg:'bogat, gărzi slabe, te atacă rar',zid:'gărzi puternice, pradă bună, te atacă rar'};
+function botLife(){const n=Date.now();if(!S.mlt)S.mlt=n;let c=0;while(n-S.mlt>=216e5&&c<8){c++;S.mlt+=216e5;MPV().vs.forEach(v=>{v.dl=Math.max(-4,Math.min(8,v.dl+P([-1,0,0,1,v.st=='agr'?1:0])));v.gd=Math.max(0,(v.gd||0)-.25)})}if(n-S.mlt>=216e5)S.mlt=n}
+function wv(){const va=MPV().vs,vs=va.some(v=>v.o!=='p')?va.filter(v=>v.o!=='p'):va,w=vs.map(v=>(v.st=='agr'?2:v.st=='zid'?.5:1)*(1+(v.gd||0)*.8)),t=w.reduce((a,b)=>a+b,0);let x=Math.random()*t;for(let i=0;i<vs.length;i++){x-=w[i];if(x<=0)return vs[i]}return vs[0]}
+function est(v){const al=S.fs.filter(f=>f.hp>0);if(!al.length)return 0;const L=S.lvl,k=vk(v),df=Math.floor(L/3*Math.sqrt(k)),H=al.reduce((s,f)=>s+Math.min(f.hp,mhp(f)),0),td=al.reduce((s,f)=>s+bon(f).def*(1+bon(f).pf/100)+tr(f,'def'),0)/al.length,dps=al.reduce((s,f)=>s+Math.max(1,atkOf(f)*1.15-df),0);let T=0;for(const [n,rm,b] of [[L>3?2.5:1.5,1,0],[1,2,1]]){const hp=(12+5*L+rm*3)*(b?2.4:1)*k,at=(3+L*1.1+rm*.5)*(b?1.4:1)*k;T+=n*hp/dps*n*.6*Math.max(1,at-td)}return H/T}
+function scout(id){const v=MPV().vs.find(x=>x.id===id);if(v.sc&&Date.now()-v.sc<18e5)S.msg='Satul a fost deja iscodit recent.';else if(S.pts<1)S.msg='Îți trebuie 1 punct.';else{spend(1);v.sc=Date.now();S.msg='Iscoadele s-au întors cu informații despre '+v.n+'.'}go()}
+function svInfo(v){const sc=v.sc&&Date.now()-v.sc<18e5,vl=Math.max(1,S.lvl+v.dl);if(!sc)return`<div class="mute">Două lupte (gărzi, apoi căpitan). Stilul și apărarea nu se văd până nu iscodești.</div><div class="row"><span class="mute">Iscodire: 1 punct, valabilă 30 de minute</span><button onclick="scout(${v.id})">Iscodește</button></div>`;const e=est(v),lb=e>=EZ?'Ușor':e>=EB?'Echilibrat':'Greu';return`<div class="mute">Stil: <b>${STN[v.st]}</b> · ${STD[v.st]}</div><div class="row"><span>Gărzi ×${vk(v).toFixed(1)}</span><span>Pradă din sat ≈ ${Math.round((60+30*vl)*wf(v)*v.r)} aur</span></div><div class="row"><span>Răzbunare: ${'●'.repeat(Math.round(v.gd||0))||'niciuna'}</span><b class="${lb=='Greu'?'r4':lb=='Ușor'?'r2':''}">${lb} pentru echipa ta</b></div>`}
+function loginChk(){if(S.tu>=0&&S.tu<TU.length-1)return;const d=dk();if(S.lg===d)return;const first=S.lg==null;S.lg=d;if(first)return;const g=20+4*S.lvl,o=Math.round(4+S.lvl/2);S.gold+=g;S.ore+=o;S.pts=Math.min(MXP(),S.pts+5);S.msg=(S.msg?S.msg+' ':'')+`Bun venit înapoi! Recompensă zilnică: +${g} aur, +${o} minereu, +5 puncte.`}
+function tab(t){S.tab=t;S.msg='';go()}
+const bar=(a,b,c)=>`<div class="bar ${c||''}"><i style="width:${Math.max(0,Math.min(100,a/b*100))}%"></i></div>`;
+function vA(){const u=S.ui,lv=[];if(((pls(u)[u.p||0])||{}).lv>u.l)u.p=0;if(SF[u.s||0].lv>u.l)u.s=0;for(let l=Math.max(1,S.lvl-2);l<=S.lvl+2;l++)lv.push(l);if(!lv.includes(u.l))u.l=S.lvl;
+ const sl=S.forge.slice(0,Math.max(S.slots,S.forge.length)),now=Date.now();
+ let h=`<section><h2>Topitoria</h2><div class="mute">${S.forge.filter(x=>x).length} din ${S.slots} sloturi ocupate. Forja nu consumă puncte. Șansa depinde de nivelul obiectului față de al tău, de raritate și de calitatea cristalului. La eșec primești jumătate din materiale, iar fiecare eșec crește șansa următoare. Afixele puternice se deblochează la niveluri mai mari ale obiectului.${nxt(u)}</div>`;
+ for(let i=0;i<S.slots;i++){const s=S.forge[i];h+='<div class="row">'+(!s?'<span class="mute">Slot liber</span>':now<s.end?`<span>${s.label}</span><span data-end="${s.end}">${fmt(s.end-now)}</span>`:`<span>${s.label}</span><button class="p" onclick="collect(${i})">Ridică</button>`)+'</div>'}
+ h+=`</section><section><h2>Forjează un obiect</h2>
+ <div class="row"><label>Tip</label><select onchange="ui('t',this.value)"><option value="w"${u.t=='w'?' selected':''}>Armă</option><option value="a"${u.t=='a'?' selected':''}>Armură</option><option value="h"${u.t=='h'?' selected':''}>Coif</option><option value="b"${u.t=='b'?' selected':''}>Cizme</option></select></div>
+ <div class="row"><label>Nivel</label><select onchange="ui('l',this.value)">${lv.map(l=>`<option${l==u.l?' selected':''}>${l}</option>`).join('')}</select></div>
+ <div class="row"><label>Raritate</label><select onchange="ui('r',this.value)">${RAR.map((r,i)=>`<option value="${i}"${i==u.r?' selected':''}>${r.n}</option>`).join('')}</select></div>
+ ${u.r>=1?`<div class="row"><label>Prefix</label><select onchange="ui('p',this.value)">${pls(u).map((x,i)=>(x.lv||1)>u.l?'':`<option value="${i}"${i==u.p?' selected':''}>${x.n} (${ad(x)})</option>`).join('')}</select></div>`:''}${u.r>=2?`<div class="row"><label>Sufix</label><select onchange="ui('s',this.value)">${SF.map((x,i)=>(x.lv||1)>u.l?'':`<option value="${i}"${i==u.s?' selected':''}>${x.n} (${ad(x)})</option>`).join('')}</select></div>`:''}${u.r>=1?`<div class="row"><label>Calitate cristal</label><select onchange="ui('q',this.value)">${QN.map((n,q)=>`<option value="${q}"${q==u.q?' selected':''}>${n} (${have(RM[u.r]+q)})</option>`).join('')}</select></div>`:''}<div class="row"><span>Șansă de reușită</span><b>${Math.round(chance(u.l,u.r,u.q)*10)/10}%</b></div>
+ <div class="mute">Necesar: ${nh(u)}</div><div class="row"><span>Durată</span><span>${fmt(RAR[u.r].t*1000*Math.pow(.96,BL().f)*(1-terB('forge')/100))}</span></div>
+ ${S.pity?`<div class="mute">Bonus după ${S.pity} eșec${S.pity>1?'uri':''}: +${S.pity*5}% la următoarea forjare, până la prima reușită</div>`:''}
+ <div class="row"><span class="mute">Durate scurtate pentru test</span><button class="p" onclick="craft()">Forjează</button></div></section>`;return h}
+function vC(){const d=S.d;if(!d)return`<section><h2>Coborâre</h2><p style="display:none">Șase încăperi, ultima cu un căpitan. Fiecare ușă costă un punct, iar căpitanul trei. Poți ieși oricând cu prada.</p><div class="mute">Punctele (sus) se cheltuiesc la uși: 1 punct pe ușă, 3 la căpitan. Se regenerează câte 1 la 6 minute, până la 30, și se adună și cu pagina închisă. Dacă îi lipsesc, așteaptă sau folosește Topitoria, care nu costă puncte.</div>${S.fs.some(f=>f.hp<=0)?'<div class="r4">Ai luptători căzuți: ridică-i din fila Echipă înainte să cobori.</div>':''}${botCard()}</section>${evCard()}${DG.map((g,i)=>[g,i]).sort((a,b)=>a[0].lv-b[0].lv).map(([g,i])=>g.ev||S.lvl+10<g.lv?'':`<section><h2>${g.n}</h2><div class="mute">${g.rooms} încăperi · inamici ×${g.k} · cerință: nivel ${g.lv}</div><div class="mute">${g.rm>=3?'Cristale, esențe și calități rare':g.rm==2?'Cristale rare, calități medii':'Cristale comune, calitate slabă'}</div><button class="p" onclick="startD(${i})"${S.lvl<g.lv?' disabled':''}>Intră</button></section>`).join('')}`;
+ const f=d.f;let h=`<section><h2>${d.raid!=null?(d.lbl||'Raid')+': '+d.rn:DG[d.di||0].n}: ${d.room}/${d.rooms}</h2><div class="mute">Pradă: ${d.loot.gold} aur, ${d.loot.ore} minereu, ${Object.values(d.loot.m||{}).reduce((a,b)=>a+b,0)} materiale, ${d.loot.xp} exp.</div><div class="row"><button onclick="tg('auto')">Luptă: ${S.auto!==false?'automat':'manual'}</button><select onchange="tg('rule',this.value)">${[['weak','Ținta: cel mai slab'],['strong','Ținta: cel mai puternic'],['first','Ținta: primul']].map(([v,n])=>`<option value="${v}"${(S.rule||'weak')==v?' selected':''}>${n}</option>`).join('')}</select></div>${S.fl&&!f?'<div class="log">'+S.fl.map(x=>'<div>'+x+'</div>').join('')+'</div>':''}`;
+ if(f){const a=S.fs[f.i];h+=f.es.map((e,i)=>e.hp>0?`<button class="en${i==f.t?' t':''}" onclick="tgt(${i})">${e.n}${e.bl?' · sângerează':''}${e.st?' · amețit':''}${bar(e.hp,e.mh,'e')}<span class="mute">${e.hp}/${e.mh} viață</span></button>`:'').join('');
+  h+=`<div class="log">${f.log.slice(-3).map(x=>`<div>${x}</div>`).join('')}</div><div class="row"><span style="display:flex;gap:10px;align-items:center">${av(a,40)}<b>Tura lui ${a.n}</b></span><span class="mute">${a.hp}/${mhp(a)} viață</span></div><div class="row"><button onclick="act('n')">Lovește</button><button class="p" onclick="act('s')"${a.cd>0?' disabled':''}>${CL[a.c].sp}${a.cd>0?' ('+a.cd+')':''}</button><button onclick="autoRun()">Automat</button></div><div class="mute">${CL[a.c].sp}: ${CL[a.c].d}. Atinge un inamic ca să-l ții în țintă.</div>`}
+ else if(d.done)h+='<p>Mina e curățată.</p>';
+ else h+='<div class="mute">Indiciile: arme = luptă, lumină aurie = comoară, podea suspectă = capcană, foc = odihnă.</div>'+d.doors.map((x,i)=>`<div class="row"><span>${x.t=='b'?'Poarta căpitanului':DR[x.t]}</span><button class="p" onclick="door(${i})">Intră (${x.t=='b'?(d.raid!=null?1:3):1} p)</button></div>`).join('');
+ return h+`</section>${f?'<button class="d" onclick="flee()">Fugi (pierzi jumătate din pradă)</button>':'<button class="d" onclick="leave()">Ieși cu prada</button>'}`}
+let portretSelectat = -1;
+function portrait0(f){
+  if(!f.h){
+    return '';
+  }
+  return '<img src="imagini/erou.jpeg" alt="'+f.n+'" style="width:100%;max-width:320px;height:380px;object-fit:cover;object-position:center;border-radius:12px;border:1px solid var(--line);display:block;margin:12px auto">';
+}
+function deschidePortret(i){
+	portretSelectat = i;
+	render();
+	}
+ function vE(){const b=bon();let h='<section><h2>Echipa</h2><div class="row"><span class="mute">Numele eroului</span><input maxlength="14" value="'+(S.fs.find(f=>f.h)||S.fs[0]).n+'" onchange="rn(this.value)"></div>'+S.fs.map((f,i)=>`<div>${f.h?portrait(f):(portretSelectat===i?'<img src="imagini/'+(f.c==='Campion'?'campion.jpeg':f.c==='Arcaș'?'arcasa.jpeg':'paznic.jpeg')+'" alt="'+f.n+'" style="width:100%;max-width:320px;height:380px;object-fit:cover;border-radius:12px;display:block;margin:12px auto">':'')}<div class="row"><span style="display:flex;gap:10px;align-items:center"><span onclick="deschidePortret(${i})" style="cursor:pointer;display:flex;gap:10px;align-items:center">${av(f)}<span><b>${f.n}</b> <span class="mute">${f.h?'erou, ':''}${f.rk?RK[f.rk]+' ':''}${f.c}${f.sc?', '+f.sc+' cicatrice':''}</span>${f.t&&f.t.length?'<br><span class="mute">'+f.t.map(x=>x.n).join(', ')+'</span>':''}</span></span>${f.hp<=0?`<button class="d" onclick="revive(${i})">Ridică (${Math.round(15*S.lvl*Math.pow(.96,BL().i))} aur)</button>`:`<span class="mute">${f.hp}/${mhp(f)}</span>`}</div>${bar(Math.min(f.hp,mhp(f)),mhp(f))}`).join('')+`<div class="row"><span class="mute">Infirmerie: vindecă toți răniții</span><button onclick="heal()">${Math.round(6*S.lvl*Math.pow(.96,BL().i))} aur</button></div></section>`;
+ h+=vPre();h+='<section><h2>Echipament</h2><div class="row">'+roster().map((f,i)=>`<button${f===cur()?' class="p"':''} onclick="sel(${i})">${f.n}</button>`).join('')+`</div><div class="mute">${cur().c} · ${CL[cur().c].sp}: ${CL[cur().c].d}<br>Viață ${mhp(cur())} · Atac ${Math.round(atkOf(cur()))} · Apărare ${bon(cur()).def+tr(cur(),'def')}<br>Specialul se reîncărcă după 2 ture (vraciul după 1). Fiecare luptător are 6 sloturi de echipament.</div>`+vSlots()+'</section>';
+ h+=vInv();
+ if(DEV())h+=`<section><h2>Opțiuni de test</h2><div class="row"><span>Sloturi de forjă (simulare abonament)</span><select onchange="opt('slots',this.value)">${[4,6,8].map(n=>`<option${n==S.slots?' selected':''}>${n}</option>`).join('')}</select></div><div class="row"><button onclick="opt('pts')">+10 puncte</button><button onclick="opt('gold')">+1000 aur</button><button onclick="opt('ore')">+100 minereu</button><button onclick="opt('lvl')">+1 nivel</button><button onclick="opt('lvl5')">+5 niveluri</button><button onclick="opt('prem')">Premium (test): ${S.prem?'pornit':'oprit'}</button><button onclick="opt('mats')">+20 din fiecare material</button><button onclick="opt('lg')">Armă legendară (test)</button><button onclick="opt('tu')">Repornește ghidul</button><button class="d" onclick="opt('reset')">Resetează jocul</button></div></section>`;return h}
+function hdr(){const h=S.fs.find(f=>f.h)||S.fs[0];
+ q('#hs').innerHTML=`<span class="rc" title="Puncte">${IC.p}<span><b id="pp">${S.pts}/${MXP()}</b><small id="pt">${S.pts<MXP()?'(+1 în '+fmt(PT-(Date.now()-S.ptsT))+')':'Puncte'}</small></span></span><span class="rc" title="Aur">${IC.g}<span><b>${S.gold}</b><small>Aur</small></span></span><span class="rc" title="Minereu">${IC.o}<span><b>${S.ore}</b><small>Minereu</small></span></span><span class="lvb">${av(h,40)}<span><b>${h.n}</b><small>Nivel ${S.lvl} · ${S.xp}/${need(S.lvl)} exp.</small><i class="xpb"><i style="width:${Math.min(100,S.xp/need(S.lvl)*100)}%"></i></i></span></span>`;
+ q('#nv').innerHTML=[['a','Sat','🏰'],['c','Coborâre','⛏️'],['m','Hartă','🗺️'],['e','Echipă','🛡️']].map(([k,n,i])=>`<button class="${S.tab==k?'on':''}" onclick="tab('${k}')"><span class="ni">${i}</span><span>${n}${navBadge(k)}</span></button>`).join('')+sideHtml()}
+function render(){sync();q('#v').innerHTML=(S.tab=='a'?hero():'')+(S.msg?`<p class="msg">${S.msg}</p>`:'')+tuH()+(S.tab=='a'?vV():S.tab=='c'?vC():S.tab=='m'?vM():vE());hdr();fxScan()}
+function go(){pool();shop();MPV();terTick();atkCheck();tuChk();botLife();loginChk();tronCheck();save();render()}
+load();terNorm();if(S.d&&S.d.f&&!S.d.f.es.some(e=>e.hp>0))win();pool();shop();MPV();terTick();atkCheck();botLife();loginChk();save();render();
+setInterval(()=>{const n=Date.now();sync();botTick();{const b=S.al&&S.al[0];atkCheck();if((S.al&&S.al[0])!==b){save();render()}}const a=q('#pp');if(a)a.textContent=S.pts+'/'+MXP();const t=q('#pt');if(t)t.textContent=S.pts<MXP()?'(+1 în '+fmt(PT-(n-S.ptsT))+')':'';
+ let done=false;qa('[data-end]').forEach(e=>{const r=+e.dataset.end-n;if(r<=0)done=true;else e.textContent=fmt(r)});if(done)render()},1000);
+</script>
+<button id="auth-toggle" type="button" aria-expanded="false" aria-controls="auth-panel">👑 Cont</button>
+<div id="auth-panel" class="auth-hidden" style="position:fixed;right:12px;top:12px;z-index:9999;background:#20252d;color:white;padding:14px;border-radius:12px;width:260px;font:14px Arial;box-shadow:0 4px 20px #0008">
+  <b>👑 Silver Throne — Cont</b>
+  <div id="auth-status" style="margin:8px 0">Neconectat</div>
+  <input id="auth-email" type="email" placeholder="Adresa de email" style="box-sizing:border-box;width:100%;padding:9px;margin:4px 0">
+  <input id="auth-password" type="password" placeholder="Parola (minim 6 caractere)" style="box-sizing:border-box;width:100%;padding:9px;margin:4px 0">
+  <button id="auth-register" style="width:100%;padding:9px;margin-top:5px">Creează cont</button>
+  <button id="auth-login" style="width:100%;padding:9px;margin-top:5px">Conectare</button>
+  <button id="auth-logout" style="width:100%;padding:9px;margin-top:5px;display:none">Deconectare</button>
+  <div id="auth-message" style="margin-top:8px;overflow-wrap:anywhere"></div>
+</div>
+<script>
+(function(){
+  const tgl = document.getElementById('auth-toggle'), pnl = document.getElementById('auth-panel');
+  tgl.addEventListener('click', function(){ const h = pnl.classList.toggle('auth-hidden'); tgl.setAttribute('aria-expanded', h ? 'false' : 'true'); });
+  const email = document.getElementById('auth-email');
+  const password = document.getElementById('auth-password');
+  const status = document.getElementById('auth-status');
+  const message = document.getElementById('auth-message');
+  const register = document.getElementById('auth-register');
+  const login = document.getElementById('auth-login');
+  const logout = document.getElementById('auth-logout');
+
+  function showMessage(text){ message.textContent = text; }
+let handledUserId = null;
+
+async function syncCloud(user){
+  if (!user) {
+    handledUserId = null;
+    cloudUserId = null;
+    return;
+  }
+
+  if (handledUserId === user.id) return;
+  handledUserId = user.id;
+
+  const { data, error } = await supabaseClient
+    .from('game_saves')
+    .select('game_data')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (error) {
+    showMessage('Eroare la citirea salvării: ' + error.message);
+    handledUserId = null;
+    return;
+  }
+
+  if (data) {
+    const useCloud = confirm(
+      'Există o salvare online. Vrei să încarci progresul din cont? ' +
+      'Apasă Anulează pentru a păstra progresul local fără sincronizare.'
+    );
+
+    if (!useCloud) {
+      cloudUserId = null;
+      showMessage('Salvarea online a fost păstrată. Sincronizarea este oprită.');
+      return;
+    }
+
+    cloudLoading = true;
+    S = data.game_data; terNorm();
+    localStorage.setItem(KEY, JSON.stringify(S));
+    cloudLoading = false;
+    cloudUserId = user.id;
+    render();
+    showMessage('Progresul din cloud a fost încărcat.');
+  } else {
+    cloudUserId = user.id;
+    save();
+    showMessage('Cont conectat. Progresul local va fi salvat online.');
+  }
+}
+  async function updateAuth(){
+    const {data, error} = await supabaseClient.auth.getSession();
+    if(error){ showMessage(error.message); return; }
+    const user = data.session && data.session.user;
+    status.textContent = user ? 'Conectat: ' + user.email : 'Neconectat'; await syncCloud(user);
+    email.style.display = user ? 'none' : 'block';
+    password.style.display = user ? 'none' : 'block';
+    register.style.display = user ? 'none' : 'block';
+    login.style.display = user ? 'none' : 'block';
+    logout.style.display = user ? 'block' : 'none';
+  }
+
+  register.addEventListener('click', async function(){
+    const {error} = await supabaseClient.auth.signUp({
+      email: email.value.trim(),
+      password: password.value
+    });
+    showMessage('TEST: butonul Creează cont a fost apăsat.');
+    await updateAuth();
+  });
+
+  login.addEventListener('click', async function(){
+    const {error} = await supabaseClient.auth.signInWithPassword({
+      email: email.value.trim(),
+      password: password.value
+    });
+    showMessage(error ? error.message : 'Conectare reușită!');
+    await updateAuth();
+  });
+
+  logout.addEventListener('click', async function(){
+    const {error} = await supabaseClient.auth.signOut();
+    showMessage(error ? error.message : 'Te-ai deconectat.');
+    await updateAuth();
+  });
+
+  supabaseClient.auth.onAuthStateChange(function(){
+    updateAuth();
+  });
+
+  updateAuth();
+})();
+</script>
+<style>
+/* Ghid: săgeți aurii și contur strălucitor (doar vizual) */
+.tu-glow{outline:2px solid #f2c14e!important;outline-offset:2px;animation:tuGlow 1.6s ease-in-out infinite}
+g.tu-glow{outline:none!important;animation:tuGlowSvg 1.6s ease-in-out infinite}
+@keyframes tuGlow{0%,100%{box-shadow:0 0 4px 1px #f2c14e80}50%{box-shadow:0 0 14px 4px #f2c14ecc}}
+@keyframes tuGlowSvg{0%,100%{filter:drop-shadow(0 0 2px #f2c14e)}50%{filter:drop-shadow(0 0 6px #f2c14e)}}
+#tu-arrow{position:fixed;left:0;top:0;width:var(--tu-s);height:var(--tu-s);pointer-events:none;z-index:50;display:none;--tu-s:64px}
+#tu-arrow i{display:block;width:100%;height:100%;animation:tuBob .9s ease-in-out infinite alternate}
+#tu-arrow svg{display:block;width:100%;height:100%;filter:drop-shadow(0 2px 3px #0007)}
+@keyframes tuBob{from{transform:translateY(-6px)}to{transform:translateY(4px)}}
+@media (max-width:520px){#tu-arrow{--tu-s:52px}}
+@media (prefers-reduced-motion:reduce){.tu-glow,g.tu-glow,#tu-arrow i{animation:none}.tu-glow{box-shadow:0 0 10px 3px #f2c14eaa}}
+</style>
+<script>
+(function(){
+  const ar=document.createElement('div');ar.id='tu-arrow';ar.setAttribute('aria-hidden','true');
+  ar.innerHTML='<i><svg viewBox="0 0 64 64"><defs><linearGradient id="tuG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1b8"/><stop offset=".45" stop-color="#f2c14e"/><stop offset="1" stop-color="#b8860b"/></linearGradient></defs><path d="M22 4h20v28h14L32 60 8 32h14z" fill="url(#tuG)" stroke="#6b4a06" stroke-width="2.5" stroke-linejoin="round"/></svg></i>';
+  document.body.appendChild(ar);
+  const V=s=>[...document.querySelectorAll('#v '+s)].filter(e=>e.offsetParent!==null||e instanceof SVGElement);
+  const B=(s,on)=>V('button[onclick^="'+s+'"]').filter(b=>on===undefined||!b.disabled);
+  // Ținte pentru fiecare pas din TU (aceeași ordine): [ținta săgeții, ...alte ținte evidențiate]
+  const TG=[
+    ()=>B('tuNext('),
+    ()=>V('button[onclick="startD(0)"]'),
+    ()=>{if(!S.d)return V('button[onclick="startD(0)"]');if(S.d.f)return[];const d=B('door(',1),l=B('leave(');return d.length?[...d,...l]:l},
+    ()=>{const u=S.ui||{};if(u.t!='w')return V('select[onchange^="ui(\'t\'"]');if(+u.r!==0)return V('select[onchange^="ui(\'r\'"]');return B('craft(')},
+    ()=>{const c=B('collect(');return c.length?c:V('[data-end]')},
+    ()=>B('equip('),
+    ()=>B('train(',1).slice(0,1),
+    ()=>B('hire(').slice(0,1),
+    ()=>{const r=B('raid(');return r.length?r:V('g[onclick^="mv("]')},
+    ()=>B('tuSkip()').filter(b=>b.classList.contains('p'))
+  ];
+  function targets(){
+    if(typeof S=='undefined'||S.tu==null||S.tu<0||!TU[S.tu])return[];
+    const st=TU[S.tu];
+    if(st.go&&(S.tab!=st.go[0]||(st.go[1]&&(S.vil||'a')!=st.go[1])))return B('tuGo(');
+    return TG[S.tu]?TG[S.tu]():[];
+  }
+  let lit=[];
+  function tick(){
+    const t=targets();
+    lit.forEach(e=>{if(!t.includes(e))e.classList.remove('tu-glow')});
+    t.forEach(e=>e.classList.add('tu-glow'));lit=t;
+    const el=t[0],r=el&&el.getBoundingClientRect();
+    if(!r||!r.width){ar.style.display='none';return requestAnimationFrame(tick)}
+    ar.style.display='block';
+    const s=ar.offsetWidth,vh=innerHeight,vw=document.documentElement.clientWidth,
+      top=(document.querySelector('header')||{}).getBoundingClientRect?.().bottom||0,
+      bot=vh-(innerWidth<960?((document.getElementById('nv')||{}).offsetHeight||0):0);
+    let x=Math.max(4,Math.min(vw-s-4,r.left+r.width/2-s/2)),y,rot=0;
+    if(r.top>bot)y=bot-s-6; // ținta e sub ecran: săgeata stă jos și arată în jos
+    else if(r.bottom<top)y=top+6,rot=180; // ținta e deasupra: sus, arată în sus
+    else if(r.top-s-6>=top)y=r.top-s-6; // deasupra butonului, arată în jos
+    else y=r.bottom+6,rot=180; // nu e loc deasupra: sub buton, arată în sus
+    ar.style.transform=`translate(${Math.round(x)}px,${Math.round(y)}px) rotate(${rot}deg)`;
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
