@@ -133,7 +133,7 @@ async function lwReport(c) {
 }
 
 /* ------------------------------------------------------------------ HARTA LUMII */
-function lwPos(p) { const h = lwHash(p.id), jx = ((h & 255) / 255 - 0.5) * 44, jy = (((h >>> 8) & 255) / 255 - 0.5) * 34; return [p.x * LW.CELL + jx, p.y * LW.CELL * 0.82 + jy]; }
+function lwPos(p) { const h = lwHash(p.id), jx = ((h & 255) / 255 - 0.5) * 44, jy = (((h >>> 8) & 255) / 255 - 0.5) * 34; return [p.x * LW.CELL + Math.sign(p.x) * 30 + jx, p.y * LW.CELL * 0.82 + Math.sign(p.y) * 52 + jy]; }   /* loc liber în jurul Tronului, pentru numele regilor */
 const lwVB = () => { const c = LUME.cam || LUME.full; return `${lwF(c.x)} ${lwF(c.y)} ${lwF(c.w)} ${lwF(c.h)}`; };
 function lwClamp(c) {
   const F = LUME.full; c.w = Math.min(F.w, Math.max(F.w / 8, Math.max(260, c.w))); c.w = Math.min(c.w, F.w); c.h = c.w * F.h / F.w;
@@ -167,7 +167,7 @@ function lwTerrain(ps, F) {
   for (let y = F.y - 40; y < F.y + F.h + 40; y += 44) for (let x = F.x - 40; x < F.x + F.w + 40; x += 50) {
     if (rg() > 0.42) continue;
     const tx = x + (rg() - 0.5) * 40, ty = y + (rg() - 0.5) * 34;
-    if (Math.hypot(tx, ty) < 78) continue;
+    if (Math.abs(tx) < 110 && ty > -70 && ty < 100) continue;
     const gx = Math.round(tx / LW.CELL), gy = Math.round(ty / sy); let near = false;
     for (let i = -1; i <= 1 && !near; i++) for (let j = -1; j <= 1 && !near; j++) { const q = cell.get((gx + i) + ',' + (gy + j)); if (q) { const [qx, qy] = pos.get(q.id); if (Math.hypot(tx - qx, ty - qy) < 50) near = true; } }
     if (near) continue;
@@ -177,12 +177,26 @@ function lwTerrain(ps, F) {
   LUME.terr = { key, svg: s };
   return s;
 }
-function lwThrone() {
-  return `<g pointer-events="none"><circle r="52" fill="url(#st-gl)"/><circle r="36" fill="#c9a24b" fill-opacity=".06" stroke="#f0d27a" stroke-opacity=".6" stroke-width="1.2" stroke-dasharray="6 3"/>`
-    + `<g transform="translate(-21 -27) scale(.35)"><path d="M41 21 L45 3 L53 13 L60 0 L67 13 L75 3 L79 21 Z" fill="#f0d27a" stroke="#5c430c" stroke-width="3"/><path d="M36 50 Q36 26 60 24 Q84 26 84 50 L84 88 L36 88 Z" fill="#c3ccd1" stroke="#2a3134" stroke-width="4"/><path d="M45 54 Q45 35 60 33 Q75 35 75 54 L75 84 L45 84 Z" fill="#1d2427"/><circle cx="60" cy="49" r="5" fill="#f0d27a"/><rect x="24" y="72" width="16" height="16" rx="3" fill="#aab4ba" stroke="#2a3134" stroke-width="4"/><rect x="80" y="72" width="16" height="16" rx="3" fill="#aab4ba" stroke="#2a3134" stroke-width="4"/><rect x="26" y="86" width="68" height="12" rx="3" fill="#c3ccd1" stroke="#2a3134" stroke-width="4"/><path d="M32 98V122M88 98V122" stroke="#7c878d" stroke-width="8" stroke-linecap="round"/></g>`
-    + `<g transform="translate(0 46)"><rect x="-48" y="-8" width="96" height="14" rx="3" fill="#0b0e10" fill-opacity=".88" stroke="#f0d27a" stroke-width=".8"/><text y="2.4" text-anchor="middle" fill="#f0d27a" style="font:700 9px Cinzel,Georgia,serif">Tronul de Argint</text></g></g>`;
+/* cine e pe Tron: câștigătorul ultimei săptămâni încheiate (Sala Faimei) și regele de acum, din datele Tronului (tron.js) */
+function lwKings(ps) {
+  const st = typeof TRON !== 'undefined' && TRON.st, out = { win: null, week: 0, cur: null };
+  if (!st) return out;
+  const h = (st.hall || []).reduce((a, x) => (!a || x.week > a.week ? x : a), null), w = h && (h.top || []).find(t => t.rank === 1);
+  const idOf = t => t.user_id || (() => { const m = ps.filter(p => p.name === t.name); return m.length === 1 ? m[0].id : null; })();
+  if (w) { out.win = { name: w.name, id: idOf(w) }; out.week = h.week + 1; }
+  if (st.holder) out.cur = { name: st.holder.name, id: st.holder.user_id };
+  return out;
 }
-function lwVil(p, sel, mine) {
+function lwThrone(K) {
+  const plate = (y, txt, gold, big) => { const w = txt.length * (big ? 5.6 : 5) + 16; return `<g transform="translate(0 ${y})"><rect x="${lwF(-w / 2)}" y="-8" width="${lwF(w)}" height="${big ? 15 : 13}" rx="3" fill="#0b0e10" fill-opacity=".9" stroke="${gold ? '#f0d27a' : '#c9a24b'}" stroke-opacity="${gold ? 1 : 0.6}" stroke-width="${gold ? 1 : 0.7}"/><text y="${big ? 3 : 2}" text-anchor="middle" fill="${gold ? '#f0d27a' : '#e9e1cf'}" style="font:${big ? '700 9.5px Cinzel' : '600 8.4px Alegreya'},Georgia,serif">${tEsc(txt)}</text></g>`; };
+  let lb = plate(46, 'Tronul de Argint', true, true);
+  if (K.win) lb += plate(62, `👑 ${K.win.name} · regele săptămânii ${K.week}`, true);
+  lb += plate(K.win ? 77 : 62, K.cur ? `Pe Tron acum: ${K.cur.name}` : 'Tronul e gol acum', false);
+  return `<g class="lw-tr" onclick="tab('r')" onkeydown="if(event.key==='Enter'){tab('r')}" tabindex="0" role="button" aria-label="Tronul de Argint${K.win ? ', regele săptămânii: ' + tEsc(K.win.name) : ''}${K.cur ? ', pe Tron acum: ' + tEsc(K.cur.name) : ''}"><circle r="52" fill="url(#st-gl)"/><circle r="36" fill="#c9a24b" fill-opacity=".06" stroke="#f0d27a" stroke-opacity=".6" stroke-width="1.2" stroke-dasharray="6 3"/>`
+    + `<g transform="translate(-21 -27) scale(.35)"><path d="M41 21 L45 3 L53 13 L60 0 L67 13 L75 3 L79 21 Z" fill="#f0d27a" stroke="#5c430c" stroke-width="3"/><path d="M36 50 Q36 26 60 24 Q84 26 84 50 L84 88 L36 88 Z" fill="#c3ccd1" stroke="#2a3134" stroke-width="4"/><path d="M45 54 Q45 35 60 33 Q75 35 75 54 L75 84 L45 84 Z" fill="#1d2427"/><circle cx="60" cy="49" r="5" fill="#f0d27a"/><rect x="24" y="72" width="16" height="16" rx="3" fill="#aab4ba" stroke="#2a3134" stroke-width="4"/><rect x="80" y="72" width="16" height="16" rx="3" fill="#aab4ba" stroke="#2a3134" stroke-width="4"/><rect x="26" y="86" width="68" height="12" rx="3" fill="#c3ccd1" stroke="#2a3134" stroke-width="4"/><path d="M32 98V122M88 98V122" stroke="#7c878d" stroke-width="8" stroke-linecap="round"/></g>`
+    + lb + '</g>';
+}
+function lwVil(p, sel, mine, K) {
   const [cx, cy] = lwPos(p), c = lwCfg(), st = Math.max(0, Math.min(4, p.stage | 0)), rg = lwRng(lwHash(p.id)), n = [3, 4, 5, 7, 9][st];
   const prot = p.level < c.min_level, cd = p.cd && p.cd > lwNow(), col = mine ? '#f0d27a' : prot ? '#7b7f82' : '#c9d1d6', ph = rg() * 6.28, H = [];
   for (let i = 0; i < n; i++) { const a = i * 2.39996 + ph, r = 4.6 * Math.sqrt(i + 0.6); H.push([Math.cos(a) * r, Math.sin(a) * r * 0.9, (rg() - 0.5) * 26, 1 + ((rg() * 3) | 0)]); }
@@ -195,6 +209,8 @@ function lwVil(p, sel, mine) {
   H.forEach(([x, y, r, k]) => { h += `<use href="#st-h${k}" transform="translate(${lwF(x)} ${lwF(y)}) rotate(${lwF(r)}) scale(${lwF(0.92 + st * 0.04)})"/>`; });
   h += `<g class="st-fl" transform="translate(-14 -6)"><path d="M0 0V-9" stroke="#2a1d10" stroke-width=".9"/><path d="M0-9l6 2.2-6 2.2z" fill="${mine ? '#f0d27a' : prot || cd ? '#7b7f82' : '#c0504a'}" stroke="#12181a" stroke-width=".4"/></g>`;
   h += `<g transform="translate(15 -15)"><circle r="7.4" fill="#12181a" stroke="${mine ? '#f0d27a' : '#c9a24b'}" stroke-width="1.1"/><text y="3.3" text-anchor="middle" fill="#f0d27a" style="font:700 ${p.level > 99 ? 7 : 9}px Cinzel,Georgia,serif">${p.level}</text></g>`;
+  const won = K && K.win && K.win.id === p.id, cur = K && K.cur && K.cur.id === p.id;
+  if (won || cur) h += `<g transform="translate(0 -31)"><title>${won ? 'Regele săptămânii ' + K.week : ''}${won && cur ? ' · ' : ''}${cur ? 'Ține Tronul acum' : ''}</title><path d="M-9 4L-7-6-3-1 0-8 3-1 7-6 9 4Z" fill="${won ? '#f0d27a' : '#c9d1d6'}" stroke="#5c430c" stroke-width="1" stroke-linejoin="round"/>${won && cur ? '<circle cy="-1" r="1.6" fill="#c0504a"/>' : ''}</g>`;
   h += `<circle class="st-sel" r="23" fill="none" stroke="#f0d27a" stroke-opacity=".28" stroke-width="5"/><circle class="st-sel" r="23" fill="none" stroke="#f0d27a" stroke-width="1.5"/>`;
   return h + `<g transform="translate(0 33)" pointer-events="none"><rect x="${lwF(-w / 2)}" y="-8" width="${lwF(w)}" height="13" rx="3" fill="#0b0e10" fill-opacity=".86" stroke="${mine ? '#f0d27a' : '#c9a24b'}" stroke-opacity=".7" stroke-width=".7"/><text y="1.8" text-anchor="middle" fill="${mine ? '#f0d27a' : '#e9e1cf'}" style="font:600 8.6px Alegreya,Georgia,serif">${tEsc(lbl)}</text></g></g>`;
 }
@@ -202,7 +218,7 @@ function lwMap() {
   const st = LUME.st, ps = st.players, meId = st.me && st.me.user_id;
   let x0 = 0, x1 = 0, y0 = 0, y1 = 0;
   for (const p of ps) { const [x, y] = lwPos(p); x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
-  x0 -= 95; x1 += 95; y0 -= 80; y1 += 95;
+  x0 -= 95; x1 += 95; y0 -= 80; y1 += 105;
   let w = x1 - x0, h = y1 - y0;
   if (w < 640) { x0 -= (640 - w) / 2; w = 640; }
   if (w / h < 1.6) { const nw = h * 1.6; x0 -= (nw - w) / 2; w = nw; } else { const nh = w / 1.6; y0 -= (nh - h) / 2; h = nh; }
@@ -210,8 +226,8 @@ function lwMap() {
   if (LUME.cam) LUME.cam = lwClamp(LUME.cam);
   else if (!LUME.camInit && meId && (w > 1300 || (lwNarrow() && w > 600))) lwCenter(ps.find(p => p.id === meId));
   LUME.camInit = true;
-  const vs = [...ps].sort((a, b) => (a.id === LUME.sel) - (b.id === LUME.sel) || lwPos(a)[1] - lwPos(b)[1]);
-  return `<div class="st-map lw-map"><svg id="lwmap" viewBox="${lwVB()}" role="group" aria-label="Harta lumii, ${ps.length} ${ps.length === 1 ? 'sat' : 'sate'}"><defs>${SMDEFS}</defs>${lwTerrain(ps, LUME.full)}${lwThrone()}${vs.map(p => lwVil(p, p.id === LUME.sel, p.id === meId)).join('')}<rect x="${lwF(x0)}" y="${lwF(y0)}" width="${lwF(w)}" height="${lwF(h)}" fill="url(#st-vg)" pointer-events="none"/></svg>`
+  const K = lwKings(ps), vs = [...ps].sort((a, b) => (a.id === LUME.sel) - (b.id === LUME.sel) || lwPos(a)[1] - lwPos(b)[1]);
+  return `<div class="st-map lw-map"><svg id="lwmap" viewBox="${lwVB()}" role="group" aria-label="Harta lumii, ${ps.length} ${ps.length === 1 ? 'sat' : 'sate'}"><defs>${SMDEFS}</defs>${lwTerrain(ps, LUME.full)}${lwThrone(K)}${vs.map(p => lwVil(p, p.id === LUME.sel, p.id === meId, K)).join('')}<rect x="${lwF(x0)}" y="${lwF(y0)}" width="${lwF(w)}" height="${lwF(h)}" fill="url(#st-vg)" pointer-events="none"/></svg>`
     + `<div class="st-zc"><button class="st-zb" onclick="lwZoom(1.35)" aria-label="Mărește">+</button><button class="st-zb" onclick="lwZoom(1/1.35)" aria-label="Micșorează">−</button><button class="st-zb" onclick="lwReset()" aria-label="Toată lumea" title="Toată lumea">⌂</button><button class="st-zb" onclick="lwFind()" aria-label="Satul meu" title="Satul meu">◎</button></div></div>`;
 }
 function lwEnBar() {
@@ -244,7 +260,7 @@ function vLume() {
   if (!LUME.st) return `<section><h2>Lumea</h2><p class="mute">${LUME.err ? tEsc(LUME.err) : 'Se încarcă harta lumii…'}</p>${LUME.err ? '<button onclick="lwSync(true)">Încearcă din nou</button>' : ''}</section>`;
   const n = LUME.st.players.length, c = lwCfg();
   let h = `<section><h2>Lumea</h2><div class="mute">Satele tuturor jucătorilor, în jurul Tronului de Argint. Fiecare jucător nou primește un loc la marginea hărții, așa că lumea crește odată cu voi. Acum: <b>${n}</b> ${n === 1 ? 'sat' : 'sate'}.</div>${LUME.err ? `<p class="r4">${tEsc(LUME.err)}</p>` : ''}${LUME.repErr ? `<p class="r4">Rezultatul ultimului atac nu a ajuns la server (${tEsc(LUME.repErr)}). Se retrimite automat.</p>` : ''}${lwEnBar()}${lwMap()}`;
-  h += `<div class="st-lg"><span><i style="background:#f0d27a"></i>Satul tău</span><span><i style="background:#c0504a"></i>Poate fi atacat</span><span><i style="background:#7b7f82"></i>Începător (sub nivelul ${c.min_level}) sau atacat recent de tine</span><span>Zidurile apar de la stadiul „Târg întărit”</span></div></section>`;
+  h += `<div class="st-lg"><span><i style="background:#f0d27a"></i>Satul tău</span><span><i style="background:#c0504a"></i>Poate fi atacat</span><span><i style="background:#7b7f82"></i>Începător (sub nivelul ${c.min_level}) sau atacat recent de tine</span><span>👑 auriu: regele săptămânii · argintiu: pe Tron acum</span><span>Zidurile apar de la stadiul „Târg întărit”</span></div></section>`;
   return h + lwSelPanel() + lwLog() + `<section><h2>Reguli</h2><div class="mute">• Bara are ${c.en_max} atacuri și se reface câte unul la ${c.en_regen_min} de minute, adică ${Math.round(24 * 60 / c.en_regen_min)} pe zi.<br>• Același jucător îl poți ataca o dată la ${c.same_h} ore. Începătorii (sub nivelul ${c.min_level}) nu pot fi atacați și nu pot ataca.<br>• Lupți cu fantoma echipei lui, cu aceleași plafoane ca la Tron. Dacă învingi, iei prada calculată de joc și experiență în plus. Apărătorul nu pierde niciodată nimic, doar află din jurnal.<br>• Satele din Lume nu se pot cuceri; teritoriile rămân în regiunea ta.</div></section>`;
 }
 
@@ -346,6 +362,7 @@ if (typeof setInterval === 'function') setInterval(() => {
   st.textContent = `
 #lwmap{display:block;width:100%;aspect-ratio:16/10;cursor:grab;touch-action:none}
 #lwmap.drag{cursor:grabbing}
+.lw-tr{cursor:pointer;outline:none}.lw-tr:focus-visible>circle:nth-child(2){stroke-width:2.5}
 .lw-map .st-zc{gap:4px}
 .lw-en{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:10px 0;padding:8px 10px;background:linear-gradient(180deg,#181e21,#0e1214);border:1px solid var(--line);border-left:3px solid var(--blood);border-radius:4px}
 .lw-en-t{font:700 15px Cinzel,serif;color:var(--ink)}.lw-en-t b{color:var(--gold2)}
