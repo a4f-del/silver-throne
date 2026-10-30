@@ -189,6 +189,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="panou.js"></script>
 <script src="tron.js"></script>
 <script src="tema.js"></script>
+<script src="echipa.js"></script>
 </head>
 <body>
 <header><h1><span class="cr">♛</span> Silver Throne</h1><div class="hs" id="hs"></div></header>
@@ -659,12 +660,11 @@ function deschidePortret(i){
 	portretSelectat = i;
 	render();
 	}
- function vE(){const b=bon();let h='<section><h2>Echipa</h2><div class="row"><span class="mute">Numele eroului</span><input maxlength="14" value="'+(S.fs.find(f=>f.h)||S.fs[0]).n+'" onchange="rn(this.value)"></div>'+S.fs.map((f,i)=>`<div>${f.h?portrait(f):(portretSelectat===i?'<img src="imagini/'+(f.c==='Campion'?'campion.jpeg':f.c==='Arcaș'?'arcasa.jpeg':'paznic.jpeg')+'" alt="'+f.n+'" style="width:100%;max-width:320px;height:380px;object-fit:cover;border-radius:12px;display:block;margin:12px auto">':'')}<div class="row"><span style="display:flex;gap:10px;align-items:center"><span onclick="deschidePortret(${i})" style="cursor:pointer;display:flex;gap:10px;align-items:center">${av(f)}<span><b>${f.n}</b> <span class="mute">${f.h?'erou, ':''}${f.rk?RK[f.rk]+' ':''}${f.c}${f.sc?', '+f.sc+' cicatrice':''}</span>${f.t&&f.t.length?'<br><span class="mute">'+f.t.map(x=>x.n).join(', ')+'</span>':''}</span></span>${f.hp<=0?`<button class="d" onclick="revive(${i})">Ridică (${Math.round(15*S.lvl*Math.pow(.96,BL().i))} aur)</button>`:`<span class="mute">${f.hp}/${mhp(f)}</span>`}</div>${bar(Math.min(f.hp,mhp(f)),mhp(f))}`).join('')+`<div class="row"><span class="mute">Infirmerie: vindecă toți răniții</span><button onclick="heal()">${Math.round(6*S.lvl*Math.pow(.96,BL().i))} aur</button></div></section>`;
- h+=vPre();h+='<section><h2>Echipament</h2><div class="row">'+roster().map((f,i)=>`<button${f===cur()?' class="p"':''} onclick="sel(${i})">${f.n}</button>`).join('')+`</div><div class="mute">${cur().c} · ${CL[cur().c].sp}: ${CL[cur().c].d}<br>Viață ${mhp(cur())} · Atac ${Math.round(atkOf(cur()))} · Apărare ${bon(cur()).def+tr(cur(),'def')}<br>Specialul se reîncărcă după 2 ture (vraciul după 1). Fiecare luptător are 6 sloturi de echipament.</div>`+vSlots()+'</section>';
+ function vE(){let h=vEquipTop();h+=vPre();
  h+=vInv();
  if(DEV())h+=`<section><h2>Opțiuni de test</h2><div class="row"><span>Sloturi de forjă (simulare abonament)</span><select onchange="opt('slots',this.value)">${[4,6,8].map(n=>`<option${n==S.slots?' selected':''}>${n}</option>`).join('')}</select></div><div class="row"><button onclick="opt('pts')">+10 puncte</button><button onclick="opt('gold')">+1000 aur</button><button onclick="opt('ore')">+100 minereu</button><button onclick="opt('lvl')">+1 nivel</button><button onclick="opt('lvl5')">+5 niveluri</button><button onclick="opt('prem')">Premium (test): ${S.prem?'pornit':'oprit'}</button><button onclick="opt('mats')">+20 din fiecare material</button><button onclick="opt('lg')">Armă legendară (test)</button><button onclick="opt('tu')">Repornește ghidul</button><button class="d" onclick="opt('reset')">Resetează jocul</button></div></section>`;return h}
 function hdr(){const h=S.fs.find(f=>f.h)||S.fs[0];
- q('#hs').innerHTML=`<span class="rc" title="Puncte">${IC.p}<span><b id="pp">${S.pts}/${MXP()}</b><small id="pt">${S.pts<MXP()?'(+1 în '+fmt(PT-(Date.now()-S.ptsT))+')':'Puncte'}</small></span></span><span class="rc" title="Aur">${IC.g}<span><b>${S.gold}</b><small>Aur</small></span></span><span class="rc" title="Minereu">${IC.o}<span><b>${S.ore}</b><small>Minereu</small></span></span><span class="lvb">${av(h,40)}<span><b>${h.n}</b><small>Nivel ${S.lvl} · ${S.xp}/${need(S.lvl)} exp.</small><i class="xpb"><i style="width:${Math.min(100,S.xp/need(S.lvl)*100)}%"></i></i></span></span>`;
+ q('#hs').innerHTML=temaHdr();
  q('#nv').innerHTML=temaNav()+sideHtml()}
 function render(){sync();q('#v').innerHTML=(S.tab=='a'?hero()+tronBanner():'')+(S.msg?`<p class="msg">${S.msg}</p>`:'')+tuH()+(S.tab=='a'?vV():S.tab=='c'?vC():S.tab=='m'?vM():S.tab=='r'?vTron():vE());hdr();fxScan();temaPost()}
 function go(){pool();shop();MPV();terTick();atkCheck();tuChk();botLife();loginChk();tronCheck();terBack();save();render()}

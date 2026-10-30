@@ -71,7 +71,7 @@ function invBulk(kind) {
 function vSlots() {
   return '<div class="slotgrid">' + SL.map(k => {
     const it = E(cur())[k], n = S.inv.filter(x => x && x.t === k).length;
-    return `<div class="scard${it ? ' ' + invCls(it) : ''}"><div class="mute" style="font-size:13px;text-transform:uppercase;letter-spacing:.06em">${SLN[k]}</div>` +
+    return `<div class="scard${it ? ' ' + invCls(it) : ' emp'}" data-k="${k}" data-g="${IG[k]}"><div class="mute" style="font-size:13px;text-transform:uppercase;letter-spacing:.06em">${SLN[k]}</div>` +
       (it ? `<div class="ic-n">${iname(it)}</div>${invChips(it)}<div class="ic-a"><button onclick="unequip('${k}')">Scoate</button><button onclick="invF('${k}')">În rucsac (${n})</button></div>` : `<div class="mute" style="margin:6px 0">nimic echipat</div><div class="ic-a"><button onclick="invF('${k}')">În rucsac (${n})</button></div>`) + '</div>';
   }).join('') + '</div>';
 }
