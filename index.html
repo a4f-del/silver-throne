@@ -4,6 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Silver Throne</title>
+<meta name="theme-color" content="#0b0e10">
+<meta name="description" content="Coboară în mină, ridică satul, cucerește Tronul de Argint.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Silver Throne">
+<script>/* PWA: service worker (sw.js); dacă browserul nu-l suportă, jocul merge la fel */
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(e => console.warn('service worker:', e)));</script>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;700&family=Alegreya+SC:wght@500;700&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{--hh:64px;--bg:#0b0e10;--panel:#161b1e;--panel2:#1d2427;--ink:#e9e1cf;--mute:#9b9483;--line:#4e4224;--gold:#c9a24b;--gold2:#f0d27a;--acc:#4fa35e;--ember:#d99a3a;--blood:#d4564f;color-scheme:dark}
@@ -630,8 +639,7 @@ function deschidePortret(i){
 	portretSelectat = i;
 	render();
 	}
- function vE(){let h=vEquipTop();h+=vPre();
- h+=vInv();
+ function vE(){let h=vEquipTop(vInv());h+=vPre();
  if(DEV())h+=`<section><h2>Opțiuni de test</h2><div class="row"><span>Sloturi de forjă (simulare abonament)</span><select onchange="opt('slots',this.value)">${[4,6,8].map(n=>`<option${n==S.slots?' selected':''}>${n}</option>`).join('')}</select></div><div class="row"><button onclick="opt('pts')">+10 puncte</button><button onclick="opt('gold')">+1000 aur</button><button onclick="opt('ore')">+100 minereu</button><button onclick="opt('lvl')">+1 nivel</button><button onclick="opt('lvl5')">+5 niveluri</button><button onclick="opt('prem')">Premium (test): ${S.prem?'pornit':'oprit'}</button><button onclick="opt('mats')">+20 din fiecare material</button><button onclick="opt('lg')">Armă legendară (test)</button><button onclick="opt('tu')">Repornește ghidul</button><button class="d" onclick="opt('reset')">Resetează jocul</button></div></section>`;return h}
 function hdr(){const h=S.fs.find(f=>f.h)||S.fs[0];
  q('#hs').innerHTML=temaHdr();

@@ -215,18 +215,27 @@ function spPick(k) {
 }
 
 /* ------------------------------------------------------------------ PANOUL DIN ECHIPĂ */
+/* scurt: rangul și faima, treptele deblocate; lista completă (și schimbarea) se deschide la cerere */
+let spOpen = false;
 function spPanel(f) {
   const ss = SP.T[f.c]; if (!ss) return '';
-  const t = spT(f), lbl = i => (f.h ? 'nivel ' + SP.HERO_LV[i] : RK[i + 1]);
-  let h = '<div class="sp-box"><h3>Specializare</h3>';
+  const t = spT(f), lbl = i => (f.h ? 'nivel ' + SP.HERO_LV[i] : RK[i + 1]), mine = spDef0(f);
+  let h = '<div class="sp-box">';
   if (!f.h) {
     const rk = f.rk || 0, nx = rk < 4 ? SP.RKF[rk + 1] : null, p0 = SP.RKF[rk], p = nx ? Math.max(0, Math.min(100, ((f.fm || 0) - p0) / (nx - p0) * 100)) : 100;
-    h += `<div class="sp-fm"><span><b>${RK[rk]}</b> · nivel ${f.lv || '?'} · ${nx ? `faimă ${f.fm || 0}/${nx} până la ${RK[rk + 1]}` : 'rangul maxim'}</span><i class="xpb"><i style="width:${p}%"></i></i><small class="mute">+1 faimă la fiecare luptă câștigată în care e în echipă și în viață, +3 la căpitani și raiduri.</small></div>`;
-  } else h += `<div class="mute sp-fm">Treptele eroului se deblochează la nivelurile ${SP.HERO_LV.join(', ')}.</div>`;
-  const card = (s, mine) => `<div class="sp-c${mine ? ' on' : ''}"><div class="sp-h"><b>${s.n}</b><span class="mute">${s.r}</span></div><ol>${s.u.map((u, i) => `<li class="${mine && t > i ? 'ok' : ''}"><span class="sp-r">${lbl(i)}</span>${u}</li>`).join('')}</ol>`
-    + (mine ? '' : t >= 1 ? `<button class="${f.sp ? '' : 'p'}" onclick="spPick('${s.k}')">${f.sp ? `Schimbă în ${s.n} · ${SP.respec(f)} aur` : `Alege ${s.n}`}</button>` : '') + '</div>';
-  if (!f.sp) h += `<p class="${t >= 1 ? 'sp-ask' : 'mute'}">${t >= 1 ? `${tEsc(f.n)} poate primi o specializare. Prima alegere e gratuită.` : f.h ? 'Eroul își alege specializarea la nivelul 10.' : `${tEsc(f.n)} își alege specializarea la rangul Veteran.`}</p><div class="sp-two">${ss.map(s => card(s, false)).join('')}</div>`;
-  else { const mine = spDef0(f), oth = ss.filter(s => s.k !== f.sp); h += `<div class="sp-two">${card(mine, true)}${oth.map(s => card(s, false)).join('')}</div>`; }
+    h += `<div class="sp-fm" title="+1 faimă la fiecare luptă câștigată în care e în echipă și în viață, +3 la căpitani și raiduri"><span><b>${RK[rk]}</b> · ${nx ? `faimă ${f.fm || 0}/${nx} până la ${RK[rk + 1]}` : 'rang maxim'}</span><i class="xpb"><i style="width:${p}%"></i></i></div>`;
+  }
+  const card = (s, own) => `<div class="sp-c${own ? ' on' : ''}"><div class="sp-h"><b>${s.n}</b><span class="mute">${s.r}</span></div><ol>${s.u.map((u, i) => `<li class="${own && t > i ? 'ok' : ''}"><span class="sp-r">${lbl(i)}</span>${u}</li>`).join('')}</ol>`
+    + (own ? '' : t >= 1 ? `<button class="${f.sp ? '' : 'p'}" onclick="spPick('${s.k}')">${f.sp ? `Schimbă · ${SP.respec(f)} aur` : `Alege ${s.n}`}</button>` : '') + '</div>';
+  if (mine) {
+    const on = mine.u.slice(0, t), nx = t < 4 ? mine.u[t] : null;
+    h += `<div class="sp-cur"><b>${mine.n}</b> <span class="mute">${mine.r}</span></div><ul class="sp-on">${on.map(u => `<li>${u}</li>`).join('')}</ul>${nx ? `<div class="sp-nx mute">La ${lbl(t)}: ${nx.charAt(0).toLowerCase() + nx.slice(1)}</div>` : ''}`;
+  } else if (t >= 1) {
+    h += `<div class="sp-ask">Alege o specializare (prima e gratuită):</div><div class="sp-pick">${ss.map(s => `<button class="p" onclick="spPick('${s.k}')"><b>${s.n}</b><small>${s.u[0]}</small></button>`).join('')}</div>`;
+  } else {
+    h += `<div class="sp-nx mute">${f.h ? 'Eroul își alege specializarea la nivelul 10.' : 'Specializarea se alege la rangul Veteran.'}</div>`;
+  }
+  h += `<details class="sp-all"${spOpen ? ' open' : ''} ontoggle="spOpen=this.open"><summary>${mine ? 'Toate treptele · schimbă specializarea' : 'Vezi ce face fiecare specializare'}</summary><div class="sp-two">${(mine ? [mine, ...ss.filter(s => s !== mine)] : ss).map(s => card(s, s === mine)).join('')}</div></details>`;
   return h + '</div>';
 }
 const spNeedN = () => [...S.fs, ...(S.rs || [])].filter(spNeed).length;
@@ -235,20 +244,29 @@ const spNeedN = () => [...S.fs, ...(S.rs || [])].filter(spNeed).length;
   if (typeof document === 'undefined' || !document.head) return;
   const st = document.createElement('style');
   st.textContent = `
-.sp-box{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
-.sp-box h3{font:700 16px Cinzel,serif;color:var(--gold);margin:0 0 6px}
-.sp-fm{display:block;margin:0 0 10px}.sp-fm>span{display:block;font-size:15px;margin-bottom:4px}.sp-fm small{display:block;margin-top:4px;font-size:13px}
-.sp-ask{color:var(--gold2);margin:6px 0}
-.sp-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.sp-c{padding:8px 10px;background:linear-gradient(180deg,#171e21,#11171a);border:1px solid var(--line);border-radius:4px}
+.sp-box{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:14px;text-align:left}
+.sp-fm{display:block;margin:0 0 8px}.sp-fm>span{display:block;margin-bottom:3px}
+.sp-cur b{font:700 15px Cinzel,serif;color:var(--gold2)}
+.sp-on{list-style:none;margin:4px 0 0;padding:0}.sp-on li{padding:2px 0 2px 18px;position:relative;line-height:1.35}.sp-on li::before{content:'✔';position:absolute;left:0;color:#7fd88c}
+.sp-nx{margin-top:4px;line-height:1.35}
+.sp-ask{color:var(--gold2);margin:2px 0 6px}
+.sp-pick{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sp-pick button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;padding:6px 8px}
+.sp-pick b{font:700 14px Cinzel,serif}.sp-pick small{font-size:12px;font-weight:400;line-height:1.3}
+.sp-all{margin-top:8px}
+.sp-all summary{cursor:pointer;color:var(--gold2);font-size:13px;text-decoration:underline;text-underline-offset:3px;list-style:none}
+.sp-all summary::-webkit-details-marker{display:none}
+.sp-all summary::before{content:'▸ ';text-decoration:none;display:inline-block;margin-right:4px}
+.sp-all[open] summary::before{content:'▾ '}
+.sp-two{display:grid;grid-template-columns:1fr;gap:6px;margin-top:6px}
+.sp-c{padding:6px 8px;background:linear-gradient(180deg,#171e21,#11171a);border:1px solid var(--line);border-radius:4px}
 .sp-c.on{border-color:var(--gold);box-shadow:inset 3px 0 var(--gold)}
-.sp-h{display:flex;justify-content:space-between;gap:6px;align-items:baseline}.sp-h b{font:700 15px Cinzel,serif;color:var(--ink)}.sp-h span{font-size:13px}
-.sp-c ol{list-style:none;margin:6px 0;padding:0}
-.sp-c li{font-size:14px;line-height:1.35;padding:3px 0;color:var(--mute);border-top:1px solid #ffffff0d}
+.sp-h{display:flex;justify-content:space-between;gap:6px;align-items:baseline}.sp-h b{font:700 14px Cinzel,serif;color:var(--ink)}.sp-h span{font-size:12px}
+.sp-c ol{list-style:none;margin:4px 0;padding:0}
+.sp-c li{font-size:13px;line-height:1.3;padding:3px 0;color:var(--mute);border-top:1px solid #ffffff0d}
 .sp-c li.ok{color:var(--ink)}.sp-c li.ok .sp-r{color:#7fd88c}.sp-c li.ok .sp-r::before{content:'✔ '}
-.sp-r{display:block;font-size:12px;color:var(--gold);letter-spacing:.03em}
-.sp-c button{width:100%;margin-top:4px;font-size:14px;padding:6px 8px}
-@media (max-width:520px){.sp-two{grid-template-columns:1fr}}
+.sp-r{display:block;font-size:11px;color:var(--gold);letter-spacing:.03em}
+.sp-c button{width:100%;margin-top:4px;font-size:13px;padding:5px 8px}
 `;
   document.head.appendChild(st);
 })();

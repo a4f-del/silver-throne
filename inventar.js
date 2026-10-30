@@ -42,7 +42,7 @@ function invCmp(it) {
   const eq = E(cur())[it.t]; if (eq === it) return '';
   const keys = Object.keys(INV_L).filter(k => (it.s[k] || 0) || (eq && (eq.s[k] || 0))), out = [];
   for (const k of keys) { const d = (it.s[k] || 0) - ((eq && eq.s[k]) || 0); if (d) out.push(`<span class="dl ${d > 0 ? 'up' : 'dn'}">${d > 0 ? '▲ +' : '▼ −'}${Math.abs(d)} ${INV_L[k]}</span>`); }
-  if (!eq) return `<div class="chips"><span class="mute">Slot gol la ${tEsc(cur().n)}</span>${out.join('')}</div>`;
+  if (!eq) return `<div class="chips"><span class="mute">slot gol la ${tEsc(cur().n)}: totul e câștig</span></div>`;   /* statisticile sunt deja afișate mai sus */
   return out.length ? `<div class="chips"><span class="mute">față de ${tEsc(eq.name)}:</span>${out.join('')}</div>` : `<div class="chips"><span class="mute">la fel ca ${tEsc(eq.name)}</span></div>`;
 }
 const invChips = it => { const c = Object.keys(INV_L).filter(k => it.s[k]).map(k => `<span>+${it.s[k]} ${INV_L[k]}</span>`); return c.length ? `<div class="chips">${c.join('')}</div>` : ''; };
@@ -51,7 +51,7 @@ const invCls = it => (it.lg ? 'rl' : 'r' + (it.r + 1));
 function invCard(x) {
   const it = x.it, i = x.i;
   return `<div class="icard ${invCls(it)}${it.lk ? ' lk' : ''}" data-i="${i}" data-t="${it.t}"><div class="ic-n">${iname(it)}${it.lk ? ' <span title="Blocat">🔒</span>' : ''}</div>${invChips(it)}${invCmp(it)}` +
-    `<div class="ic-a"><button class="p" onclick="equip(${i})">Pune pe ${tEsc(cur().n)}</button><button onclick="invLock(${i})" title="${it.lk ? 'Deblochează' : 'Blochează: nu poate fi vândut sau dezmembrat'}">${it.lk ? '🔓' : '🔒'}</button><button onclick="dis(${i})"${it.lk ? ' disabled' : ''}>Dezmembrează</button><button onclick="sell(${i})"${it.lk ? ' disabled' : ''}>${invVal(it)} aur</button></div></div>`;
+    `<div class="ic-a"><button class="p" onclick="equip(${i})" aria-label="Pune pe ${tEsc(cur().n)}" title="Pune pe ${tEsc(cur().n)}">Pune</button><button onclick="invLock(${i})" title="${it.lk ? 'Deblochează' : 'Blochează: nu poate fi vândut sau dezmembrat'}">${it.lk ? '🔓' : '🔒'}</button><button onclick="dis(${i})"${it.lk ? ' disabled' : ''}>Dezmembrează</button><button onclick="sell(${i})"${it.lk ? ' disabled' : ''}>${invVal(it)} aur</button></div></div>`;
 }
 function invLock(i) { const it = S.inv[i]; if (it) it.lk = it.lk ? 0 : 1; go(); }
 
@@ -71,8 +71,8 @@ function invBulk(kind) {
 function vSlots() {
   return '<div class="slotgrid">' + SL.map(k => {
     const it = E(cur())[k], n = S.inv.filter(x => x && x.t === k).length;
-    return `<div class="scard${it ? ' ' + invCls(it) : ' emp'}" data-k="${k}" data-g="${IG[k]}"><div class="mute" style="font-size:13px;text-transform:uppercase;letter-spacing:.06em">${SLN[k]}</div>` +
-      (it ? `<div class="ic-n">${iname(it)}</div>${invChips(it)}<div class="ic-a"><button onclick="unequip('${k}')">Scoate</button><button onclick="invF('${k}')">În rucsac (${n})</button></div>` : `<div class="mute" style="margin:6px 0">nimic echipat</div><div class="ic-a"><button onclick="invF('${k}')">În rucsac (${n})</button></div>`) + '</div>';
+    return `<div class="scard${it ? ' ' + invCls(it) : ' emp'}" data-k="${k}" data-g="${IG[k]}"><span class="sc-k">${SLN[k]}</span>` +
+      (it ? `<div class="ic-n">${iname(it)}</div>${invChips(it)}<div class="ic-a"><button onclick="unequip('${k}')">Scoate</button><button onclick="invF('${k}')" title="Arată în rucsac doar obiectele pentru acest slot">Rucsac (${n})</button></div>` : `<div class="mute sc-e">gol</div><div class="ic-a"><button onclick="invF('${k}')" title="Arată în rucsac doar obiectele pentru acest slot"${n ? '' : ' disabled'}>Rucsac (${n})</button></div>`) + '</div>';
   }).join('') + '</div>';
 }
 
