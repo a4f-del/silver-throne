@@ -67,12 +67,33 @@ function invBulk(kind) {
   S.inv = S.inv.filter((_, i) => !ids.has(i)); S.msg = kind === 'sell' ? `Ai vândut ${set.length} obiecte: +${gold} aur.` : `Ai dezmembrat ${set.length} obiecte: +${ore} minereu.`; go();
 }
 
+/* ------------------------------------------------ ALEGEREA DIN SLOT
+   Butonul „Înlocuiește / Alege” de pe un slot deschide o fereastră cu obiectele de acel tip din rucsac,
+   comparate cu ce poartă luptătorul. Ordinea: cât adaugă la putere (aceeași formulă ca la Tron:
+   viață + 6 × atac + 10 × apărare, cu procentele aproximate). Echiparea e funcția equip() a jocului. */
+const INV_W = { hp: 1, dmg: 6, def: 10, crit: 4, bleed: 3, heal: 2, loot: 1, vd: 0.5, pd: 7, ph: 5, pf: 7 };
+const invScore = it => (it ? Object.keys(INV_W).reduce((s, k) => s + (it.s[k] || 0) * INV_W[k], 0) : 0);
+function invPick(k) {
+  const f = cur(), eq = E(f)[k], base = invScore(eq);
+  const list = S.inv.map((it, i) => ({ it, i })).filter(x => x.it && x.it.t === k)
+    .sort((p, q) => invScore(q.it) - invScore(p.it) || invRarKey(q.it) - invRarKey(p.it) || q.it.l - p.it.l);
+  const card = x => { const g = invScore(x.it) - base;
+    return `<div class="ipk-c icard ${invCls(x.it)}"><div class="ic-n">${iname(x.it)}${x.it.lk ? ' 🔒' : ''}</div>${invChips(x.it)}${eq ? invCmp(x.it) : ''}<div class="ipk-a">${eq ? `<span class="ipk-g ${g > 0 ? 'up' : g < 0 ? 'dn' : ''}">${g > 0 ? '▲ mai bun' : g < 0 ? '▼ mai slab' : '≈ la fel'}</span>` : ''}<button class="${!eq || g >= 0 ? 'p' : ''}" onclick="invPickEq(${x.i})">${eq ? 'Înlocuiește' : 'Pune'}</button></div></div>`; };
+  mdl(`<div class="ipk"><h3>${SLN[k]} · ${tEsc(f.n)}</h3>`
+    + `<div class="ipk-now"><span class="mute">Acum:</span> ${eq ? `${iname(eq)}${invChips(eq)}<button onclick="invPickOff('${k}')">Scoate</button>` : '<span class="mute">nimic echipat</span>'}</div>`
+    + `<div class="ipk-l">${list.length ? list.map(card).join('') : '<p class="mute">Nu ai în rucsac obiecte de acest tip.</p>'}</div>`
+    + `<div class="ipk-f mute">${list.length > 1 ? 'Ordonate după cât adaugă la putere. ' : ''}<button class="lw-lnk" onclick="invPickAll('${k}')">Vezi în rucsac (vânzare, dezmembrare)</button></div></div>`, 'ipk-b');
+}
+function invPickEq(i) { lgClose(); equip(i); }
+function invPickOff(k) { lgClose(); unequip(k); }
+function invPickAll(k) { lgClose(); invF(k); setTimeout(() => { const g = document.querySelector('.igrid') || document.querySelector('.invbar'); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); }
+
 /* sloturile echipate ale luptătorului selectat, ca grilă */
 function vSlots() {
   return '<div class="slotgrid">' + SL.map(k => {
     const it = E(cur())[k], n = S.inv.filter(x => x && x.t === k).length;
     return `<div class="scard${it ? ' ' + invCls(it) : ' emp'}" data-k="${k}" data-g="${IG[k]}"><span class="sc-k">${SLN[k]}</span>` +
-      (it ? `<div class="ic-n">${iname(it)}</div>${invChips(it)}<div class="ic-a"><button onclick="unequip('${k}')">Scoate</button><button onclick="invF('${k}')" title="Arată în rucsac doar obiectele pentru acest slot">Rucsac (${n})</button></div>` : `<div class="mute sc-e">gol</div><div class="ic-a"><button onclick="invF('${k}')" title="Arată în rucsac doar obiectele pentru acest slot"${n ? '' : ' disabled'}>Rucsac (${n})</button></div>`) + '</div>';
+      (it ? `<div class="ic-n">${iname(it)}</div>${invChips(it)}<div class="ic-a"><button onclick="unequip('${k}')">Scoate</button><button class="${n ? 'p' : ''}" onclick="invPick('${k}')"${n ? '' : ' disabled'}>${n ? `Înlocuiește (${n})` : 'Nimic în rucsac'}</button></div>` : `<div class="mute sc-e">gol</div><div class="ic-a"><button class="${n ? 'p' : ''}" onclick="invPick('${k}')"${n ? '' : ' disabled'}>${n ? `Alege (${n})` : 'Nimic în rucsac'}</button></div>`) + '</div>';
   }).join('') + '</div>';
 }
 
@@ -104,6 +125,14 @@ function vInv() {
     + '.icard.rl,.scard.rl{border-left-color:#f0d27a;box-shadow:inset 0 0 14px #0006,0 0 10px #c9a24b33}.icard.lk{outline:1px dashed #f0d27a55}'
     + '.ic-a{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.ic-a button{padding:5px 10px;font-size:14px}'
     + '.pager{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px 0}.pager button{min-width:38px}'
-    + '@media (max-width:520px){.igrid,.slotgrid{grid-template-columns:1fr}}';
+    + '@media (max-width:520px){.igrid,.slotgrid{grid-template-columns:1fr}}'
+    + '.lgm-b.ipk-b{width:min(94vw,520px);text-align:left;max-height:88vh;display:flex;flex-direction:column}'
+    + '.ipk{display:flex;flex-direction:column;min-height:0}.ipk h3{font:700 19px Cinzel,serif;color:var(--gold2);margin:2px 36px 8px 0}'
+    + '.ipk-now{padding:6px 8px;margin-bottom:8px;border:1px dashed var(--line);border-radius:4px;font-size:14px}.ipk-now .ic-n{display:inline}.ipk-now button{margin-top:4px;padding:3px 10px;font-size:13px}'
+    + '.ipk-l{overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding-right:2px;min-height:0}'
+    + '.ipk-c{padding:6px 8px}.ipk-c .ic-n{font-size:14px;line-height:1.3}.ipk-c .chips span{font-size:12px;padding:0 6px}'
+    + '.ipk-a{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:4px}.ipk-a button{padding:4px 14px;font-size:14px}'
+    + '.ipk-g{font-size:13px;margin-right:auto;color:var(--mute)}.ipk-g.up{color:#7fd88c}.ipk-g.dn{color:#e8837b}'
+    + '.ipk-f{margin-top:8px;font-size:13px}.ipk-f .lw-lnk{background:none;border:0;box-shadow:none;padding:0;color:var(--gold2);text-decoration:underline;text-underline-offset:3px;font:inherit;cursor:pointer}';
   document.head.appendChild(st);
 })();
