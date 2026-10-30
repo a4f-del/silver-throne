@@ -16,7 +16,7 @@ function tmCard(f, i) {
   const c = tmHp(f), e = E(f), sel = f === cur(), dead = c.hp <= 0, nfs = S.fs.length;
   const pips = TM_ORD.filter(k => SL.includes(k)).map(k => { const it = e[k]; return it ? `<i class="pip ${it.lg ? 'rl' : 'q' + it.r}" title="${tEsc(it.name)} (niv. ${it.l})">${IG[k]}</i>` : `<i class="pip empty" title="${SLN[k]}: gol">${IG[k]}</i>`; }).join('');
   const where = f.h ? 'Erou' : i < nfs ? 'În echipă' : (S.gd || []).includes(f) ? 'Gardian' : 'Rezervă';
-  return `<button class="tm-c${sel ? ' sel' : ''}${dead ? ' dead' : ''}" onclick="sel(${i})" aria-pressed="${sel}" title="${tEsc(f.n)}: ${Math.round(c.hp)}/${c.max} viață"><span class="tm-av">${av(f, 54)}${dead ? '<b class="sk">☠</b>' : ''}</span><span class="tm-n">${tEsc(f.n)}</span><span class="tm-k">${f.rk ? RK[f.rk] + ' ' : ''}${tEsc(f.c)}</span><i class="tm-hp${c.p < 40 ? ' low' : ''}"><i style="width:${c.p}%"></i></i><span class="tm-pips">${pips}</span><small class="tm-w">${where}</small></button>`;
+  return `<button class="tm-c${sel ? ' sel' : ''}${dead ? ' dead' : ''}" onclick="sel(${i})" aria-pressed="${sel}" title="${tEsc(f.n)}: ${Math.round(c.hp)}/${c.max} viață"><span class="tm-av">${av(f, 54)}${dead ? '<b class="sk">☠</b>' : ''}</span><span class="tm-n">${tEsc(f.n)}</span><span class="tm-k">${f.rk ? RK[f.rk] + ' ' : ''}${tEsc(f.c)}${!f.h && f.lv ? ' · nv ' + f.lv : ''}</span>${spNeed(f) ? '<b class="nb" title="Poate primi o specializare">!</b>' : ''}<i class="tm-hp${c.p < 40 ? ' low' : ''}"><i style="width:${c.p}%"></i></i><span class="tm-pips">${pips}</span><small class="tm-w">${where}</small></button>`;
 }
 function tmStrip() {
   const ro = roster(), room = S.fs.length + S.rs.length < 8;
@@ -39,10 +39,10 @@ function tmChar() {
   const hurt = [...S.fs, ...S.rs].some(x => x.hp > 0 && x.hp < mhp(x));
   const hero = f.h ? `<div class="tm-nm"><span class="mute">Numele eroului</span><input maxlength="14" value="${tEsc(f.n)}" onchange="rn(this.value)"></div>` : '';
   const xp = f.h ? `<div class="tm-xp"><span class="mute">Nivel ${S.lvl} · ${S.xp}/${need(S.lvl)} exp.</span><i class="xpb"><i style="width:${Math.min(100, S.xp / need(S.lvl) * 100)}%"></i></i></div>` : '';
-  let h = `<div class="tm-char"><section class="tm-left"><div class="tm-por">${tmPortrait(f)}</div><h2 class="tm-h">${tEsc(f.n)}</h2><div class="tm-sub mute">${f.h ? 'erou, ' : ''}${f.rk ? RK[f.rk] + ' ' : ''}${tEsc(f.c)}${f.sc ? ', ' + f.sc + ' cicatrice' : ''}${f.t && f.t.length ? '<br>' + f.t.map(x => tEsc(x.n)).join(', ') : ''}</div>`;
+  let h = `<div class="tm-char"><section class="tm-left"><div class="tm-por">${tmPortrait(f)}</div><h2 class="tm-h">${tEsc(f.n)}</h2><div class="tm-sub mute">${f.h ? 'erou, ' : 'nivel ' + (f.lv || '?') + ', '}${RK[f.rk || 0]} ${tEsc(f.c)}${f.sp && spDef0(f) ? ' · ' + spDef0(f).n : ''}${f.sc ? ', ' + f.sc + ' cicatrice' : ''}${f.t && f.t.length ? '<br>' + f.t.map(x => tEsc(x.n)).join(', ') : ''}</div>`;
   h += `<div class="tm-hpbar"><span>${c.hp <= 0 ? '☠ căzut' : Math.round(c.hp) + ' / ' + c.max + ' viață'}</span><i class="bar${c.hp <= 0 ? ' e' : ''}"><i style="width:${c.p}%"></i></i></div>`;
   h += `<div class="tm-stats"><div><b>${c.max}</b><span>Viață</span></div><div><b>${Math.round(atkOf(f))}</b><span>Atac</span></div><div><b>${tmDef(f)}</b><span>Apărare</span></div></div>${extra ? `<div class="chips">${extra}</div>` : ''}`;
-  h += `<div class="tm-sp"><b>${tEsc(CL[f.c].sp)}</b> <span class="mute">${tEsc(CL[f.c].d)}. Se reîncarcă după 2 ture (vraciul după 1).</span></div>${hero}${xp}<div class="tm-act">${rv}${hurt ? `<button onclick="heal()">Vindecă răniții · ${healCost} aur</button>` : ''}</div></section>`;
+  h += `<div class="tm-sp"><b>${tEsc(CL[f.c].sp)}</b> <span class="mute">${tEsc(CL[f.c].d)}. Se reîncarcă după ${spCd(f)} ${spCd(f) === 1 ? 'tură' : 'ture'}.</span></div>${typeof spPanel === 'function' ? spPanel(f) : ''}${hero}${xp}<div class="tm-act">${rv}${hurt ? `<button onclick="heal()">Vindecă răniții · ${healCost} aur</button>` : ''}</div></section>`;
   h += `<section class="tm-right"><h2>Echipament · ${tEsc(f.n)}</h2>${vSlots()}<div class="mute">Apasă „În rucsac” la un slot ca să vezi doar obiectele potrivite, apoi „Pune pe ${tEsc(f.n)}”.</div></section></div>`;
   return h;
 }

@@ -106,7 +106,7 @@ function terRelic(lv) {
   return { t: 'r', l: lv, r: 3, q, name: P(['Pecetea Corbului', 'Colții Haitei', 'Lacrima Izvorului', 'Cenușa Veche', 'Inelul Străjerului', 'Ochiul Cenușii']), s, m: [] };
 }
 function terMerc(extraRank) {
-  const c = cand(), f = { n: c.n, c: c.c, hp: 0, sc: 0, t: c.t, rk: Math.min(4, (c.rk || 0) + (extraRank || 1)) }; f.hp = mhp(f);
+  const c = cand(), f = spNew(c, Math.min(4, (c.rk || 0) + (extraRank || 1))); f.hp = mhp(f);
   if (S.fs.length + S.rs.length >= 8) { const g = Math.round(rp(c) * .8); S.gold += g; return 'Barăcile sunt pline: ' + f.n + ' a plecat și ți-a lăsat ' + g + ' aur.'; }
   (S.fs.length < 3 && !S.d ? S.fs : S.rs).push(f); return f.n + ' (' + RK[f.rk] + ' ' + f.c + ') s-a alăturat.';
 }
