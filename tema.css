@@ -4,6 +4,7 @@
    Culori și variabile: aceleași ca în index.html (--gold, --ink, --line, ...), plus câteva noi.
    ========================================================================== */
 :root {
+  --tema-v: "2026.10.30-3";                 /* versiunea stilurilor; tema.js o compară cu a lui și avertizează dacă nu coincid */
   --gold-grad: linear-gradient(180deg, #f6dc8e, #c9a24b 55%, #8f6d1f);
   --mute: #b4ad99;
   --card-a: #262f34;
@@ -202,6 +203,7 @@ nav button.tr .ni { font-size: 24px; text-shadow: 0 0 14px #f0d27a99; }
 .tm-por { display: flex; flex-direction: column; align-items: center; margin-bottom: 12px; }
 .tm-por>img, .tm-por .pcard { max-width: 100%; }
 .tm-por>img { width: 100% !important; max-width: 230px !important; height: 230px !important; object-position: center top; object-fit: cover; border-radius: 12px; border: 2px solid var(--gold); box-shadow: 0 0 26px #000c, 0 0 20px #c9a24b33; margin: 0 auto 6px !important; display: block; }
+.tm-por .pcard { width: min(100%, 200px); margin: 0 auto 8px; }
 .tm-por .row { justify-content: center; margin: 6px 0 0; }
 .tm-por .row button { font-size: 14px; padding: 7px 12px; }
 .tm-bigav { position: relative; width: 100%; max-width: 230px; height: 230px; display: flex; align-items: center; justify-content: center; border-radius: 12px; border: 2px solid var(--gold); overflow: hidden; background: radial-gradient(circle at 50% 35%, #34423a, #11171a 72%); box-shadow: 0 0 26px #000c, 0 0 20px #c9a24b33; }

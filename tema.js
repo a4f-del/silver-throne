@@ -59,9 +59,27 @@ function forgeSlots() {
   return h + '</div>';
 }
 
+/* ------------------------------------------------ VERIFICARE DE VERSIUNE */
+/* Dacă tema.css e din altă versiune decât tema.js (de exemplu o încărcare incompletă pe GitHub sau un cache vechi), jocul
+   arată stricat fără explicație. Avertismentul de mai jos spune exact ce s-a întâmplat. Stil inline: se vede și fără tema.css. */
+const TEMA_V = '2026.10.30-3';
+function temaVerCheck() {
+  try {
+    if (document.getElementById('tema-warn')) return;
+    const css = String(getComputedStyle(document.documentElement).getPropertyValue('--tema-v') || '').replace(/["'\s]/g, '');
+    if (css === TEMA_V) return;
+    const w = document.createElement('div'); w.id = 'tema-warn'; w.setAttribute('role', 'alert');
+    w.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:99999;padding:10px 14px;background:#7a1d1d;color:#fff;font:15px/1.4 Arial,sans-serif;box-shadow:0 4px 18px #000a';
+    w.innerHTML = '<b>Jocul s-a actualizat doar pe jumătate.</b> ' + (css ? 'Stilurile (tema.css) sunt din versiunea ' + css + ', iar jocul cere ' + TEMA_V + '.' : 'Fișierul de stiluri (tema.css) lipsește sau e vechi.') + ' Apasă Ctrl+F5. Dacă mesajul rămâne, încarcă din nou fișierul <b>tema.css</b> pe GitHub (și așteaptă 1–2 minute). <button style="margin-left:8px;padding:4px 10px" onclick="this.parentNode.remove()">Închide</button>';
+    document.body.appendChild(w);
+  } catch (e) { /* verificarea nu trebuie să blocheze jocul */ }
+}
+let _tmVer = false;
+
 /* ------------------------------------------- DUPĂ RANDARE: tranziții și notificări */
 let _tmKey = '', _tmMsg = '', _tmT = null;
 function temaPost() {
+  if (!_tmVer) { _tmVer = true; temaVerCheck(); }
   try {
     const v = document.getElementById('v'); if (!v) return;
     const key = S.tab + '|' + S.mt + '|' + S.vil;
