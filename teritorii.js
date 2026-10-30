@@ -380,7 +380,7 @@ function terFortWin(d) {
 
 /* ----------------------------------------------- CÂRLIGE ÎN RL / WIN / LEAVE ---- */
 function terRl(d) {
-  if (d.conq) terConqWin(d); else if (d.camp) terCampWin(d); else if (d.fort) terFortWin(d); else if (d.tron) tronWin(d);
+  if (d.conq) terConqWin(d); else if (d.camp) terCampWin(d); else if (d.fort) terFortWin(d); else if (d.tron) tronWin(d); else if (d.lume) lumeWin(d);
 }
 function terRaidStat(v) { v.rw = (v.rw || 0) + 1; S.ter.st.raid++; }
 function campBoss(d) { if (d.di != null) S.camp.bk[d.di] = 1; }
@@ -681,7 +681,7 @@ function terLegend() {
 }
 function terTabs() {
   const k = S.mt || 'h', r = cmpReady();
-  return `<div class="tabs">${[['h', 'Hartă'], ['k', 'Campanie' + (r ? ' ●' : '')], ['t', 'Teritorii']].map(([x, n]) => `<button${x == k ? ' class="p"' : ''} onclick="mtab('${x}')">${n}</button>`).join('')}</div>`;
+  return `<div class="tabs">${[['h', 'Regiunea'], ['l', 'Lumea'], ['b', 'Clasament'], ['k', 'Campanie' + (r ? ' ●' : '')], ['t', 'Teritorii']].map(([x, n]) => `<button${x == k ? ' class="p"' : ''} onclick="mtab('${x}')">${n}</button>`).join('')}</div>`;
 }
 function mtab(k) { S.mt = k; S.msg = ''; go(); }
 function vTer() {
@@ -691,13 +691,15 @@ function vTer() {
   h += `<div class="row"><span>Întreținere: <b>${d} aur/zi</b>${t.debt ? ` · <b class="r4">datorie ${t.debt} aur: bonusurile sunt suspendate</b>` : ''}</span>${t.debt ? `<button class="p" onclick="terPay()">Plătește</button>` : ''}</div><div class="mute">Întreținerea se plătește automat din aur, o dată pe zi. Dacă nu ai aur, bonusurile se opresc, dar teritoriile nu se pierd din cauza asta. Absența nu costă mai mult de ${TP.upkeep.maxDays} zile.</div></section>`;
   h += `<section><h2>Sate (${own.length}/${S.map.vs.length})</h2>` + S.map.vs.map(v => { const I = vInfoT(v), o = v.o === 'p'; return `<div class="row"><span><b>${I.nm}</b> <span class="mute">(${v.n}, ${o ? 'al tău' : (v.lost ? 'pierdut' : 'NPC: ' + v.b)})</span><br><span class="mute">${terBTxt(I.tip, I.tier)}${o ? ' · garnizoană ' + (v.g || 0) + '/' + TP.gar.max + ' · întreținere ' + TW.upk(tLvl(v), I.tier, TP, v.g) + '/zi' : ''}</span></span><span><button onclick="tab('m');mtab('h');mv(${v.id})">Pe hartă</button></span></div>`; }).join('') + '</section>';
   const f = t.fort; h += `<section><h2>${TW.FORT.ic} ${TW.FORT.nm}</h2><div class="row"><span>${f.o === 'p' ? '<b style="color:var(--gold2)">În stăpânirea ta</b>' : !t.dsc.fort ? 'Nedescoperit' : f.lost ? '<b class="r4">Pierdut</b>' : 'Descoperit, necucerit'}<br><span class="mute">${TW.FORT.bd}</span></span><button onclick="tab('m');mtab('h');terSel('f')"${t.dsc.fort ? '' : ' disabled'}>Pe hartă</button></div></section>`;
-  h += `<section><h2>Reguli</h2><div class="mute">• Cucerirea cere raiduri reușite, iscodire, taxă și 3 lupte mai grele decât un raid.<br>• Un sat cucerit e protejat ${TP.conq.immuneH} h. Dacă o oaste inamică îți sparge apărarea, poate ocupa un teritoriu (cel mult unul la ${TP.seize.cdH} h; zidul scade șansa). Poți recuceri mai ieftin și fără raiduri.<br>• Bonusul se acordă cât timp ai satul, nu la cucerire: nu poate fi încasat de două ori. Recompensa de primă cucerire se dă o singură dată pe sat.<br>• Toate satele sunt controlate de NPC. Nu există atacuri între jucători.</div></section>`;
+  h += `<section><h2>Reguli</h2><div class="mute">• Cucerirea cere raiduri reușite, iscodire, taxă și 3 lupte mai grele decât un raid.<br>• Un sat cucerit e protejat ${TP.conq.immuneH} h. Dacă o oaste inamică îți sparge apărarea, poate ocupa un teritoriu (cel mult unul la ${TP.seize.cdH} h; zidul scade șansa). Poți recuceri mai ieftin și fără raiduri.<br>• Bonusul se acordă cât timp ai satul, nu la cucerire: nu poate fi încasat de două ori. Recompensa de primă cucerire se dă o singură dată pe sat.<br>• Satele din regiunea ta sunt controlate de NPC. Atacurile între jucători sunt în Lumea și nu pot cuceri teritorii.</div></section>`;
   h += `<section><h2>Jurnal</h2>${t.lg.map(x => `<div class="mute">${tEsc(x)}</div>`).join('') || '<p class="mute">Nimic încă.</p>'}</section>`;
   return h;
 }
 function vM() {
   terTick(); const k = S.mt || 'h', tabs = terTabs();
   if (k === 'k') return tabs + vCamp();
+  if (k === 'l') return tabs + vLume();
+  if (k === 'b') return tabs + vBoard();
   if (k === 't') return tabs + vTer();
   let h = vMmap();
   h = h.replace('<p class="mute">Atinge un sat ca să-l vezi.</p>', terPanel());

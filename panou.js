@@ -70,6 +70,7 @@ function sdTasks() {
   if (ch) { const d = ch.obj.filter(objDone).length, rd = chReady(ch); r.push(sdRow('👑', `Cap. ${ch.id}: ${tEsc(ch.nm)}`, rd ? 'gata!' : `${d}/${ch.obj.length}`, "sdGo('m','mt','k')", rd)); }
   else r.push(sdRow('👑', 'Campanie încheiată', '✔', "sdGo('m','mt','k')"));
   if (typeof tronRow === 'function') { const x = tronRow(); if (x) r.push(x); }
+  if (typeof lumeRow === 'function') { const x = lumeRow(); if (x) r.push(x); }
   const own = terOwnedV().length, debt = S.ter && S.ter.debt > 0;
   r.push(sdRow(debt ? '⚠' : '🚩', `Teritorii: ${own}/${S.map.vs.length}`, debt ? 'datorie' : '', "sdGo('m','mt','t')", debt));
   return `<div class="sd-t">Acum</div>${r.join('')}`;

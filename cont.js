@@ -101,6 +101,7 @@ function contBoot(key, src) {
   catch (e) { console.error(e); CONT.msg = { t: 'err', m: 'Jocul nu a pornit: ' + ((e && e.message) || e) }; return contShow('retry'); }
   CONT.booted = true; contHide(); contChip();
   contPush(); try { tronInit(); tronSync(); } catch (e) { /* Tronul se reîncearcă singur */ }
+  try { lwSync(); } catch (e) { /* Lumea se reîncearcă singură */ }
 }
 
 /* ---------------------------------------------------------------- ECRANUL */

@@ -184,6 +184,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="inventar.js?v=2026.10.30-3"></script>
 <script src="panou.js?v=2026.10.30-3"></script>
 <script src="tron.js?v=2026.10.30-3"></script>
+<script src="lume.js?v=2026.10.30-3"></script>
 <script src="tema.js?v=2026.10.30-3"></script>
 <script src="echipa.js?v=2026.10.30-3"></script>
 <script src="cont.js?v=2026.10.30-3"></script>
@@ -407,7 +408,7 @@ function mapGen(){const NV=['Valea Cenușie','Pârâul Lung','Stânca Neagră','
 function mv(i){S.msel=null;S.mv=i;S.msg='';go()}
 function raid(id){const v=MPV().vs.find(x=>x.id===id),c=trv(v);if(v.o==='p'){S.msg='Satul îți aparține.';return go()}if(S.d){S.msg='Ești deja într-o coborâre.';return go()}if(!S.fs.some(f=>f.hp>0)){S.msg='Toți luptătorii sunt căzuți. Du-te la infirmerie.';return go()}if(S.pts<c){S.msg='Îți trebuie '+c+' puncte.';return go()}
  cn('r');spend(c);const f=wf(v),k=vk(v);v.t=Date.now();v.gd=Math.min(5,(v.gd||0)+1);S.d={room:1,rooms:2,k,rw:1+(k-1)*.6,bn:'Căpitanul gărzii',di:0,raid:v.id,rn:v.n,rf:f,loot:{gold:0,ore:0,xp:0,m:{}},f:null,done:false};startF(false);terFrom();S.tab='c';S.msg='Ai ajuns la '+v.n+'. Gărzile te așteaptă.';if(S.auto!==false){autoRun();return}go()}
-function rl(d){if(d.conq||d.camp||d.fort||d.tron)return terRl(d);const v=MPV().vs.find(x=>x.id===d.raid),f=d.rf,vl=Math.max(1,S.lvl+v.dl),w=f*v.r;terRaidStat(v);d.loot.gold+=Math.round((60+30*vl)*w*(1+terB('gold')/100));d.loot.ore+=Math.round((6+vl*.8)*w);d.loot.xp+=Math.round((20+8*vl)*f);for(let i=0,n=Math.round(RI(2,4)*w);i<n;i++)lm(pm(),1);if(Math.random()<.5*f)rdrop(false)}
+function rl(d){if(d.conq||d.camp||d.fort||d.tron||d.lume)return terRl(d);const v=MPV().vs.find(x=>x.id===d.raid),f=d.rf,vl=Math.max(1,S.lvl+v.dl),w=f*v.r;terRaidStat(v);d.loot.gold+=Math.round((60+30*vl)*w*(1+terB('gold')/100));d.loot.ore+=Math.round((6+vl*.8)*w);d.loot.xp+=Math.round((20+8*vl)*f);for(let i=0,n=Math.round(RI(2,4)*w);i<n;i++)lm(pm(),1);if(Math.random()<.5*f)rdrop(false)}
 function vMold(){const m=MPV(),sv=m.vs.find(v=>v.id===S.mv);let g='<svg viewBox="0 0 280 200" width="100%" style="display:block;background:var(--panel);border:1px solid var(--line)">';
  for(let x=0;x<7;x++)for(let y=0;y<5;y++)g+=`<rect x="${x*40}" y="${y*40}" width="40" height="40" style="fill:none;stroke:var(--line);stroke-width:.5"/>`;
  g+='<circle cx="140" cy="100" r="12" style="fill:var(--ember)"/><text x="140" y="104" text-anchor="middle" style="fill:#fff;font:700 10px sans-serif">Tu</text>';
@@ -637,7 +638,7 @@ function hdr(){const h=S.fs.find(f=>f.h)||S.fs[0];
  q('#hs').innerHTML=temaHdr();
  q('#nv').innerHTML=temaNav()+sideHtml()}
 function render(){sync();q('#v').innerHTML=(S.tab=='a'?hero()+tronBanner():'')+(S.msg?`<p class="msg">${S.msg}</p>`:'')+tuH()+(S.tab=='a'?vV():S.tab=='c'?vC():S.tab=='m'?vM():S.tab=='r'?vTron():vE());hdr();fxScan();temaPost()}
-function go(){pool();shop();MPV();terTick();atkCheck();tuChk();botLife();loginChk();tronCheck();terBack();save();render()}
+function go(){pool();shop();MPV();terTick();atkCheck();tuChk();botLife();loginChk();tronCheck();lumeCheck();terBack();save();render()}
 /* pornirea jocului o face cont.js, după conectare: boot(salvare) */
 function boot(src){load(src);terNorm();if(S.d&&S.d.f&&!S.d.f.es.some(e=>e.hp>0))win();pool();shop();MPV();terTick();atkCheck();botLife();loginChk();save();render()}
 contStart();
