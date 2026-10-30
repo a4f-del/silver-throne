@@ -22,6 +22,7 @@ function navBadge(k) {
     if (k === 'a') n = dmReady() + sdForgeReady();
     else if (k === 'c') n = S.d ? 1 : 0;
     else if (k === 'm') n = cmpReady() + (S.ex ? 1 : 0);
+    else if (k === 'r') n = (typeof tronPend === 'function' && tronPend()) ? 1 : 0;
     else if (k === 'e') n = S.fs.filter(f => f.hp <= 0).length;
   } catch (e) { n = 0; }
   return n > 0 ? `<b class="nb" aria-label="${n} de făcut">${n}</b>` : '';

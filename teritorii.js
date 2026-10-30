@@ -16,6 +16,13 @@ const tDur = ms => { const m = Math.max(0, Math.ceil(ms / 60000)); return m >= 6
 const tLvl = v => Math.max(1, S.lvl + v.dl);
 const MXP = () => MAXP0 + terB('pts');
 
+/* ----------------------------------------------------- ÎNTOARCERE DUPĂ LUPTĂ ----
+   Luptele pornite de pe hartă (raid, cucerire, tabără, fortăreață, Tron) se afișează în fila Coborâre. terFrom() reține
+   de unde a pornit lupta, iar go() te readuce acolo când lupta s-a încheiat (ieșire cu prada, înfrângere sau fugă).
+   Botul (S.ib) nu schimbă navigarea. */
+function terFrom() { if (!S.ib && (S.tab === 'm' || S.tab === 'r')) S.rt = { t: S.tab, mt: S.mt || 'h' }; }
+function terBack() { if (!S.rt) return; if (!S.d) { if (S.tab === 'c') { S.tab = S.rt.t; if (S.rt.t === 'm') S.mt = S.rt.mt; } S.rt = null; } }
+
 /* ------------------------------------------------------------------ STARE ---- */
 function terKey() { return S.map.vs.map(v => v.x + ',' + v.y).join('|'); }
 function terInit() {
@@ -175,7 +182,7 @@ function campGo(id) {
   const k = campK(c);
   S.d = { room: 1, rooms: T.fights, k, rw: TP.camp.rw, bn: T.bn, di: 0, raid: -1, rn: T.nm, lbl: 'Tabără', camp: c.id, rf: 1, fx: 1, xn: T.xn, loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false,
     em: { nm: T.en, dr: T.drops, hm: T.hm, am: T.am, dm: T.dm } };
-  startF(false); S.tab = 'c'; S.msg = 'Ai ajuns la ' + T.nm + '.';
+  startF(false); terFrom(); S.tab = 'c'; S.msg = 'Ai ajuns la ' + T.nm + '.';
   if (S.auto !== false) { autoRun(); return; } go();
 }
 /* recompensa la căderea căpitanului: deterministă după seed-ul taberei */
@@ -214,7 +221,7 @@ function conq(id) {
   const I = c.I, k = Math.max(vk(v), TW.kb(S.lvl)) * TP.conq.ck[I.tier - 1] * (c.re ? TP.conq.reK : 1);
   v.t = Date.now(); v.gd = Math.min(5, (v.gd || 0) + 1);
   S.d = { room: 1, rooms: 2, k, rw: TP.conq.rw, bn: 'Stăpânul ' + v.b, di: 0, raid: v.id, rn: v.n, lbl: 'Cucerire', conq: 1, rf: 1, fx: 1, xn: TP.conq.xn[I.tier - 1], loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false, em: { nm: I.def, hm: 1, am: 1, dm: 1 } };
-  startF(false); S.tab = 'c'; S.msg = 'Asediezi ' + v.n + '. Apărătorii nu se predau ușor.';
+  startF(false); terFrom(); S.tab = 'c'; S.msg = 'Asediezi ' + v.n + '. Apărătorii nu se predau ușor.';
   if (S.auto !== false) { autoRun(); return; } go();
 }
 function terConqWin(d) {
@@ -362,7 +369,7 @@ function fortGo() {
   if (!c.ok) { S.msg = 'Condițiile de asediu nu sunt îndeplinite.'; return go(); }
   cn('r'); spend(c.pts); S.gold -= c.fee; const ks = TP.fort.k.map(x => TW.kb(S.lvl) * x * (c.re ? TP.conq.reK : 1));
   S.d = { room: 1, rooms: 3, k: ks[0], ks, xs: TP.fort.xn, rw: TP.fort.rw, bn: TW.FORT.boss, di: 0, raid: -2, rn: TW.FORT.nm, lbl: 'Asediu', fort: 1, rf: 1, fx: 1, loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false, em: { nm: TW.FORT.en, hm: 1, am: 1, dm: 1.1 } };
-  startF(false); S.tab = 'c'; S.msg = 'Asediezi ' + TW.FORT.nm + '.'; if (S.auto !== false) { autoRun(); return; } go();
+  startF(false); terFrom(); S.tab = 'c'; S.msg = 'Asediezi ' + TW.FORT.nm + '.'; if (S.auto !== false) { autoRun(); return; } go();
 }
 function terFortWin(d) {
   const t = S.ter, f = t.fort, re = !!f.lost, now = Date.now(), L = d.loot, out = [TW.FORT.nm + ' e al tău! ' + TW.FORT.bd];
@@ -674,7 +681,7 @@ function terLegend() {
 }
 function terTabs() {
   const k = S.mt || 'h', r = cmpReady();
-  return `<div class="tabs">${[['h', 'Hartă'], ['k', 'Campanie' + (r ? ' ●' : '')], ['t', 'Teritorii'], ['r', 'Tron' + (tronPend() ? ' ●' : '')]].map(([x, n]) => `<button${x == k ? ' class="p"' : ''} onclick="mtab('${x}')">${n}</button>`).join('')}</div>`;
+  return `<div class="tabs">${[['h', 'Hartă'], ['k', 'Campanie' + (r ? ' ●' : '')], ['t', 'Teritorii']].map(([x, n]) => `<button${x == k ? ' class="p"' : ''} onclick="mtab('${x}')">${n}</button>`).join('')}</div>`;
 }
 function mtab(k) { S.mt = k; S.msg = ''; go(); }
 function vTer() {
@@ -692,7 +699,6 @@ function vM() {
   terTick(); const k = S.mt || 'h', tabs = terTabs();
   if (k === 'k') return tabs + vCamp();
   if (k === 't') return tabs + vTer();
-  if (k === 'r') return tabs + vTron();
   let h = vMmap();
   h = h.replace('<p class="mute">Atinge un sat ca să-l vezi.</p>', terPanel());
   const i = h.indexOf('</section>'); if (i > 0) h = h.slice(0, i) + terLegend() + h.slice(i);

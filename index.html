@@ -179,6 +179,7 @@ main{padding:8px 24px;max-width:940px}
 .st-wv{animation:st-wv 5s linear infinite}
 @media (prefers-reduced-motion:reduce){.st-sk,.st-fl,.st-rt,.st-wv{animation:none}}
 </style>
+<link rel="stylesheet" href="tema.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="world-data.js"></script>
 <script src="tron-logic.js"></script>
@@ -187,6 +188,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="inventar.js"></script>
 <script src="panou.js"></script>
 <script src="tron.js"></script>
+<script src="tema.js"></script>
 </head>
 <body>
 <header><h1><span class="cr">♛</span> Silver Throne</h1><div class="hs" id="hs"></div></header>
@@ -423,7 +425,7 @@ function vP(){const s=shop();return SH.map(([k,n])=>`<section><h2>${n}</h2>${s[k
 function vD(){const rows=[['ore','Minereu',S.ore],...AFM.map(k=>[k,MA[k],MT()[k]||0])];return`<section><h2>Depozit</h2><div class="mute">Capacitate: ${cap()} din fiecare material. O poți mări la Curte. Dezmembrarea îi dă înapoi materialele afixelor.</div>${rows.map(([k,n,v])=>`<div class="row"><span>${n}<br><span class="mute">${MU[k]}</span></span><span><b>${v}</b>/${cap()}</span></div>${bar(v,cap())}`).join('')}${[1,2,3].map(r=>`<div class="row"><span>${MA[RM[r]]}<br><span class="mute">raritate ${RAR[r].n}</span></span><span>${QN.map((n,q)=>`${n} <b>${MT()[RM[r]+q]||0}</b>`).join(' · ')}</span></div>`).join('')}</section>`}
 const VL=[['a','Topitorie'],['h','Han'],['p','Piață'],['l','Negustor'],['d','Depozit'],['z','Apărare'],['q','Bot'],['x','Misiuni'],['t','Curte']];
 function vil(k){S.vil=k;S.msg='';go()}
-function vV(){const k=S.vil||'a';return`<div class="tabs">${VL.map(([x,n])=>`<button${x==k?' class="p"':''} onclick="vil('${x}')">${n}${x=='x'&&dmReady()?' ●':''}</button>`).join('')}</div>`+(k=='a'?vA():k=='h'?vB():k=='p'?vP():k=='l'?vLux():k=='d'?vD():k=='z'?vZ():k=='q'?vBot():k=='x'?vMis():vT())}
+function vV(){const k=S.vil||'a';return temaVTabs(k)+(k=='a'?vA():k=='h'?vB():k=='p'?vP():k=='l'?vLux():k=='d'?vD():k=='z'?vZ():k=='q'?vBot():k=='x'?vMis():vT())}
 const QN=['alb','verde','albastru','mov','roșu'];
 const DG=[{n:'Mina Cenușie',lv:1,k:1,rooms:6,w:[100],rm:1,bn:'Căpitanul Cenușii'},{n:'Catacombele Uitate',lv:8,k:1.5,rooms:8,w:[60,30,10],rm:2,bn:'Regele Oaselor'},{n:'Cetatea Scufundată',lv:18,k:2.1,rooms:10,w:[35,35,20,10],rm:3,bn:'Căpitanul Înecat'},{n:'Abisul Cenușiu',lv:30,k:3,rooms:12,w:[15,25,30,20,10],rm:3,bn:'Stăpânul Abisului'}];
 const mn=k=>/\d$/.test(k)?MA[k.slice(0,-1)]+' ('+QN[+k.slice(-1)]+')':(k=='ore'?'Minereu':MA[k]);
@@ -433,7 +435,7 @@ const MPV=()=>{const m=S.map||(S.map=mapGen());m.vs.forEach(v=>{if(!v.st){v.st=P
 function mapGen(){const NV=['Valea Cenușie','Pârâul Lung','Stânca Neagră','Moara Veche','Dealul Corbilor','Podul Rupt','Fântâna Seacă','Plaiul Pustiu'],NB=['Arnulf','Brenna','Corvin','Dagmar','Eskil','Freya','Gunnar','Hilda'],u=new Set(['3,2']),vs=[];for(let i=0;i<8;i++){let x,y;do{x=RI(0,6);y=RI(0,4)}while(u.has(x+','+y));u.add(x+','+y);vs.push({id:i,n:NV[i],b:NB[i],x,y,dl:RI(-3,5),r:+(.7+Math.random()*.8).toFixed(2),t:0})}return{vs}}
 function mv(i){S.msel=null;S.mv=i;S.msg='';go()}
 function raid(id){const v=MPV().vs.find(x=>x.id===id),c=trv(v);if(v.o==='p'){S.msg='Satul îți aparține.';return go()}if(S.d){S.msg='Ești deja într-o coborâre.';return go()}if(!S.fs.some(f=>f.hp>0)){S.msg='Toți luptătorii sunt căzuți. Du-te la infirmerie.';return go()}if(S.pts<c){S.msg='Îți trebuie '+c+' puncte.';return go()}
- cn('r');spend(c);const f=wf(v),k=vk(v);v.t=Date.now();v.gd=Math.min(5,(v.gd||0)+1);S.d={room:1,rooms:2,k,rw:1+(k-1)*.6,bn:'Căpitanul gărzii',di:0,raid:v.id,rn:v.n,rf:f,loot:{gold:0,ore:0,xp:0,m:{}},f:null,done:false};startF(false);S.tab='c';S.msg='Ai ajuns la '+v.n+'. Gărzile te așteaptă.';if(S.auto!==false){autoRun();return}go()}
+ cn('r');spend(c);const f=wf(v),k=vk(v);v.t=Date.now();v.gd=Math.min(5,(v.gd||0)+1);S.d={room:1,rooms:2,k,rw:1+(k-1)*.6,bn:'Căpitanul gărzii',di:0,raid:v.id,rn:v.n,rf:f,loot:{gold:0,ore:0,xp:0,m:{}},f:null,done:false};startF(false);terFrom();S.tab='c';S.msg='Ai ajuns la '+v.n+'. Gărzile te așteaptă.';if(S.auto!==false){autoRun();return}go()}
 function rl(d){if(d.conq||d.camp||d.fort||d.tron)return terRl(d);const v=MPV().vs.find(x=>x.id===d.raid),f=d.rf,vl=Math.max(1,S.lvl+v.dl),w=f*v.r;terRaidStat(v);d.loot.gold+=Math.round((60+30*vl)*w*(1+terB('gold')/100));d.loot.ore+=Math.round((6+vl*.8)*w);d.loot.xp+=Math.round((20+8*vl)*f);for(let i=0,n=Math.round(RI(2,4)*w);i<n;i++)lm(pm(),1);if(Math.random()<.5*f)rdrop(false)}
 function vMold(){const m=MPV(),sv=m.vs.find(v=>v.id===S.mv);let g='<svg viewBox="0 0 280 200" width="100%" style="display:block;background:var(--panel);border:1px solid var(--line)">';
  for(let x=0;x<7;x++)for(let y=0;y<5;y++)g+=`<rect x="${x*40}" y="${y*40}" width="40" height="40" style="fill:none;stroke:var(--line);stroke-width:.5"/>`;
@@ -630,7 +632,7 @@ const bar=(a,b,c)=>`<div class="bar ${c||''}"><i style="width:${Math.max(0,Math.
 function vA(){const u=S.ui,lv=[];if(((pls(u)[u.p||0])||{}).lv>u.l)u.p=0;if(SF[u.s||0].lv>u.l)u.s=0;for(let l=Math.max(1,S.lvl-2);l<=S.lvl+2;l++)lv.push(l);if(!lv.includes(u.l))u.l=S.lvl;
  const sl=S.forge.slice(0,Math.max(S.slots,S.forge.length)),now=Date.now();
  let h=`<section><h2>Topitoria</h2><div class="mute">${S.forge.filter(x=>x).length} din ${S.slots} sloturi ocupate. Forja nu consumă puncte. Șansa depinde de nivelul obiectului față de al tău, de raritate și de calitatea cristalului. La eșec primești jumătate din materiale, iar fiecare eșec crește șansa următoare. Afixele puternice se deblochează la niveluri mai mari ale obiectului.${nxt(u)}</div>`;
- for(let i=0;i<S.slots;i++){const s=S.forge[i];h+='<div class="row">'+(!s?'<span class="mute">Slot liber</span>':now<s.end?`<span>${s.label}</span><span data-end="${s.end}">${fmt(s.end-now)}</span>`:`<span>${s.label}</span><button class="p" onclick="collect(${i})">Ridică</button>`)+'</div>'}
+ h+=forgeSlots();
  h+=`</section><section><h2>Forjează un obiect</h2>
  <div class="row"><label>Tip</label><select onchange="ui('t',this.value)"><option value="w"${u.t=='w'?' selected':''}>Armă</option><option value="a"${u.t=='a'?' selected':''}>Armură</option><option value="h"${u.t=='h'?' selected':''}>Coif</option><option value="b"${u.t=='b'?' selected':''}>Cizme</option></select></div>
  <div class="row"><label>Nivel</label><select onchange="ui('l',this.value)">${lv.map(l=>`<option${l==u.l?' selected':''}>${l}</option>`).join('')}</select></div>
@@ -663,9 +665,9 @@ function deschidePortret(i){
  if(DEV())h+=`<section><h2>Opțiuni de test</h2><div class="row"><span>Sloturi de forjă (simulare abonament)</span><select onchange="opt('slots',this.value)">${[4,6,8].map(n=>`<option${n==S.slots?' selected':''}>${n}</option>`).join('')}</select></div><div class="row"><button onclick="opt('pts')">+10 puncte</button><button onclick="opt('gold')">+1000 aur</button><button onclick="opt('ore')">+100 minereu</button><button onclick="opt('lvl')">+1 nivel</button><button onclick="opt('lvl5')">+5 niveluri</button><button onclick="opt('prem')">Premium (test): ${S.prem?'pornit':'oprit'}</button><button onclick="opt('mats')">+20 din fiecare material</button><button onclick="opt('lg')">Armă legendară (test)</button><button onclick="opt('tu')">Repornește ghidul</button><button class="d" onclick="opt('reset')">Resetează jocul</button></div></section>`;return h}
 function hdr(){const h=S.fs.find(f=>f.h)||S.fs[0];
  q('#hs').innerHTML=`<span class="rc" title="Puncte">${IC.p}<span><b id="pp">${S.pts}/${MXP()}</b><small id="pt">${S.pts<MXP()?'(+1 în '+fmt(PT-(Date.now()-S.ptsT))+')':'Puncte'}</small></span></span><span class="rc" title="Aur">${IC.g}<span><b>${S.gold}</b><small>Aur</small></span></span><span class="rc" title="Minereu">${IC.o}<span><b>${S.ore}</b><small>Minereu</small></span></span><span class="lvb">${av(h,40)}<span><b>${h.n}</b><small>Nivel ${S.lvl} · ${S.xp}/${need(S.lvl)} exp.</small><i class="xpb"><i style="width:${Math.min(100,S.xp/need(S.lvl)*100)}%"></i></i></span></span>`;
- q('#nv').innerHTML=[['a','Sat','🏰'],['c','Coborâre','⛏️'],['m','Hartă','🗺️'],['e','Echipă','🛡️']].map(([k,n,i])=>`<button class="${S.tab==k?'on':''}" onclick="tab('${k}')"><span class="ni">${i}</span><span>${n}${navBadge(k)}</span></button>`).join('')+sideHtml()}
-function render(){sync();q('#v').innerHTML=(S.tab=='a'?hero():'')+(S.msg?`<p class="msg">${S.msg}</p>`:'')+tuH()+(S.tab=='a'?vV():S.tab=='c'?vC():S.tab=='m'?vM():vE());hdr();fxScan()}
-function go(){pool();shop();MPV();terTick();atkCheck();tuChk();botLife();loginChk();tronCheck();save();render()}
+ q('#nv').innerHTML=temaNav()+sideHtml()}
+function render(){sync();q('#v').innerHTML=(S.tab=='a'?hero()+tronBanner():'')+(S.msg?`<p class="msg">${S.msg}</p>`:'')+tuH()+(S.tab=='a'?vV():S.tab=='c'?vC():S.tab=='m'?vM():S.tab=='r'?vTron():vE());hdr();fxScan();temaPost()}
+function go(){pool();shop();MPV();terTick();atkCheck();tuChk();botLife();loginChk();tronCheck();terBack();save();render()}
 load();terNorm();if(S.d&&S.d.f&&!S.d.f.es.some(e=>e.hp>0))win();pool();shop();MPV();terTick();atkCheck();botLife();loginChk();save();render();
 setInterval(()=>{const n=Date.now();sync();botTick();{const b=S.al&&S.al[0];atkCheck();if((S.al&&S.al[0])!==b){save();render()}}const a=q('#pp');if(a)a.textContent=S.pts+'/'+MXP();const t=q('#pt');if(t)t.textContent=S.pts<MXP()?'(+1 în '+fmt(PT-(n-S.ptsT))+')':'';
  let done=false;qa('[data-end]').forEach(e=>{const r=+e.dataset.end-n;if(r<=0)done=true;else e.textContent=fmt(r)});if(done)render()},1000);
