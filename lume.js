@@ -35,7 +35,7 @@ function lwSnap() {
   const h = S.fs.find(f => f.h) || S.fs[0], units = tronUnits(), b = BL(), tot = BN.reduce((s, [k]) => s + (b[k] || 0), 0), si = TW.stage(tot);
   const own = S.map ? terOwnedV().length : 0, fort = S.ter && S.ter.fort && S.ter.fort.o === 'p' ? 1 : 0;
   return { name: h.n, level: S.lvl, power: Math.round(TT.power(units)), territories: own + fort, stage: si, stage_name: TW.STAGES[si][1],
-    title: (S.tron && S.tron.title) || '', hero: { n: h.n, c: h.c }, units };
+    title: (S.tron && S.tron.title) || '', hero: { n: h.n, c: h.c, ic: h.ic || '' }, units };
 }
 
 /* ------------------------------------------------------------------ SERVER */
@@ -241,7 +241,7 @@ function lwSelPanel() {
   if (!p) return '<p class="mute">Atinge un sat ca să vezi cine locuiește acolo.</p>';
   const mine = st.me && p.id === st.me.user_id, can = mine ? null : lwCan(p), myP = Math.round(TT.power(tronUnits()));
   const cmp = mine ? '' : p.power > myP * 1.25 ? '<span class="r4">mai puternic decât tine</span>' : p.power < myP * 0.8 ? '<span class="lw-ok">mai slab decât tine</span>' : 'cam cât tine';
-  return `<section class="lw-sel"><div class="lw-sel-h">${av({ n: p.hero && p.hero.n || p.name, c: (p.hero && p.hero.c) || 'Campion' }, 56)}<div><h2>${tEsc(p.name)}${mine ? ' <span class="mute">(tu)</span>' : ''}</h2><div class="mute">${p.title ? '♛ ' + tEsc(p.title) + ' · ' : ''}${tEsc(p.stage_name)} · văzut ${lwAgo(p.seen)}</div></div></div>`
+  return `<section class="lw-sel"><div class="lw-sel-h">${av({ n: p.hero && p.hero.n || p.name, c: (p.hero && p.hero.c) || 'Campion', ic: p.hero && p.hero.ic }, 56)}<div><h2>${tEsc(p.name)}${mine ? ' <span class="mute">(tu)</span>' : ''}</h2><div class="mute">${p.title ? '♛ ' + tEsc(p.title) + ' · ' : ''}${tEsc(p.stage_name)} · văzut ${lwAgo(p.seen)}</div></div></div>`
     + `<div class="lw-stats"><div><b>${p.level}</b><span>Nivel</span></div><div><b>${lwNum(p.power)}</b><span>Putere</span></div><div><b>${p.territories}</b><span>Teritorii</span></div></div>`
     + (mine ? '' : `<div class="mute">Puterea echipei lui: ${cmp} (a ta: ${lwNum(myP)}).</div>`)
     + `<div class="row lw-act"><span class="mute">${mine ? 'Satul tău, așa cum îl văd ceilalți.' : can.ok ? 'Dacă învingi, iei prada și experiența. El nu pierde nimic.' : can.why}</span><span>${mine ? '' : `<button class="p" onclick="lwAttack('${p.id}')"${can.ok && !LUME.busy ? '' : ' disabled'}>Atacă · 1 ⚔</button> `}<button onclick="lwProfile('${p.id}')">Vezi profilul</button></span></div></section>`;
@@ -290,7 +290,7 @@ function vBoard() {
   if (!b) return h + `<p class="mute">${LUME.bErr ? tEsc(LUME.bErr) : 'Se încarcă…'}</p></section>`;
   if (!b.rows.length) return h + `<p class="mute">${k === 'tron' ? 'Nu sunt încă date despre domnii la Tron.' : 'Nimeni în clasament încă.'}</p></section>`;
   const medal = r => (r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : r);
-  h += `<div class="lw-board">${b.rows.map(r => `<button class="lw-br${r.id === me ? ' me' : ''}" onclick="lwProfile('${r.id}')"><span class="lw-rk">${medal(r.rank)}</span>${av({ n: r.name, c: (r.hero && r.hero.c) || 'Campion' }, 36)}<span class="lw-bn"><b>${tEsc(r.name)}${r.id === me ? ' <span class="mute">(tu)</span>' : ''}</b><small>${r.title ? '♛ ' + tEsc(r.title) + ' · ' : ''}${tEsc(r.stage_name)}${k !== 'level' ? ' · nivel ' + r.level : ''}</small></span><span class="lw-bv">${lwVal(k, r)}</span></button>`).join('')}</div>`;
+  h += `<div class="lw-board">${b.rows.map(r => `<button class="lw-br${r.id === me ? ' me' : ''}" onclick="lwProfile('${r.id}')"><span class="lw-rk">${medal(r.rank)}</span>${av({ n: r.name, c: (r.hero && r.hero.c) || 'Campion', ic: r.hero && r.hero.ic }, 36)}<span class="lw-bn"><b>${tEsc(r.name)}${r.id === me ? ' <span class="mute">(tu)</span>' : ''}</b><small>${r.title ? '♛ ' + tEsc(r.title) + ' · ' : ''}${tEsc(r.stage_name)}${k !== 'level' ? ' · nivel ' + r.level : ''}</small></span><span class="lw-bv">${lwVal(k, r)}</span></button>`).join('')}</div>`;
   if (b.me && !b.rows.some(r => r.id === me)) h += `<div class="lw-br me static"><span class="lw-rk">${b.me.rank}</span><span class="lw-bn"><b>Tu</b><small>din ${b.total}</small></span><span class="lw-bv">${lwVal(k, b.me)}</span></div>`;
   return h + `<div class="mute" style="margin-top:8px">${b.total > 50 ? `Primii 50 din ${b.total} de jucători.` : `Toți cei ${b.total} ${b.total === 1 ? 'jucător' : 'jucători'}.`} Puterea e suma echipei active: viață + 6 × atac + 10 × apărare. Datele se actualizează când fiecare jucător intră în joc.</div></section>`;
 }
@@ -305,7 +305,7 @@ async function lwProfile(id) {
   const can = !p.me && wp ? lwCan(Object.assign({}, wp, { cd: p.cd })) : null;
   const units = (p.units || []).map(u => `<div class="lwp-u"><b>${tEsc(u.n)}</b><span class="mute">${tEsc(u.c)}</span><span>${lwNum(u.hp)} viață · ${lwNum(u.atk)} atac · ${lwNum(u.def)} apărare</span></div>`).join('');
   const rec = (p.recent || []).map(x => `<div class="row"><span>${x.att ? (x.win ? '⚔ A învins satul lui ' : '⚔ A pierdut la satul lui ') : (x.win ? '🛡 A fost învins de ' : '🛡 L-a respins pe ')}${tEsc(x.other)}</span><span class="mute">${lwAgo(x.t)}</span></div>`).join('');
-  mdl(`<div class="lwp"><div class="lwp-hd">${av({ n: p.hero.n || p.name, c: p.hero.c || 'Campion' }, 76)}<div><h3>${tEsc(p.name)}${p.me ? ' <span class="mute">(tu)</span>' : ''}</h3><div class="lwp-t">${p.title ? '♛ ' + tEsc(p.title) : '<span class="mute">Fără titlu</span>'}</div><div class="mute">${tEsc(p.stage_name)} · joacă din ${lwDate(p.joined)}</div></div></div>`
+  mdl(`<div class="lwp"><div class="lwp-hd">${av({ n: p.hero.n || p.name, c: p.hero.c || 'Campion', ic: p.hero.ic }, 76)}<div><h3>${tEsc(p.name)}${p.me ? ' <span class="mute">(tu)</span>' : ''}</h3><div class="lwp-t">${p.title ? '♛ ' + tEsc(p.title) : '<span class="mute">Fără titlu</span>'}</div><div class="mute">${tEsc(p.stage_name)} · joacă din ${lwDate(p.joined)}</div></div></div>`
     + `<div class="lw-stats"><div><b>${p.level}</b><span>Nivel</span></div><div><b>${lwNum(p.power)}</b><span>Putere</span></div><div><b>${p.territories}</b><span>Teritorii</span></div></div>`
     + `<div class="lwp-rk mute">Locul <b>${rk.level}</b> la nivel și <b>${rk.power}</b> la putere, din ${rk.total} jucători.</div>`
     + `<h4>Echipa</h4>${units || '<p class="mute">Nepublicată.</p>'}`

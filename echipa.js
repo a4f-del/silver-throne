@@ -33,6 +33,10 @@ function tmPortrait(f) {
 /* butoanele de skin ale eroului (înainte stăteau sub portretul mare) */
 function tmSkin(f) {
   if (!f.h) return '';
+  const look = typeof hcEdit === 'function' ? `<button class="${f.ic ? '' : 'p'}" onclick="hcEdit()">${f.ic ? 'Schimbă aspectul' : 'Alege-ți portretul'}</button>` : '';
+  return look + tmSkin0(f);
+}
+function tmSkin0(f) {
   if (skinOn(f)) return `<button onclick="skinView()">Portret mare</button><button onclick="skinSet('clasic')">Skin clasic</button>`;
   return S.prem ? `<button onclick="skinView()">Portret mare</button><button class="p" onclick="skinSet('umbra')">Skin Umbra Runelor</button>` : `<button onclick="skinView()">Skin premium</button>`;
 }

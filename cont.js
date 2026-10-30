@@ -17,6 +17,7 @@
 const CONT = { user: null, booted: false, mode: 'in', email: '', busy: false, timer: null, pushing: false, again: false, lastOk: 0, err: '', overGame: false };
 /* linkul din emailul de resetare aduce „type=recovery” în adresă; îl citim înainte ca Supabase să curețe adresa */
 const CONT_RECOV = typeof location !== 'undefined' && /type=recovery/.test(location.hash);
+const CONT_GONE = typeof location !== 'undefined' && /cont-sters/.test(location.hash);
 const contHere = () => location.origin + location.pathname;
 const cEsc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const cRead = k => { try { const o = JSON.parse(localStorage.getItem(k)); return o && o.fs ? o : null; } catch (e) { return null; } };
@@ -72,7 +73,8 @@ async function contStart() {
   catch (e) { CONT.msg = { t: 'err', m: contErr(e) }; }
   if (session && (CONT_RECOV || CONT.recov)) { CONT.recov = true; CONT.user = session.user; return contShow('new'); }
   if (session) return contEnter(session.user);
-  contShow('in');
+  if (CONT_GONE) { CONT.msg = { t: 'ok', m: 'Contul tău și toate datele lui au fost șterse.' }; try { history.replaceState(null, '', contHere()); } catch (e) { /* rămâne în adresă; nu contează */ } }
+  contShow('in', true);
 }
 
 /* contul e conectat: alege salvarea și pornește jocul */
@@ -99,7 +101,8 @@ function contBoot(key, src) {
   SKEY = key;
   try { boot(src); }
   catch (e) { console.error(e); CONT.msg = { t: 'err', m: 'Jocul nu a pornit: ' + ((e && e.message) || e) }; return contShow('retry'); }
-  CONT.booted = true; contHide(); contChip();
+  CONT.booted = true; contChip();
+  if (typeof hcNeed === 'function' && hcNeed()) { hcStart('new'); contShow('hero'); } else contHide();     /* cont nou: întâi eroul (erou.js) */
   contPush(); try { tronInit(); tronSync(); } catch (e) { /* Tronul se reîncearcă singur */ }
   try { lwSync(); } catch (e) { /* Lumea se reîncearcă singură */ }
 }
@@ -152,9 +155,15 @@ function contShow(mode, keepMsg) {
     h = `<h2 class="g-h">Contul tău e nou</h2><p class="g-p">Pe acest dispozitiv a rămas un progres mai vechi, de dinainte de conturi: <b>${cEsc(hero.n || 'Eroul')}</b>, nivel ${+g.lvl || 1}, ${+g.gold || 0} aur.</p><p class="g-p">Îl poți muta în contul ${cEsc(CONT.user.email)} sau poți începe de la zero. Se poate muta într-un singur cont.</p>`
       + `<div class="g-two"><button class="g-go" type="button" onclick="contPick(1)">Mută progresul în cont</button><button type="button" onclick="contPick(0)">Începe de la zero</button></div>`;
     f = `<button type="button" class="g-link" onclick="contOut()">Folosește alt cont</button>`;
+  } else if (mode === 'hero') {
+    h = hcCard();
+  } else if (mode === 'del') {
+    h = `<h2 class="g-h">Ștergi contul?</h2><p class="g-p">Se șterg definitiv contul <b>${cEsc(CONT.user && CONT.user.email)}</b>, tot progresul din joc, satul din Lume, atacurile și istoricul de la Tron. Nu se mai poate recupera.</p>`
+      + `<form onsubmit="contDel(event)" novalidate>${cField('g-pass', 'Parola, ca să confirmi că ești tu', 'password', 'current-password')}${cField('g-conf', 'Scrie ȘTERGE', 'text', 'off', '', 'autocapitalize="characters" spellcheck="false"')}${cMsg()}<button class="g-go g-danger" type="submit">Șterge definitiv contul</button></form><button type="button" class="g-link" onclick="contHide()">Renunță</button>`;
   } else if (mode === 'retry') {
     h = `${cMsg()}<div class="g-two"><button class="g-go" type="button" onclick="${CONT.user ? 'contEnter(CONT.user)' : 'location.reload()'}">Încearcă din nou</button>${CONT.user ? '<button type="button" onclick="contOut()">Deconectează-te</button>' : ''}</div>`;
   }
+  if (mode === 'in' || mode === 'up' || mode === 'reset') f += '<div class="g-legal"><a href="confidentialitate.html">Confidențialitate</a> · <a href="sterge-cont.html">Ștergerea contului</a></div>';
   card.innerHTML = h; foot.innerHTML = f;
   const first = card.querySelector('input:not([value]), input[value=""]') || card.querySelector('input');
   if (first && window.innerWidth > 700) setTimeout(() => first.focus(), 30);
@@ -230,6 +239,26 @@ function contPick(move) {
   if (move && CONT.booted) { try { localStorage.removeItem(KEY); } catch (e) { /* rămâne și local; nu e grav */ } S.msg = 'Progresul de pe acest dispozitiv a fost mutat în contul tău.'; render(); }
 }
 
+/* ștergerea contului: reconfirmă parola, apoi delete_my_account() șterge totul pe server (03-cont.sql) */
+async function contDel(ev) {
+  ev.preventDefault(); if (CONT.busy || !CONT.user) return;
+  const pw = cVal('g-pass'), cf = cVal('g-conf').trim().toUpperCase();
+  if (!pw) return cSay('err', 'Scrie parola.');
+  if (cf !== 'ȘTERGE' && cf !== 'STERGE') return cSay('err', 'Scrie ȘTERGE în al doilea câmp ca să confirmi.');
+  cBusy(true, 'Se verifică…');
+  const a = await supabaseClient.auth.signInWithPassword({ email: CONT.user.email, password: pw }).catch(e => ({ error: e }));
+  if (a.error) { cBusy(false); return cSay('err', /greșită/.test(contErr(a.error)) ? 'Parola nu e corectă.' : contErr(a.error)); }
+  cBusy(true, 'Se șterge…');
+  clearTimeout(CONT.timer); CONT.timer = null;
+  const uid = CONT.user.id, r = await supabaseClient.rpc('delete_my_account').catch(e => ({ error: e }));
+  if (r.error) { cBusy(false); return cSay('err', /Could not find the function|schema cache/i.test(String(r.error.message)) ? 'Ștergerea nu e încă pornită pe server (rulează supabase/03-cont.sql).' : 'Contul nu a putut fi șters: ' + contErr(r.error)); }
+  CONT.booted = false; CONT.user = null;
+  try { localStorage.removeItem(KEY + ':' + uid); } catch (e) { /* ignorat */ }
+  await supabaseClient.auth.signOut().catch(() => {});
+  try { history.replaceState(null, '', contHere() + '#cont-sters'); } catch (e) { /* mesajul de confirmare nu mai apare; contul e șters oricum */ }
+  location.reload();
+}
+
 /* deconectare: întâi trimitem ultima salvare, apoi ieșim și repornim pagina */
 async function contOut() {
   const b = document.getElementById('acc-out'); if (b) { b.disabled = true; b.textContent = 'Se salvează…'; }
@@ -257,7 +286,7 @@ function contChip() {
   t.innerHTML = '👑 Cont' + (CONT.user && CONT.err ? ' <b class="acc-dot" title="Salvarea online a eșuat">!</b>' : '');
   const st = CONT.err ? `<span class="acc-bad">Salvarea online a eșuat: ${cEsc(CONT.err)} Progresul e păstrat pe acest dispozitiv.</span> <button type="button" onclick="contPush()">Reîncearcă</button>`
     : CONT.pushing || CONT.timer ? 'Se salvează online…' : CONT.lastOk ? 'Progresul e salvat online.' : 'Se pregătește salvarea online…';
-  p.innerHTML = `<div class="acc-who">Conectat ca<b>${cEsc(CONT.user.email)}</b></div><p class="acc-st">${st}</p><button type="button" id="acc-out" onclick="contOut()">Deconectează-te</button>`;
+  p.innerHTML = `<div class="acc-who">Conectat ca<b>${cEsc(CONT.user.email)}</b></div><p class="acc-st">${st}</p><button type="button" id="acc-out" onclick="contOut()">Deconectează-te</button><div class="acc-legal"><a href="confidentialitate.html" target="_blank" rel="noopener">Confidențialitate</a> · <button type="button" class="acc-del" onclick="contShow('del')">Șterge contul</button></div>`;
 }
 /* tab ascuns (telefon blocat, altă aplicație): trimitem imediat ce aștepta */
 if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && CONT.timer) contPush(); });
@@ -299,6 +328,10 @@ html.gate-on,html.gate-on body{overflow:hidden}
 .g-load{display:flex;align-items:center;justify-content:center;gap:12px;padding:18px 0;color:var(--mute)}
 .g-spin{width:22px;height:22px;border:3px solid #ffffff22;border-top-color:var(--gold2);border-radius:50%;animation:gSpin .8s linear infinite}
 @keyframes gSpin{to{transform:rotate(360deg)}}
+.g-danger{background:linear-gradient(180deg,#e0766e,#9c2f29 60%,#6e1f1b)!important;border-color:#f0a49e!important;color:#fff!important;text-shadow:0 1px 1px #000a}
+.g-legal{margin-top:14px;font-size:14px;color:var(--mute)}.g-legal a{color:var(--mute);text-underline-offset:3px}
+.acc-legal{margin-top:10px;font-size:13px;color:var(--mute);text-align:center}.acc-legal a{color:var(--mute)}
+#auth-panel .acc-del{display:inline;width:auto;margin:0;padding:0;background:none;border:0;box-shadow:none;color:#f0a49e;font-size:13px;text-decoration:underline;text-underline-offset:3px}
 .g-foot{margin-top:6px}.g-foot small{display:block;color:var(--mute);font-size:14px;max-width:320px;margin:2px auto 0}
 #gate button:focus-visible,#gate input:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.g-crest svg,.g-spin{animation:none}#gate{transition:none}}
