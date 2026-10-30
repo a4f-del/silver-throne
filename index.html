@@ -69,10 +69,6 @@ nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:linear-gradie
 nav button{flex:1;border:0;border-radius:0;background:none;box-shadow:none;padding:8px 4px;font-family:Cinzel,serif;font-weight:700;font-size:12px;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:2px}
 nav .ni{font-size:22px;line-height:1}
 nav button.on{color:var(--gold2);background:linear-gradient(180deg,#3a2f15,#1a1608);box-shadow:inset 0 3px var(--gold)}
-#auth-toggle{position:fixed;top:10px;right:10px;z-index:10000;padding:6px 12px;font-family:Cinzel,serif;font-weight:700;font-size:13px;color:var(--gold2);background:linear-gradient(180deg,#2a2412,#15110a);border:1px solid var(--gold);border-radius:6px}
-#auth-panel{top:52px!important;right:10px!important;background:linear-gradient(180deg,#1c2225,#12171a)!important;border:1px solid var(--gold);border-radius:8px!important;max-width:calc(100vw - 20px);font:15px Alegreya,Georgia,serif!important;color:var(--ink)!important}
-#auth-panel input{width:100%;background:#0b0e10;color:var(--ink);border:1px solid var(--line);border-radius:4px}
-.auth-hidden{display:none!important}
 @media (max-width:959px){
 header{flex-wrap:wrap;padding:6px 10px;padding-right:84px;gap:4px}
 header h1{font-size:17px}
@@ -190,6 +186,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="tron.js?v=2026.10.30-3"></script>
 <script src="tema.js?v=2026.10.30-3"></script>
 <script src="echipa.js?v=2026.10.30-3"></script>
+<script src="cont.js?v=2026.10.30-3"></script>
 </head>
 <body>
 <header><h1><span class="cr">♛</span> Silver Throne</h1><div class="hs" id="hs"></div></header>
@@ -203,6 +200,7 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_KEY
 );
 const KEY='mina-cenusie-v1',PT=360000,MAXP0=30;
+let SKEY=KEY;   /* cheia salvării locale a contului: KEY + ':' + id (vezi cont.js); KEY singur = progresul vechi, de dinainte de conturi */
 const q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
 const R=(a,b)=>a+Math.random()*(b-a),RI=(a,b)=>Math.floor(R(a,b+1)),P=a=>a[RI(0,a.length-1)];
 const RAR=[{n:'Comun',pen:0,aff:0,cost:3,t:20,m:1},{n:'Magic',pen:5,aff:1,cost:6,t:45,m:1.1},{n:'Rar',pen:10,aff:2,cost:10,t:90,m:1.2},{n:'Epic',pen:20,aff:2,cost:16,t:180,m:1.4}];
@@ -214,37 +212,9 @@ const DR={l:'Se aud arme în sală',c:'O lumină aurie în depărtare',x:'Podea 
 let S;
 const mk=(n,c)=>({n,c,hp:CL[c].hp,sc:0});
 function fresh(){return{lvl:1,xp:0,gold:40,ore:24,pts:MXP(),ptsT:Date.now(),slots:4,forge:[null,null,null,null],inv:[],pity:0,tab:'a',ui:{t:'w',l:1,r:0,p:0,s:0,q:0},fs:[{...mk('Eroul','Campion'),h:1},mk('Elena','Arcaș'),mk('Toma','Paznic')],d:null,msg:'',rs:[],tu:0,pool:{t:0,c:[]},mat:{zim:6,sng:6,bli:6,cal:6,vul:6,pra:6,rab:6,izv:6,jwf0:4,jwb0:2,esf0:1}}}
-function load(){try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}if(!S||!S.fs)S=fresh();S.rs=S.rs||[];S.pool=S.pool||{t:0,c:[]};{const m=S.mat||(S.mat={});['jwf','jwb','esf'].forEach(k=>{if(m[k]){m[k+'0']=(m[k+'0']||0)+m[k];delete m[k]}})}S.ui.q=S.ui.q||0;if(S.tu===undefined)S.tu=-1;if(S.tab=='t')S.tab='a';S.ui.p=S.ui.p||0;S.ui.s=S.ui.s||0;if(S.eq){if(S.fs[0])S.fs[0].eq=S.eq;delete S.eq}{const a=[...S.fs,...S.rs];if(!a.some(f=>f.h)){a[0].h=1;a[0].c='Campion'}if(!S.fs.some(f=>f.h)){const i=S.rs.findIndex(f=>f.h),h=S.rs.splice(i,1)[0];S.fs.unshift(h);if(S.fs.length>3)S.rs.push(S.fs.pop())}}}
-let cloudSaveTimer = null;
-let cloudUserId = null;
-let cloudLoading = false;
-
-function save(){
-  try {
-    localStorage.setItem(KEY, JSON.stringify(S));
-  } catch(e) {}
-
-  if (!cloudUserId || cloudLoading) return;
-
-  clearTimeout(cloudSaveTimer);
-  cloudSaveTimer = setTimeout(async function(){
-    try {
-      const { error } = await supabaseClient
-        .from('game_saves')
-        .upsert({
-          user_id: cloudUserId,
-          game_data: S,
-          updated_at: new Date().toISOString()
-        });
-
-      if (error) {
-        console.error('Eroare la salvarea online:', error.message);
-      }
-    } catch(e) {
-      console.error('Eroare la salvarea online:', e);
-    }
-  }, 1200);
-}
+function load(src){try{S=src!==undefined?src:JSON.parse(localStorage.getItem(SKEY))}catch(e){S=null}if(!S||!S.fs)S=fresh();S.rs=S.rs||[];S.pool=S.pool||{t:0,c:[]};{const m=S.mat||(S.mat={});['jwf','jwb','esf'].forEach(k=>{if(m[k]){m[k+'0']=(m[k+'0']||0)+m[k];delete m[k]}})}S.ui.q=S.ui.q||0;if(S.tu===undefined)S.tu=-1;if(S.tab=='t')S.tab='a';S.ui.p=S.ui.p||0;S.ui.s=S.ui.s||0;if(S.eq){if(S.fs[0])S.fs[0].eq=S.eq;delete S.eq}{const a=[...S.fs,...S.rs];if(!a.some(f=>f.h)){a[0].h=1;a[0].c='Campion'}if(!S.fs.some(f=>f.h)){const i=S.rs.findIndex(f=>f.h),h=S.rs.splice(i,1)[0];S.fs.unshift(h);if(S.fs.length>3)S.rs.push(S.fs.pop())}}}
+/* salvare: local imediat, online prin cont.js (amânat 1,2 s); S.sv = momentul salvării, ca să știm care copie e mai nouă */
+function save(){S.sv=Date.now();try{localStorage.setItem(SKEY,JSON.stringify(S))}catch(e){}if(typeof contQueue==='function')contQueue()}
 function sync(){const n=Date.now();if(S.pts>=MXP()){S.pts=Math.max(S.pts,MXP());S.ptsT=n;return}const k=Math.floor((n-S.ptsT)/PT);if(k>0){S.pts=Math.min(MXP(),S.pts+k);S.ptsT+=k*PT;if(S.pts>=MXP())S.ptsT=n}}
 function spend(k){if(S.pts>=MXP())S.ptsT=Date.now();S.pts-=k}
 const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
@@ -668,125 +638,11 @@ function hdr(){const h=S.fs.find(f=>f.h)||S.fs[0];
  q('#nv').innerHTML=temaNav()+sideHtml()}
 function render(){sync();q('#v').innerHTML=(S.tab=='a'?hero()+tronBanner():'')+(S.msg?`<p class="msg">${S.msg}</p>`:'')+tuH()+(S.tab=='a'?vV():S.tab=='c'?vC():S.tab=='m'?vM():S.tab=='r'?vTron():vE());hdr();fxScan();temaPost()}
 function go(){pool();shop();MPV();terTick();atkCheck();tuChk();botLife();loginChk();tronCheck();terBack();save();render()}
-load();terNorm();if(S.d&&S.d.f&&!S.d.f.es.some(e=>e.hp>0))win();pool();shop();MPV();terTick();atkCheck();botLife();loginChk();save();render();
-setInterval(()=>{const n=Date.now();sync();botTick();{const b=S.al&&S.al[0];atkCheck();if((S.al&&S.al[0])!==b){save();render()}}const a=q('#pp');if(a)a.textContent=S.pts+'/'+MXP();const t=q('#pt');if(t)t.textContent=S.pts<MXP()?'(+1 în '+fmt(PT-(n-S.ptsT))+')':'';
+/* pornirea jocului o face cont.js, după conectare: boot(salvare) */
+function boot(src){load(src);terNorm();if(S.d&&S.d.f&&!S.d.f.es.some(e=>e.hp>0))win();pool();shop();MPV();terTick();atkCheck();botLife();loginChk();save();render()}
+contStart();
+setInterval(()=>{if(!S)return;const n=Date.now();sync();botTick();{const b=S.al&&S.al[0];atkCheck();if((S.al&&S.al[0])!==b){save();render()}}const a=q('#pp');if(a)a.textContent=S.pts+'/'+MXP();const t=q('#pt');if(t)t.textContent=S.pts<MXP()?'(+1 în '+fmt(PT-(n-S.ptsT))+')':'';
  let done=false;qa('[data-end]').forEach(e=>{const r=+e.dataset.end-n;if(r<=0)done=true;else e.textContent=fmt(r)});if(done)render()},1000);
-</script>
-<button id="auth-toggle" type="button" aria-expanded="false" aria-controls="auth-panel">👑 Cont</button>
-<div id="auth-panel" class="auth-hidden" style="position:fixed;right:12px;top:12px;z-index:9999;background:#20252d;color:white;padding:14px;border-radius:12px;width:260px;font:14px Arial;box-shadow:0 4px 20px #0008">
-  <b>👑 Silver Throne — Cont</b>
-  <div id="auth-status" style="margin:8px 0">Neconectat</div>
-  <input id="auth-email" type="email" placeholder="Adresa de email" style="box-sizing:border-box;width:100%;padding:9px;margin:4px 0">
-  <input id="auth-password" type="password" placeholder="Parola (minim 6 caractere)" style="box-sizing:border-box;width:100%;padding:9px;margin:4px 0">
-  <button id="auth-register" style="width:100%;padding:9px;margin-top:5px">Creează cont</button>
-  <button id="auth-login" style="width:100%;padding:9px;margin-top:5px">Conectare</button>
-  <button id="auth-logout" style="width:100%;padding:9px;margin-top:5px;display:none">Deconectare</button>
-  <div id="auth-message" style="margin-top:8px;overflow-wrap:anywhere"></div>
-</div>
-<script>
-(function(){
-  const tgl = document.getElementById('auth-toggle'), pnl = document.getElementById('auth-panel');
-  tgl.addEventListener('click', function(){ const h = pnl.classList.toggle('auth-hidden'); tgl.setAttribute('aria-expanded', h ? 'false' : 'true'); });
-  const email = document.getElementById('auth-email');
-  const password = document.getElementById('auth-password');
-  const status = document.getElementById('auth-status');
-  const message = document.getElementById('auth-message');
-  const register = document.getElementById('auth-register');
-  const login = document.getElementById('auth-login');
-  const logout = document.getElementById('auth-logout');
-
-  function showMessage(text){ message.textContent = text; }
-let handledUserId = null;
-
-async function syncCloud(user){
-  if (!user) {
-    handledUserId = null;
-    cloudUserId = null;
-    return;
-  }
-
-  if (handledUserId === user.id) return;
-  handledUserId = user.id;
-
-  const { data, error } = await supabaseClient
-    .from('game_saves')
-    .select('game_data')
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  if (error) {
-    showMessage('Eroare la citirea salvării: ' + error.message);
-    handledUserId = null;
-    return;
-  }
-
-  if (data) {
-    const useCloud = confirm(
-      'Există o salvare online. Vrei să încarci progresul din cont? ' +
-      'Apasă Anulează pentru a păstra progresul local fără sincronizare.'
-    );
-
-    if (!useCloud) {
-      cloudUserId = null;
-      showMessage('Salvarea online a fost păstrată. Sincronizarea este oprită.');
-      return;
-    }
-
-    cloudLoading = true;
-    S = data.game_data; terNorm();
-    localStorage.setItem(KEY, JSON.stringify(S));
-    cloudLoading = false;
-    cloudUserId = user.id;
-    render();
-    showMessage('Progresul din cloud a fost încărcat.');
-  } else {
-    cloudUserId = user.id;
-    save();
-    showMessage('Cont conectat. Progresul local va fi salvat online.');
-  }
-}
-  async function updateAuth(){
-    const {data, error} = await supabaseClient.auth.getSession();
-    if(error){ showMessage(error.message); return; }
-    const user = data.session && data.session.user;
-    status.textContent = user ? 'Conectat: ' + user.email : 'Neconectat'; await syncCloud(user);
-    email.style.display = user ? 'none' : 'block';
-    password.style.display = user ? 'none' : 'block';
-    register.style.display = user ? 'none' : 'block';
-    login.style.display = user ? 'none' : 'block';
-    logout.style.display = user ? 'block' : 'none';
-  }
-
-  register.addEventListener('click', async function(){
-    const {error} = await supabaseClient.auth.signUp({
-      email: email.value.trim(),
-      password: password.value
-    });
-    showMessage('TEST: butonul Creează cont a fost apăsat.');
-    await updateAuth();
-  });
-
-  login.addEventListener('click', async function(){
-    const {error} = await supabaseClient.auth.signInWithPassword({
-      email: email.value.trim(),
-      password: password.value
-    });
-    showMessage(error ? error.message : 'Conectare reușită!');
-    await updateAuth();
-  });
-
-  logout.addEventListener('click', async function(){
-    const {error} = await supabaseClient.auth.signOut();
-    showMessage(error ? error.message : 'Te-ai deconectat.');
-    await updateAuth();
-  });
-
-  supabaseClient.auth.onAuthStateChange(function(){
-    updateAuth();
-  });
-
-  updateAuth();
-})();
 </script>
 <style>
 /* Ghid: săgeți aurii și contur strălucitor (doar vizual) */
