@@ -57,7 +57,7 @@ async function lwSync0(force) {
 }
 let _lwSync = null;
 function lwSync(force) { if (_lwSync) return _lwSync; _lwSync = lwSync0(force).finally(() => { _lwSync = null; }); return _lwSync; }
-function lwOnWorld() { return S && S.tab === 'm' && (S.mt === 'l' || S.mt === 'b'); }
+function lwOnWorld() { return S && (S.tab === 'k' || (S.tab === 'm' && S.mt === 'l')); }
 function lwUi() { try { if (lwOnWorld()) render(); else if (typeof hdr === 'function') hdr(); } catch (e) { /* se reface la următoarea acțiune */ } }
 
 /* bara de atacuri: se reface câte unul la en_regen_min minute, până la en_max */
@@ -385,6 +385,7 @@ if (typeof setInterval === 'function') setInterval(() => {
 .lw-ok{color:#7fd88c}
 .lw-lnk{background:none!important;border:0!important;box-shadow:none!important;padding:0;color:var(--gold2);text-decoration:underline;text-underline-offset:3px;font:inherit}
 .lw-bt{flex-wrap:wrap}
+@media (max-width:600px){.lw-bt{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}.lw-bt button{flex:none}}
 .lw-board{display:flex;flex-direction:column;gap:4px;margin-top:8px}
 .lw-br{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:6px 10px;background:linear-gradient(180deg,#181e21,#0e1214);border:1px solid var(--line);border-radius:4px;color:var(--ink)}
 .lw-br.me{border-color:var(--gold);box-shadow:inset 3px 0 var(--gold)}.lw-br.static{margin-top:8px}

@@ -681,7 +681,7 @@ function terLegend() {
 }
 function terTabs() {
   const k = S.mt || 'h', r = cmpReady();
-  return `<div class="tabs">${[['h', 'Regiunea'], ['l', 'Lumea'], ['b', 'Clasament'], ['k', 'Campanie' + (r ? ' ●' : '')], ['t', 'Teritorii']].map(([x, n]) => `<button${x == k ? ' class="p"' : ''} onclick="mtab('${x}')">${n}</button>`).join('')}</div>`;
+  return `<div class="tabs">${[['h', 'Regiunea'], ['l', 'Lumea'], ['k', 'Campanie' + (r ? ' ●' : '')], ['t', 'Teritorii']].map(([x, n]) => `<button${x == k ? ' class="p"' : ''} onclick="mtab('${x}')">${n}</button>`).join('')}</div>`;
 }
 function mtab(k) { S.mt = k; S.msg = ''; go(); }
 function vTer() {
@@ -696,10 +696,10 @@ function vTer() {
   return h;
 }
 function vM() {
+  if (S.mt === 'b') S.mt = 'h';   /* clasamentul s-a mutat în bara de sus */
   terTick(); const k = S.mt || 'h', tabs = terTabs();
   if (k === 'k') return tabs + vCamp();
   if (k === 'l') return tabs + vLume();
-  if (k === 'b') return tabs + vBoard();
   if (k === 't') return tabs + vTer();
   let h = vMmap();
   h = h.replace('<p class="mute">Atinge un sat ca să-l vezi.</p>', terPanel());

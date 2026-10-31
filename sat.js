@@ -171,7 +171,7 @@ function satFold() {
     m.replaceWith(d);
   });
 }
-function satPost() { try { if (typeof tipHide === 'function') tipHide(); satFold(); } catch (e) { /* aspectul nu blochează jocul */ } }
+function satPost() { try { if (typeof tipHide === 'function') tipHide(); satFold(); const c = document.getElementById('hdr-cl'); if (c) c.classList.toggle('on', S.tab === 'k'); } catch (e) { /* aspectul nu blochează jocul */ } }
 
 /* ------------------------------------------------------------------ STILURI */
 (function () {
