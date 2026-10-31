@@ -2,11 +2,11 @@
    Silver Throne — lupta-vs.js
    Cardul „VS” de la începutul fiecărei lupte: echipa ta (stânga) față în față cu adversarul (dreapta),
    cu Viață, Atac, Apărare și Critic pentru fiecare parte și o estimare a șanselor.
-   Apare peste joc fără să blocheze nimic și dispare singur: mare la căpitani, raiduri, Lume și Tron,
-   mic la luptele obișnuite din camere. Un clic îl închide; S.vsOff îl oprește (comutatorul e în Coborâre).
+   Stă în pagina temniței, deasupra luptei, până apeși „Mai departe” sau „Ieși cu prada”: mare la căpitani,
+   raiduri, Lume și Tron, mai mic la camerele obișnuite. „×” îl ascunde; S.vsOff îl oprește (comutatorul e în Coborâre).
    Apelat din startF (index.html), după ce inamicii sunt pregătiți. Se încarcă înaintea scriptului din pagină.
    ========================================================================== */
-const VS = { el: null, timer: null };
+const VS = { last: null };
 
 function vsSide(list, isTeam, enemyDefAvg) {
   const al = list.filter(x => x.hp > 0);
@@ -39,34 +39,36 @@ function vsFlash() {
     if (b) { por = `<span class="vs-por boss" style="--aura:${b[1]}"><img src="imagini/monstri/${b[0]}.jpg" alt=""></span>`; name = es[0].n; }
     else if (d.lume || d.tron) { por = `<span class="vs-por pvp">${d.vsh && typeof av === 'function' ? av({ n: d.bn, c: d.vsh.c || 'Campion', ic: d.vsh.ic }, 84) : vsMonster}</span>`; name = d.bn; }
     else { por = `<span class="vs-por mob">${vsMonster}</span>`; name = es.length > 1 ? es[0].n + ` <small>+${es.length - 1}</small>` : es[0].n; }
-    const el = VS.el || (VS.el = Object.assign(document.createElement('div'), { id: 'vs-fl' }));
-    if (!el.isConnected) document.body.appendChild(el);
-    el.className = big ? 'full' : 'mini'; el.setAttribute('role', 'status');
-    el.innerHTML = `<div class="vs-card" onclick="vsHide()" title="Închide"><div class="vs-ctx">${ctx}</div><div class="vs-row">`
-      + `<div class="vs-side l"><div class="vs-ph">${av(hero, big ? 84 : 56)}${mates.length ? `<span class="vs-mates">${mates.map(x => av(x, big ? 30 : 22)).join('')}</span>` : ''}</div><div class="vs-nm">${tEsc(hero.n)}${mates.length ? ` <small>+${mates.length}</small>` : ''}</div>${vsStats(me)}</div>`
+    VS.last = { big, fresh: true, html: `<div class="vs-card"><button class="vs-x" onclick="vsClose()" aria-label="Ascunde cardul">×</button><div class="vs-ctx">${ctx}</div><div class="vs-row">`
+      + `<div class="vs-side l"><div class="vs-ph">${av(hero, big ? 84 : 60)}${mates.length ? `<span class="vs-mates">${mates.map(x => av(x, big ? 30 : 24)).join('')}</span>` : ''}</div><div class="vs-nm">${tEsc(hero.n)}${mates.length ? ` <small>+${mates.length}</small>` : ''}</div>${vsStats(me)}</div>`
       + `<div class="vs-mid"><b>VS</b><small class="vs-odds ${oc}">${odds}</small></div>`
-      + `<div class="vs-side r"><div class="vs-ph">${por}</div><div class="vs-nm">${name}</div>${vsStats(en)}</div></div></div>`;
-    el.classList.remove('out'); void el.offsetWidth; el.classList.add('in');
-    clearTimeout(VS.timer); VS.timer = setTimeout(vsHide, big ? 2600 : 1400);
+      + `<div class="vs-side r"><div class="vs-ph">${por}</div><div class="vs-nm">${name}</div>${vsStats(en)}</div></div></div>` };
   } catch (e) { /* cardul nu trebuie să oprească lupta */ }
 }
-function vsHide() { const el = VS.el; if (!el) return; clearTimeout(VS.timer); el.classList.remove('in'); el.classList.add('out'); }
+/* cardul stă în pagina temniței, deasupra luptei, până treci în camera următoare sau ieși */
+function vsPost() {
+  try {
+    const v = document.getElementById('v'), L = VS.last;
+    if (!v || !L || S.vsOff || S.tab !== 'c' || !S.d) return;
+    const el = document.createElement('div'); el.className = 'vs-in ' + (L.big ? 'full' : 'mini') + (L.fresh ? ' anim' : ''); el.setAttribute('role', 'status');
+    el.innerHTML = L.html; v.insertBefore(el, v.firstChild); L.fresh = false;
+  } catch (e) { /* aspectul nu blochează jocul */ }
+}
+function vsClear() { VS.last = null; }
+function vsClose() { VS.last = null; go(); }
 function vsToggle() { S.vsOff = !S.vsOff; S.msg = S.vsOff ? 'Cardurile de luptă sunt oprite.' : 'Cardurile de luptă sunt pornite.'; go(); }
 
 (function () {
   if (typeof document === 'undefined' || !document.head) return;
   const st = document.createElement('style');
   st.textContent = `
-#vs-fl{position:fixed;left:50%;top:max(150px,20%);z-index:20000;transform:translateX(-50%);pointer-events:none;width:min(640px,94vw);opacity:0}
-#vs-fl.in{animation:vsIn .35s ease-out forwards}#vs-fl.out{animation:vsOut .4s ease-in forwards}
-#vs-fl.mini{top:calc(108px + env(safe-area-inset-top,0px));width:min(480px,92vw)}
-#vs-fl.mini .vs-card{pointer-events:none}   /* cel mic nu prinde atingeri: butoanele de dedesubt rămân apăsabile */
-@media (min-width:960px){#vs-fl.mini{top:auto;bottom:28px}}
-.vs-card{pointer-events:auto;cursor:pointer;padding:10px 14px 14px;border-radius:14px;background:radial-gradient(ellipse at 50% 0,#2a3236f2,#101416f5 70%);border:1px solid var(--gold);box-shadow:0 18px 50px #000d,inset 0 1px 0 #ffffff14}
+.vs-in{margin:0 0 12px}
+.vs-card{position:relative;padding:10px 14px 14px;border-radius:14px;background:radial-gradient(ellipse at 50% 0,#2a3236f2,#101416f5 70%);border:1px solid var(--gold);box-shadow:0 18px 50px #000d,inset 0 1px 0 #ffffff14}
 .vs-ctx{text-align:center;font:700 12px Cinzel,serif;letter-spacing:.08em;color:var(--gold2);text-transform:uppercase;margin-bottom:8px}
 .vs-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
 .vs-side{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0}
-.vs-side.l{animation:vsL .45s ease-out both}.vs-side.r{animation:vsR .45s ease-out both}
+.vs-in.anim .vs-card{animation:vsIn .3s ease-out both}.vs-in.anim .vs-side.l{animation:vsL .45s ease-out both}.vs-in.anim .vs-side.r{animation:vsR .45s ease-out both}
+.vs-x{position:absolute;top:4px;right:6px;padding:0 8px!important;min-height:0!important;font-size:18px;line-height:24px;background:none!important;border:0!important;color:var(--mute)!important;box-shadow:none!important}.vs-x:hover{color:var(--ink)!important}
 .vs-ph{position:relative;display:flex;align-items:flex-end;justify-content:center}
 .vs-mates{display:flex;margin-left:-8px}.vs-mates>*{margin-left:-6px;border-radius:50%;box-shadow:0 0 0 2px #101416}
 .vs-por{display:block;width:84px;height:84px;border-radius:50%;overflow:hidden;border:2px solid var(--gold)}
@@ -77,19 +79,19 @@ function vsToggle() { S.vsOff = !S.vsOff; S.msg = S.vsOff ? 'Cardurile de luptă
 .vs-st{display:grid;grid-template-columns:1fr 1fr;gap:3px 10px;font-size:13px;width:100%}
 .vs-st span{display:flex;align-items:baseline;gap:4px;justify-content:center;white-space:nowrap}.vs-st i{font-style:normal;font-size:12px}.vs-st b{color:#fff}.vs-st small{color:var(--mute);font-size:11px}
 .vs-mid{display:flex;flex-direction:column;align-items:center;gap:6px}
-.vs-mid b{font:900 40px/1 Cinzel,Georgia,serif;background:linear-gradient(180deg,#fff4c2,#f0d27a 45%,#9b7424);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 0 #000) drop-shadow(0 0 12px #f0d27a77);animation:vsSlam .5s cubic-bezier(.2,1.6,.4,1) .15s both}
+.vs-mid b{font:900 40px/1 Cinzel,Georgia,serif;background:linear-gradient(180deg,#fff4c2,#f0d27a 45%,#9b7424);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 0 #000) drop-shadow(0 0 12px #f0d27a77);}
+.vs-in.anim .vs-mid b{animation:vsSlam .5s cubic-bezier(.2,1.6,.4,1) .15s both}
 .vs-odds{font:700 11.5px Cinzel,serif;padding:2px 8px;border-radius:9px;white-space:nowrap;border:1px solid}
 .vs-odds.g2{color:#9be0a6;border-color:#4fa35e}.vs-odds.g1{color:#c6e8a0;border-color:#7aa046}.vs-odds.n{color:#f0d27a;border-color:#9b7424}.vs-odds.b1{color:#f0b07b;border-color:#c0703a}.vs-odds.b2{color:#ff8a80;border-color:#d4564f}
-#vs-fl.mini .vs-card{padding:7px 10px 9px}#vs-fl.mini .vs-ctx{font-size:10.5px;margin-bottom:4px}
-#vs-fl.mini .vs-por{width:56px;height:56px}#vs-fl.mini .vs-mid b{font-size:26px}#vs-fl.mini .vs-nm{font-size:13px}
-#vs-fl.mini .vs-st{font-size:11.5px;gap:1px 6px}#vs-fl.mini .vs-st small{display:none}
-@keyframes vsIn{from{opacity:0;transform:translate(-50%,-10px) scale(.97)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
-@keyframes vsOut{from{opacity:1}to{opacity:0;transform:translate(-50%,-6px)}}
+
+.vs-in.mini .vs-card{padding:7px 12px 10px}.vs-in.mini .vs-ctx{font-size:10.5px;margin-bottom:4px}.vs-in.mini .vs-por{width:60px;height:60px}.vs-in.mini .vs-mid b{font-size:28px}.vs-in.mini .vs-nm{font-size:13.5px}
+.vs-in.mini .vs-st{font-size:12px;gap:1px 8px}
+@keyframes vsIn{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes vsL{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:none}}
 @keyframes vsR{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
 @keyframes vsSlam{from{opacity:0;transform:scale(2.2)}to{opacity:1;transform:scale(1)}}
 @media (max-width:520px){.vs-por{width:64px;height:64px}.vs-mid b{font-size:30px}.vs-st{grid-template-columns:1fr;font-size:12px}.vs-st small{display:none}.vs-nm{font-size:13.5px}}
-@media (prefers-reduced-motion:reduce){#vs-fl.in,#vs-fl.out,.vs-side.l,.vs-side.r,.vs-mid b{animation:none!important;opacity:1}#vs-fl.out{display:none}}
+@media (prefers-reduced-motion:reduce){.vs-in .vs-card,.vs-in .vs-side,.vs-in .vs-mid b{animation:none!important}}
 `;
   document.head.appendChild(st);
 })();

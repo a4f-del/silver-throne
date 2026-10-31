@@ -186,26 +186,26 @@ main{padding:8px 24px;max-width:940px}
 </style>
 <link rel="stylesheet" href="tema.css?v=2026.10.30-3">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="world-data.js?v=2026.10.31-8"></script>
-<script src="tron-logic.js?v=2026.10.31-8"></script>
-<script src="cladiri-art.js?v=2026.10.31-8"></script>
-<script src="teritorii.js?v=2026.10.31-8"></script>
-<script src="inventar.js?v=2026.10.31-8"></script>
-<script src="panou.js?v=2026.10.31-8"></script>
-<script src="ghid.js?v=2026.10.31-8"></script>
-<script src="specializari.js?v=2026.10.31-8"></script>
-<script src="tron.js?v=2026.10.31-8"></script>
-<script src="lume-art.js?v=2026.10.31-8"></script>
-<script src="sat.js?v=2026.10.31-8"></script>
-<script src="lupta-vs.js?v=2026.10.31-8"></script>
-<script src="temnite.js?v=2026.10.31-8"></script>
-<script src="harta.js?v=2026.10.31-8"></script>
-<script src="lume.js?v=2026.10.31-8"></script>
-<script src="lume-pictat.js?v=2026.10.31-8"></script>
-<script src="tema.js?v=2026.10.31-8"></script>
-<script src="echipa.js?v=2026.10.31-8"></script>
-<script src="erou.js?v=2026.10.31-8"></script>
-<script src="cont.js?v=2026.10.31-8"></script>
+<script src="world-data.js?v=2026.10.31-9"></script>
+<script src="tron-logic.js?v=2026.10.31-9"></script>
+<script src="cladiri-art.js?v=2026.10.31-9"></script>
+<script src="teritorii.js?v=2026.10.31-9"></script>
+<script src="inventar.js?v=2026.10.31-9"></script>
+<script src="panou.js?v=2026.10.31-9"></script>
+<script src="ghid.js?v=2026.10.31-9"></script>
+<script src="specializari.js?v=2026.10.31-9"></script>
+<script src="tron.js?v=2026.10.31-9"></script>
+<script src="lume-art.js?v=2026.10.31-9"></script>
+<script src="sat.js?v=2026.10.31-9"></script>
+<script src="lupta-vs.js?v=2026.10.31-9"></script>
+<script src="temnite.js?v=2026.10.31-9"></script>
+<script src="harta.js?v=2026.10.31-9"></script>
+<script src="lume.js?v=2026.10.31-9"></script>
+<script src="lume-pictat.js?v=2026.10.31-9"></script>
+<script src="tema.js?v=2026.10.31-9"></script>
+<script src="echipa.js?v=2026.10.31-9"></script>
+<script src="erou.js?v=2026.10.31-9"></script>
+<script src="cont.js?v=2026.10.31-9"></script>
 </head>
 <body>
 <header><h1><img class="hd-tron" src="imagini/logo-tron.webp" alt="" width="34" height="40"><span class="hd-nm">Silver Throne</span></h1><div class="hs" id="hs"></div></header>
@@ -294,7 +294,7 @@ function doors(){const d=S.d;if(d.fx&&d.room!=d.rooms-1)return[{t:'l'}];return d
 /* costul unei camere: 1 punct, căpitanul 2 (la raiduri 1); evenimentul cu chei e gratuit */
 const dCost=(d,t)=>d.ev?0:t=='b'?(d.raid!=null?1:2):1;
 function door(i){const d=S.d,t=d.doors[i].t,c=dCost(d,t);S.msg='';if(c>0&&S.pts<c){S.msg='Îți trebuie '+c+(c>1?' puncte.':' punct.')+' Se regenerează câte unul la 6 minute.';return go()}
- if(c>0)spend(c);d.room++;
+ if(c>0)spend(c);if(typeof vsClear==='function')vsClear();d.room++;
  if(t=='l'||t=='b'){startF(t=='b');if(S.auto!==false){autoRun();return}}
  else{if(t=='c'){const g=Math.round((RI(8,14)+S.lvl*4)*(d.rw||1)),o=RI(3,6)+S.lvl;d.loot.gold+=g;d.loot.ore+=o;lm(pm(),RI(1,2));rdrop(false);S.msg=`Comoară: +${g} aur, +${o} minereu și materiale.`}
   else if(t=='x'){const al=S.fs.filter(f=>f.hp>0),f=P(al),dm=Math.max(3,Math.round(mhp(f)*.15));f.hp=Math.max(1,f.hp-dm);S.msg=`Capcană! ${f.n} pierde ${dm} viață.`}
@@ -329,7 +329,7 @@ function enemy(){const f=S.d.f,L=[];
 function win(q){cn('w');const d=S.d,b=d.f.es[0].b,m=b?3:1,pr=spFame(b||d.raid!=null);d.loot.gold+=Math.round((RI(6,12)+S.lvl*3)*m*(d.rw||1));d.loot.ore+=RI(2,4)+Math.floor(S.lvl/2)+(b?8:0);d.f.es.forEach(e=>{if(e.dm)lm(e.dm,1)});rdrop(b);if(b){lm(pm(),2);if(d.ev){if(Math.random()<.6)relic(1)}else if(Math.random()<.35)relic()};d.loot.xp+=Math.round((8+S.lvl*4)*m*(d.rw||1));d.f=null;
  if(b){d.done=true;d.doors=[];if(d.raid!=null)rl(d);else campBoss(d);S.msg=(d.cm?d.cm+' ':'')+'Căpitanul a căzut! Ieși cu prada.'}else{d.doors=doors();S.msg='Victorie.'}if(pr)S.msg+=' '+pr;if(!q)go()}
 function flee(){const d=S.d,g=Math.floor(d.loot.gold/2),o=Math.floor(d.loot.ore/2);S.gold+=g;S.ore+=o;{const h={ore:0,m:{}};for(const k in(d.loot.m||{}))h.m[k]=Math.floor(d.loot.m[k]/2);stash(h)}S.d=null;S.msg=`Ai fugit din mină cu ${g} aur și ${o} minereu. Experiența din coborâre s-a pierdut.`;go()}
-function leave(){const d=S.d;terLeave(d);const g=Math.round(d.loot.gold*(1+(S.fs.reduce((s,f)=>s+tr(f,'loot')+bon(f).loot,0)+ST().n)/100));S.gold+=g;const lost=stash(d.loot);(d.loot.it||[]).forEach(x=>S.inv.push(x));S.xp+=d.loot.xp;let up=0;while(S.xp>=need(S.lvl)){S.xp-=need(S.lvl);S.lvl++;up++;S.pts=S.lvl<=10?Math.max(0,S.pts)+MXP():Math.max(S.pts,MXP());S.ptsT=Date.now()}   /* până la nivelul 10, un nivel nou ADAUGĂ puncte (și peste maxim); apoi doar umple bara */
+function leave(){const d=S.d;if(typeof vsClear==='function')vsClear();terLeave(d);const g=Math.round(d.loot.gold*(1+(S.fs.reduce((s,f)=>s+tr(f,'loot')+bon(f).loot,0)+ST().n)/100));S.gold+=g;const lost=stash(d.loot);(d.loot.it||[]).forEach(x=>S.inv.push(x));S.xp+=d.loot.xp;let up=0;while(S.xp>=need(S.lvl)){S.xp-=need(S.lvl);S.lvl++;up++;S.pts=S.lvl<=10?Math.max(0,S.pts)+MXP():Math.max(S.pts,MXP());S.ptsT=Date.now()}   /* până la nivelul 10, un nivel nou ADAUGĂ puncte (și peste maxim); apoi doar umple bara */
  S.msg=`Ieși cu ${g} aur, ${d.loot.ore} minereu și ${d.loot.xp} experiență.`+(lost?` Depozitul e plin: ai pierdut ${lost} materiale.`:'')+(up?` Nivel nou: ${S.lvl}! `+(S.lvl<=10?`+${MXP()*up} puncte (ai ${S.pts}).`:`Punctele s-au umplut (${S.pts}/${MXP()}).`):'');cn('l');S.d=null;if(d.xm)S.msg+=' '+d.xm;go()}
 function opt(k,v){if(k=='slots'){S.slots=+v;while(S.forge.length<S.slots)S.forge.push(null);S.forge.length=Math.max(S.slots,S.forge.findLastIndex(x=>x)+1)}if(k=='pts')S.pts+=10;if(k=='gold')S.gold+=1000;if(k=='ore')S.ore+=100;if(k=='lvl'){S.lvl++;S.xp=0;S.pts=MXP();S.ptsT=Date.now()}if(k=='lvl5'){S.lvl+=5;S.xp=0;S.pts=MXP();S.ptsT=Date.now()}if(k=='prem')S.prem=!S.prem;if(k=='tu'){S.tu=0;S.cn={};S.ghs={};S.ghOff=0;S.tuv=2}if(k=='mats'){for(const x of AFM)give(x,20);for(const r of[1,2,3])for(let q=0;q<5;q++)give(RM[r]+q,5)}if(k=='lg'){S.inv.push(mkLegendary('runic',S.lvl))}if(k=='reset'){if(S.cf&&S.cf.k=='reset'&&Date.now()-S.cf.t<4000)S=fresh();else{S.cf={k:'reset',t:Date.now()};S.msg='Apasă din nou în 4 secunde ca să ștergi tot progresul.';go();return}}S.msg='';go()}
 function cand(){const rk=(m=>Math.random()<.5?RI(0,m):m)(Math.min(4,Math.floor(S.lvl/10)));const t=[P(TR)];if(Math.random()<.45){const x=P(TR);if(x!=t[0])t.push(x)}return spCand({rk,n:P(NMS),c:P(Object.keys(CL).filter(x=>x!='Campion'&&x!='Gardian')),t,p:Math.round((25+12*S.lvl*t.length)*(1+.6*rk))})}
@@ -648,7 +648,7 @@ function deschidePortret(i){
 function hdr(){const h=S.fs.find(f=>f.h)||S.fs[0];
  q('#hs').innerHTML=temaHdr();
  q('#nv').innerHTML=temaNav()+sideHtml()}
-function render(){sync();q('#v').innerHTML=(S.tab=='a'&&!S.vil?hero():'')+(S.msg?`<p class="msg">${S.msg}</p>`:'')+tuH()+ghIdle()+(S.tab=='a'?vV():S.tab=='c'?vC():S.tab=='m'?vM():S.tab=='r'?vTron():S.tab=='k'?vBoard():vE());   /* k = clasamentul, deschis din bara de sus */hdr();fxScan();temaPost();satPost()}
+function render(){sync();q('#v').innerHTML=(S.tab=='a'&&!S.vil?hero():'')+(S.msg?`<p class="msg">${S.msg}</p>`:'')+tuH()+ghIdle()+(S.tab=='a'?vV():S.tab=='c'?vC():S.tab=='m'?vM():S.tab=='r'?vTron():S.tab=='k'?vBoard():vE());   /* k = clasamentul, deschis din bara de sus */hdr();fxScan();temaPost();satPost();if(typeof vsPost==='function')vsPost()}
 function go(){pool();shop();MPV();terTick();atkCheck();tuChk();botLife();loginChk();tronCheck();lumeCheck();terBack();save();render()}
 /* pornirea jocului o face cont.js, după conectare: boot(salvare) */
 function boot(src){load(src);terNorm();spNorm();if(S.d&&S.d.f&&!S.d.f.es.some(e=>e.hp>0))win();pool();shop();MPV();terTick();atkCheck();botLife();loginChk();save();render()}
