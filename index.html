@@ -186,25 +186,26 @@ main{padding:8px 24px;max-width:940px}
 </style>
 <link rel="stylesheet" href="tema.css?v=2026.10.30-3">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="world-data.js?v=2026.10.31-7"></script>
-<script src="tron-logic.js?v=2026.10.31-7"></script>
-<script src="cladiri-art.js?v=2026.10.31-7"></script>
-<script src="teritorii.js?v=2026.10.31-7"></script>
-<script src="inventar.js?v=2026.10.31-7"></script>
-<script src="panou.js?v=2026.10.31-7"></script>
-<script src="ghid.js?v=2026.10.31-7"></script>
-<script src="specializari.js?v=2026.10.31-7"></script>
-<script src="tron.js?v=2026.10.31-7"></script>
-<script src="lume-art.js?v=2026.10.31-7"></script>
-<script src="sat.js?v=2026.10.31-7"></script>
-<script src="temnite.js?v=2026.10.31-7"></script>
-<script src="harta.js?v=2026.10.31-7"></script>
-<script src="lume.js?v=2026.10.31-7"></script>
-<script src="lume-pictat.js?v=2026.10.31-7"></script>
-<script src="tema.js?v=2026.10.31-7"></script>
-<script src="echipa.js?v=2026.10.31-7"></script>
-<script src="erou.js?v=2026.10.31-7"></script>
-<script src="cont.js?v=2026.10.31-7"></script>
+<script src="world-data.js?v=2026.10.31-8"></script>
+<script src="tron-logic.js?v=2026.10.31-8"></script>
+<script src="cladiri-art.js?v=2026.10.31-8"></script>
+<script src="teritorii.js?v=2026.10.31-8"></script>
+<script src="inventar.js?v=2026.10.31-8"></script>
+<script src="panou.js?v=2026.10.31-8"></script>
+<script src="ghid.js?v=2026.10.31-8"></script>
+<script src="specializari.js?v=2026.10.31-8"></script>
+<script src="tron.js?v=2026.10.31-8"></script>
+<script src="lume-art.js?v=2026.10.31-8"></script>
+<script src="sat.js?v=2026.10.31-8"></script>
+<script src="lupta-vs.js?v=2026.10.31-8"></script>
+<script src="temnite.js?v=2026.10.31-8"></script>
+<script src="harta.js?v=2026.10.31-8"></script>
+<script src="lume.js?v=2026.10.31-8"></script>
+<script src="lume-pictat.js?v=2026.10.31-8"></script>
+<script src="tema.js?v=2026.10.31-8"></script>
+<script src="echipa.js?v=2026.10.31-8"></script>
+<script src="erou.js?v=2026.10.31-8"></script>
+<script src="cont.js?v=2026.10.31-8"></script>
 </head>
 <body>
 <header><h1><img class="hd-tron" src="imagini/logo-tron.webp" alt="" width="34" height="40"><span class="hd-nm">Silver Throne</span></h1><div class="hs" id="hs"></div></header>
@@ -303,7 +304,7 @@ function door(i){const d=S.d,t=d.doors[i].t,c=dCost(d,t);S.msg='';if(c>0&&S.pts<
 function startF(b){const d=S.d,n=b?1:RI(1,2)+(S.lvl>3?1:0)+terXn(d),es=[],NM=[['Bandit','pra'],['Ghoul de mină','sng'],['Pază corupt','bli'],['Lup de peșteră','zim']];
  for(let i=0;i<n;i++)es.push({n:b?(d.bn||'Căpitanul Cenușii'):P(NM)[0],hp:0,atk:Math.round((3+S.lvl*1.1+d.room*.5)*(b?1.4:1)*(d.k||1)),def:Math.floor(S.lvl/3*Math.sqrt(d.k||1)),bl:0,st:0,b});
  es.forEach(e=>{e.dm=(NM.find(z=>z[0]==e.n)||[])[1];e.mh=e.hp=Math.round((12+5*S.lvl+d.room*3)*(e.b?2.4:1)*(d.k||1))});if(d.em)terEm(es,d);
- S.fs.forEach(x=>x.cd=0);spFightStart();d.f={es,i:S.fs.findIndex(f=>f.hp>0),t:0,log:[b?(d.bn||'Căpitanul Cenușii')+' îți iese în cale.':'Inamicii apar din umbră.']}}
+ S.fs.forEach(x=>x.cd=0);spFightStart();d.f={es,i:S.fs.findIndex(f=>f.hp>0),t:0,log:[b?(d.bn||'Căpitanul Cenușii')+' îți iese în cale.':'Inamicii apar din umbră.']};if(typeof vsFlash==='function')vsFlash()}   /* cardul VS: lupta-vs.js */
 function tgt(i){S.d.f.t=i;go()}
 /* o: {crit: lovitură critică sigură, ign: parte din apărare ignorată (0..1), n: lovitură normală}; efectele specializărilor sunt în specializari.js */
 function hit(a,e,m,L,o){o=o||{};spPre(a,o);const bo=bon(a);let dm=Math.round(atkOf(a)*m*spMul(a,e)*R(.85,1.15)),cr=!!o.crit||Math.random()<.05+(bo.crit+tr(a,'crit')+(a.h?ST().a*.8:0)+spCrit(a))/100;if(cr){dm=Math.round(dm*spCm(a));L.push('Lovitură critică!')}dm=Math.max(1,Math.round(dm-spDef(a,e,o)));e.hp-=dm;L.push(`${a.n} lovește ${e.n} (-${dm}).`);spAfter(a,e,dm,cr,L);return dm}
@@ -624,7 +625,7 @@ function vA(){const u=S.ui,lv=[];if(((pls(u)[u.p||0])||{}).lv>u.l)u.p=0;if(SF[u.
  <div class="mute">Necesar: ${nh(u)}</div><div class="row"><span>Durată</span><span>${fmt(RAR[u.r].t*1000*Math.pow(.96,BL().f)*(1-terB('forge')/100))}</span></div>
  ${S.pity?`<div class="mute">Bonus după ${S.pity} eșec${S.pity>1?'uri':''}: +${S.pity*5}% la următoarea forjare, până la prima reușită</div>`:''}
  <div class="row"><span class="mute">Durate scurtate pentru test</span><button class="p" onclick="craft()">Forjează</button></div></section>`;return h}
-function vC(){const d=S.d;if(!d)return`<section><h2>Coborâre</h2><p style="display:none">Câteva încăperi, ultima cu un căpitan. Fiecare cameră costă un punct, iar căpitanul două. Poți ieși oricând cu prada.</p><div class="mute">Punctele (sus) se cheltuiesc în temnițe: 1 punct pe cameră, 2 la căpitan; Cripta Furtunii e gratuită, cere doar o cheie. Se regenerează câte 1 la 6 minute, până la 30, și se adună și cu pagina închisă. Dacă îi lipsesc, așteaptă sau folosește Topitoria, care nu costă puncte.</div>${S.fs.some(f=>f.hp<=0)?'<div class="row"><span class="r4">Ai luptători căzuți: ridică-i înainte să cobori.</span>'+reviveAllBtn()+'</div>':''}${botCard()}</section>${vDung()}`;
+function vC(){const d=S.d;if(!d)return`<section><h2>Coborâre</h2><p style="display:none">Câteva încăperi, ultima cu un căpitan. Fiecare cameră costă un punct, iar căpitanul două. Poți ieși oricând cu prada.</p><div class="mute">Punctele (sus) se cheltuiesc în temnițe: 1 punct pe cameră, 2 la căpitan; Cripta Furtunii e gratuită, cere doar o cheie. Se regenerează câte 1 la 6 minute, până la 30, și se adună și cu pagina închisă. Dacă îi lipsesc, așteaptă sau folosește Topitoria, care nu costă puncte.</div>${S.fs.some(f=>f.hp<=0)?'<div class="row"><span class="r4">Ai luptători căzuți: ridică-i înainte să cobori.</span>'+reviveAllBtn()+'</div>':''}${botCard()}<div class="row"><span class="mute">Cardul „VS” de la începutul luptelor</span><button onclick="vsToggle()">${S.vsOff?'Pornește':'Oprește'}</button></div></section>${vDung()}`;
  const f=d.f;let h=`<section><h2>${d.raid!=null?(d.lbl||'Raid')+': '+d.rn:DG[d.di||0].n}: ${d.room}/${d.rooms}</h2><div class="mute">Pradă: ${d.loot.gold} aur, ${d.loot.ore} minereu, ${Object.values(d.loot.m||{}).reduce((a,b)=>a+b,0)} materiale, ${d.loot.xp} exp.</div><div class="row"><button onclick="tg('auto')">Luptă: ${S.auto!==false?'automat':'manual'}</button><select onchange="tg('rule',this.value)">${[['weak','Ținta: cel mai slab'],['strong','Ținta: cel mai puternic'],['first','Ținta: primul']].map(([v,n])=>`<option value="${v}"${(S.rule||'weak')==v?' selected':''}>${n}</option>`).join('')}</select></div>${S.fl&&!f?'<div class="log">'+S.fl.map(x=>'<div>'+x+'</div>').join('')+'</div>':''}`;
  if(f){const a=S.fs[f.i];h+=f.es.map((e,i)=>e.hp>0?enCard(e,i,i==f.t):'').join('');   /* căpitanii cu portret: temnite.js */
   h+=`<div class="log">${f.log.slice(-3).map(x=>`<div>${x}</div>`).join('')}</div><div class="row"><span style="display:flex;gap:10px;align-items:center">${av(a,40)}<b>Tura lui ${a.n}</b></span><span class="mute">${a.hp}/${mhp(a)} viață</span></div><div class="row"><button onclick="act('n')">Lovește</button><button class="p" onclick="act('s')"${a.cd>0?' disabled':''}>${CL[a.c].sp}${a.cd>0?' ('+a.cd+')':''}</button><button onclick="autoRun()">Automat</button></div><div class="mute">${CL[a.c].sp}: ${CL[a.c].d}. Atinge un inamic ca să-l ții în țintă.</div>`}
