@@ -44,7 +44,7 @@ function tmnEvent() {
   const g = DG[i], e = evs(), ok = S.lvl >= g.lv, b = tmnBoss(g.bn), img = tmnImg(g.n), keys = [0, 1, 2].map(k => `<i class="${k < e.k ? 'on' : ''}">🗝</i>`).join('');
   return `<section class="dg-ev"><div class="dg-img">${img ? `<img class="dg-bg" src="${img}" alt="" loading="lazy" onerror="this.remove()">` : ''}<span class="dg-tag ev">Eveniment săptămânal</span>${b ? `<span class="dg-boss big" style="--aura:${b[1]}"><img src="imagini/monstri/${b[0]}.jpg" alt="" loading="lazy" onerror="this.parentNode.remove()"></span>` : ''}</div>`
     + `<div class="dg-b"><div class="dg-h"><b>${g.n}</b>${tmnStars(1.4 + S.lvl * 0.055)}</div><div class="dg-keys">${keys}<span class="mute">${e.k} din 3 chei · se refac în ${evLeft()} ${evLeft() == 1 ? 'zi' : 'zile'}</span></div>`
-    + `<div class="mute dg-i">Căpitan: ${g.bn}. La el ai 60% șansă la o relicvă de nivelul tău.</div>`
+    + `<div class="mute dg-i"><b class="dg-free">Fără puncte la intrare</b>: cere doar o cheie, iar căpitanul nu costă nimic; vindecarea între camere costă tot 2 puncte. Căpitan: ${g.bn}; la el ai 60% șansă la o relicvă de nivelul tău.</div>`
     + `<button class="p" onclick="startD(${i})"${ok && e.k > 0 ? '' : ' disabled'}>Intră (1 cheie)${ok ? '' : ', nivel ' + g.lv}</button></div></section>`;
 }
 
@@ -92,6 +92,7 @@ function bossMini(n) { const b = tmnBoss(n); return b ? `<span class="eb-mini" s
 .dg-ev{padding:0!important;overflow:hidden;border-color:#5cc8ff66!important;box-shadow:0 0 0 1px #5cc8ff44,0 0 26px #5cc8ff22!important}
 .dg-ev .dg-img{aspect-ratio:21/7}
 .dg-ev .dg-b{padding:12px 16px 14px}.dg-ev .dg-h{padding-right:84px}
+.dg-free{color:#7fd88c}.dg-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.dg-tip{margin:2px 0 6px;font-size:13.5px}.dg-auto{border-top:1px dashed #ffffff1a;padding-top:8px}.dg-next span small{font-size:12.5px}
 .dg-keys{display:flex;align-items:center;gap:4px;font-size:13.5px}.dg-keys i{font-style:normal;filter:grayscale(1) opacity(.35)}.dg-keys i.on{filter:drop-shadow(0 0 4px #5cc8ff)}.dg-keys span{margin-left:6px}
 /* căpitanul în luptă */
 .en-boss{display:flex!important;align-items:center;gap:14px;padding:10px 14px!important;margin:6px 0 10px!important;border:1px solid var(--gold)!important;border-radius:12px!important;background:radial-gradient(ellipse at 15% 50%,color-mix(in srgb,var(--aura) 14%,transparent),transparent 60%),linear-gradient(180deg,#221a12,#120e0a)!important;box-shadow:0 0 0 1px #000,0 0 18px color-mix(in srgb,var(--aura) 30%,transparent)!important}

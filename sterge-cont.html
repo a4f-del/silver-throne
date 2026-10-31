@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ștergerea contului · Silver Throne</title>
+<meta name="theme-color" content="#0b0e10">
+<link rel="icon" type="image/png" href="icons/favicon-64.png">
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#e9e1cf;--mute:#a49d8c;--line:#3a3524;--gold:#c9a24b;--gold2:#f0d27a;--red:#f0a49e;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:max(28px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom));font:17px/1.5 Alegreya,Georgia,serif;color:var(--ink);background:radial-gradient(700px 420px at 50% 0,#26302f 0,transparent 70%),#0b0e10}
+main{max-width:460px;margin:0 auto}
+h1{font:700 26px/1.2 Cinzel,Georgia,serif;color:var(--gold2);margin:0 0 6px;text-align:center}
+.sub{text-align:center;color:var(--mute);margin:0 0 22px}
+.card{background:linear-gradient(180deg,#1b2124,#121719);border:1px solid var(--line);border-top:2px solid var(--gold);border-radius:6px;padding:18px}
+ul{margin:8px 0 14px;padding-left:20px}li{margin:3px 0}
+label{display:block;margin:0 0 12px}label span{display:block;margin-bottom:4px}
+input{width:100%;padding:10px 11px;font:17px Alegreya,Georgia,serif;color:var(--ink);background:#0b0e10;border:1px solid #5b5236;border-radius:4px}
+input:focus{outline:none;border-color:var(--gold2);box-shadow:0 0 0 2px #f0d27a33}
+button{width:100%;padding:11px 14px;font:700 16px Cinzel,Georgia,serif;border-radius:4px;cursor:pointer;color:#fff;background:linear-gradient(180deg,#e0766e,#9c2f29 60%,#6e1f1b);border:1px solid var(--red)}
+button:disabled{opacity:.7;cursor:wait}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
+.msg{min-height:0;margin:0 0 10px}.msg.err{color:var(--red)}.msg.ok{color:#9be0a6}
+.note{color:var(--mute);font-size:15px;margin-top:16px}
+a{color:var(--gold2);text-underline-offset:3px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Ștergerea contului</h1>
+  <p class="sub">Silver Throne</p>
+  <div class="card" id="card">
+    <p>Poți șterge contul și din joc (butonul 👑 Cont → Șterge contul) sau de aici, fără aplicație. Se șterg definitiv, imediat:</p>
+    <ul>
+      <li>contul (adresa de email și parola);</li>
+      <li>tot progresul din joc;</li>
+      <li>satul din Lume, atacurile date și primite;</li>
+      <li>profilul, clasamentele și istoricul de la Tronul de Argint.</li>
+    </ul>
+    <p>Nu păstrăm copii ale acestor date după ștergere.</p>
+    <form id="f" novalidate>
+      <label><span>Email</span><input id="email" type="email" autocomplete="username email" inputmode="email" required></label>
+      <label><span>Parola</span><input id="pass" type="password" autocomplete="current-password" required></label>
+      <label><span>Scrie ȘTERGE ca să confirmi</span><input id="conf" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" required></label>
+      <p class="msg" id="msg" role="status"></p>
+      <button type="submit" id="go">Șterge definitiv contul</button>
+    </form>
+  </div>
+  <p class="note">Ai uitat parola? Resetează-o din ecranul de conectare al jocului („Am uitat parola”), apoi revino aici. Dacă nu mai ai acces la adresa de email, scrie-ne la adresa din <a href="confidentialitate.html">politica de confidențialitate</a>. <a href="./">Înapoi la joc</a></p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* Aceeași bază de date ca jocul (cheia publică, la fel ca în index.html). Ștergerea o face funcția delete_my_account() din supabase/03-cont.sql. */
+const sb = window.supabase.createClient('https://qzrelarnmvnwzvfddbrv.supabase.co', 'sb_publishable_8Ds3XwQm1HJWzCah-6N0Ww_VbvV-Oy4');
+const $ = id => document.getElementById(id), say = (t, m) => { const p = $('msg'); p.className = 'msg ' + t; p.setAttribute('role', t === 'err' ? 'alert' : 'status'); p.textContent = m; };
+const err = e => { const m = String((e && e.message) || e || ''); if (/Invalid login credentials/i.test(m)) return 'Email sau parolă greșită.'; if (/Email not confirmed/i.test(m)) return 'Contul nu e confirmat încă.'; if (/Failed to fetch|network/i.test(m)) return 'Nu mă pot conecta la server. Verifică internetul.'; if (/rate limit|too many/i.test(m)) return 'Prea multe încercări. Așteaptă un minut.'; return m || 'A apărut o eroare.'; };
+$('f').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const email = $('email').value.trim(), password = $('pass').value, conf = $('conf').value.trim().toUpperCase(), b = $('go');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return say('err', 'Scrie o adresă de email validă.');
+  if (!password) return say('err', 'Scrie parola.');
+  if (conf !== 'ȘTERGE' && conf !== 'STERGE') return say('err', 'Scrie ȘTERGE în ultimul câmp ca să confirmi.');
+  b.disabled = true; b.textContent = 'Se verifică…'; say('', '');
+  const a = await sb.auth.signInWithPassword({ email, password }).catch(e => ({ error: e }));
+  if (a.error) { b.disabled = false; b.textContent = 'Șterge definitiv contul'; return say('err', err(a.error)); }
+  b.textContent = 'Se șterge…';
+  const r = await sb.rpc('delete_my_account').catch(e => ({ error: e }));
+  if (r.error) { b.disabled = false; b.textContent = 'Șterge definitiv contul'; await sb.auth.signOut().catch(() => {}); return say('err', 'Contul nu a putut fi șters: ' + err(r.error)); }
+  try { Object.keys(localStorage).filter(k => k.indexOf(':' + a.data.user.id) > 0).forEach(k => localStorage.removeItem(k)); } catch (e) { /* ignorat */ }
+  await sb.auth.signOut().catch(() => {});
+  $('card').innerHTML = '<p class="msg ok" role="status" style="font-size:18px;margin:0">Contul tău și toate datele lui au fost șterse.</p>';
+});
+</script>
+</body>
+</html>

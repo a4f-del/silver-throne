@@ -77,7 +77,9 @@
   W.GW = 7; W.GH = 5; W.CAP = [3, 2];
   W.need0 = L => Math.round(30 * L * (1 + Math.max(0, L - 20) * .35));
   W.paceK = L => { const p = W.P.pace; if (!p.on) return 1; return Math.max(1, p.a * Math.pow(L, p.b) * (p.xa + p.xb * L) / W.need0(L)); };
-  W.need = L => Math.round(W.need0(L) * W.paceK(L));
+  /* începutul mai rapid: la nivelul 1 trebuie 45% din experiența normală, crescând treptat până la 100% la nivelul 12 (măsurat: nivelul 5 în ~15 minute) */
+  W.early = L => (L <= 12 ? 0.45 + 0.55 * (L - 1) / 11 : 1);
+  W.need = L => Math.round(W.need0(L) * W.paceK(L) * W.early(L));
   W.kb = L => 1 + W.P.kl * Math.min(L, 40);
   W.cheb = (x, y) => Math.max(Math.abs(x - W.CAP[0]), Math.abs(y - W.CAP[1]));
   W.cellKey = (x, y) => x + ',' + y;

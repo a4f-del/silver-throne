@@ -54,7 +54,7 @@ function tmChar(inv) {
   let h = `<div class="tm-char"><section class="tm-left"><div class="tm-por">${tmPortrait(f)}</div><h2 class="tm-h">${tEsc(f.n)}</h2><div class="tm-sub mute">${sub}</div>`;
   h += `<div class="tm-hpbar"><span>${c.hp <= 0 ? '☠ căzut' : Math.round(c.hp) + ' / ' + c.max + ' viață'}</span><i class="bar${c.hp <= 0 ? ' e' : ''}"><i style="width:${c.p}%"></i></i></div>`;
   h += `<div class="tm-stats"><div><b>${c.max}</b><span>Viață</span></div><div><b>${Math.round(atkOf(f))}</b><span>Atac</span></div><div><b>${tmDef(f)}</b><span>Apărare</span></div></div>${extra ? `<div class="chips">${extra}</div>` : ''}`;
-  h += `<div class="tm-sp"><b>${tEsc(CL[f.c].sp)}</b> <span class="mute">${tEsc(CL[f.c].d)}; se reîncarcă după ${cd} ${cd === 1 ? 'tură' : 'ture'}.</span></div>${typeof spPanel === 'function' ? spPanel(f) : ''}${hero}${xp}<div class="tm-act">${deadAll().length > 1 || (deadAll().length === 1 && c.hp > 0) ? reviveAllBtn() : ''}${rv}${hurt ? `<button onclick="heal()">Vindecă răniții · ${healCost} aur</button>` : ''}${tmSkin(f)}</div></section>`;
+  h += `<div class="tm-sp"><b>${tEsc(CL[f.c].sp)}</b> <span class="mute">${tEsc(CL[f.c].d)}; se reîncarcă după ${cd} ${cd === 1 ? 'tură' : 'ture'}.</span></div>${typeof spPanel === 'function' ? spPanel(f) : ''}${hero}${xp}<div class="tm-act">${deadAll().length > 1 || (deadAll().length === 1 && c.hp > 0) ? reviveAllBtn() : ''}${rv}${hurt && !S.d ? `<button onclick="heal()">Vindecă răniții · ${healCost} aur</button>` : ''}${tmSkin(f)}</div></section>`;
   h += `<div class="tm-right"><section class="tm-eq"><h2>Echipament · ${tEsc(f.n)}</h2>${vSlots()}</section>${inv || ''}</div></div>`;
   return h;
 }
