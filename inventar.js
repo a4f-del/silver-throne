@@ -50,8 +50,15 @@ const invCls = it => (it.lg ? 'rl' : 'r' + (it.r + 1));
 
 function invCard(x) {
   const it = x.it, i = x.i;
-  return `<div class="icard ${invCls(it)}${it.lk ? ' lk' : ''}" data-i="${i}" data-t="${it.t}"><div class="ic-n">${iname(it)}${it.lk ? ' <span title="Blocat">🔒</span>' : ''}</div>${invChips(it)}${invCmp(it)}` +
+  return `<div class="icard ${invCls(it)}${it.lk ? ' lk' : ''}" data-i="${i}" data-t="${it.t}"><div class="ic-n"${itTipA(it, invCmp(it))}>${iname(it)}${it.lk ? ' <span title="Blocat">🔒</span>' : ''}</div>${invVerdict(it)}` +
     `<div class="ic-a"><button class="p" onclick="equip(${i})" aria-label="Pune pe ${tEsc(cur().n)}" title="Pune pe ${tEsc(cur().n)}">Pune</button><button onclick="invLock(${i})" title="${it.lk ? 'Deblochează' : 'Blochează: nu poate fi vândut sau dezmembrat'}">${it.lk ? '🔓' : '🔒'}</button><button onclick="dis(${i})"${it.lk ? ' disabled' : ''}>Dezmembrează</button><button onclick="sell(${i})"${it.lk ? ' disabled' : ''}>${invVal(it)} aur</button></div></div>`;
+}
+/* semnul mic de pe card: merită pus? (aceeași formulă de putere ca la alegerea din slot) */
+function invVerdict(it) {
+  const eq = E(cur())[it.t]; if (eq === it) return '';
+  if (!eq) return '<span class="ic-v nw">slot gol</span>';
+  const g = invScore(it) - invScore(eq);
+  return g > 0 ? '<span class="ic-v up">▲ mai bun</span>' : g < 0 ? '<span class="ic-v dn">▼ mai slab</span>' : '<span class="ic-v">≈ la fel</span>';
 }
 function invLock(i) { const it = S.inv[i]; if (it) it.lk = it.lk ? 0 : 1; go(); }
 
@@ -78,9 +85,9 @@ function invPick(k) {
   const list = S.inv.map((it, i) => ({ it, i })).filter(x => x.it && x.it.t === k)
     .sort((p, q) => invScore(q.it) - invScore(p.it) || invRarKey(q.it) - invRarKey(p.it) || q.it.l - p.it.l);
   const card = x => { const g = invScore(x.it) - base;
-    return `<div class="ipk-c icard ${invCls(x.it)}"><div class="ic-n">${iname(x.it)}${x.it.lk ? ' 🔒' : ''}</div>${invChips(x.it)}${eq ? invCmp(x.it) : ''}<div class="ipk-a">${eq ? `<span class="ipk-g ${g > 0 ? 'up' : g < 0 ? 'dn' : ''}">${g > 0 ? '▲ mai bun' : g < 0 ? '▼ mai slab' : '≈ la fel'}</span>` : ''}<button class="${!eq || g >= 0 ? 'p' : ''}" onclick="invPickEq(${x.i})">${eq ? 'Înlocuiește' : 'Pune'}</button></div></div>`; };
+    return `<div class="ipk-c icard ${invCls(x.it)}"><div class="ic-n"${itTipA(x.it, eq ? invCmp(x.it) : '')}>${iname(x.it)}${x.it.lk ? ' 🔒' : ''}</div><div class="ipk-a">${eq ? `<span class="ipk-g ${g > 0 ? 'up' : g < 0 ? 'dn' : ''}">${g > 0 ? '▲ mai bun' : g < 0 ? '▼ mai slab' : '≈ la fel'}</span>` : ''}<button class="${!eq || g >= 0 ? 'p' : ''}" onclick="invPickEq(${x.i})">${eq ? 'Înlocuiește' : 'Pune'}</button></div></div>`; };
   mdl(`<div class="ipk"><h3>${SLN[k]} · ${tEsc(f.n)}</h3>`
-    + `<div class="ipk-now"><span class="mute">Acum:</span> ${eq ? `${iname(eq)}${invChips(eq)}<button onclick="invPickOff('${k}')">Scoate</button>` : '<span class="mute">nimic echipat</span>'}</div>`
+    + `<div class="ipk-now"><span class="mute">Acum:</span> ${eq ? `<span class="ic-n"${itTipA(eq)}>${iname(eq)}</span> <button onclick="invPickOff('${k}')">Scoate</button>` : '<span class="mute">nimic echipat</span>'}</div>`
     + `<div class="ipk-l">${list.length ? list.map(card).join('') : '<p class="mute">Nu ai în rucsac obiecte de acest tip.</p>'}</div>`
     + `<div class="ipk-f mute">${list.length > 1 ? 'Ordonate după cât adaugă la putere. ' : ''}<button class="lw-lnk" onclick="invPickAll('${k}')">Vezi în rucsac (vânzare, dezmembrare)</button></div></div>`, 'ipk-b');
 }
@@ -93,7 +100,7 @@ function vSlots() {
   return '<div class="slotgrid">' + SL.map(k => {
     const it = E(cur())[k], n = S.inv.filter(x => x && x.t === k).length;
     return `<div class="scard${it ? ' ' + invCls(it) : ' emp'}" data-k="${k}" data-g="${IG[k]}"><span class="sc-k">${SLN[k]}</span>` +
-      (it ? `<div class="ic-n">${iname(it)}</div>${invChips(it)}<div class="ic-a"><button onclick="unequip('${k}')">Scoate</button><button class="${n ? 'p' : ''}" onclick="invPick('${k}')"${n ? '' : ' disabled'}>${n ? `Înlocuiește (${n})` : 'Nimic în rucsac'}</button></div>` : `<div class="mute sc-e">gol</div><div class="ic-a"><button class="${n ? 'p' : ''}" onclick="invPick('${k}')"${n ? '' : ' disabled'}>${n ? `Alege (${n})` : 'Nimic în rucsac'}</button></div>`) + '</div>';
+      (it ? `<div class="ic-n"${itTipA(it)}>${iname(it)}</div><div class="ic-a"><button onclick="unequip('${k}')">Scoate</button><button class="${n ? 'p' : ''}" onclick="invPick('${k}')"${n ? '' : ' disabled'}>${n ? `Înlocuiește (${n})` : 'Nimic în rucsac'}</button></div>` : `<div class="mute sc-e">gol</div><div class="ic-a"><button class="${n ? 'p' : ''}" onclick="invPick('${k}')"${n ? '' : ' disabled'}>${n ? `Alege (${n})` : 'Nimic în rucsac'}</button></div>`) + '</div>';
   }).join('') + '</div>';
 }
 

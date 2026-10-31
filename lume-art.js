@@ -272,6 +272,8 @@
   };
   A.defs += `<radialGradient id="lwa-vg" cx="50%" cy="50%" r="70%"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></radialGradient><linearGradient id="lwa-pl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4c5356"/><stop offset="1" stop-color="#2a2f31"/></linearGradient>`;
   A.I = I; A.P = P;
+  /* piesele de desen, folosite și pentru clădirile satului (sat.js) */
+  Object.assign(A, { box, house, tower, wallSeg, gate, crenel, plateau, poly, winL, winR, ROOF, WALLC, STONE, WOOD });
   if (typeof module !== 'undefined' && module.exports) module.exports = A;
   root.LWA = A;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

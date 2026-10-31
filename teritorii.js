@@ -774,7 +774,7 @@ function vLux() {
   let h = `<section><h2>Negustorul de lux</h2><div class="mute">Obiecte de calitate superioară, plătite doar cu aur. Marfa se schimbă în fiecare zi; prețul crește mult cu calitatea obiectului.</div>`;
   if (S.lvl < M.luxMinLv) h += `<p class="mute">Apare la nivelul ${M.luxMinLv}.</p>`;
   else {
-    h += m.lux.length ? m.lux.map((it, i) => `<div class="row"><span>${iname(it)}<br><span class="mute">${desc(it)} · calitate ${QN[it.q]}</span></span><button class="p" onclick="luxBuy(${i})"${S.gold >= luxP(it) ? '' : ' disabled'}>${luxP(it)} aur</button></div>`).join('') : '<p class="mute">Stoc epuizat azi. Revine mâine.</p>';
+    h += m.lux.length ? m.lux.map((it, i) => `<div class="row"><span class="ic-n"${itTipA(it)}>${iname(it)}</span><button class="p" onclick="luxBuy(${i})"${S.gold >= luxP(it) ? '' : ' disabled'}>${luxP(it)} aur</button></div>`).join('') : '<p class="mute">Stoc epuizat azi. Revine mâine.</p>';
     const rc = TW.luxReroll(S.lvl, m.rr, TP); h += `<div class="row"><span class="mute">Marfă nouă acum (schimburi azi: ${m.rr}; fiecare costă mai mult)</span><button onclick="luxRe()"${S.gold >= rc ? '' : ' disabled'}>${rc} aur</button></div>`;
   }
   h += '</section><section><h2>Schimb de cristale</h2><div class="mute">Cumperi cristale cu aur, la un curs prost și cu limită zilnică; pentru obținere obișnuită, raidurile și temnițele rămân mai avantajoase. Calitățile superioare dau obiecte mai puternice.</div>';

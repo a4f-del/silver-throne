@@ -186,21 +186,22 @@ main{padding:8px 24px;max-width:940px}
 </style>
 <link rel="stylesheet" href="tema.css?v=2026.10.30-3">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="world-data.js?v=2026.10.30-9"></script>
-<script src="tron-logic.js?v=2026.10.30-9"></script>
-<script src="cladiri-art.js?v=2026.10.30-9"></script>
-<script src="teritorii.js?v=2026.10.30-9"></script>
-<script src="inventar.js?v=2026.10.30-9"></script>
-<script src="panou.js?v=2026.10.30-9"></script>
-<script src="ghid.js?v=2026.10.30-9"></script>
-<script src="specializari.js?v=2026.10.30-9"></script>
-<script src="tron.js?v=2026.10.30-9"></script>
-<script src="lume-art.js?v=2026.10.30-9"></script>
-<script src="lume.js?v=2026.10.30-9"></script>
-<script src="tema.js?v=2026.10.30-9"></script>
-<script src="echipa.js?v=2026.10.30-9"></script>
-<script src="erou.js?v=2026.10.30-9"></script>
-<script src="cont.js?v=2026.10.30-9"></script>
+<script src="world-data.js?v=2026.10.31-1"></script>
+<script src="tron-logic.js?v=2026.10.31-1"></script>
+<script src="cladiri-art.js?v=2026.10.31-1"></script>
+<script src="teritorii.js?v=2026.10.31-1"></script>
+<script src="inventar.js?v=2026.10.31-1"></script>
+<script src="panou.js?v=2026.10.31-1"></script>
+<script src="ghid.js?v=2026.10.31-1"></script>
+<script src="specializari.js?v=2026.10.31-1"></script>
+<script src="tron.js?v=2026.10.31-1"></script>
+<script src="lume-art.js?v=2026.10.31-1"></script>
+<script src="sat.js?v=2026.10.31-1"></script>
+<script src="lume.js?v=2026.10.31-1"></script>
+<script src="tema.js?v=2026.10.31-1"></script>
+<script src="echipa.js?v=2026.10.31-1"></script>
+<script src="erou.js?v=2026.10.31-1"></script>
+<script src="cont.js?v=2026.10.31-1"></script>
 </head>
 <body>
 <header><h1><span class="cr">♛</span> Silver Throne</h1><div class="hs" id="hs"></div></header>
@@ -405,11 +406,12 @@ const SH=[['w','Armurierul'],['a','Fierarul de armuri'],['h','Coifarul'],['b','C
 function shop(){const s=S.shop||(S.shop={t:0,w:[],a:[],j:[]});if(Date.now()>s.t||!s.w.length||!s.h){for(const [k] of SH){s[k]=[];for(let i=0;i<3;i++)s[k].push(mkItem(k,Math.max(1,S.lvl+RI(-1,1)),P([0,1,1,1,2,2,3])))}s.t=Date.now()+12e5}return s}
 function buy(k,i){const s=shop(),it=s[k][i],c=ip(it);if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;s[k].splice(i,1);S.inv.push(it);S.msg='Ai cumpărat '+it.name+'.'}go()}
 function reshop(){const c=15*S.lvl;if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;S.shop.t=0;S.msg='Negustorii au adus marfă nouă.'}go()}
-function vP(){const s=shop();return SH.map(([k,n])=>`<section><h2>${n}</h2>${s[k].length?s[k].map((it,i)=>`<div class="row"><span>${iname(it)}<br><span class="mute">${desc(it)}</span></span><button class="p" onclick="buy('${k}',${i})">${ip(it)} aur</button></div>`).join(''):'<p class="mute">Stoc epuizat.</p>'}</section>`).join('')+`<div class="row"><span class="mute">Marfa se schimbă la 20 de minute</span><button onclick="reshop()">${15*S.lvl} aur</button></div>`}
+function vP(){const s=shop();return SH.map(([k,n])=>`<section><h2>${n}</h2>${s[k].length?s[k].map((it,i)=>`<div class="row"><span class="ic-n"${itTipA(it)}>${iname(it)}</span><button class="p" onclick="buy('${k}',${i})">${ip(it)} aur</button></div>`).join(''):'<p class="mute">Stoc epuizat.</p>'}</section>`).join('')+`<div class="row"><span class="mute">Marfa se schimbă la 20 de minute</span><button onclick="reshop()">${15*S.lvl} aur</button></div>`}
 function vD(){const rows=[['ore','Minereu',S.ore],...AFM.map(k=>[k,MA[k],MT()[k]||0])];return`<section><h2>Depozit</h2><div class="mute">Capacitate: ${cap()} din fiecare material. O poți mări la Curte. Dezmembrarea îi dă înapoi materialele afixelor.</div>${rows.map(([k,n,v])=>`<div class="row"><span>${n}<br><span class="mute">${MU[k]}</span></span><span><b>${v}</b>/${cap()}</span></div>${bar(v,cap())}`).join('')}${[1,2,3].map(r=>`<div class="row"><span>${MA[RM[r]]}<br><span class="mute">raritate ${RAR[r].n}</span></span><span>${QN.map((n,q)=>`${n} <b>${MT()[RM[r]+q]||0}</b>`).join(' · ')}</span></div>`).join('')}</section>`}
 const VL=[['a','Topitorie'],['h','Han'],['p','Piață'],['l','Negustor'],['d','Depozit'],['z','Apărare'],['q','Bot'],['x','Misiuni'],['t','Curte']];
 function vil(k){S.vil=k;S.msg='';go()}
-function vV(){const k=S.vil||'a';return temaVTabs(k)+(k=='a'?vA():k=='h'?vB():k=='p'?vP():k=='l'?vLux():k=='d'?vD():k=='z'?vZ():k=='q'?vBot():k=='x'?vMis():vT())}
+/* Satul: fără S.vil = pagina de start cu clădirile (sat.js); altfel banda „‹ Sat” + clădirea */
+function vV(){const k=S.vil;if(!k||!VL.some(x=>x[0]===k))return vHub();return vBar(k)+(k=='a'?vA():k=='h'?vB():k=='p'?vP():k=='l'?vLux():k=='d'?vD():k=='z'?vZ():k=='q'?vBot():k=='x'?vMis():vT())}
 const QN=['alb','verde','albastru','mov','roșu'];
 const DG=[{n:'Mina Cenușie',lv:1,k:1,rooms:6,w:[100],rm:1,bn:'Căpitanul Cenușii'},{n:'Catacombele Uitate',lv:8,k:1.5,rooms:8,w:[60,30,10],rm:2,bn:'Regele Oaselor'},{n:'Cetatea Scufundată',lv:18,k:2.1,rooms:10,w:[35,35,20,10],rm:3,bn:'Căpitanul Înecat'},{n:'Abisul Cenușiu',lv:30,k:3,rooms:12,w:[15,25,30,20,10],rm:3,bn:'Stăpânul Abisului'}];
 const mn=k=>/\d$/.test(k)?MA[k.slice(0,-1)]+' ('+QN[+k.slice(-1)]+')':(k=='ore'?'Minereu':MA[k]);
@@ -597,7 +599,7 @@ function est(v){const al=S.fs.filter(f=>f.hp>0);if(!al.length)return 0;const L=S
 function scout(id){const v=MPV().vs.find(x=>x.id===id);if(v.sc&&Date.now()-v.sc<18e5)S.msg='Satul a fost deja iscodit recent.';else if(S.pts<1)S.msg='Îți trebuie 1 punct.';else{spend(1);v.sc=Date.now();S.msg='Iscoadele s-au întors cu informații despre '+v.n+'.'}go()}
 function svInfo(v){const sc=v.sc&&Date.now()-v.sc<18e5,vl=Math.max(1,S.lvl+v.dl);if(!sc)return`<div class="mute">Două lupte (gărzi, apoi căpitan). Stilul și apărarea nu se văd până nu iscodești.</div><div class="row"><span class="mute">Iscodire: 1 punct, valabilă 30 de minute</span><button onclick="scout(${v.id})">Iscodește</button></div>`;const e=est(v),lb=e>=EZ?'Ușor':e>=EB?'Echilibrat':'Greu';return`<div class="mute">Stil: <b>${STN[v.st]}</b> · ${STD[v.st]}</div><div class="row"><span>Gărzi ×${vk(v).toFixed(1)}</span><span>Pradă din sat ≈ ${Math.round((60+30*vl)*wf(v)*v.r)} aur</span></div><div class="row"><span>Răzbunare: ${'●'.repeat(Math.round(v.gd||0))||'niciuna'}</span><b class="${lb=='Greu'?'r4':lb=='Ușor'?'r2':''}">${lb} pentru echipa ta</b></div>`}
 function loginChk(){if(S.tu>=0&&S.tu<TU.length-1)return;const d=dk();if(S.lg===d)return;const first=S.lg==null;S.lg=d;if(first)return;const g=20+4*S.lvl,o=Math.round(4+S.lvl/2);S.gold+=g;S.ore+=o;S.pts=Math.min(MXP(),S.pts+5);S.msg=(S.msg?S.msg+' ':'')+`Bun venit înapoi! Recompensă zilnică: +${g} aur, +${o} minereu, +5 puncte.`}
-function tab(t){S.tab=t;S.msg='';go()}
+function tab(t){if(t=='a')S.vil='';S.tab=t;S.msg='';go()}   /* butonul Sat duce mereu la pagina de start a satului */
 const bar=(a,b,c)=>`<div class="bar ${c||''}"><i style="width:${Math.max(0,Math.min(100,a/b*100))}%"></i></div>`;
 function vA(){const u=S.ui,lv=[];if(((pls(u)[u.p||0])||{}).lv>u.l)u.p=0;if(SF[u.s||0].lv>u.l)u.s=0;for(let l=Math.max(1,S.lvl-2);l<=S.lvl+2;l++)lv.push(l);if(!lv.includes(u.l))u.l=S.lvl;
  const sl=S.forge.slice(0,Math.max(S.slots,S.forge.length)),now=Date.now();
@@ -634,7 +636,7 @@ function deschidePortret(i){
 function hdr(){const h=S.fs.find(f=>f.h)||S.fs[0];
  q('#hs').innerHTML=temaHdr();
  q('#nv').innerHTML=temaNav()+sideHtml()}
-function render(){sync();q('#v').innerHTML=(S.tab=='a'?hero()+tronBanner():'')+(S.msg?`<p class="msg">${S.msg}</p>`:'')+tuH()+ghIdle()+(S.tab=='a'?vV():S.tab=='c'?vC():S.tab=='m'?vM():S.tab=='r'?vTron():vE());hdr();fxScan();temaPost()}
+function render(){sync();q('#v').innerHTML=(S.tab=='a'&&!S.vil?hero():'')+(S.msg?`<p class="msg">${S.msg}</p>`:'')+tuH()+ghIdle()+(S.tab=='a'?vV():S.tab=='c'?vC():S.tab=='m'?vM():S.tab=='r'?vTron():vE());hdr();fxScan();temaPost();satPost()}
 function go(){pool();shop();MPV();terTick();atkCheck();tuChk();botLife();loginChk();tronCheck();lumeCheck();terBack();save();render()}
 /* pornirea jocului o face cont.js, după conectare: boot(salvare) */
 function boot(src){load(src);terNorm();spNorm();if(S.d&&S.d.f&&!S.d.f.es.some(e=>e.hp>0))win();pool();shop();MPV();terTick();atkCheck();botLife();loginChk();save();render()}

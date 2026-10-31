@@ -1,6 +1,6 @@
 /* ============================================================================
    Silver Throne — ghid.js
-   1) Ghidul pentru jucătorii noi: fiecare pas arată DRUMUL prin meniu („Sat › Producție › Topitorie”),
+   1) Ghidul pentru jucătorii noi: fiecare pas arată DRUMUL prin meniu („Sat › Topitorie”),
       iar săgeata aurie indică pe rând butonul de urmat: meniul, grupul, fila, apoi butonul acțiunii.
       „Du-mă acolo” rămâne doar ca scurtătură mică.
    2) Sfaturi care apar la momentul lor (Lumea la nivelul 5, primul Veteran, Catacombele, Tronul).
@@ -105,20 +105,16 @@ const ghVilN = v => (Object.fromEntries(VL)[v] || v);
 function ghPath(p) {
   if (!p) return null;
   if (S.tab !== p.t) return ghQ(`#nv button[onclick="tab('${p.t}')"]`)[0] || null;
-  if (p.v && (S.vil || 'a') !== p.v) {
-    const gi = ghGroup(p.v), ci = ghGroup(S.vil || 'a');
-    if (gi >= 0 && gi !== ci) return ghQ(`#v .tabs.grp button[onclick="vil('${TEMA_G[gi][2][0]}')"]`)[0] || null;
-    return ghQ(`#v .tabs.sub button[onclick="vil('${p.v}')"]`)[0] || null;
-  }
+  if (p.v && S.vil !== p.v) return ghQ(`#v .vh-card[data-v="${p.v}"], #v .vb-c[data-v="${p.v}"]`)[0] || null;   /* pagina de start a satului sau banda din clădiri */
   if (p.m && (S.mt || 'h') !== p.m) return ghQ(`#v button[onclick="mtab('${p.m}')"]`)[0] || null;
   return null;
 }
-const ghThere = p => !p || (S.tab === p.t && (!p.v || (S.vil || 'a') === p.v) && (!p.m || (S.mt || 'h') === p.m));
+const ghThere = p => !p || (S.tab === p.t && (!p.v || S.vil === p.v) && (!p.m || (S.mt || 'h') === p.m));
 /* „Unde: Sat › Producție › Topitorie”, cu bucățile deja parcurse bifate */
 function ghCrumb(p) {
   if (!p) return '';
   const seg = [[GH_TAB[p.t], S.tab === p.t]];
-  if (p.v) { const gi = ghGroup(p.v); if (gi >= 0) seg.push([TEMA_G[gi][0], S.tab === p.t && ghGroup(S.vil || 'a') === gi]); seg.push([ghVilN(p.v), S.tab === p.t && (S.vil || 'a') === p.v]); }
+  if (p.v) seg.push([ghVilN(p.v), S.tab === p.t && S.vil === p.v]);
   if (p.m) seg.push([GH_MT[p.m], S.tab === p.t && (S.mt || 'h') === p.m]);
   let cur = true;
   return `<div class="gh-path"><span class="mute">Unde:</span> ${seg.map(([n, ok]) => { const now = cur && !ok; if (!ok) cur = false; return `<span class="${ok ? 'ok' : now ? 'now' : ''}">${n}</span>`; }).join('<i>›</i>')}</div>`;

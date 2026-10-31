@@ -100,7 +100,8 @@ const HC_NAMES = { m: ['Radu', 'Vlad', 'Mircea', 'Ștefan', 'Dragoș', 'Bogdan',
   f: ['Ilinca', 'Ioana', 'Anca', 'Maria', 'Dana', 'Oana', 'Irina', 'Smaranda', 'Ruxandra', 'Doina', 'Sanda', 'Viorica'] };
 const hcIds = g => Object.keys(HERO_ICONS).filter(k => HERO_ICONS[k].g === g);
 /* id-urile din SVG primesc sufixul portretului: altfel gradientele a două portrete diferite din aceeași pagină s-ar încurca */
-const heroSvg = (id, z) => { const d = HERO_ICONS[id] || HERO_ICONS.m1; return `<svg viewBox="0 0 64 64" width="${z}" height="${z}" role="img" aria-label="${d.n}">${d.svg.replace(/id="(\w+)"/g, `id="$1-${id}"`).replace(/url\(#(\w+)\)/g, `url(#$1-${id})`).replace(/<circle cx="([^"]+)" cy="([^"]+)" r="([^"]+)"/g, '<ellipse cx="$1" cy="$2" rx="$3" ry="$3"')}</svg>`; };   /* elipse, nu cercuri: unele stiluri din tema.css (inelul de experiență) golesc orice <circle> */
+let heroN = 0;   /* fiecare portret are gradientele lui: unul ascuns (de ex. echipa din bara de sus, pe telefon) nu le mai poate „împrumuta” celorlalte */
+const heroSvg = (id, z) => { const d = HERO_ICONS[id] || HERO_ICONS.m1, u = id + '-' + (++heroN); return `<svg viewBox="0 0 64 64" width="${z}" height="${z}" role="img" aria-label="${d.n}">${d.svg.replace(/id="(\w+)"/g, `id="$1-${u}"`).replace(/url\(#(\w+)\)/g, `url(#$1-${u})`).replace(/<circle cx="([^"]+)" cy="([^"]+)" r="([^"]+)"/g, '<ellipse cx="$1" cy="$2" rx="$3" ry="$3"')}</svg>`; };   /* elipse, nu cercuri: unele stiluri din tema.css (inelul de experiență) golesc orice <circle> */
 function heroAv(f, z) {
   z = z || 44; const id = HERO_ICONS[f.ic] ? f.ic : 'm1';
   return `<span class="avw hav" style="width:${z}px;height:${z}px">${heroSvg(id, z)}<img src="imagini/eroi/${id}.jpeg" alt="" onerror="this.remove()"></span>`;
