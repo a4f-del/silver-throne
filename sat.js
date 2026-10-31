@@ -179,6 +179,9 @@ function satPost() { try { if (typeof tipHide === 'function') tipHide(); satFold
   const st = document.createElement('style');
   st.textContent = `
 .vh .vh-grid{margin-top:4px}
+header h1{text-shadow:none!important}header h1 .hd-tron{display:block;height:40px;width:auto;filter:drop-shadow(0 2px 4px #000c)}
+header h1 .hd-nm{text-shadow:none!important;font:700 21px/1 Cinzel,Georgia,serif;letter-spacing:.08em;text-transform:uppercase;background:linear-gradient(180deg,#ffffff 0,#dfe5e9 38%,#9aa6ad 62%,#5f6b72 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 1px 0 #000) drop-shadow(0 0 6px #c9d1d633)}
+@media (max-width:959px){header h1 .hd-tron{height:30px}header h1 .hd-nm{font-size:16px}}
 #v>.hero:first-child{min-height:170px}
 .vh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px}
 .vh-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 8px 10px;text-align:center;border:1px solid var(--line);border-radius:12px;background:radial-gradient(ellipse at 50% 38%,#2b3a2c 0,#16201a 55%,#101416 100%);box-shadow:inset 0 1px 0 #ffffff10,0 4px 12px #0008;transition:transform .15s,border-color .15s}

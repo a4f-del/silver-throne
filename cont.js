@@ -123,7 +123,7 @@ const CONT_CREST = '<svg viewBox="0 0 120 128" aria-hidden="true"><defs>'
 function contMount() {
   if (document.getElementById('gate')) return;
   const g = document.createElement('div'); g.id = 'gate'; g.setAttribute('role', 'dialog'); g.setAttribute('aria-modal', 'true'); g.setAttribute('aria-labelledby', 'gate-t');
-  g.innerHTML = `<div class="g-col"><div class="g-crest">${CONT_CREST}</div><h1 id="gate-t">Silver Throne</h1><p class="g-tag">Coboară în mină, ridică satul, cucerește Tronul.</p><div class="g-card" id="gate-card"></div><div class="g-foot" id="gate-foot"></div></div>`;
+  g.innerHTML = `<div class="g-col"><h1 id="gate-t" class="g-logo"><img src="imagini/logo.webp" alt="Silver Throne" width="360" height="229"></h1><p class="g-tag">Coboară în mină, ridică satul, cucerește Tronul.</p><div class="g-card" id="gate-card"></div><div class="g-foot" id="gate-foot"></div></div>`;
   document.body.appendChild(g); document.documentElement.classList.add('gate-on');
 }
 function contHide() { const g = document.getElementById('gate'); if (g) g.classList.add('g-out'); setTimeout(() => { if (g && CONT.booted && !CONT.overGame) { g.remove(); } }, 320); document.documentElement.classList.remove('gate-on'); CONT.overGame = false; }
@@ -306,6 +306,7 @@ html.gate-on,html.gate-on body{overflow:hidden}
   background:radial-gradient(700px 420px at 50% 0,#26302f 0,transparent 70%),radial-gradient(900px 500px at 50% 110%,#2a2212 0,transparent 70%),repeating-linear-gradient(45deg,#0d1113 0 6px,#0b0e10 6px 12px);transition:opacity .3s}
 #gate.g-out{opacity:0;pointer-events:none}
 .g-col{width:100%;max-width:400px;margin:auto 0;text-align:center}
+.g-logo{margin:0 auto 2px!important;background:none!important;-webkit-text-fill-color:initial!important;filter:none!important}.g-logo img{display:block;width:min(360px,86vw);height:auto;margin:0 auto;filter:drop-shadow(0 10px 18px #000d) drop-shadow(0 0 22px #c9d1d622);animation:gRise 1.4s ease-out both}
 .g-crest{width:112px;margin:0 auto 6px;filter:drop-shadow(0 6px 10px #000c)}
 .g-crest svg{display:block;width:100%;height:auto;animation:gRise 1.4s ease-out both}
 @keyframes gRise{0%{opacity:0;transform:translateY(8px);filter:drop-shadow(0 0 0 #f0d27a00)}55%{opacity:1;filter:drop-shadow(0 0 18px #f0d27aaa)}100%{transform:none;filter:drop-shadow(0 0 6px #f0d27a44)}}
@@ -338,7 +339,7 @@ html.gate-on,html.gate-on body{overflow:hidden}
 #auth-panel .acc-del{display:inline;width:auto;margin:0;padding:0;background:none;border:0;box-shadow:none;color:#f0a49e;font-size:13px;text-decoration:underline;text-underline-offset:3px}
 .g-foot{margin-top:6px}.g-foot small{display:block;color:var(--mute);font-size:14px;max-width:320px;margin:2px auto 0}
 #gate button:focus-visible,#gate input:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){.g-crest svg,.g-spin{animation:none}#gate{transition:none}}
+@media (prefers-reduced-motion:reduce){.g-crest svg,.g-logo img,.g-spin{animation:none}#gate{transition:none}}
 #hdr-act{position:fixed;top:10px;right:10px;z-index:10000;display:flex;gap:6px}
 #hdr-act #auth-toggle,#hdr-cl{position:static;padding:6px 12px;font-family:Cinzel,serif;font-weight:700;font-size:13px;color:var(--gold2);background:linear-gradient(180deg,#2a2412,#15110a);border:1px solid var(--gold);border-radius:6px}
 #hdr-cl{display:flex;align-items:center;gap:6px}#hdr-cl.on{background:linear-gradient(180deg,#4a3c14,#241c0a);box-shadow:0 0 0 1px var(--gold2),0 0 12px #f0d27a55}

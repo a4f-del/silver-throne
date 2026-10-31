@@ -186,26 +186,27 @@ main{padding:8px 24px;max-width:940px}
 </style>
 <link rel="stylesheet" href="tema.css?v=2026.10.30-3">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="world-data.js?v=2026.10.31-3"></script>
-<script src="tron-logic.js?v=2026.10.31-3"></script>
-<script src="cladiri-art.js?v=2026.10.31-3"></script>
-<script src="teritorii.js?v=2026.10.31-3"></script>
-<script src="inventar.js?v=2026.10.31-3"></script>
-<script src="panou.js?v=2026.10.31-3"></script>
-<script src="ghid.js?v=2026.10.31-3"></script>
-<script src="specializari.js?v=2026.10.31-3"></script>
-<script src="tron.js?v=2026.10.31-3"></script>
-<script src="lume-art.js?v=2026.10.31-3"></script>
-<script src="sat.js?v=2026.10.31-3"></script>
-<script src="temnite.js?v=2026.10.31-3"></script>
-<script src="lume.js?v=2026.10.31-3"></script>
-<script src="tema.js?v=2026.10.31-3"></script>
-<script src="echipa.js?v=2026.10.31-3"></script>
-<script src="erou.js?v=2026.10.31-3"></script>
-<script src="cont.js?v=2026.10.31-3"></script>
+<script src="world-data.js?v=2026.10.31-4"></script>
+<script src="tron-logic.js?v=2026.10.31-4"></script>
+<script src="cladiri-art.js?v=2026.10.31-4"></script>
+<script src="teritorii.js?v=2026.10.31-4"></script>
+<script src="inventar.js?v=2026.10.31-4"></script>
+<script src="panou.js?v=2026.10.31-4"></script>
+<script src="ghid.js?v=2026.10.31-4"></script>
+<script src="specializari.js?v=2026.10.31-4"></script>
+<script src="tron.js?v=2026.10.31-4"></script>
+<script src="lume-art.js?v=2026.10.31-4"></script>
+<script src="sat.js?v=2026.10.31-4"></script>
+<script src="temnite.js?v=2026.10.31-4"></script>
+<script src="harta.js?v=2026.10.31-4"></script>
+<script src="lume.js?v=2026.10.31-4"></script>
+<script src="tema.js?v=2026.10.31-4"></script>
+<script src="echipa.js?v=2026.10.31-4"></script>
+<script src="erou.js?v=2026.10.31-4"></script>
+<script src="cont.js?v=2026.10.31-4"></script>
 </head>
 <body>
-<header><h1><span class="cr">♛</span> Silver Throne</h1><div class="hs" id="hs"></div></header>
+<header><h1><img class="hd-tron" src="imagini/logo-tron.webp" alt="" width="34" height="40"><span class="hd-nm">Silver Throne</span></h1><div class="hs" id="hs"></div></header>
 <main id="v"></main>
 <nav id="nv"></nav>
 <script>
@@ -525,7 +526,7 @@ function smRoute(m,sv){if(!sv)return'';const r=smTerrain(m).roads[sv.id],d=dst(s
  return `<g pointer-events="none"><path d="${r.d}" fill="none" stroke="#f0d27a" stroke-opacity=".28" stroke-width="6.5" stroke-linecap="round"/><path class="st-rt" d="${r.d}" fill="none" stroke="#f0d27a" stroke-width="1.6" stroke-dasharray="5 4" stroke-linecap="round"/><g transform="translate(${smF(r.mid[0])} ${smF(r.mid[1])})"><rect x="${smF(-w/2)}" y="-7" width="${smF(w)}" height="12" rx="3" fill="#0b0e10" fill-opacity=".88" stroke="#f0d27a" stroke-width=".7"/><text y="1.6" text-anchor="middle" fill="#f0d27a" style="font:700 8px Alegreya,Georgia,serif">${t}</text></g></g>`}
 
 function vMnew(){const m=MPV(),sv=m.vs.find(v=>v.id===S.mv),T=smTerrain(m),vs=[...m.vs].sort((a,b)=>(a.id===S.mv)-(b.id===S.mv)||a.y-b.y);
- const g=`<div class="st-map"><svg id="stmap" class="st-an" viewBox="${smF(SMC.x)} ${smF(SMC.y)} ${smF(SMC.w)} ${smF(SMC.h)}" width="100%" role="group" aria-label="Harta lumii" style="touch-action:${SMC.w<SMW-.5?'none':'pan-y'}"><defs>${SMDEFS}</defs>${T.s}${smRoute(m,sv)}${terFog()}${smCapital()}${vs.map(v=>terVil(v,smVillage(v,v.id===S.mv))).join('')}${terMarks()}<rect width="${SMW}" height="${SMH}" fill="url(#st-vg)" pointer-events="none"/></svg><div class="st-zc"><button class="st-zb" onclick="mZoom(1.35)" aria-label="Mărește">+</button><button class="st-zb" onclick="mZoom(1/1.35)" aria-label="Micșorează">−</button><button class="st-zb" onclick="mReset()" aria-label="Vedere generală" title="Vedere generală">⌂</button></div></div>`;
+ const g=`<div class="st-map"><svg id="stmap" class="st-an" viewBox="${smF(SMC.x)} ${smF(SMC.y)} ${smF(SMC.w)} ${smF(SMC.h)}" width="100%" role="group" aria-label="Harta lumii" style="touch-action:${SMC.w<SMW-.5?'none':'pan-y'}"><defs>${SMDEFS}</defs>${hrTerrain(T)}${smRoute(m,sv)}${terFog()}${hrCapital()}${vs.map(v=>terVil(v,hrVillage(v,v.id===S.mv))).join('')}${terMarks()}<rect width="${SMW}" height="${SMH}" fill="url(#st-vg)" pointer-events="none"/></svg><div class="st-zc"><button class="st-zb" onclick="mZoom(1.35)" aria-label="Mărește">+</button><button class="st-zb" onclick="mZoom(1/1.35)" aria-label="Micșorează">−</button><button class="st-zb" onclick="mReset()" aria-label="Vedere generală" title="Vedere generală">⌂</button></div></div>`;
  return`<section><h2>Harta</h2><div class="mute">Satele boturilor, cu nivelul lor. Steag verde: bogat, gri: încă jefuit recent. Tu ești în centru. Trage de hartă ca s-o muți; rotița sau butoanele o măresc.</div>${g}<div class="st-lg"><span><i style="background:#f0d27a"></i>Teritoriul tău</span><span><i style="background:#4fa35e"></i>Bogat</span><span><i style="background:#7b7f82"></i>Jefuit recent</span><span>După iscodire: <b style="color:#c0504a">agresiv</b> · <b style="color:#d9a23a">negustor</b> · <b style="color:#8fb0c8">zidar</b></span></div></section>`+(sv?`<section><h2>${sv.n}</h2><div class="row"><span>Bot: ${sv.b}, nivel ${Math.max(1,S.lvl+sv.dl)}</span><span>Bogăție ${Math.round(wf(sv)*100)}%</span></div>${svInfo(sv)}${terVilInfo(sv)}<div class="row"><span class="mute">Drum: ${dst(sv)} ${dst(sv)==1?'zonă':'zone'}</span>${terVilBtns(sv)}</div></section>`:'<p class="mute">Atinge un sat ca să-l vezi.</p>')}
 function vMmap(){try{return vMnew()}catch(e){console.error('Harta ilustrată a eșuat, folosesc harta veche:',e);return vMold()}}
 
