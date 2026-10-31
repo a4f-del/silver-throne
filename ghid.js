@@ -22,10 +22,10 @@ const GHID = [
   { t: 'Bine ai venit!', n: 1,
     d: 'Ești eroul unui sat. Cobori în temnițe după pradă, forjezi echipament, îți strângi o echipă și, mai târziu, te lupți cu ceilalți jucători pentru Tronul de Argint. Ghidul îți arată unde e fiecare lucru: urmează săgeata aurie.' },
   { t: 'Prima coborâre', p: { t: 'c' }, c: () => C('d') >= 1, k: () => ghB('startD(0)'),
-    d: 'În <b>Coborâre</b> sunt temnițele. Intră în <b>Mina Cenușie</b>. Fiecare ușă costă 1 punct: ai 30, iar unul nou vine la 6 minute (îl vezi sus, lângă fulger).' },
-  { t: 'Deschide ușile', p: { t: 'c' }, c: () => C('l') >= 1, r: { g: 30, o: 15 },
+    d: 'În <b>Coborâre</b> sunt temnițele. Intră în <b>Mina Cenușie</b>. Fiecare cameră costă 1 punct, iar căpitanul 2: ai 30, iar unul nou vine la 6 minute (îl vezi sus, lângă fulger).' },
+  { t: 'Mergi prin temniță', p: { t: 'c' }, c: () => C('l') >= 1, r: { g: 30, o: 15 },
     k: () => { if (!S.d) return ghB('startD(0)'); if (S.d.f) return []; const d = ghB('door(', 1), l = ghB('leave('); return d.length ? [...d, ...l] : l; },
-    d: 'Alege o ușă: luptă, comoară sau odihnă. Luptele se dau singure. Când vrei să te oprești, apasă <b>„Ieși cu prada”</b>: tot ce ai strâns ajunge în sat. Dacă echipa cade, pierzi prada din acea coborâre.' },
+    d: 'Apasă <b>„Mai departe”</b>: în fiecare cameră te așteaptă o luptă, o comoară sau un foc de tabără, iar la final căpitanul. Luptele se dau singure. Când vrei să te oprești, apasă <b>„Ieși cu prada”</b>: tot ce ai strâns ajunge în sat. Dacă echipa cade, pierzi prada din acea coborâre.' },
   { t: 'Forjează o armă', p: { t: 'a', v: 'a' }, c: () => C('f') >= 1, r: { o: 15 },
     k: () => { const u = S.ui || {}; if (u.t != 'w') return ghQ('#v select[onchange^="ui(\'t\'"]'); if (+u.r !== 0) return ghQ('#v select[onchange^="ui(\'r\'"]'); return ghB('craft('); },
     d: 'Echipamentul se face în <b>Topitorie</b>, din minereu și materiale. Alege <b>Armă</b>, raritatea <b>Comun</b> și apasă <b>„Forjează”</b>. Timerul merge și cât faci altceva.' },
@@ -60,8 +60,8 @@ const ghFirst = () => !ghActive() && (S.tu < 0 || (GHID[S.tu] && GHID[S.tu].e));
 function ghHints() {
   const L = [], seen = S.ghs || {}, own = () => (S.map ? terOwnedV().length : 0);
   L.push({ k: 'fall', when: () => !S.d && S.fs.some(f => f.hp <= 0), p: { t: 'e' }, done: () => !S.fs.some(f => f.hp <= 0), t: 'Un luptător a căzut',
-    k2: () => { const r = ghB('revive('); return r.length ? r.slice(0, 1) : ghQ('#v .tm-c.dead').slice(0, 1); },
-    d: 'Luptătorii căzuți nu mai intră în luptă până nu îi ridici. În <b>Echipă</b>, alege luptătorul căzut și apasă <b>„Ridică”</b>: costă aur și îi lasă o cicatrice (−3 viață maximă). Răniții se vindecă mai ieftin, tot de acolo. Infirmeria (la Curte) scade ambele costuri.' });
+    k2: () => { const a = ghB('reviveAll('), r = ghB('revive('); return a.length ? a.slice(0, 1) : r.length ? r.slice(0, 1) : ghQ('#v .tm-c.dead').slice(0, 1); },
+    d: 'Luptătorii căzuți nu mai intră în luptă până nu îi ridici. În <b>Echipă</b> apasă <b>„Ridică toți căzuții”</b> (sau „Ridică” la unul singur): costă aur și le lasă câte o cicatrice (−3 viață maximă). Răniții se vindecă mai ieftin, tot de acolo. Infirmeria (la Curte) scade ambele costuri.' });
   L.push({ k: 'atac', when: () => !!(S.al && S.al.length), p: { t: 'a', v: 'z' }, done: () => S.tab === 'a' && S.vil === 'z', t: 'Satul tău a fost atacat',
     d: 'Satele din regiune te atacă din când în când. Dacă apărarea ține, primești tribut; dacă nu, pierzi puțin aur și minereu. În <b>Apărare</b> angajezi străjeri, iar Zidul (la Curte) îți crește apărarea.' });
   L.push({ k: 'spec', when: () => typeof spNeedN === 'function' && spNeedN() > 0, p: { t: 'e' }, done: () => typeof spNeedN === 'function' && spNeedN() === 0, t: 'Prima specializare',
@@ -194,7 +194,7 @@ function ghIdle() {
     if (pc != null && pc <= g && S.fs.length + S.rs.length < 8) add('🍺', `Angajează un mercenar la Han (de la ${pc} aur)`, "sdGo('a','vil','h')");
     if (typeof spNeedN === 'function' && spNeedN() > 0) add('⭐', 'Alege o specializare pentru un mercenar', "sdGo('e')");
     const dead = S.fs.filter(f => f.hp <= 0).length;
-    if (dead) add('☠', `Ridică ${dead === 1 ? 'luptătorul căzut' : dead + ' luptători căzuți'} (în Echipă)`, "sdGo('e')");
+    if (dead) add('☠', `Ridică ${dead === 1 ? 'luptătorul căzut' : 'toți cei ' + dead + ' căzuți'} (${dead * revCost()} aur)`, 'reviveAll()');
     else if (S.fs.some(f => f.hp > 0 && f.hp < mhp(f))) add('➕', 'Vindecă-ți răniții', "sdGo('e')");
     const en = typeof lwEn === 'function' ? lwEn() : null;
     if (S.lvl >= 5 && en && en.n >= 1) add('⚔', `Atacă alți jucători în Lume (${en.n} atacuri, fără puncte)`, "sdGo('m','mt','l')");

@@ -186,25 +186,25 @@ main{padding:8px 24px;max-width:940px}
 </style>
 <link rel="stylesheet" href="tema.css?v=2026.10.30-3">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="world-data.js?v=2026.10.31-5"></script>
-<script src="tron-logic.js?v=2026.10.31-5"></script>
-<script src="cladiri-art.js?v=2026.10.31-5"></script>
-<script src="teritorii.js?v=2026.10.31-5"></script>
-<script src="inventar.js?v=2026.10.31-5"></script>
-<script src="panou.js?v=2026.10.31-5"></script>
-<script src="ghid.js?v=2026.10.31-5"></script>
-<script src="specializari.js?v=2026.10.31-5"></script>
-<script src="tron.js?v=2026.10.31-5"></script>
-<script src="lume-art.js?v=2026.10.31-5"></script>
-<script src="sat.js?v=2026.10.31-5"></script>
-<script src="temnite.js?v=2026.10.31-5"></script>
-<script src="harta.js?v=2026.10.31-5"></script>
-<script src="lume.js?v=2026.10.31-5"></script>
-<script src="lume-pictat.js?v=2026.10.31-5"></script>
-<script src="tema.js?v=2026.10.31-5"></script>
-<script src="echipa.js?v=2026.10.31-5"></script>
-<script src="erou.js?v=2026.10.31-5"></script>
-<script src="cont.js?v=2026.10.31-5"></script>
+<script src="world-data.js?v=2026.10.31-7"></script>
+<script src="tron-logic.js?v=2026.10.31-7"></script>
+<script src="cladiri-art.js?v=2026.10.31-7"></script>
+<script src="teritorii.js?v=2026.10.31-7"></script>
+<script src="inventar.js?v=2026.10.31-7"></script>
+<script src="panou.js?v=2026.10.31-7"></script>
+<script src="ghid.js?v=2026.10.31-7"></script>
+<script src="specializari.js?v=2026.10.31-7"></script>
+<script src="tron.js?v=2026.10.31-7"></script>
+<script src="lume-art.js?v=2026.10.31-7"></script>
+<script src="sat.js?v=2026.10.31-7"></script>
+<script src="temnite.js?v=2026.10.31-7"></script>
+<script src="harta.js?v=2026.10.31-7"></script>
+<script src="lume.js?v=2026.10.31-7"></script>
+<script src="lume-pictat.js?v=2026.10.31-7"></script>
+<script src="tema.js?v=2026.10.31-7"></script>
+<script src="echipa.js?v=2026.10.31-7"></script>
+<script src="erou.js?v=2026.10.31-7"></script>
+<script src="cont.js?v=2026.10.31-7"></script>
 </head>
 <body>
 <header><h1><img class="hd-tron" src="imagini/logo-tron.webp" alt="" width="34" height="40"><span class="hd-nm">Silver Throne</span></h1><div class="hs" id="hs"></div></header>
@@ -226,7 +226,7 @@ const CL={'Războinic':{hp:40,atk:6,sp:'Spargere',d:'lovitură grea, poate ameț
 const BW=['Topor','Sabie','Ghioagă'],BA=['Pieptar','Cămașă de zale','Scut-pieptar'],BJ=['Inel','Amuletă','Brățară'],BH=['Coif','Cască','Coroană de fier'],BB=['Cizme','Cizme întărite','Jambiere'];
 const PW=[{n:'Zimțat',dmg:3,m:'zim'},{n:'Sângeros',bleed:30,m:'sng'},{n:'Străjuitor',dmg:2,vd:4,m:'pia'},{n:'Ascuțit',lv:6,dmg:2,crit:6,m:'fie'},{n:'Otrăvit',lv:12,dmg:2,bleed:45,m:'ven'},{n:'Pustiitor',lv:20,dmg:6,pd:4,m:'cen'},{n:'Fărâmător',lv:30,dmg:5,pd:8,crit:4,m:'osn'},{n:'Sfâșietor',lv:16,dmg:3,bleed:35,m:'sng'},{n:'Nimicitor',lv:40,dmg:8,pd:10,crit:6,m:'cen'}],PA=[{n:'Blindat',def:2,m:'bli'},{n:'Călit',hp:10,m:'cal'},{n:'Fortificat',def:1,vd:5,m:'pia'},{n:'Masiv',lv:8,hp:14,def:1,m:'fie'},{n:'Întărit',lv:14,def:3,pf:3,m:'fie'},{n:'Vindecător',lv:18,hp:8,heal:12,m:'izv'},{n:'Neînduplecat',lv:28,def:4,pf:6,ph:4,m:'cen'},{n:'Oțelit',lv:22,def:4,hp:12,m:'bli'},{n:'Inexpugnabil',lv:40,def:6,pf:9,ph:6,m:'cen'}],PJ=[{n:'Fermecat',crit:5},{n:'Strălucitor',bleed:20},{n:'Ocrotitor',vd:6},{n:'Înstărit',lv:6,loot:12},{n:'Izvorât',lv:10,heal:10},{n:'Regal',lv:25,pd:5,ph:5},{n:'Vrăjit',lv:15,crit:8,heal:8},{n:'Imperial',lv:40,pd:8,ph:8,pf:4}];
 const SF=[{n:'al Vulturului',crit:10,m:'vul'},{n:'al Prăzii',loot:20,m:'pra'},{n:'al Răbdării',hp:6,m:'rab'},{n:'al Izvorului',heal:20,m:'izv'},{n:'al Zidarului',vd:8,m:'pia'},{n:'al Lupului',lv:5,dmg:2,crit:5,m:'osn'},{n:'al Titanului',lv:10,hp:12,ph:3,m:'fie'},{n:'al Furiei',lv:15,dmg:3,bleed:20,m:'sng'},{n:'al Păzitorului',lv:20,def:3,pf:4,m:'bli'},{n:'al Eternității',lv:35,pd:6,ph:6,pf:6,m:'cen'},{n:'al Săgeții',lv:12,crit:12,pd:2,m:'vul'},{n:'al Lunii',lv:25,heal:30,ph:3,m:'izv'},{n:'al Zeilor',lv:42,pd:8,ph:8,pf:8,heal:15,m:'cen'}];
-const DR={l:'Se aud arme în sală',c:'O lumină aurie în depărtare',x:'Podea suspectă, cu pietre slăbite',o:'Un foc mic de tabără'};
+const DR={l:'Se aud arme în sala următoare',c:'O lumină aurie în depărtare: o comoară',x:'Podea suspectă, cu pietre slăbite',o:'Un foc mic de tabără: echipa se odihnește'};
 let S;
 const mk=(n,c)=>({n,c,hp:CL[c].hp,sc:0});
 function fresh(){return{bp:120,lvl:1,xp:0,gold:40,ore:24,pts:MXP(),ptsT:Date.now(),slots:4,forge:[null,null,null,null],inv:[],pity:0,tab:'a',ui:{t:'w',l:1,r:0,p:0,s:0,q:0},fs:[{...mk('Eroul','Campion'),h:1},mk('Elena','Arcaș'),mk('Toma','Paznic')],d:null,msg:'',rs:[],tu:0,pool:{t:0,c:[]},mat:{zim:6,sng:6,bli:6,cal:6,vul:6,pra:6,rab:6,izv:6,jwf0:4,jwb0:2,esf0:1}}}
@@ -281,11 +281,19 @@ function unequip(k){const e=E(cur());S.inv.push(e[k]);e[k]=null;go()}
 function sell(i){const it=S.inv[i];if(!it)return go();if(it.lk){S.msg='Obiect blocat 🔒. Deblochează-l mai întâi.';return go()}if(it.lg&&!confirm('Acesta este un obiect legendar. Sigur îl vinzi?'))return;S.gold+=4+it.l*3*(it.r+1);S.inv.splice(i,1);S.msg='';go()}
 function dis(i){const it=S.inv[i];if(!it)return go();if(it.lk){S.msg='Obiect blocat 🔒. Deblochează-l mai întâi.';return go()}if(it.lg&&!confirm('Acesta este un obiect legendar. Sigur îl dezmembrezi?'))return;const o=Math.floor(cost(it.l,it.r)/2);S.ore+=o;(it.m||[]).forEach(k=>give(k,1));S.inv.splice(i,1);S.msg=`Dezmembrat: +${o} minereu.`;go()}
 function heal(){const c=Math.round(6*S.lvl*Math.pow(.96,BL().i)),al=[...S.fs,...S.rs].filter(f=>f.hp>0&&f.hp<mhp(f));if(!al.length)S.msg='Nimeni nu are nevoie de vindecare.';else if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;al.forEach(f=>f.hp=mhp(f));S.msg='Răniții au fost bandajați.'}go()}
+/* ridică toți căzuții dintr-un clic: întâi echipa, apoi rezerva, cât ajunge aurul; fiecare primește o cicatrice, ca la ridicarea simplă */
+const revCost=()=>Math.round(15*S.lvl*Math.pow(.96,BL().i)),deadAll=()=>[...S.fs,...S.rs].filter(f=>f.hp<=0);
+function reviveAll(){const c=revCost(),dead=deadAll();if(!dead.length){S.msg='Nimeni nu e căzut.';return go()}let n=0;for(const f of dead){if(S.gold<c)break;S.gold-=c;f.sc++;f.hp=Math.ceil(mhp(f)/2);n++}
+ S.msg=!n?'Îți trebuie '+c+' aur pentru fiecare luptător căzut.':n===dead.length?`Ai ridicat ${n===1?'un luptător':n+' luptători'} (−${n*c} aur). Fiecare revine cu o cicatrice (−3 viață maximă).`:`Aurul a ajuns pentru ${n} din ${dead.length} luptători (−${n*c} aur). Ceilalți așteaptă.`;go()}
+function reviveAllBtn(cls){const d=deadAll().length;return d?`<button class="${cls||'d'}" onclick="reviveAll()">Ridică ${d===1?'luptătorul căzut':'toți căzuții ('+d+')'} · ${d*revCost()} aur</button>`:''}
 function revive(i,k){const c=Math.round(15*S.lvl*Math.pow(.96,BL().i)),f=(k?S.rs:S.fs)[i];if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;f.sc++;f.hp=Math.ceil(mhp(f)/2);S.msg=f.n+' revine cu o cicatrice (-3 viață maximă).'}go()}
 function startD(i){const g=DG[i||0];if(S.lvl<g.lv){S.msg='Cerință: nivel '+g.lv+'.';return go()}if(!S.fs.some(f=>f.hp>0)){S.msg='Toți luptătorii sunt căzuți. Du-te la infirmerie.';return go()}if(g.ev){const e=evs();if(e.k<=0){S.msg='Nu mai ai chei pentru evenimentul acestei săptămâni.';return go()}e.k--}const kk=g.ev?1.4+S.lvl*.055:g.k;S.d={room:0,rooms:g.rooms,k:kk,rw:1+(kk-1)*.6,bn:g.bn,di:i||0,ev:g.ev?1:0,loot:{gold:0,ore:0,xp:0,m:{}},f:null,done:false};S.d.doors=doors();S.fl=null;S.msg='';cn('d');go()}
-function doors(){const d=S.d;if(d.fx&&d.room!=d.rooms-1)return[{t:'l'}];return d.room==d.rooms-1?[{t:'b'}]:[{t:P(['l','l','c','x','o'])},{t:P(['l','l','c','x','o'])}]}
-function door(i){const d=S.d,t=d.doors[i].t,c=t=='b'?(d.raid!=null?1:3):1;S.msg='';if(S.pts<c){S.msg='Îți trebuie '+c+(c>1?' puncte.':' punct.')+' Se regenerează câte unul la 6 minute.';return go()}
- spend(c);d.room++;
+/* o singură cameră înainte (luptă, comoară sau foc de tabără); ultima e căpitanul */
+function doors(){const d=S.d;if(d.fx&&d.room!=d.rooms-1)return[{t:'l'}];return d.room==d.rooms-1?[{t:'b'}]:[{t:P(['l','l','l','c','o'])}]}
+/* costul unei camere: 1 punct, căpitanul 2 (la raiduri 1); evenimentul cu chei e gratuit */
+const dCost=(d,t)=>d.ev?0:t=='b'?(d.raid!=null?1:2):1;
+function door(i){const d=S.d,t=d.doors[i].t,c=dCost(d,t);S.msg='';if(c>0&&S.pts<c){S.msg='Îți trebuie '+c+(c>1?' puncte.':' punct.')+' Se regenerează câte unul la 6 minute.';return go()}
+ if(c>0)spend(c);d.room++;
  if(t=='l'||t=='b'){startF(t=='b');if(S.auto!==false){autoRun();return}}
  else{if(t=='c'){const g=Math.round((RI(8,14)+S.lvl*4)*(d.rw||1)),o=RI(3,6)+S.lvl;d.loot.gold+=g;d.loot.ore+=o;lm(pm(),RI(1,2));rdrop(false);S.msg=`Comoară: +${g} aur, +${o} minereu și materiale.`}
   else if(t=='x'){const al=S.fs.filter(f=>f.hp>0),f=P(al),dm=Math.max(3,Math.round(mhp(f)*.15));f.hp=Math.max(1,f.hp-dm);S.msg=`Capcană! ${f.n} pierde ${dm} viață.`}
@@ -416,10 +424,10 @@ function vil(k){S.vil=k;S.msg='';go()}
 /* Satul: fără S.vil = pagina de start cu clădirile (sat.js); altfel banda „‹ Sat” + clădirea */
 function vV(){const k=S.vil;if(!k||!VL.some(x=>x[0]===k))return vHub();return vBar(k)+(k=='a'?vA():k=='h'?vB():k=='p'?vP():k=='l'?vLux():k=='d'?vD():k=='z'?vZ():k=='q'?vBot():k=='x'?vMis():vT())}
 const QN=['alb','verde','albastru','mov','roșu'];
-const DG=[{n:'Mina Cenușie',lv:1,k:1,rooms:6,w:[100],rm:1,bn:'Căpitanul Cenușii'},{n:'Catacombele Uitate',lv:8,k:1.5,rooms:8,w:[60,30,10],rm:2,bn:'Regele Oaselor'},{n:'Cetatea Scufundată',lv:18,k:2.1,rooms:10,w:[35,35,20,10],rm:3,bn:'Căpitanul Înecat'},{n:'Abisul Cenușiu',lv:30,k:3,rooms:12,w:[15,25,30,20,10],rm:3,bn:'Stăpânul Abisului'}];
+const DG=[{n:'Mina Cenușie',lv:1,k:1,rooms:4,w:[100],rm:1,bn:'Căpitanul Cenușii'},{n:'Catacombele Uitate',lv:8,k:1.5,rooms:5,w:[60,30,10],rm:2,bn:'Regele Oaselor'},{n:'Cetatea Scufundată',lv:18,k:2.1,rooms:6,w:[35,35,20,10],rm:3,bn:'Căpitanul Înecat'},{n:'Abisul Cenușiu',lv:30,k:3,rooms:7,w:[15,25,30,20,10],rm:3,bn:'Stăpânul Abisului'}];
 const mn=k=>/\d$/.test(k)?MA[k.slice(0,-1)]+' ('+QN[+k.slice(-1)]+')':(k=='ore'?'Minereu':MA[k]);
 function rdrop(b){const g=DG[S.d.di||0],qs=g.w,t=(r,p)=>{if(Math.random()<p){let x=Math.random()*100,q=0;for(;q<qs.length-1&&x>=qs[q];q++)x-=qs[q];lm(RM[r]+q,1)}};t(1,b?.9:.2);if(g.rm>=2)t(2,b?.7:.08);if(g.rm>=3)t(3,b?.5:.04)}
-DG.push({n:'Peștera Lupilor',lv:4,k:1.25,rooms:6,w:[100],rm:1,bn:'Alfa Haitei'},{n:'Fortul Părăsit',lv:13,k:1.8,rooms:8,w:[50,35,15],rm:2,bn:'Comandantul Fantomă'},{n:'Mlaștina Putredă',lv:24,k:2.6,rooms:10,w:[25,35,25,15],rm:3,bn:'Hidra Mlaștinii'},{n:'Forja Veche',lv:38,k:3.8,rooms:12,w:[10,20,30,25,15],rm:3,bn:'Fierarul Ars'},{n:'Tronul Cenușiu',lv:46,k:4.8,rooms:14,w:[5,15,25,30,25],rm:3,bn:'Regele Cenușiu'});
+DG.push({n:'Peștera Lupilor',lv:4,k:1.25,rooms:4,w:[100],rm:1,bn:'Alfa Haitei'},{n:'Fortul Părăsit',lv:13,k:1.8,rooms:5,w:[50,35,15],rm:2,bn:'Comandantul Fantomă'},{n:'Mlaștina Putredă',lv:24,k:2.6,rooms:6,w:[25,35,25,15],rm:3,bn:'Hidra Mlaștinii'},{n:'Forja Veche',lv:38,k:3.8,rooms:7,w:[10,20,30,25,15],rm:3,bn:'Fierarul Ars'},{n:'Tronul Cenușiu',lv:46,k:4.8,rooms:8,w:[5,15,25,30,25],rm:3,bn:'Regele Cenușiu'});
 const MPV=()=>{const m=S.map||(S.map=mapGen());m.vs.forEach(v=>{if(!v.st){v.st=P(['agr','neg','zid']);v.gd=0;v.r=+(v.st=='neg'?1.1+Math.random()*.5:v.st=='zid'?.9+Math.random()*.4:.7+Math.random()*.5).toFixed(2)}});return m},wf=v=>Math.min(1,(Date.now()-v.t)/18e5),dst=v=>Math.max(Math.abs(v.x-3),Math.abs(v.y-2));
 function mapGen(){const NV=['Valea Cenușie','Pârâul Lung','Stânca Neagră','Moara Veche','Dealul Corbilor','Podul Rupt','Fântâna Seacă','Plaiul Pustiu'],NB=['Arnulf','Brenna','Corvin','Dagmar','Eskil','Freya','Gunnar','Hilda'],u=new Set(['3,2']),vs=[];for(let i=0;i<8;i++){let x,y;do{x=RI(0,6);y=RI(0,4)}while(u.has(x+','+y));u.add(x+','+y);vs.push({id:i,n:NV[i],b:NB[i],x,y,dl:RI(-3,5),r:+(.7+Math.random()*.8).toFixed(2),t:0})}return{vs}}
 function mv(i){S.msel=null;S.mv=i;S.msg='';go()}
@@ -571,7 +579,7 @@ function bcraft(){const b=BT();if(S.forge.findIndex(x=>!x)<0)return 0;const ts=b
 function braid(){if(S.pts<3||hpp()<.7||S.fs.some(f=>f.hp<=0))return 0;const m=MPV().vs.filter(v=>v.o!=='p'&&wf(v)>=.6&&v.dl<=2&&est(v)>=EB&&S.pts>=2+dst(v)).sort((a,b)=>wf(b)*b.r-wf(a)*a.r);if(!m.length)return 0;const v=m[0],t0=S.tab;raid(v.id);S.tab=t0;if(S.d&&S.d.f)autoRun();bl('Raid: '+v.n);return 1}
 function bdown(){const b=BT();if(hpp()<.8||S.fs.some(f=>f.hp<=0))return 0;let i=b.di;if(i<0){DG.forEach((g,j)=>{if(!g.ev&&g.lv<=Math.max(1,S.lvl-2)&&(i<0||g.lv>DG[i].lv))i=j})}const g=DG[i];if(!g||S.lvl<g.lv||S.pts<Math.min(MXP(),g.rooms+2))return 0;startD(i);bl('Coborâre: '+g.n);return 1}
 function bdesc(){const d=S.d;if(d.f){autoRun();return 1}if(d.done){leave();bl('Ieșit cu prada din '+(d.raid!=null?'raid':DG[d.di||0].n));return 1}const h=hpp();if(h<.35){leave();bl('Retragere: echipa e rănită');return 1}
- const pr=h<.7?['o','c','l','x','b']:['c','l','o','x','b'],ds=d.doors.map((x,i)=>[x,i]).filter(([x])=>x.t!='b'||h>=.5).sort((a,b)=>pr.indexOf(a[0].t)-pr.indexOf(b[0].t));if(!ds.length){leave();bl('Retragere înainte de căpitan');return 1}const [x,i]=ds[0],c=x.t=='b'?(d.raid!=null?1:3):1;if(S.pts<c)return 0;door(i);return 1}
+ const pr=h<.7?['o','c','l','x','b']:['c','l','o','x','b'],ds=d.doors.map((x,i)=>[x,i]).filter(([x])=>x.t!='b'||h>=.5).sort((a,b)=>pr.indexOf(a[0].t)-pr.indexOf(b[0].t));if(!ds.length){leave();bl('Retragere înainte de căpitan');return 1}const [x,i]=ds[0],c=dCost(d,x.t);if(S.pts<c)return 0;door(i);return 1}
 function botTick0(){const b=BT(),n=Date.now();if(!b.on||!S.prem||n-(S.bn||0)<1500)return;S.bn=n;if(S.d&&bdesc())return;
  if(b.f)for(let i=0;i<S.forge.length;i++){const s=S.forge[i];if(s&&n>=s.end){collect(i);bl(s.ok?'Forjat: '+s.item.name:'Forjare eșuată');return}}
  if(b.eq&&bequip())return;if(!S.d&&b.hl&&bheal())return;if(b.f&&bcraft())return;if(!S.d){if(b.r&&braid())return;if(b.d&&bdown())return}}
@@ -591,7 +599,7 @@ function rw(big){const L=S.lvl,g=(30+8*L)*(big?2:1),o=Math.round((4+L*.5)*(big?2
 function claim(i){const x=dm().list[i];if(x.g>=x.n&&!x.c){x.c=1;S.msg='Misiune îndeplinită: '+rw(false)}go()}
 function claimB(){const m=dm();if(m.list.every(x=>x.c)&&!m.bonus){m.bonus=1;S.msg='Bonus zilnic: '+rw(true)}go()}
 function vMis(){const m=dm();return`<section><h2>Misiuni zilnice</h2><div class="mute">3 misiuni noi în fiecare zi. Botul nu le avansează. Recompensele cresc cu nivelul tău: aur, minereu, uneori materiale sau un obiect.</div>${m.list.map((x,i)=>`<div class="row"><span>${x.t}<br><span class="mute">${Math.min(x.g,x.n)}/${x.n}</span></span>${x.c?'<span class="mute">Revendicat</span>':x.g>=x.n?`<button class="p" onclick="claim(${i})">Revendică</button>`:''}</div>${bar(Math.min(x.g,x.n),x.n)}`).join('')}${m.list.every(x=>x.c)?(m.bonus?'<div class="mute">Bonus revendicat. Revino mâine.</div>':'<div class="row"><span>Toate 3 făcute: bonus</span><button class="p" onclick="claimB()">Revendică bonusul</button></div>'):''}</section>`}
-DG.push({n:'Cripta Furtunii',lv:8,k:1,rooms:8,w:[60,30,10],rm:2,bn:'Străjerul Furtunii',ev:1});
+DG.push({n:'Cripta Furtunii',lv:8,k:1,rooms:5,w:[60,30,10],rm:2,bn:'Străjerul Furtunii',ev:1});
 const wkk=()=>{const d=new Date(),o=(d.getDay()+6)%7,m=new Date(d.getFullYear(),d.getMonth(),d.getDate()-o);return m.getFullYear()+'-'+(m.getMonth()+1)+'-'+m.getDate()},evLeft=()=>7-(new Date().getDay()+6)%7;
 function evs(){const k=wkk();if(!S.ev||S.ev.w!=k)S.ev={w:k,k:3};return S.ev}
 function evCard(){const e=evs(),i=DG.findIndex(g=>g.ev),ok=S.lvl>=DG[i].lv;return`<section style="border-left-color:var(--ember)"><h2>Eveniment săptămânal: ${DG[i].n}</h2><div class="mute">Cripta păstrează Cheia Furtunii și face parte din campania Tronului Cenușiu (capitolul 4). Ai ${e.k} din 3 chei, iar cheile se refac peste ${evLeft()} ${evLeft()==1?'zi':'zile'}. O intrare costă o cheie. La căpitan ai 60% șansă la o relicvă de nivelul tău: verde 70%, albastru 20%, mov 8%, roșu 2%.</div><button class="p" onclick="startD(${i})"${ok&&e.k>0?'':' disabled'}>Intră (1 cheie)${ok?'':', nivel '+DG[i].lv}</button></section>`}
@@ -616,12 +624,12 @@ function vA(){const u=S.ui,lv=[];if(((pls(u)[u.p||0])||{}).lv>u.l)u.p=0;if(SF[u.
  <div class="mute">Necesar: ${nh(u)}</div><div class="row"><span>Durată</span><span>${fmt(RAR[u.r].t*1000*Math.pow(.96,BL().f)*(1-terB('forge')/100))}</span></div>
  ${S.pity?`<div class="mute">Bonus după ${S.pity} eșec${S.pity>1?'uri':''}: +${S.pity*5}% la următoarea forjare, până la prima reușită</div>`:''}
  <div class="row"><span class="mute">Durate scurtate pentru test</span><button class="p" onclick="craft()">Forjează</button></div></section>`;return h}
-function vC(){const d=S.d;if(!d)return`<section><h2>Coborâre</h2><p style="display:none">Șase încăperi, ultima cu un căpitan. Fiecare ușă costă un punct, iar căpitanul trei. Poți ieși oricând cu prada.</p><div class="mute">Punctele (sus) se cheltuiesc la uși: 1 punct pe ușă, 3 la căpitan. Se regenerează câte 1 la 6 minute, până la 30, și se adună și cu pagina închisă. Dacă îi lipsesc, așteaptă sau folosește Topitoria, care nu costă puncte.</div>${S.fs.some(f=>f.hp<=0)?'<div class="r4">Ai luptători căzuți: ridică-i din fila Echipă înainte să cobori.</div>':''}${botCard()}</section>${vDung()}`;
+function vC(){const d=S.d;if(!d)return`<section><h2>Coborâre</h2><p style="display:none">Câteva încăperi, ultima cu un căpitan. Fiecare cameră costă un punct, iar căpitanul două. Poți ieși oricând cu prada.</p><div class="mute">Punctele (sus) se cheltuiesc în temnițe: 1 punct pe cameră, 2 la căpitan; Cripta Furtunii e gratuită, cere doar o cheie. Se regenerează câte 1 la 6 minute, până la 30, și se adună și cu pagina închisă. Dacă îi lipsesc, așteaptă sau folosește Topitoria, care nu costă puncte.</div>${S.fs.some(f=>f.hp<=0)?'<div class="row"><span class="r4">Ai luptători căzuți: ridică-i înainte să cobori.</span>'+reviveAllBtn()+'</div>':''}${botCard()}</section>${vDung()}`;
  const f=d.f;let h=`<section><h2>${d.raid!=null?(d.lbl||'Raid')+': '+d.rn:DG[d.di||0].n}: ${d.room}/${d.rooms}</h2><div class="mute">Pradă: ${d.loot.gold} aur, ${d.loot.ore} minereu, ${Object.values(d.loot.m||{}).reduce((a,b)=>a+b,0)} materiale, ${d.loot.xp} exp.</div><div class="row"><button onclick="tg('auto')">Luptă: ${S.auto!==false?'automat':'manual'}</button><select onchange="tg('rule',this.value)">${[['weak','Ținta: cel mai slab'],['strong','Ținta: cel mai puternic'],['first','Ținta: primul']].map(([v,n])=>`<option value="${v}"${(S.rule||'weak')==v?' selected':''}>${n}</option>`).join('')}</select></div>${S.fl&&!f?'<div class="log">'+S.fl.map(x=>'<div>'+x+'</div>').join('')+'</div>':''}`;
  if(f){const a=S.fs[f.i];h+=f.es.map((e,i)=>e.hp>0?enCard(e,i,i==f.t):'').join('');   /* căpitanii cu portret: temnite.js */
   h+=`<div class="log">${f.log.slice(-3).map(x=>`<div>${x}</div>`).join('')}</div><div class="row"><span style="display:flex;gap:10px;align-items:center">${av(a,40)}<b>Tura lui ${a.n}</b></span><span class="mute">${a.hp}/${mhp(a)} viață</span></div><div class="row"><button onclick="act('n')">Lovește</button><button class="p" onclick="act('s')"${a.cd>0?' disabled':''}>${CL[a.c].sp}${a.cd>0?' ('+a.cd+')':''}</button><button onclick="autoRun()">Automat</button></div><div class="mute">${CL[a.c].sp}: ${CL[a.c].d}. Atinge un inamic ca să-l ții în țintă.</div>`}
  else if(d.done)h+='<p>Mina e curățată.</p>';
- else h+='<div class="mute">Indiciile: arme = luptă, lumină aurie = comoară, podea suspectă = capcană, foc = odihnă.</div>'+d.doors.map((x,i)=>`<div class="row"><span>${x.t=='b'?bossMini(d.bn)+'Poarta căpitanului':DR[x.t]}</span><button class="p" onclick="door(${i})">Intră (${x.t=='b'?(d.raid!=null?1:3):1} p)</button></div>`).join('');
+ else h+=d.doors.map((x,i)=>{const c=dCost(d,x.t);return`<div class="row dg-next"><span>${x.t=='b'?bossMini(d.bn)+'<b>Poarta căpitanului</b>':DR[x.t]}<br><small class="mute">Camera ${d.room+1} din ${d.rooms}</small></span><button class="p" onclick="door(${i})">${x.t=='b'?'Înfruntă căpitanul':'Mai departe'} · ${c?c+' p':'gratuit'}</button></div>`}).join('');
  return h+`</section>${f?'<button class="d" onclick="flee()">Fugi (pierzi jumătate din pradă)</button>':'<button class="d" onclick="leave()">Ieși cu prada</button>'}`}
 let portretSelectat = -1;
 function portrait0(f){

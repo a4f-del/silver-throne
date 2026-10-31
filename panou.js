@@ -47,7 +47,7 @@ function sdTeam() {
     return `<div class="sd-f ${cls}"><span class="sd-fn">${tEsc(f.n)}</span><span class="sd-fh">${hp <= 0 ? '☠ căzut' : hp + '/' + m}</span><i class="sdb"><i style="width:${p}%"></i></i></div>`;
   }).join('');
   const bench = (S.rs || []).length;
-  return `<div class="sd-t">Echipa${bench ? ` <span class="mute">· +${bench} în rezervă</span>` : ''}</div>${rows}${hurt ? `<button class="sd-heal" onclick="heal()">Vindecă răniții · ${cost} aur</button>` : ''}`;
+  return `<div class="sd-t">Echipa${bench ? ` <span class="mute">· +${bench} în rezervă</span>` : ''}</div>${rows}${hurt ? `<button class="sd-heal" onclick="heal()">Vindecă răniții · ${cost} aur</button>` : ''}${typeof reviveAllBtn === 'function' ? reviveAllBtn('sd-heal') : ''}`;
 }
 
 function sdRow(ic, txt, right, onclick, hot) {
