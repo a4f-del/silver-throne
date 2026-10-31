@@ -186,22 +186,23 @@ main{padding:8px 24px;max-width:940px}
 </style>
 <link rel="stylesheet" href="tema.css?v=2026.10.30-3">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="world-data.js?v=2026.10.31-1"></script>
-<script src="tron-logic.js?v=2026.10.31-1"></script>
-<script src="cladiri-art.js?v=2026.10.31-1"></script>
-<script src="teritorii.js?v=2026.10.31-1"></script>
-<script src="inventar.js?v=2026.10.31-1"></script>
-<script src="panou.js?v=2026.10.31-1"></script>
-<script src="ghid.js?v=2026.10.31-1"></script>
-<script src="specializari.js?v=2026.10.31-1"></script>
-<script src="tron.js?v=2026.10.31-1"></script>
-<script src="lume-art.js?v=2026.10.31-1"></script>
-<script src="sat.js?v=2026.10.31-1"></script>
-<script src="lume.js?v=2026.10.31-1"></script>
-<script src="tema.js?v=2026.10.31-1"></script>
-<script src="echipa.js?v=2026.10.31-1"></script>
-<script src="erou.js?v=2026.10.31-1"></script>
-<script src="cont.js?v=2026.10.31-1"></script>
+<script src="world-data.js?v=2026.10.31-2"></script>
+<script src="tron-logic.js?v=2026.10.31-2"></script>
+<script src="cladiri-art.js?v=2026.10.31-2"></script>
+<script src="teritorii.js?v=2026.10.31-2"></script>
+<script src="inventar.js?v=2026.10.31-2"></script>
+<script src="panou.js?v=2026.10.31-2"></script>
+<script src="ghid.js?v=2026.10.31-2"></script>
+<script src="specializari.js?v=2026.10.31-2"></script>
+<script src="tron.js?v=2026.10.31-2"></script>
+<script src="lume-art.js?v=2026.10.31-2"></script>
+<script src="sat.js?v=2026.10.31-2"></script>
+<script src="temnite.js?v=2026.10.31-2"></script>
+<script src="lume.js?v=2026.10.31-2"></script>
+<script src="tema.js?v=2026.10.31-2"></script>
+<script src="echipa.js?v=2026.10.31-2"></script>
+<script src="erou.js?v=2026.10.31-2"></script>
+<script src="cont.js?v=2026.10.31-2"></script>
 </head>
 <body>
 <header><h1><span class="cr">♛</span> Silver Throne</h1><div class="hs" id="hs"></div></header>
@@ -613,12 +614,12 @@ function vA(){const u=S.ui,lv=[];if(((pls(u)[u.p||0])||{}).lv>u.l)u.p=0;if(SF[u.
  <div class="mute">Necesar: ${nh(u)}</div><div class="row"><span>Durată</span><span>${fmt(RAR[u.r].t*1000*Math.pow(.96,BL().f)*(1-terB('forge')/100))}</span></div>
  ${S.pity?`<div class="mute">Bonus după ${S.pity} eșec${S.pity>1?'uri':''}: +${S.pity*5}% la următoarea forjare, până la prima reușită</div>`:''}
  <div class="row"><span class="mute">Durate scurtate pentru test</span><button class="p" onclick="craft()">Forjează</button></div></section>`;return h}
-function vC(){const d=S.d;if(!d)return`<section><h2>Coborâre</h2><p style="display:none">Șase încăperi, ultima cu un căpitan. Fiecare ușă costă un punct, iar căpitanul trei. Poți ieși oricând cu prada.</p><div class="mute">Punctele (sus) se cheltuiesc la uși: 1 punct pe ușă, 3 la căpitan. Se regenerează câte 1 la 6 minute, până la 30, și se adună și cu pagina închisă. Dacă îi lipsesc, așteaptă sau folosește Topitoria, care nu costă puncte.</div>${S.fs.some(f=>f.hp<=0)?'<div class="r4">Ai luptători căzuți: ridică-i din fila Echipă înainte să cobori.</div>':''}${botCard()}</section>${evCard()}${DG.map((g,i)=>[g,i]).sort((a,b)=>a[0].lv-b[0].lv).map(([g,i])=>g.ev||S.lvl+10<g.lv?'':`<section><h2>${g.n}</h2><div class="mute">${g.rooms} încăperi · inamici ×${g.k} · cerință: nivel ${g.lv}</div><div class="mute">${g.rm>=3?'Cristale, esențe și calități rare':g.rm==2?'Cristale rare, calități medii':'Cristale comune, calitate slabă'}</div><button class="p" onclick="startD(${i})"${S.lvl<g.lv?' disabled':''}>Intră</button></section>`).join('')}`;
+function vC(){const d=S.d;if(!d)return`<section><h2>Coborâre</h2><p style="display:none">Șase încăperi, ultima cu un căpitan. Fiecare ușă costă un punct, iar căpitanul trei. Poți ieși oricând cu prada.</p><div class="mute">Punctele (sus) se cheltuiesc la uși: 1 punct pe ușă, 3 la căpitan. Se regenerează câte 1 la 6 minute, până la 30, și se adună și cu pagina închisă. Dacă îi lipsesc, așteaptă sau folosește Topitoria, care nu costă puncte.</div>${S.fs.some(f=>f.hp<=0)?'<div class="r4">Ai luptători căzuți: ridică-i din fila Echipă înainte să cobori.</div>':''}${botCard()}</section>${vDung()}`;
  const f=d.f;let h=`<section><h2>${d.raid!=null?(d.lbl||'Raid')+': '+d.rn:DG[d.di||0].n}: ${d.room}/${d.rooms}</h2><div class="mute">Pradă: ${d.loot.gold} aur, ${d.loot.ore} minereu, ${Object.values(d.loot.m||{}).reduce((a,b)=>a+b,0)} materiale, ${d.loot.xp} exp.</div><div class="row"><button onclick="tg('auto')">Luptă: ${S.auto!==false?'automat':'manual'}</button><select onchange="tg('rule',this.value)">${[['weak','Ținta: cel mai slab'],['strong','Ținta: cel mai puternic'],['first','Ținta: primul']].map(([v,n])=>`<option value="${v}"${(S.rule||'weak')==v?' selected':''}>${n}</option>`).join('')}</select></div>${S.fl&&!f?'<div class="log">'+S.fl.map(x=>'<div>'+x+'</div>').join('')+'</div>':''}`;
- if(f){const a=S.fs[f.i];h+=f.es.map((e,i)=>e.hp>0?`<button class="en${i==f.t?' t':''}" onclick="tgt(${i})">${e.n}${e.bl?' · sângerează':''}${e.st?' · amețit':''}${bar(e.hp,e.mh,'e')}<span class="mute">${e.hp}/${e.mh} viață</span></button>`:'').join('');
+ if(f){const a=S.fs[f.i];h+=f.es.map((e,i)=>e.hp>0?enCard(e,i,i==f.t):'').join('');   /* căpitanii cu portret: temnite.js */
   h+=`<div class="log">${f.log.slice(-3).map(x=>`<div>${x}</div>`).join('')}</div><div class="row"><span style="display:flex;gap:10px;align-items:center">${av(a,40)}<b>Tura lui ${a.n}</b></span><span class="mute">${a.hp}/${mhp(a)} viață</span></div><div class="row"><button onclick="act('n')">Lovește</button><button class="p" onclick="act('s')"${a.cd>0?' disabled':''}>${CL[a.c].sp}${a.cd>0?' ('+a.cd+')':''}</button><button onclick="autoRun()">Automat</button></div><div class="mute">${CL[a.c].sp}: ${CL[a.c].d}. Atinge un inamic ca să-l ții în țintă.</div>`}
  else if(d.done)h+='<p>Mina e curățată.</p>';
- else h+='<div class="mute">Indiciile: arme = luptă, lumină aurie = comoară, podea suspectă = capcană, foc = odihnă.</div>'+d.doors.map((x,i)=>`<div class="row"><span>${x.t=='b'?'Poarta căpitanului':DR[x.t]}</span><button class="p" onclick="door(${i})">Intră (${x.t=='b'?(d.raid!=null?1:3):1} p)</button></div>`).join('');
+ else h+='<div class="mute">Indiciile: arme = luptă, lumină aurie = comoară, podea suspectă = capcană, foc = odihnă.</div>'+d.doors.map((x,i)=>`<div class="row"><span>${x.t=='b'?bossMini(d.bn)+'Poarta căpitanului':DR[x.t]}</span><button class="p" onclick="door(${i})">Intră (${x.t=='b'?(d.raid!=null?1:3):1} p)</button></div>`).join('');
  return h+`</section>${f?'<button class="d" onclick="flee()">Fugi (pierzi jumătate din pradă)</button>':'<button class="d" onclick="leave()">Ieși cu prada</button>'}`}
 let portretSelectat = -1;
 function portrait0(f){
