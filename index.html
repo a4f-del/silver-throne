@@ -186,27 +186,27 @@ main{padding:8px 24px;max-width:940px}
 </style>
 <link rel="stylesheet" href="tema.css?v=2026.10.30-3">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="world-data.js?v=2026.10.31-10"></script>
-<script src="tron-logic.js?v=2026.10.31-10"></script>
-<script src="cladiri-art.js?v=2026.10.31-10"></script>
-<script src="teritorii.js?v=2026.10.31-10"></script>
-<script src="inventar.js?v=2026.10.31-10"></script>
-<script src="panou.js?v=2026.10.31-10"></script>
-<script src="ghid.js?v=2026.10.31-10"></script>
-<script src="mercenari.js?v=2026.10.31-10"></script>
-<script src="specializari.js?v=2026.10.31-10"></script>
-<script src="tron.js?v=2026.10.31-10"></script>
-<script src="lume-art.js?v=2026.10.31-10"></script>
-<script src="sat.js?v=2026.10.31-10"></script>
-<script src="lupta-vs.js?v=2026.10.31-10"></script>
-<script src="temnite.js?v=2026.10.31-10"></script>
-<script src="harta.js?v=2026.10.31-10"></script>
-<script src="lume.js?v=2026.10.31-10"></script>
-<script src="lume-pictat.js?v=2026.10.31-10"></script>
-<script src="tema.js?v=2026.10.31-10"></script>
-<script src="echipa.js?v=2026.10.31-10"></script>
-<script src="erou.js?v=2026.10.31-10"></script>
-<script src="cont.js?v=2026.10.31-10"></script>
+<script src="world-data.js?v=2026.10.31-11"></script>
+<script src="tron-logic.js?v=2026.10.31-11"></script>
+<script src="cladiri-art.js?v=2026.10.31-11"></script>
+<script src="teritorii.js?v=2026.10.31-11"></script>
+<script src="inventar.js?v=2026.10.31-11"></script>
+<script src="panou.js?v=2026.10.31-11"></script>
+<script src="ghid.js?v=2026.10.31-11"></script>
+<script src="mercenari.js?v=2026.10.31-11"></script>
+<script src="specializari.js?v=2026.10.31-11"></script>
+<script src="tron.js?v=2026.10.31-11"></script>
+<script src="lume-art.js?v=2026.10.31-11"></script>
+<script src="sat.js?v=2026.10.31-11"></script>
+<script src="lupta-vs.js?v=2026.10.31-11"></script>
+<script src="temnite.js?v=2026.10.31-11"></script>
+<script src="harta.js?v=2026.10.31-11"></script>
+<script src="lume.js?v=2026.10.31-11"></script>
+<script src="lume-pictat.js?v=2026.10.31-11"></script>
+<script src="tema.js?v=2026.10.31-11"></script>
+<script src="echipa.js?v=2026.10.31-11"></script>
+<script src="erou.js?v=2026.10.31-11"></script>
+<script src="cont.js?v=2026.10.31-11"></script>
 </head>
 <body>
 <header><h1><img class="hd-tron" src="imagini/logo-tron.webp" alt="" width="34" height="40"><span class="hd-nm">Silver Throne</span></h1><div class="hs" id="hs"></div></header>
@@ -369,8 +369,8 @@ function rn(v){const f=S.fs.find(x=>x.h)||S.fs[0];f.n=v.replace(/[<>"&]/g,'').tr
 const AG={'Campion':'M10 32L10 16 18 24 24 12 30 24 38 16 38 32z','Războinic':'M22 8h4v24h-4zM15 30h18v4H15zM22 34h4v7h-4z','Arcaș':'M15 8Q37 24 15 40Q25 24 15 8zM11 22h28v4H11z','Paznic':'M12 10h24v14c0 8-12 14-12 14S12 32 12 24z','Mag':'M24 8l4.7 10.6 11.3 1-8.6 7.5 2.6 11.1L24 32l-10 6.2 2.6-11.1L8 19.6l11.3-1z','Vraci':'M20 8h8v12h12v8H28v12h-8V28H8v-8h12z'};
 /* Imagini avatar: AV['Campion']={s:'data:image/webp;base64,...' (static),a:'data:image/webp;base64,...' (animat, doar premium)} */
 const AV={};
-const AVF={'Campion':'campion','Arcaș':'arcasa','Paznic':'paznic','Războinic':'razboinic','Mag':'mag','Vraci':'vraci','Gardian':'gardian'};
-function av(f,z){z=z||44;if(f&&f.ic&&typeof heroAv==='function'&&!(f.h&&skinOn(f)))return heroAv(f,z);const i=AV[f.c];if(i&&(S.prem&&i.a?i.a:i.s))return av0(f,z);return`<span class="avw" style="width:${z}px;height:${z}px">${av0(f,z)}<img src="${skinOn(f)?HS.umbra.av:'imagini/'+(f.h?'erou':AVF[f.c])+'.jpeg'}" alt="" onerror="${skinOn(f)?'imgMiss(this)':"this.style.display='none'"}"></span>`}
+const MPIC={'Războinic':'razboinic','Arcaș':'arcas','Paznic':'paznic','Mag':'mag','Vraci':'vraci'},AVF={'Campion':'campion','Arcaș':'arcasa','Paznic':'paznic','Războinic':'razboinic','Mag':'mag','Vraci':'vraci','Gardian':'gardian'};
+function av(f,z){z=z||44;if(f&&f.ic&&typeof heroAv==='function'&&!(f.h&&skinOn(f)))return heroAv(f,z);const i=AV[f.c];if(i&&(S.prem&&i.a?i.a:i.s))return av0(f,z);return`<span class="avw" style="width:${z}px;height:${z}px">${av0(f,z)}<img src="${skinOn(f)?HS.umbra.av:MPIC[f.c]?'imagini/mercenari/'+MPIC[f.c]+'.jpg':'imagini/'+(f.h?'erou':AVF[f.c])+'.jpeg'}" loading="lazy" alt="" onerror="${skinOn(f)?'imgMiss(this)':"this.style.display='none'"}"></span>`}
 const IC={g:'<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#d9a82e" stroke="#7a5a10" stroke-width="2"/><circle cx="16" cy="16" r="8.5" fill="none" stroke="#fff1b8" stroke-width="1.6"/></svg>',o:'<svg viewBox="0 0 32 32"><path d="M16 3l11 8-4 17H9L5 11z" fill="#8c98a0" stroke="#3a444a" stroke-width="2" stroke-linejoin="round"/><path d="M16 3l-4 25M16 3l4 25M5 11h22" stroke="#d7dee2" stroke-width="1" fill="none"/></svg>',p:'<svg viewBox="0 0 32 32"><path d="M18 2L6 18h8l-2 12 14-18h-8z" fill="#e0953f" stroke="#7a4310" stroke-width="2" stroke-linejoin="round"/></svg>'};
 const IG={w:'⚔️',a:'🛡️',h:'🪖',b:'👢',j:'💍',r:'🔮'},iic=it=>it.lg&&LG[it.lg]?lgIco(it):`<span class="ico q${it.r}">${IG[it.t]||'◆'}<img src="imagini/obiecte/${it.t}.png" alt="" loading="lazy" onerror="this.style.display='none'"></span>`;
 const BFILE={f:'topitorie',i:'infirmerie',b:'han',d:'depozit',z:'zid'},BGL={f:'⚒️',i:'⚕️',b:'🍺',d:'📦',z:'🧱'},bth=k=>bthHtml(k);

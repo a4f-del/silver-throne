@@ -28,7 +28,7 @@ function tmStrip() {
 const TM_IMG = { 'Campion': 'campion', 'Arcaș': 'arcasa', 'Paznic': 'paznic' };       /* portrete existente; restul folosesc avatarul */
 function tmPortrait(f) {
   const k = f.h ? null : TM_IMG[f.c];
-  return `<div class="tm-bigav">${av(f, 110)}${k ? `<img src="imagini/${k}.jpeg" alt="${tEsc(f.n)}" onerror="this.remove()">` : ''}</div>`;
+  return `<div class="tm-bigav">${av(f, 110)}</div>`;   /* portretele pictate vin din av() */
 }
 /* butoanele de skin ale eroului (înainte stăteau sub portretul mare) */
 function tmSkin(f) {
@@ -47,7 +47,7 @@ function tmChar(inv) {
   const reviveCost = Math.round(15 * S.lvl * Math.pow(.96, BL().i)), healCost = Math.round(6 * S.lvl * Math.pow(.96, BL().i));
   const rv = c.hp <= 0 && i < nfs + S.rs.length ? `<button class="d" onclick="${i < nfs ? `revive(${i})` : `revive(${i - nfs},1)`}">Ridică (${reviveCost} aur)</button>` : '';
   const hurt = [...S.fs, ...S.rs].some(x => x.hp > 0 && x.hp < mhp(x));
-  const hero = f.h ? `<div class="tm-nm"><span class="mute">Numele eroului</span><input maxlength="14" value="${tEsc(f.n)}" onchange="rn(this.value)"></div>` : '';
+  const hero = '';   /* numele se schimbă doar din Cont › Nume (mercenari.js) */
   const xp = f.h ? `<div class="tm-xp"><span class="mute">Nivel ${S.lvl} · ${S.xp}/${need(S.lvl)} exp.</span><i class="xpb"><i style="width:${Math.min(100, S.xp / need(S.lvl) * 100)}%"></i></i></div>` : '';
   const sub = `${f.h ? 'erou' : 'nivel ' + S.lvl + ' · ' + RK[f.rk || 0]} · ${tEsc(f.c)}${f.sp && typeof spDef0 === 'function' && spDef0(f) ? ' · ' + spDef0(f).n : ''}${f.sc ? ' · ' + f.sc + ' cicatrice' : ''}${f.t && f.t.length ? '<br>' + f.t.map(x => tEsc(x.n)).join(', ') : ''}`;
   const cd = typeof spCd === 'function' ? spCd(f) : 2;

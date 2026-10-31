@@ -98,13 +98,17 @@ const HERO_ICONS = {
 
 const HC_NAMES = { m: ['Radu', 'Vlad', 'Mircea', 'Ștefan', 'Dragoș', 'Bogdan', 'Tudor', 'Matei', 'Sorin', 'Costin', 'Iancu', 'Horia'],
   f: ['Ilinca', 'Ioana', 'Anca', 'Maria', 'Dana', 'Oana', 'Irina', 'Smaranda', 'Ruxandra', 'Doina', 'Sanda', 'Viorica'] };
-const hcIds = g => Object.keys(HERO_ICONS).filter(k => HERO_ICONS[k].g === g);
+/* portretele pictate (imagini/eroi/<id>.jpg); desenele vechi rămân doar dedesubt, dacă imaginea lipsește */
+const HERO_PIC = { m1: 'Nobilul', m2: 'Veteranul', m3: 'Cavalerul tânăr', f1: 'Cavalerița', f2: 'Comandanta', f3: 'Războinica din nord' };
+for (const k in HERO_PIC) if (HERO_ICONS[k]) HERO_ICONS[k].n = HERO_PIC[k];
+const hcIds = g => Object.keys(HERO_PIC).filter(k => HERO_ICONS[k] && HERO_ICONS[k].g === g);
+const heroId = ic => (HERO_PIC[ic] ? ic : String(ic || '').startsWith('f') ? 'f1' : 'm1');   /* m4 / f4 vechi → primul portret de același gen */
 /* id-urile din SVG primesc sufixul portretului: altfel gradientele a două portrete diferite din aceeași pagină s-ar încurca */
 let heroN = 0;   /* fiecare portret are gradientele lui: unul ascuns (de ex. echipa din bara de sus, pe telefon) nu le mai poate „împrumuta” celorlalte */
 const heroSvg = (id, z) => { const d = HERO_ICONS[id] || HERO_ICONS.m1, u = id + '-' + (++heroN); return `<svg viewBox="0 0 64 64" width="${z}" height="${z}" role="img" aria-label="${d.n}">${d.svg.replace(/id="(\w+)"/g, `id="$1-${u}"`).replace(/url\(#(\w+)\)/g, `url(#$1-${u})`).replace(/<circle cx="([^"]+)" cy="([^"]+)" r="([^"]+)"/g, '<ellipse cx="$1" cy="$2" rx="$3" ry="$3"')}</svg>`; };   /* elipse, nu cercuri: unele stiluri din tema.css (inelul de experiență) golesc orice <circle> */
 function heroAv(f, z) {
-  z = z || 44; const id = HERO_ICONS[f.ic] ? f.ic : 'm1';
-  return `<span class="avw hav" style="width:${z}px;height:${z}px">${heroSvg(id, z)}<img src="imagini/eroi/${id}.jpeg" alt="" onerror="this.remove()"></span>`;
+  z = z || 44; const id = heroId(f.ic);
+  return `<span class="avw hav" style="width:${z}px;height:${z}px">${heroSvg(id, z)}<img src="imagini/eroi/${id}.jpg" alt="" loading="lazy" onerror="this.remove()"></span>`;
 }
 
 /* ------------------------------------------------------------------ CREARE / SCHIMBARE */
@@ -119,7 +123,7 @@ function hcNeed() {
 }
 function hcStart(mode) {
   const h = hcHero(), g = h.g || (HERO_ICONS[h.ic] ? HERO_ICONS[h.ic].g : 'm');
-  HC.mode = mode; HC.g = g; HC.ic = HERO_ICONS[h.ic] ? h.ic : hcIds(g)[0];
+  HC.mode = mode; HC.g = g; HC.ic = HERO_PIC[h.ic] ? h.ic : hcIds(g)[0];
   HC.auto = mode === 'new' || !h.n || h.n === 'Eroul'; HC.n = HC.auto && mode === 'new' ? hcRand(g) : h.n;
 }
 function hcCard() {
@@ -128,7 +132,7 @@ function hcCard() {
     + `<div class="hc-prev">${heroAv({ ic: HC.ic }, 84)}<div><b id="hc-pn">${cEsc(HC.n || '…')}</b><small>${d.n}</small></div></div>`
     + `<div class="hc-seg" role="radiogroup" aria-label="Eroul tău este">${seg('m', 'Bărbat')}${seg('f', 'Femeie')}</div>`
     + `<div class="hc-grid" role="radiogroup" aria-label="Portret">${hcIds(HC.g).map(id => `<button type="button" role="radio" aria-checked="${id === HC.ic}" class="${id === HC.ic ? 'on' : ''}" onclick="hcI('${id}')" title="${HERO_ICONS[id].n}">${heroAv({ ic: id }, 60)}<small>${HERO_ICONS[id].n}</small></button>`).join('')}</div>`
-    + `<label class="g-f" for="hc-n"><span>${HC.g === 'f' ? 'Numele eroinei' : 'Numele eroului'}</span><span class="g-in"><input id="hc-n" maxlength="14" autocomplete="off" spellcheck="false" value="${cEsc(HC.n)}" oninput="hcN(this.value)"><button type="button" class="g-eye" onclick="hcRoll()" aria-label="Alt nume" title="Alt nume">🎲</button></span></label>`
+    + (HC.mode === 'new' ? `<label class="g-f" for="hc-n"><span>${HC.g === 'f' ? 'Numele eroinei' : 'Numele eroului'}</span><span class="g-in"><input id="hc-n" maxlength="14" autocomplete="off" spellcheck="false" value="${cEsc(HC.n)}" oninput="hcN(this.value)"><button type="button" class="g-eye" onclick="hcRoll()" aria-label="Alt nume" title="Alt nume">🎲</button></span></label>` : `<p class="mute">Numele se schimbă din <b>Cont › Nume</b>.</p>`)
     + `<p class="g-msg" id="hc-msg" role="status"></p><button class="g-go" type="button" onclick="hcDone()">${HC.mode === 'new' ? 'Începe aventura' : 'Salvează'}</button></div>`;
 }
 function hcRender() { const r = document.getElementById('hc-root'); if (r) r.outerHTML = hcCard(); }
@@ -138,8 +142,8 @@ function hcN(v) { HC.n = v; HC.auto = false; const p = document.getElementById('
 function hcRoll() { HC.n = hcRand(HC.g); HC.auto = true; const i = document.getElementById('hc-n'); if (i) i.value = HC.n; hcN(HC.n); HC.auto = true; }
 function hcDone() {
   const n = String(HC.n || '').replace(/[<>"&]/g, '').trim().slice(0, 14), m = document.getElementById('hc-msg');
-  if (n.length < 2) { if (m) { m.className = 'g-msg err'; m.textContent = 'Numele trebuie să aibă cel puțin 2 litere.'; } return; }
-  const h = hcHero(); h.n = n; h.g = HC.g; h.ic = HC.ic; const first = !S.hc; S.hc = 1;
+  if (HC.mode === 'new' && n.length < 2) { if (m) { m.className = 'g-msg err'; m.textContent = 'Numele trebuie să aibă cel puțin 2 litere.'; } return; }
+  const h = hcHero(); if (HC.mode === 'new') h.n = n; h.g = HC.g; h.ic = HC.ic; const first = !S.hc; S.hc = 1;   /* „Schimbă aspectul” nu atinge numele */
   if (HC.mode === 'new') { contHide(); if (first) S.msg = `Bun venit, ${n}! Satul te așteaptă.`; }
   else lgClose();
   go();
@@ -160,13 +164,13 @@ function hcEdit() { hcStart('edit'); mdl(hcCard(), 'hc-b'); }
 .hc-seg{display:grid;grid-template-columns:1fr 1fr;margin:0 0 10px;border:1px solid var(--line);border-radius:6px;overflow:hidden}
 .hc-seg button{border:0;border-radius:0;box-shadow:none;background:#0b0e10;color:var(--mute);padding:9px;font:700 15px Cinzel,serif}
 .hc-seg button.on{background:linear-gradient(180deg,#3a3016,#1d170a);color:var(--gold2)}
-.hc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 0 12px}
+.hc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 12px}
 .hc-grid button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px;background:#0b0e10;border:1px solid var(--line);border-radius:6px;box-shadow:none}
 .hc-grid button.on{border-color:var(--gold2);background:linear-gradient(180deg,#2a2412,#141008);box-shadow:0 0 0 1px var(--gold2),0 0 12px #f0d27a33}
 .hc-grid small{font-size:12px;color:var(--mute)}.hc-grid button.on small{color:var(--gold2)}
 .hc-seg button:focus-visible,.hc-grid button:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
 .lgm-b.hc-b{width:min(94vw,420px);text-align:left}
-@media (max-width:380px){.hc-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:300px){.hc-grid{grid-template-columns:repeat(2,1fr)}}
 `;
   document.head.appendChild(st);
 })();

@@ -71,6 +71,36 @@ function mrPost() {
   } catch (e) { /* numirea nu blochează jocul */ }
 }
 
+/* ------------------------------------------------------------------ SCHIMBAREA NUMELUI (Cont › Nume)
+   Numele se aleg la început (erou) și la deblocare (mercenari) și rămân fixe. Din Cont, fiecare personaj
+   își poate schimba numele o dată gratuit (f.rnf = folosit); după aceea va costa monede (NM.cost, când apar). */
+const NM = { cost: null };   /* prețul în monede; null = monedele nu există încă */
+function nmPanel() {
+  if (typeof S === 'undefined' || !S || !S.fs) return '';
+  const rows = mrAll().filter(f => !f.nn).map((f, i) => {
+    const k = mrAll().indexOf(f), free = !f.rnf, lbl = free ? 'Schimbă · gratuit' : NM.cost ? `Schimbă · ${NM.cost} monede` : 'Monede · în curând';
+    return `<div class="nm-r"><span><b>${tEsc(f.n)}</b><small>${f.h ? 'erou' : f.c}</small></span><button type="button" onclick="nmOpen(${k})"${free || NM.cost ? '' : ' disabled title="A doua schimbare va costa monede, care vor apărea în curând."'}>${lbl}</button></div>`;
+  }).join('');
+  return `<div class="nm-p"><div class="nm-h">Nume</div><p class="nm-n">Prima schimbare e gratuită pentru fiecare personaj.</p>${rows}</div>`;
+}
+function nmOpen(k) {
+  const f = mrAll()[k]; if (!f) return;
+  document.getElementById('auth-panel')?.classList.add('auth-hidden');
+  mdl(`<h3>Schimbă numele</h3><p class="mute">${f.h ? 'Eroul tău' : f.c} se numește acum <b>${tEsc(f.n)}</b>.${f.rnf ? '' : ' Prima schimbare e gratuită; următoarele vor costa monede.'}</p><input id="nm-in" maxlength="${f.h ? 14 : 16}" value="${tEsc(f.n)}" autocomplete="off" onkeydown="if(event.key==='Enter')nmSave(${k})" style="width:100%;box-sizing:border-box;padding:9px 11px;font-size:17px"><p class="g-msg" id="nm-msg" role="status"></p><button class="p" onclick="nmSave(${k})" style="width:100%">Salvează numele</button>`, 'nm-b');
+  setTimeout(() => { const i = document.getElementById('nm-in'); if (i) { i.focus(); i.select(); } }, 50);
+}
+function nmSave(k) {
+  const f = mrAll()[k], i = document.getElementById('nm-in'), m = document.getElementById('nm-msg'); if (!f || !i) return;
+  const v = i.value.replace(/[<>"&]/g, '').replace(/\s+/g, ' ').trim().slice(0, f.h ? 14 : 16);
+  const say = t => { if (m) { m.className = 'g-msg err'; m.textContent = t; } };
+  if (v.length < 2) return say('Numele trebuie să aibă cel puțin 2 litere.');
+  if (v === f.n) return lgClose();
+  if (f.rnf && !NM.cost) return say('A doua schimbare va costa monede, care vor apărea în curând.');
+  const old = f.n; f.n = v; f.rnf = 1; lgClose(); S.msg = `${old} se numește acum ${v}.`; go();
+  if (typeof contChip === 'function') contChip();
+  if (f.h && typeof lwSync === 'function' && typeof CONT !== 'undefined' && CONT.user) setTimeout(() => lwSync(true), 0);   /* ceilalți jucători văd noul nume */
+}
+
 /* ------------------------------------------------------------------ PAGINILE SATULUI */
 /* rândul de îmbunătățire al unei clădiri (același ca la vechea Curte) */
 function mrBld(k) {
@@ -123,6 +153,9 @@ function mrRes() { return `<section><h2>La ce folosește fiecare resursă</h2><d
 .mr-hc.lock{opacity:.6}.mr-hp{position:relative;flex:none}.mr-hc.lock .mr-hp>:first-child{filter:grayscale(1) brightness(.5)}.mr-hp>b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px}
 .mr-hb{flex:1;min-width:0}.mr-hx{flex:none}
 .mr-fm{height:6px;margin:5px 0 3px;border-radius:3px;background:#ffffff14;overflow:hidden}.mr-fm i{display:block;height:100%;background:linear-gradient(90deg,#9b7424,#f0d27a)}
+.nm-p{margin:10px 0 8px;padding-top:10px;border-top:1px solid #ffffff1a}.nm-h{font:700 13px Cinzel,serif;color:var(--gold2);letter-spacing:.06em}.nm-n{margin:2px 0 6px;font-size:12.5px;color:var(--mute)}
+.nm-r{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:3px 0}.nm-r span{min-width:0}.nm-r b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nm-r small{color:var(--mute);font-size:12px}
+#auth-panel .nm-r button{width:auto!important;margin:0!important;flex:none;padding:3px 9px;font-size:12px}
 .mr-act{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 6px}
 @media (max-width:600px){.mr-hc{flex-wrap:wrap}.mr-hx{width:100%}.mr-hx button{width:100%}}
 @media (prefers-reduced-motion:reduce){.mr-c{animation:none}}

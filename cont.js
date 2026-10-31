@@ -290,7 +290,7 @@ function contChip() {
   t.innerHTML = '👑 Cont' + (CONT.user && CONT.err ? ' <b class="acc-dot" title="Salvarea online a eșuat">!</b>' : '');
   const st = CONT.err ? `<span class="acc-bad">Salvarea online a eșuat: ${cEsc(CONT.err)} Progresul e păstrat pe acest dispozitiv.</span> <button type="button" onclick="contPush()">Reîncearcă</button>`
     : CONT.pushing || CONT.timer ? 'Se salvează online…' : CONT.lastOk ? 'Progresul e salvat online.' : 'Se pregătește salvarea online…';
-  p.innerHTML = `<div class="acc-who">Conectat ca<b>${cEsc(CONT.user.email)}</b></div><p class="acc-st">${st}</p><button type="button" id="acc-out" onclick="contOut()">Deconectează-te</button><div class="acc-legal"><a href="confidentialitate.html" target="_blank" rel="noopener">Confidențialitate</a> · <button type="button" class="acc-del" onclick="contShow('del')">Șterge contul</button></div>`;
+  p.innerHTML = `<div class="acc-who">Conectat ca<b>${cEsc(CONT.user.email)}</b></div><p class="acc-st">${st}</p>${typeof nmPanel === 'function' ? nmPanel() : ''}<button type="button" id="acc-out" onclick="contOut()">Deconectează-te</button><div class="acc-legal"><a href="confidentialitate.html" target="_blank" rel="noopener">Confidențialitate</a> · <button type="button" class="acc-del" onclick="contShow('del')">Șterge contul</button></div>`;
 }
 /* tab ascuns (telefon blocat, altă aplicație): trimitem imediat ce aștepta */
 if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && CONT.timer) contPush(); });
