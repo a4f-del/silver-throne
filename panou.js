@@ -11,7 +11,7 @@
 /* mergi la o filă (și, opțional, la o subfilă) cu o singură randare */
 function sdGo(t, sub, val) {
   S.tab = t; S.msg = '';
-  if (sub === 'vil') S.vil = val; else if (sub === 'mt') S.mt = val;
+  if (sub === 'vil') S.vil = val; else if (sub === 'mt') S.mt = val; else if (t === 'a') S.vil = '';   /* „Sat” fără clădire = imaginea satului */
   go();
 }
 

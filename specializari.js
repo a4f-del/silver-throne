@@ -52,7 +52,7 @@ const spAlive = () => S.fs.filter(x => x.hp > 0);
 const spNeed = f => !!(f && SP.T[f.c] && !f.sp && spT(f) >= 1);
 const spTick0 = () => 2 + Math.floor(S.lvl / 2);                        /* daunele de bază ale sângerării (ca în enemy()) */
 /* nivelul folosit pentru statistici: eroul și străjerii urmează eroul; mercenarii, nivelul lor */
-const spL = f => (f && !f.h && Number.isFinite(f.lv) ? SP.lvE(f.lv) : el());
+const spL = f => el();   /* mercenarii urmează nivelul eroului (mercenari.js) */
 const spHpM = f => (S.fs.includes(f) && spTeam('cmd', 2) ? 0.05 : 0);  /* Comandant: +5% viață echipei */
 
 /* ------------------------------------------------------------------ LOVITURA (hit) */
@@ -162,7 +162,7 @@ function spFame(big) {
   const up = [];
   for (const f of S.fs) {
     if (f.h || f.hp <= 0 || !SP.T[f.c]) continue;
-    f.fm = (f.fm || 0) + (big ? 3 : 1);
+    f.fm = (f.fm || 0) + (big ? 3 : 1) * (1 + 0.05 * (BL().b || 0));   /* Hanul: +5% faimă pe nivel */
     while ((f.rk || 0) < 4 && f.fm >= SP.RKF[(f.rk || 0) + 1]) {
       const m0 = mhp(f); f.rk = (f.rk || 0) + 1; f.hp = Math.min(mhp(f), f.hp + Math.max(0, mhp(f) - m0));
       up.push(`${f.n} a devenit ${RK[f.rk]}!` + (f.rk === 1 && !f.sp ? ' Alege-i specializarea în Echipă.' : f.sp ? ` Deblochează: ${spU(f, f.rk)}.` : ''));

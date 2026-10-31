@@ -1,0 +1,131 @@
+/* ============================================================================
+   Silver Throne — mercenari.js
+   Mercenarii permanenți: câte unul din fiecare clasă (Războinic, Arcaș, Paznic, Mag, Vraci), primiți pe
+   parcursul ghidului și numiți de jucător. Nu se mai angajează și nu se concediază; rangul crește prin faimă,
+   ca înainte. Statisticile lor vin din erou (formulele sunt în index.html: MP, RF, mhp, atkOf, bon).
+   Tot aici: paginile satului Han, Infirmerie, Antrenament, Steag și rândul de îmbunătățire al fiecărei clădiri.
+   Se încarcă după ghid.js și înaintea scriptului din pagină.
+   ========================================================================== */
+const MR = {
+  /* ordinea și pasul din ghid la care se alătură fiecare */
+  order: [['Paznic', null], ['Arcaș', null], ['Războinic', 'Hanul'], ['Vraci', 'Misiunile zilnice'], ['Mag', 'Jefuiește un sat']],
+  rol: { 'Războinic': 'luptător echilibrat, lovește greu și poate ameți', 'Arcaș': 'atac mare de la distanță, provoacă sângerare', 'Paznic': 'atrage loviturile și apără echipa', 'Mag': 'cel mai mare atac, ignoră apărarea', 'Vraci': 'vindecă echipa în luptă' },
+  sug: { 'Războinic': ['Radu', 'Bogdan', 'Mircea'], 'Arcaș': ['Ilinca', 'Lia', 'Anca'], 'Paznic': ['Toma', 'Petru', 'Costea'], 'Mag': ['Ioana', 'Dana', 'Sorin'], 'Vraci': ['Matei', 'Vlad', 'Dragoș'] }
+};
+const mrAll = () => [...S.fs, ...S.rs];
+const mrHas = c => mrAll().some(f => !f.h && f.c === c);
+const mrStep = t => (typeof GHID !== 'undefined' ? GHID.findIndex(s => s.t === t) : -1);
+function mrDue(step) {
+  if (step == null) return true;
+  if (S.tu == null || S.tu < 0 || (GHID[S.tu] && GHID[S.tu].e)) return true;   /* ghid terminat sau sărit: toți */
+  const i = mrStep(step); return i < 0 || S.tu >= i;
+}
+function mrNew(c) {
+  const f = { n: c, c, hp: 0, sc: 0, t: [], rk: 0, fm: 0, nn: 1, eq: { w: null, a: null } };
+  f.hp = mhp(f); (S.fs.length < 3 && !S.d ? S.fs : S.rs).push(f); return f;
+}
+/* la fiecare desenare: se alătură cine a ajuns la pasul lui */
+function mrTick() { if (!S || S.mv !== 2) return; for (const [c, st] of MR.order) if (!mrHas(c) && mrDue(st)) mrNew(c); }
+
+/* jucătorii existenți: pentru fiecare clasă rămâne mercenarul cu cea mai multă faimă; echipamentul celorlalți intră în rucsac */
+function mrMig() {
+  if (!S || S.mv === 2) return;
+  const keep = {}, out = [];
+  for (const f of mrAll()) {
+    if (f.h || !MP[f.c]) continue;
+    const k = keep[f.c];
+    if (!k || (f.fm || 0) > (k.fm || 0) || ((f.fm || 0) === (k.fm || 0) && (f.rk || 0) > (k.rk || 0))) { if (k) out.push(k); keep[f.c] = f; } else out.push(f);
+  }
+  for (const f of out) { const e = f.eq || {}; for (const s in e) if (e[s]) S.inv.push(e[s]); }
+  const hero = mrAll().find(f => f.h), kept = Object.values(keep).map(f => { delete f.lv; return f; });
+  S.fs = [hero, ...kept.slice(0, 2)].filter(Boolean); S.rs = kept.slice(2);
+  S.fs.concat(S.rs).forEach(f => { f.hp = Math.min(f.hp, mhp(f)); });
+  if (out.length) S.msg = (S.msg ? S.msg + ' ' : '') + `Mercenarii sunt acum permanenți: a rămas cel mai faimos din fiecare clasă${out.some(f => Object.values(f.eq || {}).some(Boolean)) ? ', iar echipamentul celorlalți e în rucsac' : ''}.`;
+  S.mv = 2;
+}
+
+/* ------------------------------------------------------------------ NUMIREA */
+function mrName() {
+  const f = mrAll().find(x => x.nn), inp = document.getElementById('mr-in');
+  if (!f || !inp) return;
+  const v = inp.value.trim().replace(/\s+/g, ' ').slice(0, 16);
+  if (!v) { inp.focus(); inp.classList.add('err'); return; }
+  f.n = v; delete f.nn; S.msg = `${v} (${f.c}) s-a alăturat ${S.fs.includes(f) ? 'echipei' : 'rezervei'}.`;
+  document.getElementById('mr-m')?.remove(); go();
+}
+function mrPost() {
+  try {
+    mrTick();
+    const f = mrAll().find(x => x.nn), old = document.getElementById('mr-m');
+    const gate = document.getElementById('gate'), busy = (gate && !gate.classList.contains('g-out')) || document.querySelector('.hc');
+    if (!f || busy) { if (old && !f) old.remove(); if (f && busy && !MR.wait) { MR.wait = 1; setTimeout(() => { MR.wait = 0; mrPost(); }, 500); } return; }   /* ecranul eroului e încă deschis: încearcă din nou */
+    if (old && old.dataset.c === f.c) return;
+    if (old) old.remove();
+    const used = new Set(mrAll().map(x => x.n)), sg = MR.sug[f.c].find(n => !used.has(n)) || MR.sug[f.c][0];
+    const sp = (typeof SP !== 'undefined' && SP.T[f.c] || []).map(s => s.n).join(' sau ');
+    const m = document.createElement('div'); m.id = 'mr-m'; m.dataset.c = f.c; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-labelledby', 'mr-t');
+    m.innerHTML = `<div class="mr-c"><div class="mr-k">Un nou tovarăș</div><div class="mr-av">${av({ c: f.c, n: f.c }, 96)}</div><h3 id="mr-t">${f.c}</h3><p class="mute">${MR.rol[f.c]}.${sp ? ` De la rangul Veteran își alege o specializare: ${sp}.` : ''}</p>`
+      + `<label for="mr-in">Cum se numește?</label><input id="mr-in" maxlength="16" value="${sg}" autocomplete="off" onkeydown="if(event.key==='Enter')mrName()">`
+      + `<button class="p" onclick="mrName()">Primește-l în echipă</button><p class="mute mr-f">Mercenarii rămân cu tine pentru totdeauna și cresc în rang luptând.</p></div>`;
+    document.body.appendChild(m); setTimeout(() => { const i = document.getElementById('mr-in'); if (i) { i.focus(); i.select(); } }, 60);
+  } catch (e) { /* numirea nu blochează jocul */ }
+}
+
+/* ------------------------------------------------------------------ PAGINILE SATULUI */
+/* rândul de îmbunătățire al unei clădiri (același ca la vechea Curte) */
+function mrBld(k) {
+  const b = BL(), n = (BN.find(x => x[0] === k) || [])[1] || k;
+  return `<section class="mr-bl"><h2>Clădirea: ${n}</h2><div class="row"><span class="bl">${bth(k)}<span><b>${n}</b>, nivel ${b[k] || 0}<br><span class="mute">${bfx(k, b[k] || 0)}${(b[k] || 0) < bmax() ? ' → ' + bfx(k, (b[k] || 0) + 1) : ''}</span><br><span class="mute">${bAspTxt(k)} · nivel maxim acum: ${bmax()}</span></span></span><button class="p" onclick="build('${k}')"${(b[k] || 0) >= bmax() ? ' disabled' : ''}>${bcc(b[k] || 0)} aur</button></div></section>`;
+}
+function mrTrain() {
+  const s = ST();
+  return `<section><h2>Zona de antrenament</h2><div class="mute">Aurul antrenează eroul. Pricepere și Negoț ajută întreaga echipă, iar mercenarii își trag puterea din erou, deci tot ce câștigă el îi întărește și pe ei. Rang maxim la nivelul ${S.lvl}: ${smax()}.</div>${STS.map(([k, n, d]) => `<div class="row"><span><b>${n}</b>, rang ${s[k]}<br><span class="mute">${d}</span></span><button class="p" onclick="train('${k}')"${s[k] >= smax() ? ' disabled' : ''}>${stc(s[k])} aur</button></div>`).join('')}</section>`;
+}
+function mrInf() {
+  const al = mrAll(), hurt = al.filter(f => f.hp > 0 && f.hp < mhp(f)), hc = Math.round(6 * S.lvl * Math.pow(.96, BL().i));
+  const rows = al.map((f, i) => { const m = mhp(f), d = f.hp <= 0; return `<div class="row"><span style="display:flex;gap:10px;align-items:center">${av(f, 36)}<span><b>${tEsc(f.n)}</b> <span class="mute">${f.h ? 'erou' : f.c}</span><br>${bar(Math.max(0, f.hp), m, d ? 'e' : '')}<span class="mute">${d ? 'căzut' : f.hp + '/' + m + ' viață'}${f.sc ? ` · ${f.sc} ${f.sc === 1 ? 'cicatrice' : 'cicatrici'}` : ''}</span></span></span>${d ? `<button class="d" onclick="revive(${S.fs.includes(f) ? S.fs.indexOf(f) : S.rs.indexOf(f)},${S.fs.includes(f) ? 0 : 1})">Ridică · ${revCost()} aur</button>` : ''}</div>`; }).join('');
+  return `<section><h2>Infirmeria</h2><div class="mute">Răniții se vindecă toți deodată. Căzuții revin la jumătate din viață, cu o cicatrice (−3 viață maximă).</div><div class="mr-act">${hurt.length ? `<button class="p" onclick="heal()">Vindecă răniții (${hurt.length}) · ${hc} aur</button>` : ''}${reviveAllBtn()}${!hurt.length && !deadAll().length ? '<span class="mute">Toți sunt sănătoși.</span>' : ''}</div>${rows}</section>` + mrBld('i');
+}
+function mrHan() {
+  const fm = f => Math.floor(f.fm || 0), nx = f => (f.rk || 0) < 4 ? SP.RKF[(f.rk || 0) + 1] : null;
+  const cards = MR.order.map(([c, st]) => {
+    const f = mrAll().find(x => !x.h && x.c === c);
+    if (!f) return `<div class="mr-hc lock"><div class="mr-hp">${av({ c, n: c }, 56)}<b>🔒</b></div><div><b>${c}</b><div class="mute">${MR.rol[c]}</div><div class="mute">Se alătură la pasul „${st}” din ghid.</div></div></div>`;
+    const i = S.fs.indexOf(f), j = S.rs.indexOf(f), n = nx(f), p0 = SP.RKF[f.rk || 0] || 0, pc = n ? Math.min(100, Math.round((fm(f) - p0) / (n - p0) * 100)) : 100;
+    const spn = f.sp && typeof spDef0 === 'function' && spDef0(f) ? spDef0(f).n : (f.rk ? 'alege specializarea în Echipă' : 'specializare de la Veteran');
+    return `<div class="mr-hc"><div class="mr-hp">${av(f, 56)}</div><div class="mr-hb"><b>${tEsc(f.n)}</b> <span class="mute">${f.c} · ${RK[f.rk || 0]}</span><div class="mute">${spn}</div>`
+      + `<div class="mr-fm"><i style="width:${pc}%"></i></div><div class="mute">${n ? `faimă ${fm(f)}/${n} până la ${RK[(f.rk || 0) + 1]}` : 'rang maxim: Legendă'} · ${Math.round(mhp(f))} viață · ${Math.round(atkOf(f))} atac</div></div>`
+      + `<div class="mr-hx">${i >= 0 ? (f.h ? '' : `<button onclick="toBench(${i})">La rezervă</button>`) : `<button class="p" onclick="toParty(${j})"${S.fs.length >= 3 ? ' disabled title="Echipa are deja 3 luptători"' : ''}>În echipă</button>`}</div></div>`;
+  }).join('');
+  const bb = BL().b || 0;
+  return `<section><h2>Hanul: mercenarii tăi</h2><div class="mute">Cinci tovarăși, câte unul din fiecare clasă, care rămân cu tine pentru totdeauna. Trei intră în luptă alături de erou; ceilalți așteaptă în rezervă. Puterea lor vine din erou: un Recrut are cam 85% din forța de bază a eroului în specialitatea lui, o Legendă cam 98%, dar nimeni nu trece de 95% din viața, atacul sau apărarea eroului. Faima: +1 la fiecare luptă câștigată, +3 la căpitani și raiduri${bb ? `, plus ${bb * 5}% de la Han` : ''}.</div><div class="mr-list">${cards}</div></section>` + mrBld('b');
+}
+function mrFlag() { return `<section><h2>Steagul satului</h2><div class="mute">Culoarea steagurilor de pe clădiri, din capitală și de pe teritorii. Doar de aspect.</div></section>` + (typeof flagRow === 'function' ? flagRow() : ''); }
+function mrRes() { return `<section><h2>La ce folosește fiecare resursă</h2><div class="mute"><b>Aur:</b> clădiri, antrenament, vindecare, taxe de cucerire și întreținerea teritoriilor.<br><b>Minereu:</b> baza oricărei forjări.<br><b>Materiale:</b> afixele obiectelor, plus consumabile la ruine și peșteri.<br><b>Cristale:</b> raritatea obiectelor forjate.<br><b>Puncte:</b> ritmul temnițelor, raidurilor, taberelor și locurilor de interes.</div></section>`; }
+
+(function () {
+  if (typeof document === 'undefined' || !document.head) return;
+  const st = document.createElement('style');
+  st.textContent = `
+#mr-m{position:fixed;inset:0;z-index:25000;display:flex;align-items:center;justify-content:center;padding:16px;background:#05070acc;backdrop-filter:blur(3px)}
+.mr-c{width:min(420px,100%);padding:18px 20px 16px;text-align:center;border-radius:14px;border:1px solid var(--gold);background:radial-gradient(ellipse at 50% 0,#2a3236,#101416 70%);box-shadow:0 20px 60px #000e;animation:mrIn .35s ease-out}
+.mr-k{font:700 12px Cinzel,serif;letter-spacing:.1em;text-transform:uppercase;color:var(--gold2)}
+.mr-av{display:flex;justify-content:center;margin:10px 0 4px}.mr-av>*{border-radius:50%;box-shadow:0 0 0 2px var(--gold),0 0 24px #f0d27a44}
+.mr-c h3{margin:4px 0 2px;font:700 22px Cinzel,Georgia,serif;color:var(--ink)}
+.mr-c label{display:block;margin:12px 0 4px;text-align:left;font-weight:700}
+.mr-c input{width:100%;box-sizing:border-box;padding:10px 12px;font-size:17px;border-radius:8px;border:1px solid var(--line);background:#0b0e10;color:var(--ink)}
+.mr-c input.err{border-color:#d4564f}
+.mr-c button{margin-top:12px;width:100%;padding:10px}
+.mr-f{font-size:13px;margin:10px 0 0}
+@keyframes mrIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.mr-list{display:grid;gap:8px;margin-top:10px}
+.mr-hc{display:flex;align-items:center;gap:12px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(180deg,#181e21,#0e1214)}
+.mr-hc.lock{opacity:.6}.mr-hp{position:relative;flex:none}.mr-hc.lock .mr-hp>:first-child{filter:grayscale(1) brightness(.5)}.mr-hp>b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px}
+.mr-hb{flex:1;min-width:0}.mr-hx{flex:none}
+.mr-fm{height:6px;margin:5px 0 3px;border-radius:3px;background:#ffffff14;overflow:hidden}.mr-fm i{display:block;height:100%;background:linear-gradient(90deg,#9b7424,#f0d27a)}
+.mr-act{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 6px}
+@media (max-width:600px){.mr-hc{flex-wrap:wrap}.mr-hx{width:100%}.mr-hx button{width:100%}}
+@media (prefers-reduced-motion:reduce){.mr-c{animation:none}}
+`;
+  document.head.appendChild(st);
+})();

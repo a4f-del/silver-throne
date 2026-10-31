@@ -507,7 +507,7 @@ function bfx(k, l) {
   switch (k) {
     case 'f': return 'timp de forjare −' + Math.round((1 - Math.pow(.96, l)) * 100) + '%';
     case 'i': return 'cost vindecare/ridicare −' + Math.round((1 - Math.pow(.96, l)) * 100) + '%';
-    case 'b': return 'cost recrutare −' + Math.round((1 - Math.pow(.97, l)) * 100) + '%';
+    case 'b': return 'faimă pentru mercenari +' + 5 * l + '%';
     case 'd': return 'capacitate ' + (100 + 50 * l) + ' / material';
     case 'z': return 'apărarea satului +' + Math.round(60 * (1 - Math.pow(.92, l))) + '%';
   }

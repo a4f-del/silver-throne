@@ -11,10 +11,23 @@
 
 /* ------------------------------------------------------------------ CLĂDIRILE */
 const SAT_B = [
-  ['a', 'Topitorie', 'forjează echipament'], ['h', 'Han', 'mercenari'], ['t', 'Curte', 'clădiri și antrenament'],
-  ['x', 'Misiuni', 'sarcini zilnice'], ['p', 'Piață', 'cumpără echipament'], ['l', 'Negustor', 'obiecte rare'],
-  ['d', 'Depozit', 'materiale'], ['z', 'Apărare', 'străjeri și zid'], ['q', 'Bot', 'joacă singur (premium)']
+  ['a', 'Topitorie', 'forjează echipament'], ['p', 'Piață', 'cumpără echipament'], ['l', 'Negustor', 'obiecte rare'], ['h', 'Han', 'mercenarii tăi'],
+  ['i', 'Infirmerie', 'vindecă și ridică'], ['t', 'Antrenament', 'Forță, Rezistență…'], ['x', 'Misiuni', 'sarcini zilnice'], ['d', 'Depozit', 'materiale'],
+  ['z', 'Apărare', 'străjeri și zid'], ['g', 'Steag', 'culoarea satului'], ['q', 'Bot', 'joacă singur (premium)']
 ];
+/* zonele din imaginea satului (imagini/sat/sat-interior.jpg, 1140×928): poligonul pe care apeși și locul etichetei */
+const SAT_Z = {
+  a: [[0, 250, 90, 180, 215, 240, 300, 330, 305, 555, 30, 560, 0, 520], [150, 205]],
+  p: [[335, 210, 520, 215, 545, 300, 540, 410, 345, 410, 330, 330], [440, 196]],
+  l: [[655, 90, 790, 0, 985, 90, 980, 330, 670, 330], [820, 58]],
+  h: [[960, 250, 1060, 240, 1140, 280, 1140, 500, 975, 500], [1052, 262]],
+  i: [[0, 545, 110, 540, 200, 600, 380, 640, 370, 790, 0, 790], [120, 610]],
+  t: [[640, 440, 860, 400, 1010, 500, 990, 620, 760, 630, 640, 560], [842, 410]],
+  x: [[548, 495, 632, 495, 632, 612, 548, 612], [590, 520]],
+  d: [[512, 0, 650, 0, 648, 245, 515, 245], [581, 128]],
+  z: [[340, 620, 500, 600, 690, 600, 830, 620, 830, 928, 340, 928], [585, 700]],
+  g: [[548, 330, 640, 330, 640, 470, 548, 470], [594, 340]]
+};
 const SAT_ICON = {};
 function satIcon(k) {
   if (SAT_ICON[k]) return SAT_ICON[k];
@@ -69,6 +82,12 @@ function satIcon(k) {
   } else if (k === 'z') { /* apărarea: zid cu turnuri și poartă */
     g += L.tower(-7, -7, 4, 11, 'cren') + L.wallSeg(-7, -7, 7, -7, 'fort') + L.wallSeg(-7, -7, -7, 7, 'fort') + L.tower(7, -7, 4, 11, 'cren') + L.tower(-7, 7, 4, 11, 'cren');
     g += L.wallSeg(-7, 7, -2, 7, 'fort') + L.wallSeg(2, 7, 7, 7, 'fort') + L.gate(0, 7.7, 5) + L.wallSeg(7, -7, 7, 7, 'fort') + L.tower(7, 7, 4, 12, 'cren');
+  } else if (k === 'i') { /* infirmeria: casă albă cu cruce roșie */
+    g += L.house(0, 0, 11, 8, 5, 3.6, ['#e8e2d2', '#c9c2ae'], R[0], 'u');
+    const c = I(0, 4.05, 3.2); g += `<rect x="${F(c[0] - 1.2)}" y="${F(c[1] - 3.4)}" width="2.4" height="6.8" fill="#c0392b"/><rect x="${F(c[0] - 3.4)}" y="${F(c[1] - 1.2)}" width="6.8" height="2.4" fill="#c0392b"/>`;
+  } else if (k === 'g') { /* steagul: catarg cu flamură */
+    const a = I(0, 0, 0), b = I(0, 0, 22);
+    g += `<path d="M${F(a[0])} ${F(a[1])}V${F(b[1])}" stroke="#3a2614" stroke-width="1.6"/><path d="M${F(b[0])} ${F(b[1])}l13 3-3 4 3 4-13 3z" fill="#c0504a" stroke="#5a1f1a" stroke-width=".6"/>` + L.box(0, 0, 3, 3, 1.4, ['#8a8f93', '#6a6e72', '#a6abb0']);
   } else if (k === 'q') { /* botul: turn cu ceas */
     g += L.house(5, 4, 6, 5, 3.4, 2.6, WC[2], R[0], 'u');
     g += L.tower(-2, -2, 5.4, 15, R[2]);
@@ -90,26 +109,35 @@ function satStatus(k) {
       if (busy.length) return [`forjează ${busy.length}/${S.slots} · <span data-end="${Math.min(...busy.map(x => x.end))}">${fmt(Math.min(...busy.map(x => x.end)) - now)}</span>`, 0];
       return [`${free} ${free === 1 ? 'loc liber' : 'locuri libere'}`, free > 0 ? 0 : 0];
     }
-    if (k === 'h') { const n = S.fs.length + S.rs.length, c = (S.pool && S.pool.c || []).length; return [`${n}/8 luptători · ${c} ${c === 1 ? 'candidat' : 'candidați'}`, 0]; }
-    if (k === 't') { const s = ST(), tc = ['f', 'r', 'a', 'p', 'n'].filter(x => s[x] < smax()).map(x => stc(s[x])).sort((a, b) => a - b)[0], b = BL(), bc = ['f', 'i', 'b', 'd', 'z'].filter(x => (b[x] || 0) < bmax()).map(x => bcc(b[x] || 0)).sort((a, b) => a - b)[0], m = Math.min(tc == null ? 1e12 : tc, bc == null ? 1e12 : bc); return [m <= g ? 'poți îmbunătăți ceva acum' : `${terStage()} · clădiri și antrenament`, m <= g]; }
+    if (k === 'h') { const n = mrAll().filter(f => !f.h).length; return [`${n}/5 mercenari`, mrAll().some(f => f.nn)]; }
+    if (k === 't') { const s = ST(), tc = ['f', 'r', 'a', 'p', 'n'].filter(x => s[x] < smax()).map(x => stc(s[x])).sort((a, b) => a - b)[0]; return [tc != null && tc <= g ? 'poți antrena acum' : 'Forță, Rezistență, Agilitate…', tc != null && tc <= g]; }
     if (k === 'x') { const m = dm(), r = dmReady(), d = m.list.filter(x => x.c).length; return [r ? `${r} de revendicat` : `${d}/${m.list.length} terminate azi`, r > 0]; }
     if (k === 'p') { const s = shop(), n = SH.reduce((a, [x]) => a + ((s[x] || []).length), 0); return [`${n} ${n === 1 ? 'obiect' : 'obiecte'} de vânzare`, 0]; }
     if (k === 'l') return [S.lvl < 6 ? 'se deschide la nivelul 6' : 'obiecte de calitate', 0];
     if (k === 'd') return [`minereu ${S.ore} · capacitate ${cap()}`, 0];
     if (k === 'z') { const t = (S.na || now) - now; return [`putere ${dpw()} · atac în ${sdT(t)}`, !!(S.al && S.al.length)]; }
     if (k === 'q') return [S.prem ? (S.bot && S.bot.on ? 'pornit' : 'oprit') : 'premium', 0];
+    if (k === 'i') { const d = deadAll().length, h = mrAll().filter(f => f.hp > 0 && f.hp < mhp(f)).length; return [d ? `${d} ${d === 1 ? 'căzut' : 'căzuți'} de ridicat` : h ? `${h} ${h === 1 ? 'rănit' : 'răniți'}` : 'toți sănătoși', d > 0]; }
+    if (k === 'g') return ['culoarea satului', 0];
   } catch (e) { /* o stare care nu se poate calcula nu oprește pagina */ }
   return ['', 0];
 }
-function satLvl(k) { const m = { a: 'f', h: 'b', d: 'd', z: 'z' }[k]; return m ? (BL()[m] || 0) : null; }
+function satLvl(k) { const m = { a: 'f', h: 'b', i: 'i', d: 'd', z: 'z' }[k]; return m ? (BL()[m] || 0) : null; }
 
-/* pagina de start a Satului */
+/* pagina de start a Satului: imaginea satului, cu zone pe care apeși și etichete cu starea fiecărei clădiri */
 function vHub() {
-  return `${satDefs()}<section class="vh"><h2>Clădirile satului</h2><div class="vh-grid">${SAT_B.map(([k, n, d]) => {
-    const [st, hot] = satStatus(k), lv = satLvl(k);
-    return `<button class="vh-card${hot ? ' hot' : ''}" data-v="${k}" onclick="vil('${k}')"><span class="vh-art">${satIcon(k)}</span><span class="vh-n">${n}${lv != null ? ` <small>niv. ${lv}</small>` : ''}</span><span class="vh-d">${st || d}</span></button>`;
-  }).join('')}</div></section>${typeof tronBanner === 'function' ? tronBanner() : ''}`;
+  const N = Object.fromEntries(SAT_B.map(([k, n]) => [k, n]));
+  let zones = '', labels = '';
+  for (const k in SAT_Z) {
+    const [pts, [lx, ly]] = SAT_Z[k], [st, hot] = satStatus(k), lv = satLvl(k);
+    zones += `<polygon class="vh-z${hot ? ' hot' : ''}" data-z="${k}" points="${pts.join(' ')}" onclick="vil('${k}')"/>`;
+    labels += `<button class="vh-lb${hot ? ' hot' : ''}" data-v="${k}" style="left:${(lx / 11.4).toFixed(2)}%;top:${(ly / 9.28).toFixed(2)}%" onclick="vil('${k}')" onmouseenter="satHov('${k}',1)" onmouseleave="satHov('${k}',0)" aria-label="${N[k]}${lv != null ? ', nivel ' + lv : ''}: ${st.replace(/<[^>]+>/g, '')}"><b>${N[k]}${lv != null ? ` <small>${lv}</small>` : ''}</b><span>${st}</span></button>`;
+  }
+  const [bs] = satStatus('q');
+  return `<section class="vh vh-sat"><h2>${typeof terStage === 'function' ? 'Satul tău · ' + terStage() : 'Satul tău'}</h2><div class="vh-map"><img src="imagini/sat/sat-interior.jpg" alt="Satul tău, cu clădirile pe care le poți deschide" width="1140" height="928"><svg viewBox="0 0 1140 928" preserveAspectRatio="none" aria-hidden="true">${zones}</svg>${labels}</div>`
+    + `<div class="vh-more"><button class="vb-c" data-v="q" onclick="vil('q')"><span class="vb-i">${satIcon('q')}</span><span>Bot · ${bs}</span></button><span class="mute">Atinge o clădire ca s-o deschizi.</span></div></section>${typeof tronBanner === 'function' ? tronBanner() : ''}`;
 }
+function satHov(k, on) { const z = document.querySelector(`.vh-z[data-z="${k}"]`); if (z) z.classList.toggle('on', !!on); }
 /* banda din interiorul unei clădiri: înapoi la Sat + celelalte clădiri */
 function vBar(k) {
   return `${satDefs()}<div class="vb"><button class="vb-back" onclick="vil('')" aria-label="Înapoi la Sat">‹ Sat</button><div class="vb-ch">${SAT_B.map(([x, n]) => { const hot = satStatus(x)[1]; return `<button class="vb-c${x === k ? ' on' : ''}${hot ? ' hot' : ''}" data-v="${x}" onclick="vil('${x}')" aria-current="${x === k}"><span class="vb-i">${satIcon(x)}</span><span>${n}</span></button>`; }).join('')}</div></div>`;
@@ -179,6 +207,19 @@ function satPost() { try { if (typeof tipHide === 'function') tipHide(); satFold
   const st = document.createElement('style');
   st.textContent = `
 .vh .vh-grid{margin-top:4px}
+.vh-sat h2{margin-bottom:10px}
+.vh-map{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--gold);box-shadow:0 8px 24px #000a;line-height:0}
+.vh-map img{display:block;width:100%;height:auto}
+.vh-map svg{position:absolute;inset:0;width:100%;height:100%}
+.vh-z{fill:#f0d27a;fill-opacity:0;stroke:#f0d27a;stroke-opacity:0;stroke-width:3;cursor:pointer;transition:fill-opacity .15s,stroke-opacity .15s}
+.vh-z:hover,.vh-z.on{fill-opacity:.16;stroke-opacity:.9}
+.vh-lb{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;gap:1px;padding:3px 9px 4px!important;min-height:0!important;line-height:1.15;border-radius:8px;border:1px solid #c9a24bcc!important;background:linear-gradient(180deg,#1d2427ee,#0e1214ee)!important;color:var(--ink)!important;box-shadow:0 3px 10px #000b!important;white-space:nowrap;z-index:2}
+.vh-lb b{font:700 13px Cinzel,Georgia,serif;color:var(--gold2)}.vh-lb b small{font:600 11px Alegreya,serif;color:var(--mute);margin-left:2px}
+.vh-lb span{font-size:11.5px;color:var(--mute);max-width:190px;overflow:hidden;text-overflow:ellipsis}
+.vh-lb.hot{border-color:var(--gold2)!important;box-shadow:0 0 0 1px var(--gold2),0 0 14px #f0d27a66!important}.vh-lb.hot span{color:var(--gold2)}
+.vh-lb.hot::after{content:'';position:absolute;top:-4px;right:-4px;width:9px;height:9px;border-radius:50%;background:var(--gold2);box-shadow:0 0 8px var(--gold2)}
+.vh-lb:hover{border-color:var(--gold2)!important}
+.vh-more{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
 header h1{text-shadow:none!important}header h1 .hd-tron{display:block;height:40px;width:auto;filter:drop-shadow(0 2px 4px #000c)}
 header h1 .hd-nm{text-shadow:none!important;font:700 21px/1 Cinzel,Georgia,serif;letter-spacing:.08em;text-transform:uppercase;background:linear-gradient(180deg,#ffffff 0,#dfe5e9 38%,#9aa6ad 62%,#5f6b72 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 1px 0 #000) drop-shadow(0 0 6px #c9d1d633)}
 @media (max-width:959px){header h1 .hd-tron{height:30px}header h1 .hd-nm{font-size:16px}}
@@ -212,6 +253,7 @@ header h1 .hd-nm{text-shadow:none!important;font:700 21px/1 Cinzel,Georgia,serif
 .info summary::-webkit-details-marker{display:none}.info details[open] summary{margin-bottom:4px}
 @media (max-width:600px){
   .vh-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .vh-lb{padding:2px 6px 3px!important}.vh-lb b{font-size:10.5px}.vh-lb span{display:none}.vh-lb.hot span{display:block;font-size:9.5px;max-width:110px}
   .vh-art svg{width:116px;height:105px}.vh-n{font-size:15px}.vh-d{font-size:12.5px}
   .vb-c span:last-child{display:none}.vb-c{padding:3px 4px}.vb-c.on span:last-child{display:inline;padding-right:6px}
   .fgrid{grid-template-columns:1fr 1fr!important;gap:8px!important}.fslot{min-height:86px!important;padding:8px!important;gap:3px!important}.fslot .fi{font-size:24px!important}.fslot>span.mute{font-size:12px}

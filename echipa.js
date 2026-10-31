@@ -16,12 +16,12 @@ const tmHp = f => { const m = Math.max(1, mhp(f)), v = Number.isFinite(f.hp) ? f
 function tmCard(f, i) {
   const c = tmHp(f), sel = f === cur(), dead = c.hp <= 0, nfs = S.fs.length;
   const where = f.h ? 'erou' : i < nfs ? '' : (S.gd || []).includes(f) ? 'strajă' : 'rezervă';
-  const k = [f.rk ? RK[f.rk] : '', tEsc(f.c), !f.h && f.lv ? 'nv ' + f.lv : '', where].filter(Boolean).join(' · ');
+  const k = [!f.h && MP[f.c] ? RK[f.rk || 0] : f.rk ? RK[f.rk] : '', tEsc(f.c), where].filter(Boolean).join(' · ');
   return `<button class="tm-c${sel ? ' sel' : ''}${dead ? ' dead' : ''}${where === 'rezervă' || where === 'strajă' ? ' res' : ''}" onclick="sel(${i})" aria-pressed="${sel}" title="${tEsc(f.n)}: ${Math.round(c.hp)}/${c.max} viață"><span class="tm-av">${av(f, 40)}${dead ? '<b class="sk">☠</b>' : ''}</span><span class="tm-tx"><span class="tm-n">${tEsc(f.n)}</span><span class="tm-k">${k}</span><i class="tm-hp${c.p < 40 ? ' low' : ''}"><i style="width:${c.p}%"></i></i></span>${typeof spNeed === 'function' && spNeed(f) ? '<b class="nb" title="Poate primi o specializare">!</b>' : ''}</button>`;
 }
 function tmStrip() {
-  const ro = roster(), room = S.fs.length + S.rs.length < 8;
-  return `<div class="tm-strip" role="group" aria-label="Luptători">${ro.map(tmCard).join('')}${room ? `<button class="tm-c tm-add" onclick="sdGo('a','vil','h')" title="Angajează un mercenar la Han"><span class="tm-plus">＋</span><span class="tm-tx"><span class="tm-n">Angajează</span><span class="tm-k">${S.fs.length + S.rs.length}/8 luptători</span></span></button>` : ''}</div>`;
+  const ro = roster();
+  return `<div class="tm-strip" role="group" aria-label="Luptători">${ro.map(tmCard).join('')}</div>`;
 }
 
 /* ----------------------------------------------------- luptătorul selectat */
@@ -49,7 +49,7 @@ function tmChar(inv) {
   const hurt = [...S.fs, ...S.rs].some(x => x.hp > 0 && x.hp < mhp(x));
   const hero = f.h ? `<div class="tm-nm"><span class="mute">Numele eroului</span><input maxlength="14" value="${tEsc(f.n)}" onchange="rn(this.value)"></div>` : '';
   const xp = f.h ? `<div class="tm-xp"><span class="mute">Nivel ${S.lvl} · ${S.xp}/${need(S.lvl)} exp.</span><i class="xpb"><i style="width:${Math.min(100, S.xp / need(S.lvl) * 100)}%"></i></i></div>` : '';
-  const sub = `${f.h ? 'erou' : 'nivel ' + (f.lv || '?') + ' · ' + RK[f.rk || 0]} · ${tEsc(f.c)}${f.sp && typeof spDef0 === 'function' && spDef0(f) ? ' · ' + spDef0(f).n : ''}${f.sc ? ' · ' + f.sc + ' cicatrice' : ''}${f.t && f.t.length ? '<br>' + f.t.map(x => tEsc(x.n)).join(', ') : ''}`;
+  const sub = `${f.h ? 'erou' : 'nivel ' + S.lvl + ' · ' + RK[f.rk || 0]} · ${tEsc(f.c)}${f.sp && typeof spDef0 === 'function' && spDef0(f) ? ' · ' + spDef0(f).n : ''}${f.sc ? ' · ' + f.sc + ' cicatrice' : ''}${f.t && f.t.length ? '<br>' + f.t.map(x => tEsc(x.n)).join(', ') : ''}`;
   const cd = typeof spCd === 'function' ? spCd(f) : 2;
   let h = `<div class="tm-char"><section class="tm-left"><div class="tm-por">${tmPortrait(f)}</div><h2 class="tm-h">${tEsc(f.n)}</h2><div class="tm-sub mute">${sub}</div>`;
   h += `<div class="tm-hpbar"><span>${c.hp <= 0 ? '☠ căzut' : Math.round(c.hp) + ' / ' + c.max + ' viață'}</span><i class="bar${c.hp <= 0 ? ' e' : ''}"><i style="width:${c.p}%"></i></i></div>`;
