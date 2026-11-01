@@ -42,7 +42,7 @@ lwTerrain = function (ps, F) {
   }
   const nearSeg = (x, y, m) => segs.some(([a, b]) => { const dx = b[0] - a[0], dy = b[1] - a[1], L = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / L)); return Math.hypot(x - a[0] - t * dx, y - a[1] - t * dy) < m; });
   const nearVil = (x, y, m) => ps.some(p => { const [vx, vy] = pos.get(p.id); return Math.hypot(x - vx, (y - vy) * 1.4) < m; });
-  const inside = (x, y, m) => Math.hypot(x, y * 1.35) < LWP.TW * 0.62 + m * 0.4 || nearVil(x, y, m + 62) || nearSeg(x, y, 16 + m * 0.2);
+  const inside = (x, y, m) => Math.hypot(x, y * 1.35) < LWP.TW * 0.62 + m * 0.4 || nearVil(x, y, m + 62) || nearSeg(x, y, 16 + m * 0.2) || (typeof tnInside === 'function' && tnInside(x, y));
   const outer = (x, y) => Math.abs(x) / R.x + Math.abs(y) / R.y > 1;
   let low = `<rect x="${lpF(F.x - 600)}" y="${lpF(F.y - 600)}" width="${lpF(F.w + 1200)}" height="${lpF(F.h + 1200)}" fill="url(#lw-grass)"/>`;
   for (let i = 0; i < Math.round(F.w * F.h / 22000); i++) { const x = F.x + r() * F.w, y = F.y + r() * F.h; low += `<ellipse cx="${lpF(x)}" cy="${lpF(y)}" rx="${lpF(60 + r() * 140)}" ry="${lpF(26 + r() * 60)}" fill="${r() < 0.5 ? '#5f7a45' : '#16241a'}" opacity="${lpF(0.1 + r() * 0.14)}"/>`; }

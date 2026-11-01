@@ -12,7 +12,7 @@
    Se încarcă înaintea scriptului din pagină.
    ========================================================================== */
 const GH_TAB = { a: 'Sat', c: 'Coborâre', m: 'Hartă', r: 'Tron', e: 'Echipă' };
-const GH_MT = { h: 'Regiunea', l: 'Lumea', b: 'Clasament', k: 'Campanie', t: 'Teritorii' };
+const GH_MT = { h: 'Harta', l: 'Harta', b: 'Clasament', k: 'Campanie', t: 'Teritorii' };
 const ghQ = s => [...document.querySelectorAll(s)].filter(e => e.offsetParent !== null || e instanceof SVGElement);
 const ghB = (s, on) => ghQ('#v button[onclick^="' + s + '"]').filter(b => !on || !b.disabled);
 
@@ -43,9 +43,9 @@ const GHID = [
     d: 'La <b>Han</b> stau mercenarii tăi: câte unul din fiecare clasă, pentru totdeauna. Aici ți se alătură <b>Războinicul</b>: dă-i un nume. Echipa are 3 locuri; ceilalți stau în rezervă. Mercenarii cresc în rang luptând, iar puterea lor vine din erou.' },
   { t: 'Misiunile zilnice', p: { t: 'a', v: 'x' }, c: () => S.tab === 'a' && S.vil === 'x', r: { g: 30 }, k: () => ghB('claim'),
     d: 'În <b>Misiuni</b> primești în fiecare zi 3 sarcini cu recompense. Le termini jucând normal; revino aici să le revendici. Între timp ți se alătură și <b>Vraciul</b>, care vindecă echipa în luptă.' },
-  { t: 'Jefuiește un sat', p: { t: 'm', m: 'h' }, c: () => C('r') >= 1, r: { g: 80, o: 20 },
+  { t: 'Jefuiește un sat', p: { t: 'm', m: 'l' }, c: () => C('r') >= 1, r: { g: 80, o: 20 },
     k: () => { const r = ghB('raid('); return r.length ? r : ghQ('#v g[onclick^="mv("]'); },
-    d: 'Pe <b>Hartă</b>, în <b>Regiunea</b> ta, sunt sate conduse de alții. Atinge unul și apasă <b>„Jefuiește”</b>. Mai târziu le poți și cuceri, ca teritorii. Pentru drum ți se alătură ultimul mercenar: <b>Magul</b>.' },
+    d: 'Pe <b>Hartă</b>, în chenarul auriu din jurul satului tău, e <b>ținutul tău</b>: sate conduse de alții. Atinge unul și apasă <b>„Jefuiește”</b>. Mai târziu le poți și cuceri, ca teritorii. Pentru drum ți se alătură ultimul mercenar: <b>Magul</b>.' },
   { t: 'Când rămâi fără puncte', n: 1,
     d: 'Ca jucător nou ai o <b>rezervă de 120 de puncte</b> (o vezi sus, lângă fulger) care îți umple bara când se golește, iar până la nivelul 10 fiecare nivel nou îți <b>adaugă</b> 30 de puncte. După aceea punctele se refac singure, câte unul la 6 minute. Până atunci ai destule de făcut fără ele: forjă, antrenament, clădiri, misiuni. Când nu mai ai puncte, apare sus în <b>Sat</b> lista <b>„Ce poți face acum”</b>. De la nivelul 5 se deschide <b>Lumea</b>, cu atacuri asupra altor jucători care nu costă puncte.' },
   { t: 'Ești pregătit', e: 1,
@@ -76,9 +76,9 @@ function ghHints() {
   /* fiecare temniță nouă */
   DG.forEach((g, i) => { if (i > 0 && !g.ev && g.lv > 1) L.push({ k: 'dg' + i, when: () => S.lvl >= g.lv, p: { t: 'c' }, done: () => S.tab === 'c', t: 'Temniță nouă: ' + g.n,
     d: `La nivelul ${g.lv} s-a deschis <b>${g.n}</b>, în Coborâre: ${g.rooms} camere, căpitanul ${g.bn}${g.rm >= 2 ? ' și materiale mai rare' : ''}. Lupte mai grele, pradă mai bună.` }); });
-  L.push({ k: 'camp', when: () => S.lvl >= 2 && !!(S.ter && S.ter.camps && S.ter.camps.length), p: { t: 'm', m: 'h' }, done: () => S.tab === 'm' && (S.mt || 'h') === 'h', t: 'Tabere pe hartă',
+  L.push({ k: 'camp', when: () => S.lvl >= 2 && !!(S.ter && S.ter.camps && S.ter.camps.length), p: { t: 'm', m: 'l' }, done: () => S.tab === 'm' && (S.mt === 'h' || !S.mt ? 'l' : S.mt) === 'h', t: 'Tabere pe hartă',
     d: 'Pe <b>Hartă</b>, în Regiune, apar <b>tabere</b> de bandiți care pleacă după câteva ore. Au mai multe lupte la rând și un căpitan, iar prada e mai bună decât la un jaf. Le vezi și în panoul „Acum”, cu timpul rămas.' });
-  L.push({ k: 'conq', when: () => !!S.map && MPV().vs.some(v => v.o !== 'p' && (v.rw || 0) >= TP.conq.raids), p: { t: 'm', m: 'h' }, done: () => own() > 0, t: 'Poți cuceri un sat',
+  L.push({ k: 'conq', when: () => !!S.map && MPV().vs.some(v => v.o !== 'p' && (v.rw || 0) >= TP.conq.raids), p: { t: 'm', m: 'l' }, done: () => own() > 0, t: 'Poți cuceri un sat',
     d: `Ai jefuit un sat de ${TP.conq.raids} ori: acum îl poți <b>cuceri</b>. Pe Hartă, atinge-l și alege „Cucerește” (costă puncte și o taxă în aur). Un sat cucerit îți aduce bonusuri zilnice, dar are și o întreținere; le vezi la <b>Teritorii</b>.` });
   L.push({ k: 'fort', when: () => S.lvl >= TP.fort.lv && own() >= 1, p: { t: 'm', m: 't' }, done: () => S.tab === 'm' && S.mt === 't', t: 'Cetatea regiunii',
     d: `De la nivelul ${TP.fort.lv}, cu cel puțin un sat cucerit, poți asedia <b>cetatea</b> regiunii. E cel mai greu obiectiv de pe hartă și dă cele mai mari bonusuri. Condițiile le vezi la <b>Teritorii</b>.` });
@@ -98,16 +98,16 @@ function ghPath(p) {
   if (!p) return null;
   if (S.tab !== p.t) return ghQ(`#nv button[onclick="tab('${p.t}')"]`)[0] || null;
   if (p.v && S.vil !== p.v) return ghQ(`#v .vh-lb[data-v="${p.v}"], #v .vh-card[data-v="${p.v}"], #v .vb-c[data-v="${p.v}"]`)[0] || null;   /* pagina de start a satului sau banda din clădiri */
-  if (p.m && (S.mt || 'h') !== p.m) return ghQ(`#v button[onclick="mtab('${p.m}')"]`)[0] || null;
+  if (p.m && (S.mt === 'h' || !S.mt ? 'l' : S.mt) !== p.m) return ghQ(`#v button[onclick="mtab('${p.m}')"]`)[0] || null;
   return null;
 }
-const ghThere = p => !p || (S.tab === p.t && (!p.v || S.vil === p.v) && (!p.m || (S.mt || 'h') === p.m));
+const ghThere = p => !p || (S.tab === p.t && (!p.v || S.vil === p.v) && (!p.m || (S.mt === 'h' || !S.mt ? 'l' : S.mt) === p.m));
 /* „Unde: Sat › Producție › Topitorie”, cu bucățile deja parcurse bifate */
 function ghCrumb(p) {
   if (!p) return '';
   const seg = [[GH_TAB[p.t], S.tab === p.t]];
   if (p.v) seg.push([ghVilN(p.v), S.tab === p.t && S.vil === p.v]);
-  if (p.m) seg.push([GH_MT[p.m], S.tab === p.t && (S.mt || 'h') === p.m]);
+  if (p.m) seg.push([GH_MT[p.m], S.tab === p.t && (S.mt === 'h' || !S.mt ? 'l' : S.mt) === p.m]);
   let cur = true;
   return `<div class="gh-path"><span class="mute">Unde:</span> ${seg.map(([n, ok]) => { const now = cur && !ok; if (!ok) cur = false; return `<span class="${ok ? 'ok' : now ? 'now' : ''}">${n}</span>`; }).join('<i>›</i>')}</div>`;
 }

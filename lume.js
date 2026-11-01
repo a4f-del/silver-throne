@@ -150,7 +150,7 @@ function lwZoom(k, fx = 0.5, fy = 0.5) { if (!LUME.full) return; const c = Objec
 function lwReset() { LUME.cam = null; lwApply(); }
 const lwNarrow = () => typeof window !== 'undefined' && window.innerWidth < 600;
 function lwCenter(p) { if (!p || !LUME.full) return; const [x, y] = lwPos(p), F = LUME.full, w = Math.min(F.w, lwNarrow() ? 480 : 760); LUME.cam = lwClamp({ x: x - w / 2, y: y - w * F.h / F.w / 2, w, h: w * F.h / F.w }); }
-function lwPick(id) { if (Date.now() - LUME.noClick < 250) return; LUME.sel = LUME.sel === id ? null : id; S.msg = ''; render(); }
+function lwPick(id) { if (Date.now() - LUME.noClick < 250) return; LUME.sel = LUME.sel === id ? null : id; S.mv = null; S.msel = null; S.msg = ''; render(); }
 function lwFind() { const st = LUME.st, me = st && st.me && st.players.find(p => p.id === st.me.user_id); if (me) { LUME.sel = me.id; lwCenter(me); render(); } }
 
 /* raza zonei locuite (rombul), pentru decor */
@@ -227,7 +227,7 @@ function lwMap() {
   items.push([0, lwThrone(K)]);
   items.sort((a, b) => a[0] - b[0]);
   const n = ps.length, ts = typeof TRON !== 'undefined' && TRON.st;
-  return `<div class="st-map lw-map"><div class="lw-ttl"><b>Câmpia Tronului de Argint</b><small>${n} ${n === 1 ? 'sat' : 'sate'}${ts && ts.week_end ? ' · săptămâna se închide în ' + sdT(ts.week_end - tronNow()) : ''}</small></div><svg id="lwmap" viewBox="${lwVB()}" role="group" aria-label="Harta lumii, ${n} ${n === 1 ? 'sat' : 'sate'}"><defs>${LWA.defs}</defs>${T.low}${T.high}${items.map(x => x[1]).join('')}<rect x="${lwF(x0)}" y="${lwF(y0)}" width="${lwF(w)}" height="${lwF(h)}" fill="url(#lwa-vg)" pointer-events="none"/></svg>`
+  return `<div class="st-map lw-map"><div class="lw-ttl"><b>Câmpia Tronului de Argint</b><small>${n} ${n === 1 ? 'sat' : 'sate'}${ts && ts.week_end ? ' · săptămâna se închide în ' + sdT(ts.week_end - tronNow()) : ''}</small></div><svg id="lwmap" viewBox="${lwVB()}" role="group" aria-label="Harta lumii, ${n} ${n === 1 ? 'sat' : 'sate'}"><defs>${LWA.defs}</defs>${T.low}${typeof lwTinut === 'function' ? lwTinut(ps.find(p => p.id === meId)) : ''}${T.high}${items.map(x => x[1]).join('')}<rect x="${lwF(x0)}" y="${lwF(y0)}" width="${lwF(w)}" height="${lwF(h)}" fill="url(#lwa-vg)" pointer-events="none"/></svg>`
     + `<div class="st-zc"><button class="st-zb" onclick="lwZoom(1.35)" aria-label="Mărește">+</button><button class="st-zb" onclick="lwZoom(1/1.35)" aria-label="Micșorează">−</button><button class="st-zb" onclick="lwReset()" aria-label="Toată lumea" title="Toată lumea">⌂</button><button class="st-zb" onclick="lwFind()" aria-label="Satul meu" title="Satul meu">◎</button></div></div>`;
 }
 function lwEnBar() {
@@ -259,7 +259,7 @@ function vLume() {
   if (!LUME.loading && (!LUME.st || Date.now() - LUME.at > 45000 || (Date.now() - LUME.at > 8000 && JSON.stringify(lwSnap()) !== LUME.pubSig))) lwSync();
   if (!LUME.st) return `<section><h2>Lumea</h2><p class="mute">${LUME.err ? tEsc(LUME.err) : 'Se încarcă harta lumii…'}</p>${LUME.err ? '<button onclick="lwSync(true)">Încearcă din nou</button>' : ''}</section>`;
   const n = LUME.st.players.length, c = lwCfg();
-  let h = `<section><h2>Lumea</h2><div class="mute">Satele tuturor jucătorilor, în jurul Tronului de Argint. Fiecare jucător nou primește un loc la marginea hărții, așa că lumea crește odată cu voi. Acum: <b>${n}</b> ${n === 1 ? 'sat' : 'sate'}.</div>${LUME.err ? `<p class="r4">${tEsc(LUME.err)}</p>` : ''}${LUME.repErr ? `<p class="r4">Rezultatul ultimului atac nu a ajuns la server (${tEsc(LUME.repErr)}). Se retrimite automat.</p>` : ''}${lwEnBar()}${lwMap()}`;
+  let h = `<section><h2>Harta</h2><div class="mute">Satele tuturor jucătorilor, în jurul Tronului de Argint. În jurul satului tău, în chenarul auriu, e <b>ținutul tău</b>: satele de jefuit și de cucerit, taberele, locurile de interes și zonele din ceață, pe care doar tu le vezi. Acum: <b>${n}</b> ${n === 1 ? 'sat' : 'sate'} de jucători.</div>${LUME.err ? `<p class="r4">${tEsc(LUME.err)}</p>` : ''}${LUME.repErr ? `<p class="r4">Rezultatul ultimului atac nu a ajuns la server (${tEsc(LUME.repErr)}). Se retrimite automat.</p>` : ''}${lwEnBar()}${lwMap()}`;
   h += `<div class="st-lg"><span><i style="background:#f0d27a"></i>Satul tău</span><span><i style="background:#c0504a"></i>Poate fi atacat</span><span><i style="background:#7b7f82"></i>Începător (sub nivelul ${c.min_level}) sau atacat recent de tine</span><span>👑 auriu: regele săptămânii · argintiu: pe Tron acum</span><span>Satul crește cu nivelul jucătorului: palisadă la 10, zid și turn la 20, fortificații la 25, castel de la 30</span></div></section>`;
   return h + lwSelPanel() + lwLog() + `<section><h2>Reguli</h2><div class="mute">• Bara are ${c.en_max} atacuri și se reface câte unul la ${c.en_regen_min} de minute, adică ${Math.round(24 * 60 / c.en_regen_min)} pe zi.<br>• Același jucător îl poți ataca o dată la ${c.same_h} ore. Începătorii (sub nivelul ${c.min_level}) nu pot fi atacați și nu pot ataca.<br>• Lupți cu fantoma echipei lui, cu aceleași plafoane ca la Tron. Dacă învingi, iei prada calculată de joc și experiență în plus. Apărătorul nu pierde niciodată nimic, doar află din jurnal.<br>• Satele din Lume nu se pot cuceri; teritoriile rămân în regiunea ta.</div></section>`;
 }
