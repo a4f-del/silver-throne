@@ -210,6 +210,13 @@ function satPost() { try { if (typeof tipHide === 'function') tipHide(); satFold
   const st = document.createElement('style');
   st.textContent = `
 .vh .vh-grid{margin-top:4px}
+.uii{display:inline-block;width:1.3em;height:1.3em;object-fit:contain;vertical-align:middle;filter:drop-shadow(0 1px 2px #000a)}
+.ni .uii{width:30px;height:30px}.rc .uii{width:28px;height:28px;flex:none}.sd-i .uii{width:22px;height:22px}#hdr-cl .uii{width:20px;height:20px}
+.ico .uii{width:82%;height:82%}
+.scard.emp[data-k]::before{content:''!important;position:absolute;right:12px;top:30px;width:56px;height:56px;background:center/contain no-repeat;opacity:.28;filter:grayscale(.3)!important;font-size:0!important;pointer-events:none}
+.scard.emp[data-k="w"]::before{background-image:url(imagini/ui/slot-arma.webp)}.scard.emp[data-k="a"]::before{background-image:url(imagini/ui/slot-armura.webp)}
+.scard.emp[data-k="h"]::before{background-image:url(imagini/ui/slot-coif.webp)}.scard.emp[data-k="b"]::before{background-image:url(imagini/ui/slot-cizme.webp)}
+.scard.emp[data-k="j"]::before{background-image:url(imagini/ui/slot-bijuterie.webp)}.scard.emp[data-k="r"]::before{background-image:url(imagini/ui/slot-relicva.webp)}
 .vh-sat h2{margin-bottom:10px}
 .vh-map{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--gold);box-shadow:0 8px 24px #000a;line-height:0}
 .vh-map img{display:block;width:100%;height:auto}

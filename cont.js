@@ -283,7 +283,7 @@ function contChip() {
     document.addEventListener('click', e => { if (!p.classList.contains('auth-hidden') && !p.contains(e.target) && e.target !== t) { p.classList.add('auth-hidden'); t.setAttribute('aria-expanded', 'false'); } });
     /* bara de sus, dreapta: Clasament + Cont */
     const w = document.createElement('div'); w.id = 'hdr-act';
-    const cl = document.createElement('button'); cl.id = 'hdr-cl'; cl.type = 'button'; cl.innerHTML = '<span aria-hidden="true">🏆</span><span class="hdr-l">Clasament</span>'; cl.setAttribute('aria-label', 'Clasament'); cl.title = 'Clasamentul jucătorilor';
+    const cl = document.createElement('button'); cl.id = 'hdr-cl'; cl.type = 'button'; cl.innerHTML = '<img class="uii" src="imagini/ui/ui-clasament.webp" alt=""><span class="hdr-l">Clasament</span>'; cl.setAttribute('aria-label', 'Clasament'); cl.title = 'Clasamentul jucătorilor';
     cl.onclick = () => { p.classList.add('auth-hidden'); t.setAttribute('aria-expanded', 'false'); tab('k'); };
     w.append(cl, t); document.body.append(w, p);
   }
