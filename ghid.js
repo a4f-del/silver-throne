@@ -60,12 +60,12 @@ const ghFirst = () => !ghActive() && (S.tu < 0 || (GHID[S.tu] && GHID[S.tu].e));
 function ghHints() {
   const L = [], seen = S.ghs || {}, own = () => (S.map ? terOwnedV().length : 0);
   L.push({ k: 'fall', when: () => !S.d && S.fs.some(f => f.hp <= 0), p: { t: 'e' }, done: () => !S.fs.some(f => f.hp <= 0), t: 'Un luptător a căzut',
-    k2: () => { const a = ghB('reviveAll('), r = ghB('revive('); return a.length ? a.slice(0, 1) : r.length ? r.slice(0, 1) : ghQ('#v .tm-c.dead').slice(0, 1); },
+    k2: () => { const a = ghB('reviveAll('), r = ghB('revive('); return a.length ? a.slice(0, 1) : r.length ? r.slice(0, 1) : ghQ('#v .tm-t.dead').slice(0, 1); },
     d: 'Luptătorii căzuți nu mai intră în luptă până nu îi ridici. În <b>Echipă</b> apasă <b>„Ridică toți căzuții”</b> (sau „Ridică” la unul singur): costă aur și le lasă câte o cicatrice (−3 viață maximă). Răniții se vindecă mai ieftin, tot de acolo. Infirmeria din sat le face pe amândouă și le scade costul.' });
   L.push({ k: 'atac', when: () => !!(S.al && S.al.length), p: { t: 'a', v: 'z' }, done: () => S.tab === 'a' && S.vil === 'z', t: 'Satul tău a fost atacat',
     d: 'Satele din regiune te atacă din când în când. Dacă apărarea ține, primești tribut; dacă nu, pierzi puțin aur și minereu. În <b>Apărare</b> angajezi străjeri și îmbunătățești Zidul.' });
   L.push({ k: 'spec', when: () => typeof spNeedN === 'function' && spNeedN() > 0, p: { t: 'e' }, done: () => typeof spNeedN === 'function' && spNeedN() === 0, t: 'Prima specializare',
-    k2: () => { const c = ghQ('#v .tm-c .nb'); if (c.length && !spNeed(cur())) return [c[0].closest('.tm-c')]; return ghQ('#v .sp-pick button').slice(0, 1); },
+    k2: () => { const c = ghQ('#v .tm-t .nb'); if (c.length && !spNeed(cur())) return [c[0].closest('.tm-t')]; return ghQ('#v .sp-pick button').slice(0, 1); },
     d: 'Un luptător a ajuns <b>Veteran</b> (sau eroul la nivelul 10) și poate primi o <b>specializare</b>: fiecare clasă are două, cu câte 4 trepte care se deblochează odată cu rangul. În <b>Echipă</b>, alege-l pe cel cu „!”. Prima alegere e gratuită; mai târziu o poți schimba contra aur.' });
   L.push({ k: 'cmp', when: () => typeof chCur === 'function' && chReady(chCur()), p: { t: 'm', m: 'k' }, done: () => S.tab === 'm' && S.mt === 'k', t: 'Capitol de campanie terminat',
     d: 'Ai îndeplinit obiectivele unui capitol din <b>Campanie</b>. Revendică recompensa; capitolul următor îți arată ce urmează.' });
