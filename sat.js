@@ -150,9 +150,10 @@ function vBar(k) {
 const tipAttr = h => String(h).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 /* conținutul ferestrei pentru un obiect; cmp = comparația față de cel echipat (HTML) */
 function itTip(it, cmp) {
-  const L = typeof INV_L !== 'undefined' ? INV_L : {}, rows = Object.keys(it.s || {}).filter(k => it.s[k]).map(k => `<li><b>+${it.s[k]}</b> ${L[k] || k}</li>`).join('');
+  const L = typeof INV_L !== 'undefined' ? INV_L : {}, rows = Object.keys(it.s || {}).filter(k => it.s[k]).map(k => `<li class="${it.s[k] < 0 ? 'neg' : ''}"><b>${it.s[k] > 0 ? '+' : '−'}${Math.abs(it.s[k])}</b> ${L[k] || k}</li>`).join('');
+  const wt = typeof WF !== 'undefined' && it.t === 'w' && WF[wfOf(it)], wcl = wt && (wt.c === 'Campion' ? 'erou' : wt.c), wline = wt ? `<div class="tp-w">${wt.n} · potrivită pentru ${wcl} (+30% din atacul armei)<br><span>${wt.d}</span></div>` : '';
   const r = it.lg ? 'Legendar' : RAR[it.r].n;
-  return `<div class="tp-h ${it.lg ? 'rl' : 'r' + (it.r + 1)}">${it.name}</div><div class="tp-s">nivel ${it.l} · ${r}${it.q != null ? ' · ' + QN[it.q] : ''}</div>${rows ? `<ul class="tp-l">${rows}</ul>` : ''}${it.lg && typeof LG !== 'undefined' && LG[it.lg] && LG[it.lg].d ? `<div class="tp-x">${LG[it.lg].d}</div>` : ''}${cmp ? `<div class="tp-c">${cmp}</div>` : ''}`;
+  return `<div class="tp-h ${it.lg ? 'rl' : 'r' + (it.r + 1)}">${it.name}</div><div class="tp-s">nivel ${it.l} · ${r}${it.q != null ? ' · ' + QN[it.q] : ''}</div>${wline}${rows ? `<ul class="tp-l">${rows}</ul>` : ''}${it.lg && typeof LG !== 'undefined' && LG[it.lg] && LG[it.lg].d ? `<div class="tp-x">${LG[it.lg].d}</div>` : ''}${cmp ? `<div class="tp-c">${cmp}</div>` : ''}`;
 }
 const itTipA = (it, cmp) => ` data-tip="${tipAttr(itTip(it, cmp))}" tabindex="0"`;
 (function () {
@@ -252,7 +253,7 @@ header h1 .hd-nm{text-shadow:none!important;font:700 21px/1 Cinzel,Georgia,serif
 #itip{position:fixed;left:0;top:0;z-index:30000;display:none;max-width:290px;padding:8px 11px 9px;background:linear-gradient(180deg,#1d2427f5,#111618f5);border:1px solid var(--gold);border-radius:8px;box-shadow:0 10px 26px #000c;font-size:14px;color:var(--ink);pointer-events:none}
 #itip.on{display:block}
 .tp-h{font:700 15px Cinzel,Georgia,serif;line-height:1.25}.tp-s{font-size:12.5px;color:var(--mute);margin:1px 0 4px}
-.tp-l{list-style:none;margin:0;padding:0}.tp-l li{padding:1px 0}.tp-l b{color:#7fd88c}
+.tp-l{list-style:none;margin:0;padding:0}.tp-l li.neg b{color:#e8837b}.tp-w{margin:0 0 4px;font-size:12.5px;color:var(--gold2)}.tp-w span{color:var(--mute)}.tp-l li{padding:1px 0}.tp-l b{color:#7fd88c}
 .tp-x{margin-top:5px;color:var(--gold2);font-size:13px}
 .tp-c{margin-top:6px;padding-top:6px;border-top:1px solid #ffffff1a}.tp-c .chips{margin:0}
 [data-tip]{cursor:help;outline:none}[data-tip]:focus-visible{box-shadow:0 0 0 2px var(--gold2);border-radius:4px}

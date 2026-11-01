@@ -152,7 +152,7 @@ function explore(x, y) {
   else { spend(TP.explore.cost); const c = terRev(x, y, TP.explore.radius); S.msg = 'Iscoadele au explorat zona (' + c.length + ' zone noi). ' + terDisc(c); }
   go();
 }
-function terSel(k, a, b) { S.msel = { k, a, b }; S.mv = null; S.msg = ''; if (typeof LUME !== 'undefined') LUME.sel = null; go(); }
+function terSel(k, a, b) { S.msel = { k, a, b }; S.mv = null; S.wsel = null; S.msg = ''; if (typeof LUME !== 'undefined') LUME.sel = null; go(); }
 
 /* ---------------------------------------------------------------- TABERE ----- */
 function terTaken() {
@@ -699,7 +699,7 @@ function vM() {
   if (S.mt === 'b' || S.mt === 'h' || !S.mt) S.mt = 'l';   /* o singură hartă: Lumea, cu ținutul tău (tinut.js) */
   terTick(); const offline = typeof LUME !== 'undefined' && !LUME.st && LUME.err, k = offline && S.mt === 'l' ? 'h' : S.mt, tabs = terTabs();
   if (k === 'k') return tabs + vCamp();
-  if (k === 'l') return tabs + (S.ex ? vEx() : '') + vLume() + (typeof tnPanel === 'function' ? tnPanel() : '');   /* fără server: harta veche a regiunii, mai jos */
+  if (k === 'l') return tabs + (S.ex ? vEx() : '') + vLume() + (typeof wnPanel === 'function' ? wnPanel() : '') + (typeof tnPanel === 'function' ? tnPanel() : '');   /* fără server: harta veche a regiunii, mai jos */
   if (k === 't') return tabs + vTer();
   let h = vMmap();
   h = h.replace('<p class="mute">Atinge un sat ca să-l vezi.</p>', terPanel());

@@ -150,7 +150,7 @@ function lwZoom(k, fx = 0.5, fy = 0.5) { if (!LUME.full) return; const c = Objec
 function lwReset() { LUME.cam = null; lwApply(); }
 const lwNarrow = () => typeof window !== 'undefined' && window.innerWidth < 600;
 function lwCenter(p) { if (!p || !LUME.full) return; const [x, y] = lwPos(p), F = LUME.full, w = Math.min(F.w, lwNarrow() ? 480 : 760); LUME.cam = lwClamp({ x: x - w / 2, y: y - w * F.h / F.w / 2, w, h: w * F.h / F.w }); }
-function lwPick(id) { if (Date.now() - LUME.noClick < 250) return; LUME.sel = LUME.sel === id ? null : id; S.mv = null; S.msel = null; S.msg = ''; render(); }
+function lwPick(id) { if (Date.now() - LUME.noClick < 250) return; LUME.sel = LUME.sel === id ? null : id; S.mv = null; S.msel = null; S.wsel = null; S.msg = ''; render(); }
 function lwFind() { const st = LUME.st, me = st && st.me && st.players.find(p => p.id === st.me.user_id); if (me) { LUME.sel = me.id; lwCenter(me); render(); } }
 
 /* raza zonei locuite (rombul), pentru decor */
@@ -227,7 +227,7 @@ function lwMap() {
   items.push([0, lwThrone(K)]);
   items.sort((a, b) => a[0] - b[0]);
   const n = ps.length, ts = typeof TRON !== 'undefined' && TRON.st;
-  return `<div class="st-map lw-map"><div class="lw-ttl"><b>Câmpia Tronului de Argint</b><small>${n} ${n === 1 ? 'sat' : 'sate'}${ts && ts.week_end ? ' · săptămâna se închide în ' + sdT(ts.week_end - tronNow()) : ''}</small></div><svg id="lwmap" viewBox="${lwVB()}" role="group" aria-label="Harta lumii, ${n} ${n === 1 ? 'sat' : 'sate'}"><defs>${LWA.defs}</defs>${T.low}${typeof lwTinut === 'function' ? lwTinut(ps.find(p => p.id === meId)) : ''}${T.high}${items.map(x => x[1]).join('')}<rect x="${lwF(x0)}" y="${lwF(y0)}" width="${lwF(w)}" height="${lwF(h)}" fill="url(#lwa-vg)" pointer-events="none"/></svg>`
+  return `<div class="st-map lw-map"><div class="lw-ttl"><b>Câmpia Tronului de Argint</b><small>${n} ${n === 1 ? 'sat' : 'sate'}${ts && ts.week_end ? ' · săptămâna se închide în ' + sdT(ts.week_end - tronNow()) : ''}</small></div><svg id="lwmap" viewBox="${lwVB()}" role="group" aria-label="Harta lumii, ${n} ${n === 1 ? 'sat' : 'sate'}"><defs>${LWA.defs}</defs>${T.low}${typeof lwTinut === 'function' ? lwTinut(ps.find(p => p.id === meId)) : ''}${typeof lwWn === 'function' ? lwWn() : ''}${T.high}${items.map(x => x[1]).join('')}<rect x="${lwF(x0)}" y="${lwF(y0)}" width="${lwF(w)}" height="${lwF(h)}" fill="url(#lwa-vg)" pointer-events="none"/></svg>`
     + `<div class="st-zc"><button class="st-zb" onclick="lwZoom(1.35)" aria-label="Mărește">+</button><button class="st-zb" onclick="lwZoom(1/1.35)" aria-label="Micșorează">−</button><button class="st-zb" onclick="lwReset()" aria-label="Toată lumea" title="Toată lumea">⌂</button><button class="st-zb" onclick="lwFind()" aria-label="Satul meu" title="Satul meu">◎</button></div></div>`;
 }
 function lwEnBar() {

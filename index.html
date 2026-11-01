@@ -186,28 +186,28 @@ main{padding:8px 24px;max-width:940px}
 </style>
 <link rel="stylesheet" href="tema.css?v=2026.10.30-3">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="world-data.js?v=2026.11.01-3"></script>
-<script src="tron-logic.js?v=2026.11.01-3"></script>
-<script src="cladiri-art.js?v=2026.11.01-3"></script>
-<script src="teritorii.js?v=2026.11.01-3"></script>
-<script src="inventar.js?v=2026.11.01-3"></script>
-<script src="panou.js?v=2026.11.01-3"></script>
-<script src="ghid.js?v=2026.11.01-3"></script>
-<script src="mercenari.js?v=2026.11.01-3"></script>
-<script src="specializari.js?v=2026.11.01-3"></script>
-<script src="tron.js?v=2026.11.01-3"></script>
-<script src="lume-art.js?v=2026.11.01-3"></script>
-<script src="sat.js?v=2026.11.01-3"></script>
-<script src="lupta-vs.js?v=2026.11.01-3"></script>
-<script src="temnite.js?v=2026.11.01-3"></script>
-<script src="harta.js?v=2026.11.01-3"></script>
-<script src="lume.js?v=2026.11.01-3"></script>
-<script src="lume-pictat.js?v=2026.11.01-3"></script>
-<script src="tinut.js?v=2026.11.01-3"></script>
-<script src="tema.js?v=2026.11.01-3"></script>
-<script src="echipa.js?v=2026.11.01-3"></script>
-<script src="erou.js?v=2026.11.01-3"></script>
-<script src="cont.js?v=2026.11.01-3"></script>
+<script src="world-data.js?v=2026.11.01-6"></script>
+<script src="tron-logic.js?v=2026.11.01-6"></script>
+<script src="cladiri-art.js?v=2026.11.01-6"></script>
+<script src="teritorii.js?v=2026.11.01-6"></script>
+<script src="inventar.js?v=2026.11.01-6"></script>
+<script src="panou.js?v=2026.11.01-6"></script>
+<script src="ghid.js?v=2026.11.01-6"></script>
+<script src="mercenari.js?v=2026.11.01-6"></script>
+<script src="specializari.js?v=2026.11.01-6"></script>
+<script src="tron.js?v=2026.11.01-6"></script>
+<script src="lume-art.js?v=2026.11.01-6"></script>
+<script src="sat.js?v=2026.11.01-6"></script>
+<script src="lupta-vs.js?v=2026.11.01-6"></script>
+<script src="temnite.js?v=2026.11.01-6"></script>
+<script src="harta.js?v=2026.11.01-6"></script>
+<script src="lume.js?v=2026.11.01-6"></script>
+<script src="lume-pictat.js?v=2026.11.01-6"></script>
+<script src="tinut.js?v=2026.11.01-6"></script>
+<script src="tema.js?v=2026.11.01-6"></script>
+<script src="echipa.js?v=2026.11.01-6"></script>
+<script src="erou.js?v=2026.11.01-6"></script>
+<script src="cont.js?v=2026.11.01-6"></script>
 </head>
 <body>
 <header><h1><img class="hd-tron" src="imagini/logo-tron.webp" alt="" width="34" height="40"><span class="hd-nm">Silver Throne</span></h1><div class="hs" id="hs"></div></header>
@@ -241,7 +241,7 @@ function sync(){const n=Date.now();if(S.bp>0&&S.pts<MXP()){const k=Math.min(S.bp
 function spend(k){if(S.pts>=MXP())S.ptsT=Date.now();S.pts-=k}
 const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 const BL=()=>{const b=S.bl||(S.bl={f:0,i:0,b:0});if(b.d==null)b.d=0;if(b.z==null)b.z=0;return b},rp=c=>Math.round(c.p*Math.pow(.97,BL().b)),ST=()=>S.st||(S.st={f:0,r:0,a:0,p:0,n:0}),E=f=>f.eq||(f.eq={w:null,a:null}),roster=()=>[...S.fs,...S.rs,...(S.gd||[])],cur=()=>{const r=roster();return r[S.sel]||r[0]};
-function bon(f){const b={dmg:0,def:0,hp:0,bleed:0,crit:0,loot:0,heal:0,vd:0,pd:0,ph:0,pf:0};if(f){for(const k of SL){const it=E(f)[k];if(it)for(const x in b)b[x]+=it.s[x]||0}tBuf(b)}
+function bon(f){const b={dmg:0,def:0,hp:0,bleed:0,crit:0,loot:0,heal:0,vd:0,pd:0,ph:0,pf:0};if(f){for(const k of SL){const it=E(f)[k];if(it)for(const x in b)b[x]+=it.s[x]||0}tBuf(b);const w=E(f).w,wt=WF[wfOf(w)];if(wt&&wt.c===f.c)b.dmg+=Math.round(w.s.dmg*.3)}   /* arma potrivită clasei: +30% din atacul ei */
  /* apărarea mercenarului nu trece de 95% din a eroului */
  if(isM(f)){const h=heroOf();if(h){const hb=bon(h),hd=hb.def*(1+hb.pf/100)+tr(h,'def'),md=b.def*(1+b.pf/100)+tr(f,'def');if(md>MCAP*hd)b.def=Math.max(0,(MCAP*hd-tr(f,'def'))/(1+b.pf/100))}}return b}
 const el=()=>S.lvl<=20?S.lvl:20+(S.lvl-20)*.7,need=L=>ST_W.need(L);
@@ -256,13 +256,19 @@ const mhp0=f=>(CL[f.c].hp+4*(spL(f)-1)+bon(f).hp)*(1+tr(f,'hp')+(f.h?ST().r*.03:
 const atk0=f=>(CL[f.c].atk+1.2*(spL(f)-1)+bon(f).dmg)*(1+tr(f,'atk')+(f.h?ST().f*.02:0)+bon(f).pd/100+(f.rk||0)*.15);
 const mhp=f=>{if(!isM(f))return Math.max(5,Math.round(mhp0(f))-3*f.sc);const h=heroOf(),v=((CL.Campion.hp+4*(el()-1))*MP[f.c][0]+bon(f).hp)*RF[Math.min(4,f.rk||0)]*(1+tr(f,'hp')+bon(f).ph/100+spHpM(f));return Math.max(5,Math.round(h?Math.min(v,MCAP*mhp0(h)):v)-3*f.sc)};
 const atkOf=f=>{if(!isM(f))return atk0(f);const h=heroOf(),v=((CL.Campion.atk+1.2*(el()-1))*MP[f.c][1]+bon(f).dmg)*RF[Math.min(4,f.rk||0)]*(1+tr(f,'atk')+bon(f).pd/100);return h?Math.min(v,MCAP*atk0(h)):v};
-function mkItem(t,l,r,pi,si,q){const m=RAR[r].m*(1+.1*(q||0)),s={dmg:0,def:0,hp:0,bleed:0,crit:0,loot:0,heal:0,vd:0,pd:0,ph:0,pf:0};
- if(t=='w')s.dmg=Math.round((2+l*1.4)*m);else if(t=='j')s.hp=Math.round(2*l*m);else if(t=='h'){s.def=Math.round((1+l*.4)*m);s.hp=Math.round(2*l*m)}else if(t=='b'){s.hp=Math.round(2.5*l*m);s.def=Math.round((.5+l*.25)*m)}else{s.def=Math.round((1+l*.7)*m);s.hp=Math.round(3*l*m)}
- const PL=t=='w'?PW:t=='j'?PJ:PA,pf=pi!=null?PL[pi]:P(PL.filter(x=>(x.lv||1)<=l)),sf=si!=null?SF[si]:P(SF.filter(x=>(x.lv||1)<=l));let name=P(t=='w'?BW:t=='j'?BJ:t=='h'?BH:t=='b'?BB:BA);
+/* tipurile de arme: atac × m, plus avantajul și dezavantajul lor; arma potrivită clasei dă +20% din atacul armei (în bon) */
+const WF={sab:{n:'Sabie',c:'Campion',m:1,x:{crit:6},d:'echilibrată: +6% critic'},top:{n:'Topor',c:'Războinic',m:1.15,x:{bleed:15,crit:-3},d:'lovește tare și sângerează, dar e mai puțin precis'},
+ arc:{n:'Arc',c:'Arcaș',m:.95,x:{crit:10,ph:-5},d:'multe lovituri critice (+10%), dar −5% viață'},buz:{n:'Buzdugan',c:'Paznic',m:.8,x:l=>({def:l/5,hp:.8*l}),d:'atac mic, dar apărare și viață în plus'},
+ toi:{n:'Toiag',c:'Mag',m:1.1,x:{pd:8,ph:-8},d:'cel mai mult atac (+8% atac total), dar −8% viață'},sce:{n:'Sceptru',c:'Vraci',m:.7,x:l=>({heal:2*l}),d:'atac foarte mic, dar vindecă mult mai bine (vindecarea Vraciului crește cu procentul de vindecare)'}};
+const WFC=Object.fromEntries(Object.entries(WF).map(([k,v])=>[v.c,k])),wfOf=it=>!it||it.t!='w'?null:it.wf||(/Topor/.test(it.name)?'top':/Ghioag|Buzdugan/.test(it.name)?'buz':/\bArc\b/.test(it.name)?'arc':/Toiag/.test(it.name)?'toi':/Sceptru/.test(it.name)?'sce':'sab');
+const wfPick=()=>{const own=[...S.fs,...S.rs].map(f=>WFC[f.c]).filter(Boolean);return Math.random()<.6&&own.length?P(own):P(Object.keys(WF))};   /* prada: mai des tipurile din echipa ta */
+function mkItem(t,l,r,pi,si,q,wf){const m=RAR[r].m*(1+.1*(q||0)),s={dmg:0,def:0,hp:0,bleed:0,crit:0,loot:0,heal:0,vd:0,pd:0,ph:0,pf:0};
+ if(t=='w'){wf=WF[wf]?wf:wfPick();const F=WF[wf],x=typeof F.x=='function'?F.x(l):F.x;s.dmg=Math.round((2+l*1.4)*m*F.m);for(const k in x)s[k]+=['def','hp','heal'].includes(k)?Math.round(x[k]*m):x[k]}else if(t=='j')s.hp=Math.round(2*l*m);else if(t=='h'){s.def=Math.round((1+l*.4)*m);s.hp=Math.round(2*l*m)}else if(t=='b'){s.hp=Math.round(2.5*l*m);s.def=Math.round((.5+l*.25)*m)}else{s.def=Math.round((1+l*.7)*m);s.hp=Math.round(3*l*m)}
+ const PL=t=='w'?PW:t=='j'?PJ:PA,pf=pi!=null?PL[pi]:P(PL.filter(x=>(x.lv||1)<=l)),sf=si!=null?SF[si]:P(SF.filter(x=>(x.lv||1)<=l));let name=t=='w'?WF[wf].n:P(t=='j'?BJ:t=='h'?BH:t=='b'?BB:BA);
  const add=a=>{for(const k in a)if(k!='n'&&k!='m'&&k!='lv')s[k]+=['dmg','def','hp'].includes(k)?Math.round(a[k]*(1+l*.15)):a[k]};
  if(RAR[r].aff>=1){add(pf);name=pf.n+' '+name}
  if(RAR[r].aff>=2){add(sf);name+=' '+sf.n}
- return{t,l,r,q:q||0,name,s,m:[RAR[r].aff>=1?pf.m:null,RAR[r].aff>=2?sf.m:null].filter(Boolean)}}
+ const it={t,l,r,q:q||0,name,s,m:[RAR[r].aff>=1?pf.m:null,RAR[r].aff>=2?sf.m:null].filter(Boolean)};if(t=='w')it.wf=wf;return it}
  function panouStatistici(f){
   const b=bon(f);
   const t=k=>tr(f,k);
@@ -284,7 +290,7 @@ function chance(l,r,q){const d=l-S.lvl;let b=d>0?Math.max(10,40-5*(d-1)):d==0?55
 const cost=(l,r)=>Math.round(RAR[r].cost*(1+l*.3));
 function craft(){const u=S.ui,nn=nd(u),i=S.forge.findIndex(x=>!x);S.msg='';
  if(i<0)S.msg='Toate sloturile sunt ocupate.';else if(Object.keys(nn).some(k=>have(k)<nn[k]))S.msg='Nu ai destule materiale.';
- else{cn('f');for(const k in nn)take(k,nn[k]);const ok=Math.random()*100<chance(u.l,u.r,u.q);if(ok)S.pity=0;else S.pity++;S.forge[i]={end:Date.now()+RAR[u.r].t*1000*Math.pow(.96,BL().f)*(1-terB('forge')/100),ok,cm:nn,item:ok?mkItem(u.t,u.l,u.r,u.p,u.s,u.q):null,label:SLN[u.t]+' '+RAR[u.r].n+' niv. '+u.l}}
+ else{cn('f');for(const k in nn)take(k,nn[k]);const ok=Math.random()*100<chance(u.l,u.r,u.q);if(ok)S.pity=0;else S.pity++;S.forge[i]={end:Date.now()+RAR[u.r].t*1000*Math.pow(.96,BL().f)*(1-terB('forge')/100),ok,cm:nn,item:ok?mkItem(u.t,u.l,u.r,u.p,u.s,u.q,u.t=='w'?wfUi():null):null,label:SLN[u.t]+' '+RAR[u.r].n+' niv. '+u.l}}
  go()}
 function collect(i){cn('c');const s=S.forge[i];if(s.ok){S.inv.push(s.item);S.msg='Reușit: '+s.item.name+'.'}else{const cm=s.cm||{ore:s.c||0};for(const k in cm)give(k,Math.floor(cm[k]/2));S.msg='Forjarea a eșuat. Recuperezi jumătate din materiale.'}S.forge[i]=null;go()}
 function ui(k,v){S.ui[k]=k=='t'?v:+v;S.msg='';go()}
@@ -387,8 +393,13 @@ function av(f,z){z=z||44;if(f&&f.ic&&typeof heroAv==='function'&&!(f.h&&skinOn(f
 const IC={g:'<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#d9a82e" stroke="#7a5a10" stroke-width="2"/><circle cx="16" cy="16" r="8.5" fill="none" stroke="#fff1b8" stroke-width="1.6"/></svg>',o:'<svg viewBox="0 0 32 32"><path d="M16 3l11 8-4 17H9L5 11z" fill="#8c98a0" stroke="#3a444a" stroke-width="2" stroke-linejoin="round"/><path d="M16 3l-4 25M16 3l4 25M5 11h22" stroke="#d7dee2" stroke-width="1" fill="none"/></svg>',p:'<svg viewBox="0 0 32 32"><path d="M18 2L6 18h8l-2 12 14-18h-8z" fill="#e0953f" stroke="#7a4310" stroke-width="2" stroke-linejoin="round"/></svg>'};
 /* iconițele pictate ale interfeței (imagini/ui/): resursele din bara de sus și tipurile de obiecte */
 const UI=n=>`<img class="uii" src="imagini/ui/${n}.webp" alt="" loading="lazy" decoding="async">`,UISL={w:'slot-arma',a:'slot-armura',h:'slot-coif',b:'slot-cizme',j:'slot-bijuterie',r:'slot-relicva'};
+/* iconița armei: imagini/arme/<tip>[-epic].webp; dacă lipsește, cea obișnuită a tipului, apoi iconița slotului de armă */
+const WEPIC={sab:'sabie',top:'topor',arc:'arc',buz:'buzdugan',toi:'toiag',sce:'sceptru'};
+function wIcon(it){const b=WEPIC[wfOf(it)]||'sabie',ep=it.r>=3||it.lg,src=ep?`imagini/arme/${b}-epic.webp`:b=='sabie'?'imagini/ui/slot-arma.webp':`imagini/arme/${b}.webp`,fb=ep&&b!='sabie'?`imagini/arme/${b}.webp`:'imagini/ui/slot-arma.webp';
+ return `<img class="uii" src="${src}" alt="" loading="lazy" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${fb}'}else{this.onerror=null;this.src='imagini/ui/slot-arma.webp'}">`}
+const wfUi=()=>{const u=S.ui;if(!WF[u.wf]){const c=typeof cur==='function'&&cur();u.wf=(c&&WFC[c.c])||'sab'}return u.wf};
 IC.p=UI('res-puncte');IC.g=UI('res-aur');IC.o=UI('res-minereu');
-const IG={w:'⚔️',a:'🛡️',h:'🪖',b:'👢',j:'💍',r:'🔮'},iic=it=>it.lg&&LG[it.lg]?lgIco(it):`<span class="ico q${it.r}">${UISL[it.t]?UI(UISL[it.t]):'◆'}</span>`;
+const IG={w:'⚔️',a:'🛡️',h:'🪖',b:'👢',j:'💍',r:'🔮'},iic=it=>it.lg&&LG[it.lg]?lgIco(it):`<span class="ico q${it.r}">${it.t=='w'?wIcon(it):UISL[it.t]?UI(UISL[it.t]):'◆'}</span>`;
 const BFILE={f:'topitorie',i:'infirmerie',b:'han',d:'depozit',z:'zid'},BGL={f:'⚒️',i:'⚕️',b:'🍺',d:'📦',z:'🧱'},bth=k=>bthHtml(k);
 
 /* ===== Legendary items: registru extensibil =====
@@ -458,10 +469,10 @@ function rdrop(b){const g=DG[S.d.di||0],qs=g.w,t=(r,p)=>{if(Math.random()<p){let
 DG.push({n:'Peștera Lupilor',lv:4,k:1.25,rooms:4,w:[100],rm:1,bn:'Alfa Haitei'},{n:'Fortul Părăsit',lv:13,k:1.8,rooms:5,w:[50,35,15],rm:2,bn:'Comandantul Fantomă'},{n:'Mlaștina Putredă',lv:24,k:2.6,rooms:6,w:[25,35,25,15],rm:3,bn:'Hidra Mlaștinii'},{n:'Forja Veche',lv:38,k:3.8,rooms:7,w:[10,20,30,25,15],rm:3,bn:'Fierarul Ars'},{n:'Tronul Cenușiu',lv:46,k:4.8,rooms:8,w:[5,15,25,30,25],rm:3,bn:'Regele Cenușiu'});
 const MPV=()=>{const m=S.map||(S.map=mapGen());m.vs.forEach(v=>{if(!v.st){v.st=P(['agr','neg','zid']);v.gd=0;v.r=+(v.st=='neg'?1.1+Math.random()*.5:v.st=='zid'?.9+Math.random()*.4:.7+Math.random()*.5).toFixed(2)}});return m},wf=v=>Math.min(1,(Date.now()-v.t)/18e5),dst=v=>Math.max(Math.abs(v.x-3),Math.abs(v.y-2));
 function mapGen(){const NV=['Valea Cenușie','Pârâul Lung','Stânca Neagră','Moara Veche','Dealul Corbilor','Podul Rupt','Fântâna Seacă','Plaiul Pustiu'],NB=['Arnulf','Brenna','Corvin','Dagmar','Eskil','Freya','Gunnar','Hilda'],u=new Set(['3,2']),vs=[];for(let i=0;i<8;i++){let x,y;do{x=RI(0,6);y=RI(0,4)}while(u.has(x+','+y));u.add(x+','+y);vs.push({id:i,n:NV[i],b:NB[i],x,y,dl:RI(-3,5),r:+(.7+Math.random()*.8).toFixed(2),t:0})}return{vs}}
-function mv(i){S.msel=null;S.mv=i;S.msg='';if(typeof LUME!=='undefined')LUME.sel=null;go()}
+function mv(i){S.msel=null;S.mv=i;S.wsel=null;S.msg='';if(typeof LUME!=='undefined')LUME.sel=null;go()}
 function raid(id){const v=MPV().vs.find(x=>x.id===id),c=trv(v);if(v.o==='p'){S.msg='Satul îți aparține.';return go()}if(S.d){S.msg='Ești deja într-o coborâre.';return go()}if(!S.fs.some(f=>f.hp>0)){S.msg='Toți luptătorii sunt căzuți. Du-te la infirmerie.';return go()}if(S.pts<c){S.msg='Îți trebuie '+c+' puncte.';return go()}
  cn('r');spend(c);const f=wf(v),k=vk(v);v.t=Date.now();v.gd=Math.min(5,(v.gd||0)+1);S.d={room:1,rooms:2,k,rw:1+(k-1)*.6,bn:'Căpitanul gărzii',di:0,raid:v.id,rn:v.n,rf:f,loot:{gold:0,ore:0,xp:0,m:{}},f:null,done:false};startF(false);terFrom();S.tab='c';S.msg='Ai ajuns la '+v.n+'. Gărzile te așteaptă.';if(S.auto!==false){autoRun();return}go()}
-function rl(d){if(d.conq||d.camp||d.fort||d.tron||d.lume)return terRl(d);const v=MPV().vs.find(x=>x.id===d.raid),f=d.rf,vl=Math.max(1,S.lvl+v.dl),w=f*v.r;terRaidStat(v);d.loot.gold+=Math.round((60+30*vl)*w*(1+terB('gold')/100));d.loot.ore+=Math.round((6+vl*.8)*w);d.loot.xp+=Math.round((20+8*vl)*f);for(let i=0,n=Math.round(RI(2,4)*w);i<n;i++)lm(pm(),1);if(Math.random()<.5*f)rdrop(false)}
+function rl(d){if(d.wn)return wnRl(d);if(d.conq||d.camp||d.fort||d.tron||d.lume)return terRl(d);const v=MPV().vs.find(x=>x.id===d.raid),f=d.rf,vl=Math.max(1,S.lvl+v.dl),w=f*v.r;terRaidStat(v);d.loot.gold+=Math.round((60+30*vl)*w*(1+terB('gold')/100));d.loot.ore+=Math.round((6+vl*.8)*w);d.loot.xp+=Math.round((20+8*vl)*f);for(let i=0,n=Math.round(RI(2,4)*w);i<n;i++)lm(pm(),1);if(Math.random()<.5*f)rdrop(false)}
 function vMold(){const m=MPV(),sv=m.vs.find(v=>v.id===S.mv);let g='<svg viewBox="0 0 280 200" width="100%" style="display:block;background:var(--panel);border:1px solid var(--line)">';
  for(let x=0;x<7;x++)for(let y=0;y<5;y++)g+=`<rect x="${x*40}" y="${y*40}" width="40" height="40" style="fill:none;stroke:var(--line);stroke-width:.5"/>`;
  g+='<circle cx="140" cy="100" r="12" style="fill:var(--ember)"/><text x="140" y="104" text-anchor="middle" style="fill:#fff;font:700 10px sans-serif">Tu</text>';
@@ -645,7 +656,7 @@ function vA(){const u=S.ui,lv=[];if(((pls(u)[u.p||0])||{}).lv>u.l)u.p=0;if(SF[u.
  let h=`<section><h2>Topitoria</h2><div class="mute">${S.forge.filter(x=>x).length} din ${S.slots} sloturi ocupate. Forja nu consumă puncte. Șansa depinde de nivelul obiectului față de al tău, de raritate și de calitatea cristalului. La eșec primești jumătate din materiale, iar fiecare eșec crește șansa următoare. Afixele puternice se deblochează la niveluri mai mari ale obiectului.${nxt(u)}</div>`;
  h+=forgeSlots();
  h+=`</section><section><h2>Forjează un obiect</h2>
- <div class="row"><label>Tip</label><select onchange="ui('t',this.value)"><option value="w"${u.t=='w'?' selected':''}>Armă</option><option value="a"${u.t=='a'?' selected':''}>Armură</option><option value="h"${u.t=='h'?' selected':''}>Coif</option><option value="b"${u.t=='b'?' selected':''}>Cizme</option></select></div>
+ <div class="row"><label>Tip</label><select onchange="ui('t',this.value)"><option value="w"${u.t=='w'?' selected':''}>Armă</option><option value="a"${u.t=='a'?' selected':''}>Armură</option><option value="h"${u.t=='h'?' selected':''}>Coif</option><option value="b"${u.t=='b'?' selected':''}>Cizme</option></select></div>${u.t=='w'?`<div class="row"><label>Armă</label><select onchange="ui('wf',this.value)">${Object.entries(WF).map(([k,v])=>`<option value="${k}"${k==wfUi()?' selected':''}>${v.n} · ${v.c=='Campion'?'erou':v.c}</option>`).join('')}</select></div><div class="mute" style="margin:-4px 0 6px">${WF[wfUi()].n}: ${WF[wfUi()].d}. Potrivită pentru ${WF[wfUi()].c=='Campion'?'erou':WF[wfUi()].c} (+30% din atacul armei).</div>`:''}
  <div class="row"><label>Nivel</label><select onchange="ui('l',this.value)">${lv.map(l=>`<option${l==u.l?' selected':''}>${l}</option>`).join('')}</select></div>
  <div class="row"><label>Raritate</label><select onchange="ui('r',this.value)">${RAR.map((r,i)=>`<option value="${i}"${i==u.r?' selected':''}>${r.n}</option>`).join('')}</select></div>
  ${u.r>=1?`<div class="row"><label>Prefix</label><select onchange="ui('p',this.value)">${pls(u).map((x,i)=>(x.lv||1)>u.l?'':`<option value="${i}"${i==u.p?' selected':''}>${x.n} (${ad(x)})</option>`).join('')}</select></div>`:''}${u.r>=2?`<div class="row"><label>Sufix</label><select onchange="ui('s',this.value)">${SF.map((x,i)=>(x.lv||1)>u.l?'':`<option value="${i}"${i==u.s?' selected':''}>${x.n} (${ad(x)})</option>`).join('')}</select></div>`:''}${u.r>=1?`<div class="row"><label>Calitate cristal</label><select onchange="ui('q',this.value)">${QN.map((n,q)=>`<option value="${q}"${q==u.q?' selected':''}>${n} (${have(RM[u.r]+q)})</option>`).join('')}</select></div>`:''}<div class="row"><span>Șansă de reușită</span><b>${Math.round(chance(u.l,u.r,u.q)*10)/10}%</b></div>
