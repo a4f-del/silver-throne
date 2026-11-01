@@ -12,8 +12,9 @@ function bhPush(d, f) {
   d.hl = (d.hl || []).concat([`— ${d.lume || d.tron ? 'Lupta' : boss ? 'Căpitanul' : 'Camera ' + ((d.room || 0) + 1)} —`], f.log.slice(-30));
   if (d.hl.length > BHI.lines) d.hl = d.hl.slice(-BHI.lines);
 }
-const bhKind = d => d.lume ? 'p' : d.tron ? 't' : d.wn ? 's' : d.raid != null ? 'r' : 'd';
+const bhKind = d => d.tw ? 'w' : d.lume ? 'p' : d.tron ? 't' : d.wn ? 's' : d.raid != null ? 'r' : 'd';
 function bhTitle(d) {
+  if (d.tw) return 'Turnul · până la etajul ' + (d.room || 0);
   if (d.lume) return 'Atac: ' + (d.rn || d.bn);
   if (d.tron) return 'Tronul de Argint · ' + d.bn;
   if (d.raid != null) return (d.lbl || 'Jaf') + ': ' + (d.rn || d.bn || 'sat');
@@ -34,7 +35,7 @@ function bhOpen() {
   const list = S.bh || [], RES = { win: ['Victorie', 'win'], retreat: ['Retragere', 'ret'], lost: ['Înfrângere', 'lost'] };
   const rows = list.map(b => {
     const [rt, rc] = RES[b.res] || RES.retreat, gain = [b.g ? `+${b.g} aur` : '', b.o ? `+${b.o} minereu` : '', b.m ? `${b.m} materiale` : '', b.x ? `+${b.x} exp.` : ''].filter(Boolean).join(' · ');
-    return `<details class="bh-r"><summary><img class="uii bh-k" src="imagini/ui/${BHI.ic[b.k] || 'nav-coborare'}.webp" alt=""><span class="bh-m"><b>${tEsc(b.n)}</b> <span class="bh-res ${rc}">${rt}</span><small>${bhAgo(b.t)}</small><br><small>${gain || 'fără pradă'}</small>${b.it.length ? `<br><small>Obiecte: ${b.it.map(bhItem).join(', ')}</small>` : ''}</span></summary>`
+    return `<details class="bh-r"><summary><img class="uii bh-k" src="${b.k === 'w' ? 'imagini/lume/turn.webp' : 'imagini/ui/' + (BHI.ic[b.k] || 'nav-coborare') + '.webp'}" alt=""><span class="bh-m"><b>${tEsc(b.n)}</b> <span class="bh-res ${rc}">${rt}</span><small>${bhAgo(b.t)}</small><br><small>${gain || 'fără pradă'}</small>${b.it.length ? `<br><small>Obiecte: ${b.it.map(bhItem).join(', ')}</small>` : ''}</span></summary>`
       + `<div class="bh-log">${b.log.length ? b.log.map(l => `<div${l.startsWith('—') ? ' class="bh-sep"' : ''}>${tEsc(l)}</div>`).join('') : '<div class="mute">Fără jurnal.</div>'}</div></details>`;
   }).join('');
   mdl(`<h3>Istoricul luptelor</h3><p class="mute">Ultimele ${BHI.max} coborâri, atacuri și provocări. Atinge una ca să-i vezi jurnalul.</p><div class="bh-l">${rows || '<p class="mute">Nu ai dat încă nicio luptă.</p>'}</div>`, 'bh');

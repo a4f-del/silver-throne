@@ -38,6 +38,7 @@ function trChips(i) {
 }
 /* la începutul fiecărei lupte: numele monstrului pasului și abilitatea căpitanului */
 function trStart(es, d, b) {
+  if (d && d.tw && typeof twMob === 'function') { if (b) { const e = es[0]; if (e) { e.ba = twAb(d.room); e.tc = 0; if (e.ba === 'shield') e.sh = 1; } } else es.forEach(e => { e.n = twMob(d.room); }); return; }   /* Turnul */
   if (!d || d.raid != null || d.ghost) return; const g = DG[d.di || 0], D = g && trDef(g.n); if (!D) return;
   if (b) { const e = es[0]; if (e) { e.ba = D.a; e.tc = 0; if (D.a === 'shield') e.sh = 1; } }
   else { const nm = D.m[Math.min(d.room, D.m.length - 1)]; es.forEach(e => { e.n = nm; }); }
@@ -85,14 +86,14 @@ function dOdds(boss, N) {
   window.go = window.render = window.vsFlash = window.bhPush = window.bhAdd = () => {};
   let w = 0;
   try {
-    for (let i = 0; i < N; i++) { S = JSON.parse(snap); startF(boss); let g = 0; while (S.d && S.d.f && g++ < 400) autoRun(); if (S.d && !S.d.f) w++; }
+    for (let i = 0; i < N; i++) { S = JSON.parse(snap); S.d.room++; if (S.d.tw) twFloor(S.d); startF(boss);   /* ca în door(): lupta e la pasul următor */ let g = 0; while (S.d && S.d.f && g++ < 400) autoRun(); if (S.d && !S.d.f) w++; }
   } catch (e) { w = -1; }
   finally { S = JSON.parse(snap); Object.assign(window, { go: keep.go, render: keep.render, vsFlash: keep.vs, bhPush: keep.bp, bhAdd: keep.ba }); }
   const v = w < 0 ? null : Math.round(w / N * 100); S.d.oddk = key; S.d.odds = v; return v;
 }
 /* textul pasului și al căpitanului, pe ecranul dintre pași */
-function trStepTxt(d) { const g = DG[d.di || 0], D = g && trDef(g.n); return D ? `<b>${D.m[Math.min(d.room, D.m.length - 1)]}</b>` : DR.l; }
-function trBossTxt(d) { const g = DG[d.di || 0], D = g && trDef(g.n); return D ? `<span class="tr-ab">Abilitate: ${TR_A[D.a]}</span>` : ''; }
+function trStepTxt(d) { if (d.tw) return `<b>${twMob(d.room + 1)}</b>`; const g = DG[d.di || 0], D = g && trDef(g.n); return D ? `<b>${D.m[Math.min(d.room, D.m.length - 1)]}</b>` : DR.l; }
+function trBossTxt(d) { if (d.tw) return `<b>Străjerul etajului ${d.room + 1}</b><span class="tr-ab">Abilitate: ${TR_A[twAb(d.room + 1)]}</span>`; const g = DG[d.di || 0], D = g && trDef(g.n); return D ? `<span class="tr-ab">Abilitate: ${TR_A[D.a]}</span>` : ''; }
 const trOddsTag = v => v == null ? '' : `<span class="tr-odds ${v >= 75 ? 'ok' : v >= 45 ? 'mid' : 'bad'}">Șanse: ${v}%</span>`;
 (function () {
   if (typeof document === 'undefined' || !document.head) return;

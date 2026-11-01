@@ -215,6 +215,7 @@ function lwVil(p, sel, mine, K) {
 function lwMap() {
   const st = LUME.st, ps = st.players, meId = st.me && st.me.user_id, R = lwHull(ps);
   let x0 = -R.x - 90, x1 = R.x + 90, y0 = -R.y - 140, y1 = R.y + 110;
+  if (typeof twPos === 'function') y0 = Math.min(y0, twPos()[1] - 230);   /* Turnul, la marginea de nord */
   let w = x1 - x0, h = y1 - y0;
   if (w < 900) { x0 -= (900 - w) / 2; w = 900; }
   if (w / h < 1.6) { const nw = h * 1.6; x0 -= (nw - w) / 2; w = nw; } else { const nh = w / 1.6; y0 -= (nh - h) / 2; h = nh; }
@@ -228,7 +229,7 @@ function lwMap() {
   items.push([0, lwThrone(K)]);
   items.sort((a, b) => a[0] - b[0]);
   const n = ps.length, ts = typeof TRON !== 'undefined' && TRON.st;
-  return `<div class="st-map lw-map"><div class="lw-ttl"><b>Câmpia Tronului de Argint</b><small>${n} ${n === 1 ? 'sat' : 'sate'}${ts && ts.week_end ? ' · săptămâna se închide în ' + sdT(ts.week_end - tronNow()) : ''}</small></div><svg id="lwmap" viewBox="${lwVB()}" role="group" aria-label="Harta lumii, ${n} ${n === 1 ? 'sat' : 'sate'}"><defs>${LWA.defs}</defs>${T.low}${typeof lwTinut === 'function' ? lwTinut(ps.find(p => p.id === meId)) : ''}${typeof lwWn === 'function' ? lwWn() : ''}${T.high}${items.map(x => x[1]).join('')}<rect x="${lwF(x0)}" y="${lwF(y0)}" width="${lwF(w)}" height="${lwF(h)}" fill="url(#lwa-vg)" pointer-events="none"/></svg>`
+  return `<div class="st-map lw-map"><div class="lw-ttl"><b>Câmpia Tronului de Argint</b><small>${n} ${n === 1 ? 'sat' : 'sate'}${ts && ts.week_end ? ' · săptămâna se închide în ' + sdT(ts.week_end - tronNow()) : ''}</small></div><svg id="lwmap" viewBox="${lwVB()}" role="group" aria-label="Harta lumii, ${n} ${n === 1 ? 'sat' : 'sate'}"><defs>${LWA.defs}</defs>${T.low}${typeof lwTinut === 'function' ? lwTinut(ps.find(p => p.id === meId)) : ''}${typeof lwWn === 'function' ? lwWn() : ''}${T.high}${typeof lwTwr === 'function' ? lwTwr() : ''}${items.map(x => x[1]).join('')}<rect x="${lwF(x0)}" y="${lwF(y0)}" width="${lwF(w)}" height="${lwF(h)}" fill="url(#lwa-vg)" pointer-events="none"/></svg>`
     + `<div class="st-zc"><button class="st-zb" onclick="lwZoom(1.35)" aria-label="Mărește">+</button><button class="st-zb" onclick="lwZoom(1/1.35)" aria-label="Micșorează">−</button><button class="st-zb" onclick="lwReset()" aria-label="Toată lumea" title="Toată lumea">⌂</button><button class="st-zb" onclick="lwFind()" aria-label="Satul meu" title="Satul meu">◎</button></div></div>`;
 }
 function lwEnBar() {
