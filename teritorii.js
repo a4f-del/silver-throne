@@ -14,7 +14,8 @@ const DEV = () => !TW.CFG.prod || /[?&]dev=1/.test((typeof location !== 'undefin
 const tEsc = s => String(s).replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
 const tDur = ms => { const m = Math.max(0, Math.ceil(ms / 60000)); return m >= 60 ? Math.floor(m / 60) + ' h ' + (m % 60) + ' min' : m + ' min'; };
 const tLvl = v => Math.max(1, S.lvl + v.dl);
-const MXP = () => MAXP0 + terB('pts');
+/* punctele maxime: 30, +6 la fiecare 10 niveluri (60 la nivelul 50); teritoriile adaugă peste, până la 70 */
+const MXP = () => Math.min(70, MAXP0 + 6 * Math.floor(Math.min(typeof S !== 'undefined' && S ? S.lvl : 1, 50) / 10) + terB('pts'));
 
 /* ----------------------------------------------------- ÎNTOARCERE DUPĂ LUPTĂ ----
    Luptele pornite de pe hartă (raid, cucerire, tabără, fortăreață, Tron) se afișează în fila Coborâre. terFrom() reține

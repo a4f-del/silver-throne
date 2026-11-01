@@ -51,7 +51,7 @@ const invCls = it => (it.lg ? 'rl' : 'r' + (it.r + 1));
 function invCard(x) {
   const it = x.it, i = x.i;
   return `<div class="icard ${invCls(it)}${it.lk ? ' lk' : ''}" data-i="${i}" data-t="${it.t}"><div class="ic-n"${itTipA(it, invCmp(it))}>${iname(it)}${it.lk ? ' <span title="Blocat">🔒</span>' : ''}</div>${invVerdict(it)}` +
-    `<div class="ic-a"><button class="p" onclick="equip(${i})" aria-label="Pune pe ${tEsc(cur().n)}" title="Pune pe ${tEsc(cur().n)}">Pune</button><button onclick="invLock(${i})" title="${it.lk ? 'Deblochează' : 'Blochează: nu poate fi vândut sau dezmembrat'}">${it.lk ? '🔓' : '🔒'}</button><button onclick="dis(${i})"${it.lk ? ' disabled' : ''}>Dezmembrează</button><button onclick="sell(${i})"${it.lk ? ' disabled' : ''}>${invVal(it)} aur</button></div></div>`;
+    `<div class="ic-a"><button class="p" onclick="equip(${i})" aria-label="Pune pe ${tEsc(cur().n)}" title="Pune pe ${tEsc(cur().n)}">Pune</button><button onclick="invLock(${i})" title="${it.lk ? 'Deblochează' : 'Blochează: nu poate fi vândut sau dezmembrat'}">${it.lk ? '🔓' : '🔒'}</button><button onclick="dis(${i})"${it.lk ? ' disabled' : ''}>Dezmembrează</button>${it.r >= 1 && !it.lg ? `<button onclick="reroll(${i})"${it.lk ? ' disabled' : ''} title="Afixe noi la întâmplare: ${rrCost(it).o} minereu, ${rrCost(it).g} aur">Refă afixele</button>` : ''}<button onclick="sell(${i})"${it.lk ? ' disabled' : ''}>${invVal(it)} aur</button></div></div>`;
 }
 /* semnul mic de pe card: merită pus? (aceeași formulă de putere ca la alegerea din slot) */
 function invVerdict(it) {

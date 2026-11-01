@@ -25,7 +25,7 @@ function mrNew(c) {
   f.hp = mhp(f); (S.fs.length < 3 && !S.d ? S.fs : S.rs).push(f); return f;
 }
 /* la fiecare desenare: se alătură cine a ajuns la pasul lui */
-function mrTick() { if (!S || S.mrv !== 2) return; for (const [c, st] of MR.order) if (!mrHas(c) && mrDue(st)) mrNew(c); }
+function mrTick() { if (!S || S.mrv !== 2) return; for (const [c, st] of MR.order) if (!mrHas(c) && mrDue(st)) mrNew(c); stGift(); }
 
 /* jucătorii existenți: pentru fiecare clasă rămâne mercenarul cu cea mai multă faimă; echipamentul celorlalți intră în rucsac */
 function mrMig() {
@@ -113,8 +113,29 @@ function mrTrain() {
 }
 function mrInf() {
   const al = mrAll(), hurt = al.filter(f => f.hp > 0 && f.hp < mhp(f)), hc = Math.round(6 * S.lvl * Math.pow(.96, BL().i));
-  const rows = al.map((f, i) => { const m = mhp(f), d = f.hp <= 0; return `<div class="row"><span style="display:flex;gap:10px;align-items:center">${av(f, 36)}<span><b>${tEsc(f.n)}</b> <span class="mute">${f.h ? 'erou' : f.c}</span><br>${bar(Math.max(0, f.hp), m, d ? 'e' : '')}<span class="mute">${d ? 'căzut' : f.hp + '/' + m + ' viață'}${f.sc ? ` · ${f.sc} ${f.sc === 1 ? 'cicatrice' : 'cicatrici'}` : ''}</span></span></span>${d && !S.d ? `<button class="d" onclick="revive(${S.fs.includes(f) ? S.fs.indexOf(f) : S.rs.indexOf(f)},${S.fs.includes(f) ? 0 : 1})">Ridică · ${revCost()} aur</button>` : ''}</div>`; }).join('');
-  return `<section><h2>Infirmeria</h2><div class="mute">Răniții se vindecă toți deodată. Căzuții revin la jumătate din viață, cu o cicatrice (−3 viață maximă).</div><div class="mr-act">${S.d ? '<span class="r4">Ești într-o temniță: Infirmeria te așteaptă după ce ieși.</span>' : ''}${hurt.length && !S.d ? `<button class="p" onclick="heal()">Vindecă răniții (${hurt.length}) · ${hc} aur</button>` : ''}${reviveAllBtn()}${!hurt.length && !deadAll().length ? '<span class="mute">Toți sunt sănătoși.</span>' : ''}</div>${rows}</section>` + mrBld('i');
+  const rows = al.map((f, i) => { const m = mhp(f), d = f.hp <= 0; return `<div class="row"><span style="display:flex;gap:10px;align-items:center">${av(f, 36)}<span><b>${tEsc(f.n)}</b> <span class="mute">${f.h ? 'erou' : f.c}</span><br>${bar(Math.max(0, f.hp), m, d ? 'e' : '')}<span class="mute">${d ? 'căzut' : f.hp + '/' + m + ' viață'}${f.sc ? ` · ${f.sc} ${f.sc === 1 ? 'cicatrice' : 'cicatrici'} (−${scL(f)} viață)` : ''}</span></span></span>${f.sc && !d && !S.d ? `<button onclick="scHeal(${i})">Vindecă cicatricile · ${scCost(f)} aur</button>` : ''}${d && !S.d ? `<button class="d" onclick="revive(${S.fs.includes(f) ? S.fs.indexOf(f) : S.rs.indexOf(f)},${S.fs.includes(f) ? 0 : 1})">Ridică · ${revCost()} aur</button>` : ''}</div>`; }).join('');
+  return `<section><h2>Infirmeria</h2><div class="mute">Răniții se vindecă toți deodată. Căzuții revin la jumătate din viață, cu o cicatrice: −3 viață maximă la Recrut, tot mai puțin la rangurile mari (−1 la Legendă), cel mult 15% din viață. Cicatricile se vindecă aici, cu aur.</div><div class="mr-act">${S.d ? '<span class="r4">Ești într-o temniță: Infirmeria te așteaptă după ce ieși.</span>' : ''}${hurt.length && !S.d ? `<button class="p" onclick="heal()">Vindecă răniții (${hurt.length}) · ${hc} aur</button>` : ''}${reviveAllBtn()}${!hurt.length && !deadAll().length ? '<span class="mute">Toți sunt sănătoși.</span>' : ''}</div>${rows}</section>` + mrBld('i');
+}
+/* vindecarea cicatricilor: toate deodată, cu aur */
+const scCost = f => 20 * S.lvl * (f.sc || 0);
+function scHeal(i) {
+  const f = mrAll()[i]; if (!f || !f.sc) return; if (S.d) { S.msg = 'Ieși întâi din temniță.'; return go(); }
+  const c = scCost(f); if (S.gold < c) { S.msg = `Îți trebuie ${c} aur.`; return go(); }
+  S.gold -= c; const was = f.hp >= mhp(f); f.sc = 0; f.scl = 0; if (was) f.hp = mhp(f); S.msg = `${f.n} nu mai are cicatrici.`; go();
+}
+/* cadoul de început, după ghid (și pentru jucătorii existenți, o singură dată): Spada mare de gheață pentru erou și un pachet Epic */
+function stGift() {
+  if (!S || S.gift || !(S.tu >= 12 || S.tu < 0) || S.d || (typeof window !== 'undefined' && window.__noGift)) return;   /* __noGift: doar pentru testele automate */
+  S.gift = 1;
+  const H = mrAll().find(f => f.h), get = c => mrAll().find(f => f.c === c);
+  const items = [[H, mkLegendary('gheata', 12)], [H, mkItem('a', 5, 3, null, null, 0)], [get('Arcaș'), mkItem('w', 5, 3, null, null, 0, 'arc')], [get('Paznic'), mkItem('w', 5, 3, null, null, 0, 'buz')]];
+  const got = [];
+  for (const [f, it] of items) {
+    if (!it) continue; got.push(it.name);
+    const old = f && f.eq && f.eq[it.t];
+    if (f && (!old || bsc(it, f) > bsc(old, f))) { if (old) S.inv.push(old); f.eq[it.t] = it; f.hp = Math.min(mhp(f), Math.max(f.hp, 1)); } else S.inv.push(it);
+  }
+  setTimeout(() => mdl(`<h3>Cadoul de început</h3><p>Pentru drumul de acum înainte primești <b>Spada mare de gheață</b>, o armă legendară care poate îngheța dușmanii, și un pachet de echipament Epic. Le-am pus deja pe cei care au nevoie de ele.</p><ul style="text-align:left;display:inline-block;margin:0 0 12px">${got.map(n => `<li>${tEsc(n)}</li>`).join('')}</ul><br><button class="p" onclick="lgClose();S.tab='e';go()">Vezi echipa</button>`, 'gift'), 300);
 }
 function mrHan() {
   const fm = f => Math.floor(f.fm || 0), nx = f => (f.rk || 0) < 4 ? SP.RKF[(f.rk || 0) + 1] : null;

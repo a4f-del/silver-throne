@@ -99,12 +99,13 @@ function wnPanel() {
   const risk = d >= 4 ? 'periculos' : d >= 1 ? 'greu' : d >= -3 ? 'potrivit' : 'ușor';
   return `<section><h2>${v.n} · sat liber, nivel ${v.lvl}</h2><div class="mute">Un sat fără stăpân, pe care îl poate jefui oricine din Lume. Fiecare jucător îl poate jefui o dată la 4 ore; nivelul lui crește odată cu jucătorii din jur.</div>`
     + `<div class="row"><span>Pradă estimată: ~${gold} aur, minereu și experiență · pentru tine: <b>${risk}</b></span>`
-    + (left ? `<span class="mute">Jefuit de tine; din nou în ${sdT(left)}</span>` : !ok ? `<span class="mute">Poți jefui doar sate cu cel mult ${WN.gap} niveluri diferență față de tine.</span>` : `<button class="p" onclick="wnRaid('${v.id}')">Jefuiește · 1 punct</button>`) + '</div></section>';
+    + (S.lvl < 5 ? '<span class="mute">Satele libere se deschid la nivelul 5.</span>' : left ? `<span class="mute">Jefuit de tine; din nou în ${sdT(left)}</span>` : !ok ? `<span class="mute">Poți jefui doar sate cu cel mult ${WN.gap} niveluri diferență față de tine.</span>` : `<button class="p" onclick="wnRaid('${v.id}')">Jefuiește · 1 punct</button>`) + '</div></section>';
 }
 function wnRaid(id) {
   const v = wnList().find(x => x.id === id); if (!v) return;
   if (S.d) { S.msg = 'Ești deja într-o luptă.'; return go(); }
   if (!S.fs.some(f => f.hp > 0)) { S.msg = 'Toți luptătorii sunt căzuți. Du-te la Infirmerie.'; return go(); }
+  if (S.lvl < 5) { S.msg = 'Satele libere se deschid la nivelul 5.'; return go(); }
   if (wnLeft(v)) { S.msg = 'L-ai jefuit de curând.'; return go(); }
   if (Math.abs(v.lvl - S.lvl) > WN.gap) { S.msg = 'Satul e prea departe de nivelul tău.'; return go(); }
   if (S.pts < 1) { S.msg = 'Îți trebuie un punct.'; return go(); }
