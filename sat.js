@@ -112,9 +112,9 @@ function satStatus(k) {
       if (busy.length) return [`forjează ${busy.length}/${S.slots} · <span data-end="${Math.min(...busy.map(x => x.end))}">${fmt(Math.min(...busy.map(x => x.end)) - now)}</span>`, 0];
       return [`${free} ${free === 1 ? 'loc liber' : 'locuri libere'}`, free > 0 ? 0 : 0];
     }
-    if (k === 'h') { const n = mrAll().filter(f => !f.h).length; return [`${n}/5 mercenari`, mrAll().some(f => f.nn)]; }
+    if (k === 'h') { const n = mrAll().filter(f => !f.h).length, r = typeof mxReady === 'function' ? mxReady() : 0; return [r ? `${r} ${r === 1 ? 's-a întors' : 's-au întors'} din expediție` : `${n}/5 mercenari`, mrAll().some(f => f.nn) || r > 0]; }
     if (k === 't') { const s = ST(), tc = ['f', 'r', 'a', 'p', 'n'].filter(x => s[x] < smax()).map(x => stc(s[x])).sort((a, b) => a - b)[0]; return [tc != null && tc <= g ? 'poți antrena acum' : 'Forță, Rezistență, Agilitate…', tc != null && tc <= g]; }
-    if (k === 'x') { const m = dm(), r = dmReady(), d = m.list.filter(x => x.c).length; return [r ? `${r} de revendicat` : `${d}/${m.list.length} terminate azi`, r > 0]; }
+    if (k === 'x') { const m = dm(), r = dmReady(), d = m.list.filter(x => x.c).length, ch = typeof dcReady === 'function' && dcReady(); return [ch ? 'cufărul zilnic te așteaptă' : r ? `${r} de revendicat` : `${d}/${m.list.length} terminate azi`, r > 0 || ch]; }
     if (k === 'p') { const s = shop(), n = SH.reduce((a, [x]) => a + ((s[x] || []).length), 0); return [`${n} ${n === 1 ? 'obiect' : 'obiecte'} de vânzare`, 0]; }
     if (k === 'l') return [S.lvl < 6 ? 'se deschide la nivelul 6' : 'obiecte de calitate', 0];
     if (k === 'd') return [`minereu ${S.ore} · capacitate ${cap()}`, 0];

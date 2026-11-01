@@ -68,6 +68,8 @@ function sdTasks() {
   if (cp.length) { const nx = Math.min(...cp.map(c => +c.exp)); r.push(sdRow('⚔', `Tabere: ${cp.length}`, sdT(nx - now), "sdGo('m','mt','l')")); }
   for (const b of ((S.ter && S.ter.buf) || [])) if (b && Number.isFinite(+b.exp) && Number.isFinite(+b.v) && b.exp > now) r.push(sdRow('✦', `+${b.v}% ${({ pd: 'atac', pf: 'apărare', ph: 'viață' })[b.k] || b.k}`, `<span data-end="${b.exp}">${fmt(b.exp - now)}</span>`, "sdGo('m','mt','l')"));
   const m = dm(), dr = dmReady(), done = m.list.filter(x => x.c).length;
+  if (typeof dcReady === 'function' && dcReady()) r.push(sdRow('🎯', 'Cufărul zilnic', 'deschide', "sdGo('a','vil','x')", true));
+  if (typeof mxReady === 'function' && mxReady()) r.push(sdRow('🧭', 'Expediții întoarse', mxReady(), "sdGo('a','vil','h')", true));
   r.push(sdRow('🎯', 'Misiuni zilnice', dr ? `${dr} de ridicat` : `${done}/${m.list.length}`, "sdGo('a','vil','x')", dr > 0));
   const ch = chCur();
   if (ch) { const d = ch.obj.filter(objDone).length, rd = chReady(ch); r.push(sdRow('👑', `Cap. ${ch.id}: ${tEsc(ch.nm)}`, rd ? 'gata!' : `${d}/${ch.obj.length}`, "sdGo('m','mt','k')", rd)); }

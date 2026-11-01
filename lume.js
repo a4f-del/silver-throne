@@ -97,6 +97,7 @@ async function lwAttack(id) {
   } finally { LUME.busy = false; if (!S.d) go(); }
 }
 function lwFight(data) {
+  if (typeof cn === 'function') cn('a');   /* misiunea zilnică „Atacă jucători în Lume” */
   const g = (data.units || []).map(u => TT.ghostUnit(u));
   const d = { room: 1, rooms: 1, k: 1, rw: 0, bn: data.name, di: 0, raid: -4, rn: 'satul lui ' + data.name, lbl: 'Atac', lume: 1, dlv: data.level, vsh: data.hero || null,
     rf: 1, fx: 1, loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false, em: { ghost: 1 }, ghost: g };

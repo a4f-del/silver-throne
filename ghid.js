@@ -181,6 +181,10 @@ function ghIdle() {
     const s = ST(), tc = ['f', 'r', 'a', 'p', 'n'].filter(k => s[k] < smax()).map(k => stc(s[k])).sort((a, b) => a - b)[0];
     if (tc != null && tc <= g) add('💪', `Antrenează eroul (de la ${tc} aur)`, "sdGo('a','vil','t')");
     const b = BL(), bc = ['f', 'i', 'b', 'd', 'z'].filter(k => (b[k] || 0) < bmax()).map(k => bcc(b[k] || 0)).sort((a, b) => a - b)[0];
+    if (typeof dcReady === 'function' && dcReady()) add('🎁', 'Deschide cufărul zilnic', "sdGo('a','vil','x')");
+    { const mp = typeof dm === 'function' ? dm().list.filter(x => x.p && !x.c) : []; if (mp.length) add('⚡', `${mp.length} ${mp.length === 1 ? 'misiune' : 'misiuni'} fără puncte, care îți dau puncte`, "sdGo('a','vil','x')"); }
+    { const r = typeof mxReady === 'function' ? mxReady() : 0, free = typeof mxBusy === 'function' ? S.rs.filter(f => !f.h && !mxBusy(f) && f.hp > 0).length : 0;
+      if (r) add('🧭', `${r} ${r === 1 ? 'mercenar s-a întors' : 'mercenari s-au întors'} din expediție`, "sdGo('a','vil','h')"); else if (free) add('🧭', `Trimite ${free === 1 ? 'mercenarul din rezervă' : free + ' mercenari din rezervă'} în expediție`, "sdGo('a','vil','h')"); }
     if (bc != null && bc <= g) add('🏗', `Îmbunătățește o clădire (de la ${bc} aur)`, "sdGo('a')");
     if (typeof spNeedN === 'function' && spNeedN() > 0) add('⭐', 'Alege o specializare pentru un mercenar', "sdGo('e')");
     const dead = S.fs.filter(f => f.hp <= 0).length;

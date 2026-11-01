@@ -124,11 +124,11 @@ function mrHan() {
     const i = S.fs.indexOf(f), j = S.rs.indexOf(f), n = nx(f), p0 = SP.RKF[f.rk || 0] || 0, pc = n ? Math.min(100, Math.round((fm(f) - p0) / (n - p0) * 100)) : 100;
     const spn = f.sp && typeof spDef0 === 'function' && spDef0(f) ? spDef0(f).n : (f.rk ? 'alege specializarea în Echipă' : 'specializare de la Veteran');
     return `<div class="mr-hc"><div class="mr-hp">${av(f, 56)}</div><div class="mr-hb"><b>${tEsc(f.n)}</b> <span class="mute">${f.c} · ${RK[f.rk || 0]}</span><div class="mute">${spn}</div>`
-      + `<div class="mr-fm"><i style="width:${pc}%"></i></div><div class="mute">${n ? `faimă ${fm(f)}/${n} până la ${RK[(f.rk || 0) + 1]}` : 'rang maxim: Legendă'} · ${Math.round(mhp(f))} viață · ${Math.round(atkOf(f))} atac</div></div>`
-      + `<div class="mr-hx">${i >= 0 ? (f.h ? '' : `<button onclick="toBench(${i})">La rezervă</button>`) : `<button class="p" onclick="toParty(${j})"${S.fs.length >= 3 ? ' disabled title="Echipa are deja 3 luptători"' : ''}>În echipă</button>`}</div></div>`;
+      + `<div class="mr-fm"><i style="width:${pc}%"></i></div><div class="mute">${n ? `faimă ${fm(f)}/${n} până la ${RK[(f.rk || 0) + 1]}` : 'rang maxim: Legendă'} · ${Math.round(mhp(f))} viață · ${Math.round(atkOf(f))} atac</div>${typeof mxRow === 'function' ? mxRow(f) : ''}</div>`
+      + `<div class="mr-hx">${i >= 0 ? (f.h ? '' : `<button onclick="toBench(${i})">La rezervă</button>`) : (mxBusy(f) ? '<button disabled>Plecat</button>' : `<button class="p" onclick="toParty(${j})"${S.fs.length >= 3 ? ' disabled title="Echipa are deja 3 luptători"' : ''}>În echipă</button>`)}</div></div>`;
   }).join('');
   const bb = BL().b || 0;
-  return `<section><h2>Hanul: mercenarii tăi</h2><div class="mute">Cinci tovarăși, câte unul din fiecare clasă, care rămân cu tine pentru totdeauna. Trei intră în luptă alături de erou; ceilalți așteaptă în rezervă. Puterea lor vine din erou: un Recrut are cam 85% din forța de bază a eroului în specialitatea lui, o Legendă cam 98%, dar nimeni nu trece de 95% din viața, atacul sau apărarea eroului. Faima: +1 la fiecare luptă câștigată, +3 la căpitani și raiduri${bb ? `, plus ${bb * 5}% de la Han` : ''}.</div><div class="mr-list">${cards}</div></section>` + mrBld('b');
+  return `<section><h2>Hanul: mercenarii tăi</h2><div class="mute">Cinci tovarăși, câte unul din fiecare clasă, care rămân cu tine pentru totdeauna. Trei intră în luptă alături de erou; ceilalți așteaptă în rezervă. Puterea lor vine din erou: un Recrut are cam 85% din forța de bază a eroului în specialitatea lui, o Legendă cam 98%, dar nimeni nu trece de 95% din viața, atacul sau apărarea eroului. Faima: +1 la fiecare luptă câștigată, +3 la căpitani și raiduri${bb ? `, plus ${bb * 5}% de la Han` : ''}. Cei din rezervă pot pleca în <b>expediții</b> de 1, 4 sau 8 ore, din care se întorc cu aur, materiale și faimă.</div><div class="mr-list">${cards}</div></section>` + mrBld('b');
 }
 function mrFlag() { return `<section><h2>Steagul satului</h2><div class="mute">Culoarea steagurilor de pe clădiri, din capitală și de pe teritorii. Doar de aspect.</div></section>` + (typeof flagRow === 'function' ? flagRow() : ''); }
 function mrRes() { return `<section><h2>La ce folosește fiecare resursă</h2><div class="mute"><b>Aur:</b> clădiri, antrenament, vindecare, taxe de cucerire și întreținerea teritoriilor.<br><b>Minereu:</b> baza oricărei forjări.<br><b>Materiale:</b> afixele obiectelor, plus consumabile la ruine și peșteri.<br><b>Cristale:</b> raritatea obiectelor forjate.<br><b>Puncte:</b> ritmul temnițelor, raidurilor, taberelor și locurilor de interes.</div></section>`; }
@@ -160,5 +160,73 @@ function mrRes() { return `<section><h2>La ce folosește fiecare resursă</h2><d
 @media (max-width:600px){.mr-hc{flex-wrap:wrap}.mr-hx{width:100%}.mr-hx button{width:100%}}
 @media (prefers-reduced-motion:reduce){.mr-c{animation:none}}
 `;
+  document.head.appendChild(st);
+})();
+
+/* ============================================================================
+   Expedițiile mercenarilor: cei din rezervă pleacă 1, 4 sau 8 ore și se întorc cu aur, materiale și faimă.
+   S.mx[clasă] = { end, k } (un singur mercenar pe clasă, deci clasa e cheia). Cât e plecat nu intră în echipă.
+   ========================================================================== */
+const MX = { T: { s: ['Pază la mină', 1, 3, 0, 0], m: ['Escortă de caravană', 4, 8, 1, .05], l: ['Vânătoare în codri', 8, 15, 2, .2] } };   /* [nume, ore, faimă, materiale, șansă obiect] */
+const mxOf = f => S.mx && S.mx[f.c], mxBusy = f => !!mxOf(f), mxDone = f => mxBusy(f) && Date.now() >= mxOf(f).end;
+const mxReady = () => mrAll().filter(f => !f.h && mxDone(f)).length;
+function mxSend(c, k) {
+  const f = mrAll().find(x => !x.h && x.c === c), t = MX.T[k]; if (!f || !t) return;
+  if (S.d) { S.msg = 'Termină întâi lupta.'; return go(); }
+  if (!S.rs.includes(f)) { S.msg = 'Doar mercenarii din rezervă pot pleca în expediție.'; return go(); }
+  if (mxBusy(f)) { S.msg = f.n + ' e deja plecat.'; return go(); }
+  if (f.hp <= 0) { S.msg = f.n + ' e căzut: ridică-l întâi la Infirmerie.'; return go(); }
+  (S.mx = S.mx || {})[c] = { end: Date.now() + t[1] * 3600e3, k }; cn('x');
+  S.msg = `${f.n} a plecat: ${t[0].toLowerCase()} (${t[1]} ${t[1] === 1 ? 'oră' : 'ore'}).`; go();
+}
+function mxClaim(c) {
+  const f = mrAll().find(x => !x.h && x.c === c); if (!f || !mxDone(f)) return;
+  const t = MX.T[mxOf(f).k], L = S.lvl, g = Math.round((8 + 5 * L) * t[1] ** .85); S.gold += g;
+  let m = `+${g} aur, +${t[2]} faimă`;
+  if (t[3]) { const k = P(AFM.filter(x => (MLV[x] || 0) <= L)), n = t[3] + RI(0, 1); give(k, n); m += `, ${n} × ${MA[k]}`; }
+  if (Math.random() < t[4]) { const it = mkItem(P(['w', 'a', 'h', 'b', 'j']), L, P([1, 1, 2, 2, 3])); S.inv.push(it); m += `, obiect: ${it.name}`; }
+  f.fm = (f.fm || 0) + t[2]; let up = '';
+  while ((f.rk || 0) < 4 && f.fm >= SP.RKF[(f.rk || 0) + 1]) { f.rk = (f.rk || 0) + 1; up = ` ${f.n} a urcat la rangul ${RK[f.rk]}!`; }
+  delete S.mx[c]; S.msg = `${f.n} s-a întors din expediție: ${m}.${up}`; go();
+}
+function mxRow(f) {
+  if (f.h || !S.rs.includes(f)) return '';
+  if (mxDone(f)) return `<div class="mx-r"><span class="r4">S-a întors din expediție.</span><button class="p" onclick="mxClaim('${f.c}')">Primește prada</button></div>`;
+  if (mxBusy(f)) { const o = mxOf(f); return `<div class="mx-r mute">În expediție: ${MX.T[o.k][0].toLowerCase()} · se întoarce în <span data-end="${o.end}">${fmt(o.end - Date.now())}</span></div>`; }
+  return `<div class="mx-r"><span class="mute">Trimite în expediție:</span>${Object.entries(MX.T).map(([k, t]) => `<button onclick="mxSend('${f.c}','${k}')" title="${t[0]}: aur, +${t[2]} faimă${t[3] ? ', materiale' : ''}${t[4] ? ', șansă la obiect' : ''}">${t[1]} ${t[1] === 1 ? 'oră' : 'ore'}</button>`).join('')}</div>`;
+}
+
+/* ============================================================================
+   Cufărul zilnic, cu serie de zile (7, apoi o ia de la capăt). S.dc = { day, streak }.
+   ========================================================================== */
+const DC = [['aur', '🪙'], ['minereu și materiale', '⛏'], ['+5 puncte', '⚡'], ['aur dublu', '🪙'], ['materiale rare', '💎'], ['+8 puncte', '⚡'], ['un obiect Rar sau Epic', '🎁']];
+const dcYest = () => { const d = new Date(Date.now() - 864e5); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
+const dcReady = () => !S.dc || S.dc.day !== dk();
+const dcNext = () => (!S.dc || S.dc.day !== dcYest() && S.dc.day !== dk()) ? 1 : S.dc.day === dk() ? S.dc.streak : S.dc.streak % 7 + 1;
+function dcOpen() {
+  if (!dcReady()) return;
+  const n = dcNext(), L = S.lvl; let m = '';
+  if (n === 1) { const g = 20 + 6 * L; S.gold += g; m = `+${g} aur`; }
+  else if (n === 2) { const o = 8 + L, k = P(AFM.filter(x => (MLV[x] || 0) <= L)); S.ore += o; give(k, 2); m = `+${o} minereu, 2 × ${MA[k]}`; }
+  else if (n === 3) { S.pts += 5; m = '+5 puncte'; }
+  else if (n === 4) { const g = 2 * (20 + 6 * L); S.gold += g; m = `+${g} aur`; }
+  else if (n === 5) { const k = P(AFM.filter(x => (MLV[x] || 0) <= L)); give(k, 4); m = `4 × ${MA[k]}`; }
+  else if (n === 6) { S.pts += 8; m = '+8 puncte'; }
+  else { const it = mkItem(P(['w', 'a', 'h', 'b', 'j', 'r']), L, Math.random() < .25 ? 3 : 2); S.inv.push(it); m = 'obiect: ' + it.name; }
+  S.dc = { day: dk(), streak: n }; cn('k'); S.msg = `Cufărul zilei ${n}: ${m}.${n < 7 ? ' Revino mâine pentru ziua ' + (n + 1) + '.' : ' Ai încheiat seria de 7 zile!'}`; go();
+}
+function dcView() {
+  const n = dcNext(), ready = dcReady();
+  return `<section class="dc"><h2>Cufărul zilnic</h2><div class="mute">Un cufăr gratuit în fiecare zi. Dacă vii zile la rând, cufărul crește; dacă sari o zi, seria o ia de la capăt.</div><div class="dc-t">${DC.map(([t, i], k) => `<div class="dc-d${k + 1 < n || (!ready && k + 1 === n) ? ' ok' : ''}${ready && k + 1 === n ? ' now' : ''}"><b>Ziua ${k + 1}</b><span>${i}</span><small>${t}</small></div>`).join('')}</div>`
+    + `<div class="row"><span>${ready ? `Azi: <b>ziua ${n}</b>` : 'Ai deschis cufărul de azi. Revino mâine.'}</span>${ready ? '<button class="p" onclick="dcOpen()">Deschide cufărul</button>' : ''}</div></section>`;
+}
+(function () {
+  if (typeof document === 'undefined' || !document.head) return;
+  const st = document.createElement('style');
+  st.textContent = `.mx-r{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;font-size:13.5px}.mx-r button{padding:3px 10px;font-size:13px}
+.dc-t{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin:10px 0}.dc-d{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border:1px solid var(--line);border-radius:8px;text-align:center;background:#0e1214}
+.dc-d b{font:700 12px Cinzel,serif;color:var(--mute)}.dc-d span{font-size:20px}.dc-d small{font-size:11px;color:var(--mute);line-height:1.2}
+.dc-d.ok{opacity:.5}.dc-d.ok b::after{content:' ✓';color:#7fd88c}.dc-d.now{border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold2),0 0 14px #f0d27a44}.dc-d.now b{color:var(--gold2)}
+@media (max-width:600px){.dc-t{grid-template-columns:repeat(4,minmax(0,1fr))}}`;
   document.head.appendChild(st);
 })();

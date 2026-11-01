@@ -83,6 +83,7 @@ async function tronProvoca() {
   } finally { TRON.busy = false; if (!S.d) go(); }
 }
 function tronFight(data) {
+  if (typeof cn === 'function') cn('n');   /* misiunea zilnică „Provoacă regele Tronului” */
   const d = { room: 1, rooms: 1, k: 1, rw: 0, bn: 'Fantomă', di: 0, raid: -3, rn: 'Tronul de Argint', lbl: 'Tron', tron: 1, rf: 1, fx: 1, loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false };
   if (data.ghost && data.ghost.units) { d.ghost = data.ghost.units.map(u => TT.ghostUnit(u)); d.bn = data.holder_name || 'Regele'; d.em = { ghost: 1 }; }
   else { d.k = TW.kb(S.lvl) * TT.CFG.guardK; d.bn = 'Garda Regală'; d.em = { nm: ['Garda Regală'], hm: 1, am: 1, dm: 1 }; }
