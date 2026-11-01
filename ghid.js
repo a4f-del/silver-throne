@@ -25,7 +25,7 @@ const GHID = [
     d: 'În <b>Coborâre</b> sunt temnițele. Intră în <b>Mina Cenușie</b>. Intrarea costă 2 puncte, camerele sunt gratuite, iar căpitanul costă 2. Ai 30 de puncte, iar unul nou vine la 6 minute (îl vezi sus, lângă fulger).' },
   { t: 'Mergi prin temniță', p: { t: 'c' }, c: () => C('l') >= 1, r: { g: 30, o: 15 },
     k: () => { if (!S.d) return ghB('startD(0)'); if (S.d.f) return []; const d = ghB('door(', 1), l = ghB('leave('); return d.length ? [...d, ...l] : l; },
-    d: 'Apasă <b>„Mai departe”</b> (gratuit): în fiecare cameră te așteaptă o luptă, o comoară sau un foc de tabără, iar la final căpitanul. Luptele se dau singure. Dacă echipa e rănită, o poți <b>vindeca cu 2 puncte</b> între camere, dar nu și înaintea căpitanului. Când vrei să te oprești, apasă <b>„Ieși cu prada”</b>: tot ce ai strâns ajunge în sat. Dacă echipa cade, pierzi prada din acea coborâre.' },
+    d: 'Apasă <b>„Mai departe”</b> (gratuit): fiecare pas e un monstru, iar la final te așteaptă căpitanul. Luptele se dau singure. În temnițe nu există vindecare: înaintea fiecărui pas vezi <b>șansele de câștig</b> și alegi dacă mai continui. Când vrei să te oprești, apasă <b>„Ieși cu prada”</b>: tot ce ai strâns ajunge în sat. Dacă echipa cade, pierzi prada din acea coborâre.' },
   { t: 'Forjează o armă', p: { t: 'a', v: 'a' }, c: () => C('f') >= 1, r: { o: 15 },
     k: () => { const u = S.ui || {}; if (u.t != 'w') return ghQ('#v select[onchange^="ui(\'t\'"]'); if (+u.r !== 0) return ghQ('#v select[onchange^="ui(\'r\'"]'); return ghB('craft('); },
     d: 'Echipamentul se face în <b>Topitorie</b>, din minereu și materiale. Alege <b>Armă</b>, raritatea <b>Comun</b> și apasă <b>„Forjează”</b>. Timerul merge și cât faci altceva.' },

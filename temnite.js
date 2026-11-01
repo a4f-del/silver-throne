@@ -34,7 +34,7 @@ function vDung() {
       + (i === rec ? '<span class="dg-tag">Recomandat</span>' : '') + (lock ? `<span class="dg-lock">🔒 nivel ${g.lv}</span>` : '')
       + (b ? `<span class="dg-boss" style="--aura:${b[1]}" title="Căpitan: ${g.bn}"><img src="imagini/monstri/${b[0]}.jpg" alt="" loading="lazy" onerror="this.parentNode.remove()"></span>` : '') + '</div>'
       + `<div class="dg-b"><div class="dg-h"><b>${g.n}</b>${tmnStars(g.k)}</div><div class="mute dg-i">nivel ${g.lv} · ${g.rooms} încăperi · căpitan: ${g.bn}</div><div class="mute dg-i">Pradă: ${tmnMat(g)}</div>`
-      + `<button class="${lock ? '' : 'p'}" onclick="startD(${i})"${lock ? ' disabled' : ''}>${lock ? 'Blocat' : 'Intră'}</button></div></div>`;
+      + `${!lock && typeof trChips === 'function' ? trChips(i) : ''}<button class="${lock ? '' : 'p'}" onclick="startD(${i})"${lock ? ' disabled' : ''}>${lock ? 'Blocat' : 'Intră' + (typeof trTier === 'function' && trTier(i) ? ' · ' + TR_T.n[trTier(i)] : '')}</button></div></div>`;
   };
   const shown = list.filter(([g]) => S.lvl + 10 >= g.lv);   /* ca înainte: temnițele mult peste nivel rămân ascunse */
   return tmnEvent() + `<section class="dg-sec"><h2>Temnițe</h2><div class="dg-grid">${shown.map(card).join('')}</div></section>`;
