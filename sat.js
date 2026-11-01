@@ -15,19 +15,22 @@ const SAT_B = [
   ['i', 'Infirmerie', 'vindecă și ridică'], ['t', 'Antrenament', 'Forță, Rezistență…'], ['x', 'Misiuni', 'sarcini zilnice'], ['d', 'Depozit', 'materiale'],
   ['z', 'Apărare', 'străjeri și zid'], ['g', 'Steag', 'culoarea satului'], ['q', 'Bot', 'joacă singur (premium)']
 ];
-/* zonele din imaginea satului (imagini/sat/sat-interior.jpg, 1140×928): poligonul pe care apeși și locul etichetei */
+/* zonele din imaginile satului (imagini/sat/sat-1…3.jpg, 1152×928, aceeași așezare pe toate stadiile): poligonul pe care apeși și locul etichetei */
+const SAT_W = 1152, SAT_H = 928;
 const SAT_Z = {
-  a: [[0, 250, 90, 180, 215, 240, 300, 330, 305, 555, 30, 560, 0, 520], [150, 205]],
-  p: [[335, 210, 520, 215, 545, 300, 540, 410, 345, 410, 330, 330], [440, 196]],
-  l: [[655, 90, 790, 0, 985, 90, 980, 330, 670, 330], [820, 58]],
-  h: [[960, 250, 1060, 240, 1140, 280, 1140, 500, 975, 500], [1052, 262]],
-  i: [[0, 545, 110, 540, 200, 600, 380, 640, 370, 790, 0, 790], [120, 610]],
-  t: [[640, 440, 860, 400, 1010, 500, 990, 620, 760, 630, 640, 560], [842, 410]],
-  x: [[548, 495, 632, 495, 632, 612, 548, 612], [590, 520]],
-  d: [[512, 0, 650, 0, 648, 245, 515, 245], [581, 128]],
-  z: [[340, 620, 500, 600, 690, 600, 830, 620, 830, 928, 340, 928], [585, 700]],
-  g: [[548, 330, 640, 330, 640, 470, 548, 470], [594, 340]]
+  a: [[45, 255, 360, 255, 365, 500, 45, 500], [200, 262]],
+  p: [[390, 210, 565, 210, 565, 365, 390, 365], [478, 212]],
+  l: [[795, 125, 1040, 125, 1040, 370, 795, 370], [918, 140]],
+  h: [[865, 380, 1152, 380, 1152, 650, 865, 650], [1012, 430]],
+  i: [[45, 555, 375, 555, 375, 880, 45, 880], [210, 575]],
+  t: [[640, 590, 1060, 590, 1060, 800, 640, 800], [850, 612]],
+  x: [[528, 395, 630, 395, 630, 500, 528, 500], [578, 402]],
+  g: [[632, 330, 692, 330, 692, 495, 632, 495], [664, 336]],
+  d: [[590, 10, 735, 10, 735, 295, 590, 295], [662, 130]],
+  z: [[400, 640, 640, 640, 640, 860, 400, 860], [520, 700]]
 };
+/* imaginea satului după stadiu: Tabără/Sătuc → 1, Sat/Târg întărit → 2, Cetate → 3 */
+function satImgN() { const s = typeof terStage === 'function' ? terStage() : ''; return /Cetate/.test(s) ? 3 : /^(Sat|Târg)/.test(s) ? 2 : 1; }
 const SAT_ICON = {};
 function satIcon(k) {
   if (SAT_ICON[k]) return SAT_ICON[k];
@@ -131,10 +134,10 @@ function vHub() {
   for (const k in SAT_Z) {
     const [pts, [lx, ly]] = SAT_Z[k], [st, hot] = satStatus(k), lv = satLvl(k);
     zones += `<polygon class="vh-z${hot ? ' hot' : ''}" data-z="${k}" points="${pts.join(' ')}" onclick="vil('${k}')"/>`;
-    labels += `<button class="vh-lb${hot ? ' hot' : ''}" data-v="${k}" style="left:${(lx / 11.4).toFixed(2)}%;top:${(ly / 9.28).toFixed(2)}%" onclick="vil('${k}')" onmouseenter="satHov('${k}',1)" onmouseleave="satHov('${k}',0)" aria-label="${N[k]}${lv != null ? ', nivel ' + lv : ''}: ${st.replace(/<[^>]+>/g, '')}"><b>${N[k]}${lv != null ? ` <small>${lv}</small>` : ''}</b><span>${st}</span></button>`;
+    labels += `<button class="vh-lb${hot ? ' hot' : ''}" data-v="${k}" style="left:${(lx / SAT_W * 100).toFixed(2)}%;top:${(ly / SAT_H * 100).toFixed(2)}%" onclick="vil('${k}')" onmouseenter="satHov('${k}',1)" onmouseleave="satHov('${k}',0)" aria-label="${N[k]}${lv != null ? ', nivel ' + lv : ''}: ${st.replace(/<[^>]+>/g, '')}"><b>${N[k]}${lv != null ? ` <small>${lv}</small>` : ''}</b><span>${st}</span></button>`;
   }
   const [bs] = satStatus('q');
-  return `<section class="vh vh-sat"><h2>${typeof terStage === 'function' ? 'Satul tău · ' + terStage() : 'Satul tău'}</h2><div class="vh-map"><img src="imagini/sat/sat-interior.jpg" alt="Satul tău, cu clădirile pe care le poți deschide" width="1140" height="928"><svg viewBox="0 0 1140 928" preserveAspectRatio="none" aria-hidden="true">${zones}</svg>${labels}</div>`
+  return `<section class="vh vh-sat"><h2>${typeof terStage === 'function' ? 'Satul tău · ' + terStage() : 'Satul tău'}</h2><div class="vh-map"><img src="imagini/sat/sat-${satImgN()}.jpg" alt="Satul tău, cu clădirile pe care le poți deschide" width="1152" height="928"><svg viewBox="0 0 1152 928" preserveAspectRatio="none" aria-hidden="true">${zones}</svg>${labels}</div>`
     + `<div class="vh-more"><button class="vb-c" data-v="q" onclick="vil('q')"><span class="vb-i">${satIcon('q')}</span><span>Bot · ${bs}</span></button><span class="mute">Atinge o clădire ca s-o deschizi.</span></div></section>${typeof tronBanner === 'function' ? tronBanner() : ''}`;
 }
 function satHov(k, on) { const z = document.querySelector(`.vh-z[data-z="${k}"]`); if (z) z.classList.toggle('on', !!on); }

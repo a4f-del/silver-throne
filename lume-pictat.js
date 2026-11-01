@@ -8,9 +8,9 @@
    ========================================================================== */
 const LWP = {
   /* treapta satului (LWA.tier: 1–9, 10–19, 20–24, 25–29, 30+) → iconița, lățimea pe hartă */
-  tier: [['harta/sat-mic', 360, 240, 114], ['harta/sat-mare', 360, 226, 124], ['lume/sat-zid', 420, 370, 128], ['harta/capitala', 360, 241, 140], ['lume/castel-mare', 420, 342, 178]],
-  deco: { padure: [420, 416], munte: [420, 344], pietre: [420, 399] },
-  TW: 330      /* lățimea Tronului pe hartă */
+  tier: [['harta/sat-mic', 363, 380, 104], ['harta/sat-mare', 353, 380, 112], ['lume/sat-zid', 354, 380, 118], ['harta/capitala', 379, 380, 126], ['lume/castel-mare', 379, 380, 156]],
+  deco: { padure: [353, 380], munte: [420, 344], pietre: [420, 399] },
+  TW: 320      /* lățimea Tronului pe hartă (castelul cu tronul) */
 };
 LW.IA = 172; LW.IB = 104;    /* sate mai mari → mai mult loc între ele */
 const lpF = n => Math.round(n * 10) / 10;
@@ -25,7 +25,7 @@ LWA.defs += `<pattern id="lw-grass" patternUnits="userSpaceOnUse" width="440" he
 /* locul pe hartă: mai departe de centru, ca Tronul mare să aibă loc */
 lwPos = function (p) {
   const h = lwHash(p.id), jx = ((h & 255) / 255 - 0.5) * 18, jy = (((h >>> 8) & 255) / 255 - 0.5) * 12, X = (p.x - p.y) * LW.IA, Y = (p.x + p.y) * LW.IB, d = Math.hypot(X, Y * 1.6) || 1;
-  return [X + X / d * 92 + jx, Y + Y / d * 92 * (Y < 0 ? 1.45 : 1.1) + jy];
+  return [X + X / d * 128 + jx, Y + Y / d * 128 * (Y < 0 ? 1.35 : 1.25) + jy];
 };
 
 /* ------------------------------------------------------------------ TEREN */
@@ -45,7 +45,7 @@ lwTerrain = function (ps, F) {
   const inside = (x, y, m) => Math.hypot(x, y * 1.35) < LWP.TW * 0.62 + m * 0.4 || nearVil(x, y, m + 62) || nearSeg(x, y, 16 + m * 0.2);
   const outer = (x, y) => Math.abs(x) / R.x + Math.abs(y) / R.y > 1;
   let low = `<rect x="${lpF(F.x - 600)}" y="${lpF(F.y - 600)}" width="${lpF(F.w + 1200)}" height="${lpF(F.h + 1200)}" fill="url(#lw-grass)"/>`;
-  for (let i = 0; i < Math.round(F.w * F.h / 22000); i++) { const x = F.x + r() * F.w, y = F.y + r() * F.h; low += `<ellipse cx="${lpF(x)}" cy="${lpF(y)}" rx="${lpF(60 + r() * 140)}" ry="${lpF(26 + r() * 60)}" fill="${r() < 0.5 ? '#9fbf6a' : '#2f4a26'}" opacity="${lpF(0.08 + r() * 0.12)}"/>`; }
+  for (let i = 0; i < Math.round(F.w * F.h / 22000); i++) { const x = F.x + r() * F.w, y = F.y + r() * F.h; low += `<ellipse cx="${lpF(x)}" cy="${lpF(y)}" rx="${lpF(60 + r() * 140)}" ry="${lpF(26 + r() * 60)}" fill="${r() < 0.5 ? '#5f7a45' : '#16241a'}" opacity="${lpF(0.1 + r() * 0.14)}"/>`; }
   /* râul, ca înainte, pe marginea de sus a zonei locuite */
   const rv = []; for (let i = 0; i <= 8; i++) { const k = i / 8, x = -R.x - 80 + k * (R.x + 80) * 1.9, base = x <= 0 ? -(R.y / R.x) * (x + R.x) : -R.y + (R.y / R.x) * x * 0.6; rv.push([x, base - 90 - Math.sin(i * 1.7) * 18]); }
   let d = `M${lpF(F.x - 40)} ${lpF(rv[0][1] + 30)}`, pr = [F.x - 40, rv[0][1] + 30];
@@ -92,8 +92,8 @@ lwVil = function (p, sel, mine, K) {
 
 /* ------------------------------------------------------------------ TRONUL */
 lwThrone = function (K) {
-  const W = LWP.TW, H = W * 520 / 640, x0 = -W / 2, y0 = -H * 0.6, P = (u, v) => [x0 + u * W, y0 + v * H];
-  const [gx, gy] = P(0.566, 0.244), [dx, dy] = P(0.56, 0.5), br = [[0.298, 0.43], [0.46, 0.29], [0.757, 0.39], [0.62, 0.565]].map(([u, v]) => P(u, v));
+  const W = LWP.TW, H = W * 640 / 600, x0 = -W / 2, y0 = -H * 0.6, P = (u, v) => [x0 + u * W, y0 + v * H];
+  const [gx, gy] = P(0.658, 0.186), [dx, dy] = P(0.55, 0.52), br = [[0.35, 0.425], [0.322, 0.49], [0.563, 0.58], [0.703, 0.555]].map(([u, v]) => P(u, v));   /* poziții măsurate pe imagini/lume/tron.webp */
   let g = `<g class="lw-tr" onclick="tab('r')" onkeydown="if(event.key==='Enter'){tab('r')}" tabindex="0" role="button" aria-label="Tronul de Argint">`;
   g += `<ellipse class="lt-glow" cx="${lpF(dx)}" cy="${lpF(dy + 20)}" rx="${lpF(W * 0.72)}" ry="${lpF(W * 0.34)}" fill="url(#lw-tg)"/>`;
   /* cercul de rune de pe pământ, care se rotește */

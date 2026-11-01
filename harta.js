@@ -10,8 +10,16 @@
 const HR = {
   N: 5,
   /* mărimea reală a fiecărei iconițe (px), ca să păstrăm proporțiile */
-  sz: { 'tabara': [360, 240], 'sat-mare': [360, 226], 'bastion': [310, 360], 'loc-sanctuar': [360, 308], 'loc-turn': [280, 360], 'loc-ruine': [360, 309],
-    'loc-mina': [360, 261], 'capitala': [360, 241], 'loc-caravana': [360, 310], 'sat-mic': [360, 240] },
+  sz: { 'bastion': [357, 380],
+    'sat-mic': [363, 380],
+    'loc-sanctuar': [380, 371],
+    'capitala': [379, 380],
+    'loc-ruine': [377, 380],
+    'loc-caravana': [363, 380],
+    'sat-mare': [353, 380],
+    'loc-turn': [342, 380],
+    'tabara': [380, 361],
+    'loc-mina': [362, 380] },
   /* simbolul locului din joc → iconița pictată */
   ic: { '🏛': 'loc-ruine', '⛏': 'loc-mina', '✦': 'loc-sanctuar', '🛒': 'loc-caravana', '🗼': 'loc-turn', '🏰': 'bastion' }
 };
