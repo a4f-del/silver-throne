@@ -50,8 +50,11 @@ function sdTeam() {
   return `<div class="sd-t">Echipa${bench ? ` <span class="mute">· +${bench} în rezervă</span>` : ''}</div>${rows}${hurt && !S.d ? `<button class="sd-heal" onclick="heal()">Vindecă răniții · ${cost} aur</button>` : ''}${typeof reviveAllBtn === 'function' ? reviveAllBtn('sd-heal') : ''}`;
 }
 
+/* simbolurile vechi → iconițele pictate (imagini/ui/) */
+const SD_UI = { '⚔': 'ui-tabara', '🎯': 'ui-misiuni', '👑': 'ui-campanie', '✔': 'ui-forja', '⚒': 'ui-forja', '⛏': 'nav-coborare' };
 function sdRow(ic, txt, right, onclick, hot) {
-  return `<button class="sd-r${hot ? ' hot' : ''}" onclick="${onclick}"><span class="sd-i">${ic}</span><span class="sd-x">${txt}</span><span class="sd-v">${right || ''}</span></button>`;
+  const im = SD_UI[ic] ? `<img class="uii" src="imagini/ui/${SD_UI[ic]}.webp" alt="">` : ic;
+  return `<button class="sd-r${hot ? ' hot' : ''}" onclick="${onclick}"><span class="sd-i">${im}</span><span class="sd-x">${txt}</span><span class="sd-v">${right || ''}</span></button>`;
 }
 
 function sdTasks() {

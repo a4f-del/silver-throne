@@ -7,7 +7,7 @@
    ========================================================================== */
 
 /* ---------------------------------------------------------------- NAVIGARE */
-const TEMA_NAV = [['a', 'Sat', '🏰'], ['c', 'Coborâre', '⛏️'], ['m', 'Hartă', '🗺️'], ['r', 'Tron', '♛'], ['e', 'Echipă', '🛡️']];
+const TEMA_NAV = [['a', 'Sat', '<img class="uii" src="imagini/ui/nav-sat.webp" alt="">'], ['c', 'Coborâre', '<img class="uii" src="imagini/ui/nav-coborare.webp" alt="">'], ['m', 'Hartă', '<img class="uii" src="imagini/ui/nav-harta.webp" alt="">'], ['r', 'Tron', '<img class="uii" src="imagini/ui/nav-tron.webp" alt="">'], ['e', 'Echipă', '<img class="uii" src="imagini/ui/nav-echipa.webp" alt="">']];   /* iconițe pictate: imagini/ui/ */
 const temaOn = k => S.tab === k;
 function temaNav() {
   return TEMA_NAV.map(([k, n, i]) => {
