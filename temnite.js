@@ -53,7 +53,7 @@ function tmnEvent() {
 function enCard(e, i, t) {
   const st = `${e.bl ? ' · sângerează' : ''}${e.st ? ' · amețit' : ''}${e.bu ? ' · arde' : ''}${e.po ? ' · otrăvit' : ''}`;
   const b = e.b && tmnBoss(e.n);
-  if (!b) return `<button class="en${t ? ' t' : ''}" onclick="tgt(${i})">${e.n}${st}${bar(e.hp, e.mh, 'e')}<span class="mute">${e.hp}/${e.mh} viață</span></button>`;
+  if (!b) return `<button class="en${t ? ' t' : ''}${e.c ? ' en-c' : ''}" onclick="tgt(${i})">${e.c && typeof av === 'function' ? `<span class="en-av">${av({ n: e.n, c: e.c, ic: e.ic }, 34)}</span>` : ''}${e.n}${e.c ? ` <small class="mute">${e.c === 'Campion' ? 'erou' : e.c}</small>` : ''}${st}${bar(e.hp, e.mh, 'e')}<span class="mute">${e.hp}/${e.mh} viață</span></button>`;
   const hit = e._ph != null && e.hp < e._ph, low = e.hp / e.mh < 0.3; e._ph = e.hp;
   return `<button class="en en-boss${t ? ' t' : ''}${hit ? ' hit' : ''}${low ? ' low' : ''}" style="--aura:${low ? '#ff3b30' : b[1]}" onclick="tgt(${i})" aria-label="${e.n}, căpitanul temniței, ${e.hp} din ${e.mh} viață">`
     + `<span class="eb-por"><span class="eb-ring"></span><img src="imagini/monstri/${b[0]}.jpg" alt="" onerror="this.style.display='none'">${'<i class="eb-em"></i>'.repeat(6)}</span>`
@@ -92,7 +92,7 @@ function bossMini(n) { const b = tmnBoss(n); return b ? `<span class="eb-mini" s
 .dg-ev{padding:0!important;overflow:hidden;border-color:#5cc8ff66!important;box-shadow:0 0 0 1px #5cc8ff44,0 0 26px #5cc8ff22!important}
 .dg-ev .dg-img{aspect-ratio:21/7}
 .dg-ev .dg-b{padding:12px 16px 14px}.dg-ev .dg-h{padding-right:84px}
-.dg-free{color:#7fd88c}.dg-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.dg-tip{margin:2px 0 6px;font-size:13.5px}.dg-auto{border-top:1px dashed #ffffff1a;padding-top:8px}.dg-next span small{font-size:12.5px}
+.dg-free{color:#7fd88c}.en.en-c{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center}.en.en-c .en-av{grid-row:span 3}.en.en-c>.bar,.en.en-c>.mute,.en.en-c>i{grid-column:2}.dg-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.dg-tip{margin:2px 0 6px;font-size:13.5px}.dg-auto{border-top:1px dashed #ffffff1a;padding-top:8px}.dg-next span small{font-size:12.5px}
 .dg-keys{display:flex;align-items:center;gap:4px;font-size:13.5px}.dg-keys i{font-style:normal;filter:grayscale(1) opacity(.35)}.dg-keys i.on{filter:drop-shadow(0 0 4px #5cc8ff)}.dg-keys span{margin-left:6px}
 /* căpitanul în luptă */
 .en-boss{display:flex!important;align-items:center;gap:14px;padding:10px 14px!important;margin:6px 0 10px!important;border:1px solid var(--gold)!important;border-radius:12px!important;background:radial-gradient(ellipse at 15% 50%,color-mix(in srgb,var(--aura) 14%,transparent),transparent 60%),linear-gradient(180deg,#221a12,#120e0a)!important;box-shadow:0 0 0 1px #000,0 0 18px color-mix(in srgb,var(--aura) 30%,transparent)!important}

@@ -285,7 +285,9 @@ function contChip() {
     const w = document.createElement('div'); w.id = 'hdr-act';
     const cl = document.createElement('button'); cl.id = 'hdr-cl'; cl.type = 'button'; cl.innerHTML = '<img class="uii" src="imagini/ui/ui-clasament.webp" alt=""><span class="hdr-l">Clasament</span>'; cl.setAttribute('aria-label', 'Clasament'); cl.title = 'Clasamentul jucătorilor';
     cl.onclick = () => { p.classList.add('auth-hidden'); t.setAttribute('aria-expanded', 'false'); tab('k'); };
-    w.append(cl, t); document.body.append(w, p);
+    const ist = document.createElement('button'); ist.id = 'hdr-ist'; ist.type = 'button'; ist.innerHTML = '<img class="uii" src="imagini/ui/ui-tabara.webp" alt=""><span class="hdr-l">Lupte</span>'; ist.setAttribute('aria-label', 'Istoricul luptelor'); ist.title = 'Istoricul luptelor';
+    ist.onclick = () => { p.classList.add('auth-hidden'); t.setAttribute('aria-expanded', 'false'); if (typeof bhOpen === 'function') bhOpen(); };
+    w.append(ist, cl, t); document.body.append(w, p);
   }
   t.innerHTML = '👑 Cont' + (CONT.user && CONT.err ? ' <b class="acc-dot" title="Salvarea online a eșuat">!</b>' : '');
   const st = CONT.err ? `<span class="acc-bad">Salvarea online a eșuat: ${cEsc(CONT.err)} Progresul e păstrat pe acest dispozitiv.</span> <button type="button" onclick="contPush()">Reîncearcă</button>`
@@ -341,10 +343,11 @@ html.gate-on,html.gate-on body{overflow:hidden}
 #gate button:focus-visible,#gate input:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.g-crest svg,.g-logo img,.g-spin{animation:none}#gate{transition:none}}
 #hdr-act{position:fixed;top:10px;right:10px;z-index:10000;display:flex;gap:6px}
-#hdr-act #auth-toggle,#hdr-cl{position:static;padding:6px 12px;font-family:Cinzel,serif;font-weight:700;font-size:13px;color:var(--gold2);background:linear-gradient(180deg,#2a2412,#15110a);border:1px solid var(--gold);border-radius:6px}
-#hdr-cl{display:flex;align-items:center;gap:6px}#hdr-cl.on{background:linear-gradient(180deg,#4a3c14,#241c0a);box-shadow:0 0 0 1px var(--gold2),0 0 12px #f0d27a55}
+#hdr-act #auth-toggle,#hdr-cl,#hdr-ist{position:static;padding:6px 12px;font-family:Cinzel,serif;font-weight:700;font-size:13px;color:var(--gold2);background:linear-gradient(180deg,#2a2412,#15110a);border:1px solid var(--gold);border-radius:6px}
+#hdr-cl,#hdr-ist{display:flex;align-items:center;gap:6px}#hdr-cl.on{background:linear-gradient(180deg,#4a3c14,#241c0a);box-shadow:0 0 0 1px var(--gold2),0 0 12px #f0d27a55}
 @media (min-width:960px){header{padding-right:240px!important}}
-@media (max-width:959px){header{padding-right:132px!important}.hdr-l{display:none}#hdr-cl{padding:6px 10px}}
+@media (min-width:960px){header{padding-right:300px!important}}
+@media (max-width:959px){header{padding-right:176px!important}.hdr-l{display:none}#hdr-cl,#hdr-ist{padding:6px 10px}}
 #auth-toggle{position:fixed;top:10px;right:10px;z-index:10000;padding:6px 12px;font-family:Cinzel,serif;font-weight:700;font-size:13px;color:var(--gold2);background:linear-gradient(180deg,#2a2412,#15110a);border:1px solid var(--gold);border-radius:6px}
 .acc-dot{display:inline-block;margin-left:4px;width:16px;height:16px;line-height:16px;border-radius:50%;background:var(--blood);color:#fff;font:700 11px sans-serif;text-align:center}
 #auth-panel{position:fixed;top:52px;right:10px;z-index:9999;width:280px;max-width:calc(100vw - 20px);padding:14px;background:linear-gradient(180deg,#1c2225,#12171a);border:1px solid var(--gold);border-radius:8px;box-shadow:0 8px 24px #000c;font:15px Alegreya,Georgia,serif;color:var(--ink)}

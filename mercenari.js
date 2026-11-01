@@ -22,10 +22,13 @@ function mrDue(step) {
 }
 function mrNew(c) {
   const f = { n: c, c, hp: 0, sc: 0, t: [], rk: 0, fm: 0, nn: 1, eq: { w: null, a: null } };
-  f.hp = mhp(f); (S.fs.length < 3 && !S.d ? S.fs : S.rs).push(f); return f;
+  f.hp = mhp(f); f.t = [P(TR)]; (S.fs.length < TMAX() && !S.d ? S.fs : S.rs).push(f); return f;
 }
 /* la fiecare desenare: se alătură cine a ajuns la pasul lui */
-function mrTick() { if (!S || S.mrv !== 2) return; for (const [c, st] of MR.order) if (!mrHas(c) && mrDue(st)) mrNew(c); stGift(); }
+function mrTick() { if (!S || S.mrv !== 2) return; for (const [c, st] of MR.order) if (!mrHas(c) && mrDue(st)) mrNew(c);
+  mrAll().forEach(f => { if (!f.h && !(f.t && f.t.length)) f.t = [P(TR)]; });   /* trăsătura fiecărui mercenar (și pentru cei existenți) */
+  if (S.lvl >= 30 && !S.t4) { S.t4 = 1; S.msg = (S.msg ? S.msg + ' ' : '') + 'Al 4-lea loc în echipă s-a deschis: alege încă un luptător din Han.'; }
+  stGift(); }
 
 /* jucătorii existenți: pentru fiecare clasă rămâne mercenarul cu cea mai multă faimă; echipamentul celorlalți intră în rucsac */
 function mrMig() {
@@ -145,8 +148,8 @@ function mrHan() {
     const i = S.fs.indexOf(f), j = S.rs.indexOf(f), n = nx(f), p0 = SP.RKF[f.rk || 0] || 0, pc = n ? Math.min(100, Math.round((fm(f) - p0) / (n - p0) * 100)) : 100;
     const spn = f.sp && typeof spDef0 === 'function' && spDef0(f) ? spDef0(f).n : (f.rk ? 'alege specializarea în Echipă' : 'specializare de la Veteran');
     return `<div class="mr-hc"><div class="mr-hp">${av(f, 56)}</div><div class="mr-hb"><b>${tEsc(f.n)}</b> <span class="mute">${f.c} · ${RK[f.rk || 0]}</span><div class="mute">${spn}</div>`
-      + `<div class="mr-fm"><i style="width:${pc}%"></i></div><div class="mute">${n ? `faimă ${fm(f)}/${n} până la ${RK[(f.rk || 0) + 1]}` : 'rang maxim: Legendă'} · ${Math.round(mhp(f))} viață · ${Math.round(atkOf(f))} atac</div>${typeof mxRow === 'function' ? mxRow(f) : ''}</div>`
-      + `<div class="mr-hx">${i >= 0 ? (f.h ? '' : `<button onclick="toBench(${i})">La rezervă</button>`) : (mxBusy(f) ? '<button disabled>Plecat</button>' : `<button class="p" onclick="toParty(${j})"${S.fs.length >= 3 ? ' disabled title="Echipa are deja 3 luptători"' : ''}>În echipă</button>`)}</div></div>`;
+      + `<div class="mr-fm"><i style="width:${pc}%"></i></div><div class="mute">${f.t && f.t[0] ? `<b>${f.t[0].n}</b> (${f.t[0].d}) · ` : ''}${n ? `faimă ${fm(f)}/${n} până la ${RK[(f.rk || 0) + 1]}` : 'rang maxim: Legendă'} · ${Math.round(mhp(f))} viață · ${Math.round(atkOf(f))} atac</div>${typeof mxRow === 'function' ? mxRow(f) : ''}</div>`
+      + `<div class="mr-hx">${i >= 0 ? (f.h ? '' : `<button onclick="toBench(${i})">La rezervă</button>`) : (mxBusy(f) ? '<button disabled>Plecat</button>' : `<button class="p" onclick="toParty(${j})"${S.fs.length >= TMAX() ? ` disabled title="Echipa are deja ${TMAX()} luptători"` : ''}>În echipă</button>`)}</div></div>`;
   }).join('');
   const bb = BL().b || 0;
   return `<section><h2>Hanul: mercenarii tăi</h2><div class="mute">Cinci tovarăși, câte unul din fiecare clasă, care rămân cu tine pentru totdeauna. Trei intră în luptă alături de erou; ceilalți așteaptă în rezervă. Puterea lor vine din erou: un Recrut are cam 85% din forța de bază a eroului în specialitatea lui, o Legendă cam 98%, dar nimeni nu trece de 95% din viața, atacul sau apărarea eroului. Faima: +1 la fiecare luptă câștigată, +3 la căpitani și raiduri${bb ? `, plus ${bb * 5}% de la Han` : ''}. Cei din rezervă pot pleca în <b>expediții</b> de 1, 4 sau 8 ore, din care se întorc cu aur, materiale și faimă.</div><div class="mr-list">${cards}</div></section>` + mrBld('b');

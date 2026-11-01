@@ -37,7 +37,7 @@ function vsFlash() {
     const b = boss && typeof tmnBoss === 'function' ? tmnBoss(es[0].n) : null;
     let por, name;
     if (b) { por = `<span class="vs-por boss" style="--aura:${b[1]}"><img src="imagini/monstri/${b[0]}.jpg" alt=""></span>`; name = es[0].n; }
-    else if (d.lume || d.tron) { por = `<span class="vs-por pvp">${d.vsh && typeof av === 'function' ? av({ n: d.bn, c: d.vsh.c || 'Campion', ic: d.vsh.ic }, 84) : vsMonster}</span>`; name = d.bn; }
+    else if (d.lume || d.tron) { const gm = (d.ghost || []).slice(1); por = `<span class="vs-por pvp">${d.vsh && typeof av === 'function' ? av({ n: d.bn, c: d.vsh.c || 'Campion', ic: d.vsh.ic }, 84) : vsMonster}</span>${gm.length && typeof av === 'function' ? `<span class="vs-mates">${gm.map(u => av({ n: u.n, c: u.c }, big ? 30 : 24)).join('')}</span>` : ''}`; name = d.bn + (gm.length ? ` <small>+${gm.length}</small>` : ''); }   /* fantoma unui jucător: toată echipa lui, ca la tine */
     else { por = `<span class="vs-por mob">${vsMonster}</span>`; name = es.length > 1 ? es[0].n + ` <small>+${es.length - 1}</small>` : es[0].n; }
     VS.last = { big, fresh: true, html: `<div class="vs-card"><button class="vs-x" onclick="vsClose()" aria-label="Ascunde cardul">×</button><div class="vs-ctx">${ctx}</div><div class="vs-row">`
       + `<div class="vs-side l"><div class="vs-ph">${av(hero, big ? 84 : 60)}${mates.length ? `<span class="vs-mates">${mates.map(x => av(x, big ? 30 : 24)).join('')}</span>` : ''}</div><div class="vs-nm">${tEsc(hero.n)}${mates.length ? ` <small>+${mates.length}</small>` : ''}</div>${vsStats(me)}</div>`

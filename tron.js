@@ -93,7 +93,7 @@ function tronFight(data) {
 /* unitățile fantomei înlocuiesc inamicii generați (apelat din terEm) */
 function tronGhostUnits(es, d) {
   es.length = 0;
-  d.ghost.forEach((u, i) => es.push({ n: u.n, hp: u.hp, mh: u.hp, atk: u.atk, def: u.def, bl: 0, st: 0, b: i === 0 }));
+  d.ghost.forEach((u, i) => es.push({ n: u.n, c: u.c, ic: i === 0 && d.vsh ? d.vsh.ic : undefined, hp: u.hp, mh: u.hp, atk: u.atk, def: u.def, bl: 0, st: 0, b: i === 0 }));
 }
 /* victorie: fără pradă și fără să numere la misiunile zilnice (luptele cu fantome sunt gratuite, deci nu pot fi exploatate) */
 function tronWin(d) {
