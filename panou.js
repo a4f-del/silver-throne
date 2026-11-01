@@ -51,7 +51,7 @@ function sdTeam() {
 }
 
 /* simbolurile vechi → iconițele pictate (imagini/ui/) */
-const SD_UI = { '⚔': 'ui-tabara', '🎯': 'ui-misiuni', '👑': 'ui-campanie', '✔': 'ui-forja', '⚒': 'ui-forja', '⛏': 'nav-coborare' };
+const SD_UI = { '⚔': 'ui-tabara', '🎯': 'ui-misiuni', '👑': 'ui-campanie', '✔': 'ui-forja', '⚒': 'ui-forja', '⛏': 'nav-coborare', '🧭': 'nav-harta', '✦': 'slot-relicva' };
 function sdRow(ic, txt, right, onclick, hot) {
   const im = SD_UI[ic] ? `<img class="uii" src="imagini/ui/${SD_UI[ic]}.webp" alt="">` : ic;
   return `<button class="sd-r${hot ? ' hot' : ''}" onclick="${onclick}"><span class="sd-i">${im}</span><span class="sd-x">${txt}</span><span class="sd-v">${right || ''}</span></button>`;
@@ -60,13 +60,13 @@ function sdRow(ic, txt, right, onclick, hot) {
 function sdTasks() {
   const r = [], now = Date.now();
   if (S.d) r.push(sdRow('⛏', 'În coborâre', '', "sdGo('c')", true));
-  if (S.ex) r.push(sdRow('🧭', 'Expediție în curs', 'continuă', "sdGo('m','mt','h')", true));
+  if (S.ex) r.push(sdRow('🧭', 'Expediție în curs', 'continuă', "sdGo('m','mt','l')", true));
   const busy = sdForgeBusy(), ready = sdForgeReady(), slots = (S.forge || []).length;
   if (ready) r.push(sdRow('✔', `Forjă: ${ready} ${ready === 1 ? 'obiect gata' : 'obiecte gata'}`, 'ridică', "sdGo('a','vil','a')", true));
   if (busy.length) { const nx = Math.min(...busy.map(x => +x.end)); r.push(sdRow('⚒', `Forjă ${busy.length}/${slots}`, `<span data-end="${nx}">${fmt(nx - now)}</span>`, "sdGo('a','vil','a')")); }
   const cp = ((S.ter && S.ter.camps) || []).filter(c => c && Number.isFinite(+c.exp));
-  if (cp.length) { const nx = Math.min(...cp.map(c => +c.exp)); r.push(sdRow('⚔', `Tabere: ${cp.length}`, sdT(nx - now), "sdGo('m','mt','h')")); }
-  for (const b of ((S.ter && S.ter.buf) || [])) if (b && Number.isFinite(+b.exp) && Number.isFinite(+b.v) && b.exp > now) r.push(sdRow('✦', `+${b.v}% ${({ pd: 'atac', pf: 'apărare', ph: 'viață' })[b.k] || b.k}`, `<span data-end="${b.exp}">${fmt(b.exp - now)}</span>`, "sdGo('m','mt','h')"));
+  if (cp.length) { const nx = Math.min(...cp.map(c => +c.exp)); r.push(sdRow('⚔', `Tabere: ${cp.length}`, sdT(nx - now), "sdGo('m','mt','l')")); }
+  for (const b of ((S.ter && S.ter.buf) || [])) if (b && Number.isFinite(+b.exp) && Number.isFinite(+b.v) && b.exp > now) r.push(sdRow('✦', `+${b.v}% ${({ pd: 'atac', pf: 'apărare', ph: 'viață' })[b.k] || b.k}`, `<span data-end="${b.exp}">${fmt(b.exp - now)}</span>`, "sdGo('m','mt','l')"));
   const m = dm(), dr = dmReady(), done = m.list.filter(x => x.c).length;
   r.push(sdRow('🎯', 'Misiuni zilnice', dr ? `${dr} de ridicat` : `${done}/${m.list.length}`, "sdGo('a','vil','x')", dr > 0));
   const ch = chCur();

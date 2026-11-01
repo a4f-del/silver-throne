@@ -152,7 +152,7 @@ function explore(x, y) {
   else { spend(TP.explore.cost); const c = terRev(x, y, TP.explore.radius); S.msg = 'Iscoadele au explorat zona (' + c.length + ' zone noi). ' + terDisc(c); }
   go();
 }
-function terSel(k, a, b) { S.msel = { k, a, b }; S.mv = null; S.msg = ''; go(); }
+function terSel(k, a, b) { S.msel = { k, a, b }; S.mv = null; S.msg = ''; if (typeof LUME !== 'undefined') LUME.sel = null; go(); }
 
 /* ---------------------------------------------------------------- TABERE ----- */
 function terTaken() {
@@ -680,8 +680,8 @@ function terLegend() {
   return `<div class="st-lg"><span>🏛⛏✦🛒🗼 locuri de interes</span><span><i style="background:#d4564f"></i>tabere (cu timp limitat)</span><span><i style="background:${TCOL}"></i>teritoriile tale</span><span>? zonă de explorat</span></div>`;
 }
 function terTabs() {
-  const k = S.mt || 'h', r = cmpReady();
-  return `<div class="tabs">${[['h', 'Regiunea'], ['l', 'Lumea'], ['k', 'Campanie' + (r ? ' ●' : '')], ['t', 'Teritorii']].map(([x, n]) => `<button${x == k ? ' class="p"' : ''} onclick="mtab('${x}')">${n}</button>`).join('')}</div>`;
+  const k = S.mt === 'h' || !S.mt ? 'l' : S.mt, r = cmpReady();
+  return `<div class="tabs">${[['l', 'Harta'], ['k', 'Campanie' + (r ? ' ●' : '')], ['t', 'Teritorii']].map(([x, n]) => `<button${x == k ? ' class="p"' : ''} onclick="mtab('${x}')">${n}</button>`).join('')}</div>`;
 }
 function mtab(k) { S.mt = k; S.msg = ''; go(); }
 function vTer() {
@@ -696,10 +696,10 @@ function vTer() {
   return h;
 }
 function vM() {
-  if (S.mt === 'b') S.mt = 'h';   /* clasamentul s-a mutat în bara de sus */
-  terTick(); const k = S.mt || 'h', tabs = terTabs();
+  if (S.mt === 'b' || S.mt === 'h' || !S.mt) S.mt = 'l';   /* o singură hartă: Lumea, cu ținutul tău (tinut.js) */
+  terTick(); const offline = typeof LUME !== 'undefined' && !LUME.st && LUME.err, k = offline && S.mt === 'l' ? 'h' : S.mt, tabs = terTabs();
   if (k === 'k') return tabs + vCamp();
-  if (k === 'l') return tabs + vLume();
+  if (k === 'l') return tabs + (S.ex ? vEx() : '') + vLume() + (typeof tnPanel === 'function' ? tnPanel() : '');   /* fără server: harta veche a regiunii, mai jos */
   if (k === 't') return tabs + vTer();
   let h = vMmap();
   h = h.replace('<p class="mute">Atinge un sat ca să-l vezi.</p>', terPanel());

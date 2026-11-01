@@ -25,11 +25,11 @@ function mrNew(c) {
   f.hp = mhp(f); (S.fs.length < 3 && !S.d ? S.fs : S.rs).push(f); return f;
 }
 /* la fiecare desenare: se alătură cine a ajuns la pasul lui */
-function mrTick() { if (!S || S.mv !== 2) return; for (const [c, st] of MR.order) if (!mrHas(c) && mrDue(st)) mrNew(c); }
+function mrTick() { if (!S || S.mrv !== 2) return; for (const [c, st] of MR.order) if (!mrHas(c) && mrDue(st)) mrNew(c); }
 
 /* jucătorii existenți: pentru fiecare clasă rămâne mercenarul cu cea mai multă faimă; echipamentul celorlalți intră în rucsac */
 function mrMig() {
-  if (!S || S.mv === 2) return;
+  if (!S || S.mrv === 2) return;
   const keep = {}, out = [];
   for (const f of mrAll()) {
     if (f.h || !MP[f.c]) continue;
@@ -41,7 +41,7 @@ function mrMig() {
   S.fs = [hero, ...kept.slice(0, 2)].filter(Boolean); S.rs = kept.slice(2);
   S.fs.concat(S.rs).forEach(f => { f.hp = Math.min(f.hp, mhp(f)); });
   if (out.length) S.msg = (S.msg ? S.msg + ' ' : '') + `Mercenarii sunt acum permanenți: a rămas cel mai faimos din fiecare clasă${out.some(f => Object.values(f.eq || {}).some(Boolean)) ? ', iar echipamentul celorlalți e în rucsac' : ''}.`;
-  S.mv = 2;
+  S.mrv = 2;   /* semnul trecerii la mercenarii permanenți (S.mv e satul selectat pe hartă) */
 }
 
 /* ------------------------------------------------------------------ NUMIREA */
