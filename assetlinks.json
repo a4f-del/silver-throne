@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "DE_COMPLETAT.pachetul.aplicatiei",
+      "sha256_cert_fingerprints": ["DE_COMPLETAT:AMPRENTA_SHA256_DIN_PLAY_CONSOLE"]
+    }
+  }
+]

@@ -214,7 +214,8 @@ begin
     stage       = greatest(0, least(20, coalesce((p->>'stage')::numeric, 0)::int)),
     stage_name  = left(coalesce(p->>'stage_name', 'Tabără'), 30),
     title       = left(coalesce(p->>'title', ''), 40),
-    hero        = jsonb_build_object('n', left(coalesce(p->'hero'->>'n', nm), 20), 'c', left(coalesce(p->'hero'->>'c', 'Campion'), 20)),
+    hero        = jsonb_build_object('n', left(coalesce(p->'hero'->>'n', nm), 20), 'c', left(coalesce(p->'hero'->>'c', 'Campion'), 20),
+                                   'ic', case when coalesce(p->'hero'->>'ic', '') ~ '^[mf][1-9]$' then p->'hero'->>'ic' else '' end),
     units       = p->'units',
     seen_at     = now()
   where user_id = uid;
