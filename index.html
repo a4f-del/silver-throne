@@ -186,30 +186,30 @@ main{padding:8px 24px;max-width:940px}
 </style>
 <link rel="stylesheet" href="tema.css?v=2026.10.30-3">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="world-data.js?v=2026.11.01-11"></script>
-<script src="tron-logic.js?v=2026.11.01-11"></script>
-<script src="cladiri-art.js?v=2026.11.01-11"></script>
-<script src="teritorii.js?v=2026.11.01-11"></script>
-<script src="inventar.js?v=2026.11.01-11"></script>
-<script src="panou.js?v=2026.11.01-11"></script>
-<script src="ghid.js?v=2026.11.01-11"></script>
-<script src="mercenari.js?v=2026.11.01-11"></script>
-<script src="specializari.js?v=2026.11.01-11"></script>
-<script src="tron.js?v=2026.11.01-11"></script>
-<script src="lume-art.js?v=2026.11.01-11"></script>
-<script src="sat.js?v=2026.11.01-11"></script>
-<script src="lupta-vs.js?v=2026.11.01-11"></script>
-<script src="temnite.js?v=2026.11.01-11"></script>
-<script src="harta.js?v=2026.11.01-11"></script>
-<script src="lume.js?v=2026.11.01-11"></script>
-<script src="lume-pictat.js?v=2026.11.01-11"></script>
-<script src="tinut.js?v=2026.11.01-11"></script>
-<script src="tema.js?v=2026.11.01-11"></script>
-<script src="echipa.js?v=2026.11.01-11"></script>
-<script src="erou.js?v=2026.11.01-11"></script>
-<script src="cont.js?v=2026.11.01-11"></script>
-<script src="istoric.js?v=2026.11.01-11"></script>
-<script src="portofel.js?v=2026.11.01-11"></script>
+<script src="world-data.js?v=2026.11.01-12"></script>
+<script src="tron-logic.js?v=2026.11.01-12"></script>
+<script src="cladiri-art.js?v=2026.11.01-12"></script>
+<script src="teritorii.js?v=2026.11.01-12"></script>
+<script src="inventar.js?v=2026.11.01-12"></script>
+<script src="panou.js?v=2026.11.01-12"></script>
+<script src="ghid.js?v=2026.11.01-12"></script>
+<script src="mercenari.js?v=2026.11.01-12"></script>
+<script src="specializari.js?v=2026.11.01-12"></script>
+<script src="tron.js?v=2026.11.01-12"></script>
+<script src="lume-art.js?v=2026.11.01-12"></script>
+<script src="sat.js?v=2026.11.01-12"></script>
+<script src="lupta-vs.js?v=2026.11.01-12"></script>
+<script src="temnite.js?v=2026.11.01-12"></script>
+<script src="harta.js?v=2026.11.01-12"></script>
+<script src="lume.js?v=2026.11.01-12"></script>
+<script src="lume-pictat.js?v=2026.11.01-12"></script>
+<script src="tinut.js?v=2026.11.01-12"></script>
+<script src="tema.js?v=2026.11.01-12"></script>
+<script src="echipa.js?v=2026.11.01-12"></script>
+<script src="erou.js?v=2026.11.01-12"></script>
+<script src="cont.js?v=2026.11.01-12"></script>
+<script src="istoric.js?v=2026.11.01-12"></script>
+<script src="portofel.js?v=2026.11.01-12"></script>
 </head>
 <body>
 <header><h1><img class="hd-tron" src="imagini/logo-tron.webp" alt="" width="34" height="40"><span class="hd-nm">Silver Throne</span></h1><div class="hs" id="hs"></div></header>
@@ -370,7 +370,7 @@ function win(q){cn('w');if(typeof bhPush==='function')bhPush(S.d,S.d.f);const d=
  if(b){d.done=true;d.doors=[];if(d.raid!=null)rl(d);else campBoss(d);S.msg=(d.cm?d.cm+' ':'')+'Căpitanul a căzut! Ieși cu prada.'}else{d.doors=doors();S.msg='Victorie.'}if(pr)S.msg+=' '+pr;if(!q)go()}
 function flee(){const d=S.d,g=Math.floor(d.loot.gold/2),o=Math.floor(d.loot.ore/2);if(typeof bhAdd==='function'){if(d.f)bhPush(d,d.f);d.loot.xp=0;bhAdd(d,'retreat',g)}S.gold+=g;S.ore+=o;{const h={ore:0,m:{}};for(const k in(d.loot.m||{}))h.m[k]=Math.floor(d.loot.m[k]/2);stash(h)}S.d=null;S.msg=`Ai fugit din mină cu ${g} aur și ${o} minereu. Experiența din coborâre s-a pierdut.`;go()}
 function leave(){const d=S.d;if(typeof vsClear==='function')vsClear();terLeave(d);const g=Math.round(d.loot.gold*(1+(S.fs.reduce((s,f)=>s+tr(f,'loot')+bon(f).loot,0)+ST().n)/100));S.gold+=g;const lost=stash(d.loot);(d.loot.it||[]).forEach(x=>S.inv.push(x));S.xp+=d.loot.xp;let up=0;while(S.lvl<LMAX&&S.xp>=need(S.lvl)){S.xp-=need(S.lvl);S.lvl++;up++;S.pts=S.lvl<=10?Math.max(0,S.pts)+MXP():Math.max(S.pts,MXP());S.ptsT=Date.now()}   /* până la nivelul 10, un nivel nou ADAUGĂ puncte (și peste maxim); apoi doar umple bara */
- if(typeof bhAdd==='function')bhAdd(d,d.done?'win':'retreat',g);const fit=(d.loot.it||[]);S.msg=`Ieși cu ${g} aur, ${d.loot.ore} minereu și ${d.loot.xp} experiență.`+(fit.length?` Obiecte găsite: ${fit.map(i=>i.name).join(', ')}.`:'')+(lost?` Depozitul e plin: ai pierdut ${lost} materiale.`:'')+(up?` Nivel nou: ${S.lvl}! `+(S.lvl<=10?`+${MXP()*up} puncte (ai ${S.pts}).`:`Punctele s-au umplut (${S.pts}/${MXP()}).`):'');cn('l');S.d=null;if(d.xm)S.msg+=' '+d.xm;go()}
+ if(typeof bhAdd==='function')bhAdd(d,d.done?'win':'retreat',g);const fit=(d.loot.it||[]);S.msg=`Ieși cu ${g} aur, ${d.loot.ore} minereu și ${d.loot.xp} experiență.`+(fit.length?` Obiecte găsite: ${fit.map(i=>i.name).join(', ')}.`:'')+(lost?` Depozitul e plin: surplusul (${lost}) s-a vândut pentru ${d.loot._sold||0} aur.`:'')+(up?` Nivel nou: ${S.lvl}! `+(S.lvl<=10?`+${MXP()*up} puncte (ai ${S.pts}).`:`Punctele s-au umplut (${S.pts}/${MXP()}).`):'');cn('l');S.d=null;if(d.xm)S.msg+=' '+d.xm;go()}
 function opt(k,v){if(k=='slots'){S.slots=+v;while(S.forge.length<S.slots)S.forge.push(null);S.forge.length=Math.max(S.slots,S.forge.findLastIndex(x=>x)+1)}if(k=='pts')S.pts+=10;if(k=='gold')S.gold+=1000;if(k=='ore')S.ore+=100;if(k=='lvl'){S.lvl++;S.xp=0;S.pts=MXP();S.ptsT=Date.now()}if(k=='lvl5'){S.lvl+=5;S.xp=0;S.pts=MXP();S.ptsT=Date.now()}if(k=='prem')S.prem=!S.prem;if(k=='tu'){S.tu=0;S.cn={};S.ghs={};S.ghOff=0;S.tuv=2}if(k=='mats'){for(const x of AFM)give(x,20);for(const r of[1,2,3])for(let q=0;q<5;q++)give(RM[r]+q,5)}if(k=='lg'){S.inv.push(mkLegendary('runic',S.lvl))}if(k=='reset'){if(S.cf&&S.cf.k=='reset'&&Date.now()-S.cf.t<4000)S=fresh();else{S.cf={k:'reset',t:Date.now()};S.msg='Apasă din nou în 4 secunde ca să ștergi tot progresul.';go();return}}S.msg='';go()}
 function cand(){const rk=(m=>Math.random()<.5?RI(0,m):m)(Math.min(4,Math.floor(S.lvl/10)));const t=[P(TR)];if(Math.random()<.45){const x=P(TR);if(x!=t[0])t.push(x)}return spCand({rk,n:P(NMS),c:P(Object.keys(CL).filter(x=>x!='Campion'&&x!='Gardian')),t,p:Math.round((25+12*S.lvl*t.length)*(1+.6*rk))})}
 function pool(){const p=S.pool;if(Date.now()>p.t||!p.c.length){p.c=[cand(),cand(),cand()];p.t=Date.now()+18e5}return p}
@@ -458,11 +458,13 @@ function av0(f,z){z=z||44;const i=AV[f.c];if(i){const u=S.prem&&i.a?i.a:i.s;if(u
 const MA={zim:'Colți zimțati',sng:'Sânge închegat',bli:'Plăci de oțel',cal:'Cărbune de forjă',vul:'Pene de vultur',pra:'Monede vechi',rab:'Rășină',izv:'Apă de izvor',pia:'Piatră cioplită',ven:'Venin de viperă',fie:'Fier negru',cen:'Cenușă vie',osn:'Oase de monstru',jwf:'Cristal pal',jwb:'Cristal albastru',esf:'Esență de foc'};
 const MU={ore:'bază pentru orice forjare',zim:'prefix Zimțat',sng:'prefix Sângeros',bli:'prefix Blindat',cal:'prefix Călit',vul:'sufix al Vulturului',pra:'sufix al Prăzii',rab:'sufix al Răbdării',izv:'sufix al Izvorului',ven:'prefix Otrăvit',fie:'afixe de oțel: Ascuțit, Masiv, Întrit, al Titanului',cen:'afixe de nivel mare (20+)',osn:'afixe: Fărâmător, al Lupului',pia:'iteme de apărare a satului',jwf:'raritate Magic',jwb:'raritate Rar',esf:'raritate Epic'};
 const AFM=['zim','sng','bli','cal','vul','pra','rab','izv','pia','ven','fie','cen','osn'],RM=[null,'jwf','jwb','esf'];
-const MT=()=>S.mat||(S.mat={}),have=k=>k=='ore'?S.ore:(MT()[k]||0),give=(k,n)=>{if(k=='ore')S.ore+=n;else MT()[k]=(MT()[k]||0)+n},take=(k,n)=>give(k,-n),cap=()=>100+50*(BL().d||0),pls=u=>u.t=='w'?PW:PA;
+const MT=()=>S.mat||(S.mat={}),have=k=>k=='ore'?S.ore:(MT()[k]||0),give=(k,n)=>{if(k=='ore')S.ore+=n;else MT()[k]=(MT()[k]||0)+n},take=(k,n)=>give(k,-n),cap=()=>300+150*(BL().d||0),pls=u=>u.t=='w'?PW:PA;
 function lm(k,n){const l=S.d.loot,m=l.m||(l.m={});m[k]=(m[k]||0)+n}
 function nd(u){const o={ore:cost(u.l,u.r)},R=RAR[u.r],n=2+Math.floor(u.l/5),a=pls(u)[u.p||0],b=SF[u.s||0];if(R.aff>=1)o[a.m]=n;if(R.aff>=2)o[b.m]=(o[b.m]||0)+n;if(u.r>0)o[RM[u.r]+(u.q||0)]=u.r;return o}
 const nh=u=>Object.entries(nd(u)).map(([k,n])=>`<span class="${have(k)<n?'r4':''}">${mn(k)} ${have(k)}/${n}</span>`).join(' · ');
-function stash(l){let lost=0;const a=Object.assign({},l.m||{});a.ore=(a.ore||0)+(l.ore||0);for(const k in a){const n=Math.min(a[k],Math.max(0,cap()-have(k)));give(k,n);lost+=a[k]-n}return lost}
+/* ce nu mai încape în Depozit se vinde automat (minereul 1 aur, materialele 3, materialele de raritate 5 × treapta), nu se pierde */
+const SELLP=k=>k==='ore'?1:AFM.includes(k)?3:5*Math.max(1,RM.indexOf(String(k).slice(0,3)));
+function stash(l){let lost=0,sold=0;const a=Object.assign({},l.m||{});a.ore=(a.ore||0)+(l.ore||0);for(const k in a){const n=Math.min(a[k],Math.max(0,cap()-have(k)));give(k,n);const x=a[k]-n;if(x>0){lost+=x;sold+=x*SELLP(k)}}if(sold){S.gold+=sold;l._sold=(l._sold||0)+sold}return lost}
 const SH=[['w','Armurierul'],['a','Fierarul de armuri'],['h','Coifarul'],['b','Cizmarul'],['j','Bijutierul']],ip=it=>Math.round((25+it.l*14)*(1+it.r*1.1));
 function shop(){const s=S.shop||(S.shop={t:0,w:[],a:[],j:[]});if(Date.now()>s.t||!s.w.length||!s.h){for(const [k] of SH){s[k]=[];for(let i=0;i<3;i++)s[k].push(mkItem(k,Math.max(1,S.lvl+RI(-1,1)),P([0,1,1,1,2,2,3])))}s.t=Date.now()+12e5}return s}
 function buy(k,i){const s=shop(),it=s[k][i],c=ip(it);if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;s[k].splice(i,1);S.inv.push(it);S.msg='Ai cumpărat '+it.name+'.'}go()}

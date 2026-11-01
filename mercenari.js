@@ -140,6 +140,26 @@ function stGift() {
   }
   setTimeout(() => mdl(`<h3>Cadoul de început</h3><p>Pentru drumul de acum înainte primești <b>Spada mare de gheață</b>, o armă legendară care poate îngheța dușmanii, și un pachet de echipament Epic. Le-am pus deja pe cei care au nevoie de ele.</p><ul style="text-align:left;display:inline-block;margin:0 0 12px">${got.map(n => `<li>${tEsc(n)}</li>`).join('')}</ul><br><button class="p" onclick="lgClose();S.tab='e';go()">Vezi echipa</button>`, 'gift'), 300);
 }
+/* schimbarea echipei: un mercenar din rezervă intră în locul unuia din echipă (eroul rămâne mereu) */
+function swapTeam(ri, ti) {
+  ri = +ri; ti = +ti; const a = S.rs[ri], b = S.fs[ti];
+  if (S.d) { S.msg = 'Nu poți schimba echipa în timpul coborârii.'; return go(); }
+  if (!a || !b || b.h) return go();
+  if (typeof mxBusy === 'function' && mxBusy(a)) { S.msg = a.n + ' e plecat în expediție.'; return go(); }
+  S.fs[ti] = a; S.rs[ri] = b; S.msg = `${a.n} intră în echipă în locul lui ${b.n}.`; go();
+}
+/* controlul din Echipă și din Han, pentru luptătorul f */
+function teamCtl(f) {
+  if (!f || f.h || S.d) return '';
+  const ti = S.fs.indexOf(f), ri = S.rs.indexOf(f), opts = (arr, fn) => arr.map(fn).join('');
+  if (ti >= 0) {
+    const av = S.rs.map((x, i) => [x, i]).filter(([x]) => !x.h && !(typeof mxBusy === 'function' && mxBusy(x)));
+    return av.length ? `<select class="tm-swap" onchange="if(this.value!=='')swapTeam(this.value,${ti})" aria-label="Înlocuiește pe ${tEsc(f.n)}"><option value="">Înlocuiește cu…</option>${opts(av, ([x, i]) => `<option value="${i}">${tEsc(x.n)} · ${x.c}</option>`)}</select>` : '';
+  }
+  if (ri < 0 || (typeof mxBusy === 'function' && mxBusy(f))) return '';
+  if (S.fs.length < TMAX()) return `<button class="p" onclick="toParty(${ri})">Pune în echipă</button>`;
+  return `<select class="tm-swap" onchange="if(this.value!=='')swapTeam(${ri},this.value)" aria-label="Pune pe ${tEsc(f.n)} în echipă"><option value="">Pune în locul lui…</option>${opts(S.fs.map((x, i) => [x, i]).filter(([x]) => !x.h), ([x, i]) => `<option value="${i}">${tEsc(x.n)} · ${x.c}</option>`)}</select>`;
+}
 function mrHan() {
   const fm = f => Math.floor(f.fm || 0), nx = f => (f.rk || 0) < 4 ? SP.RKF[(f.rk || 0) + 1] : null;
   const cards = MR.order.map(([c, st]) => {
@@ -149,7 +169,7 @@ function mrHan() {
     const spn = f.sp && typeof spDef0 === 'function' && spDef0(f) ? spDef0(f).n : (f.rk ? 'alege specializarea în Echipă' : 'specializare de la Veteran');
     return `<div class="mr-hc"><div class="mr-hp">${av(f, 56)}</div><div class="mr-hb"><b>${tEsc(f.n)}</b> <span class="mute">${f.c} · ${RK[f.rk || 0]}</span><div class="mute">${spn}</div>`
       + `<div class="mr-fm"><i style="width:${pc}%"></i></div><div class="mute">${f.t && f.t[0] ? `<b>${f.t[0].n}</b> (${f.t[0].d}) · ` : ''}${n ? `faimă ${fm(f)}/${n} până la ${RK[(f.rk || 0) + 1]}` : 'rang maxim: Legendă'} · ${Math.round(mhp(f))} viață · ${Math.round(atkOf(f))} atac</div>${typeof mxRow === 'function' ? mxRow(f) : ''}</div>`
-      + `<div class="mr-hx">${i >= 0 ? (f.h ? '' : `<button onclick="toBench(${i})">La rezervă</button>`) : (mxBusy(f) ? '<button disabled>Plecat</button>' : `<button class="p" onclick="toParty(${j})"${S.fs.length >= TMAX() ? ` disabled title="Echipa are deja ${TMAX()} luptători"` : ''}>În echipă</button>`)}</div></div>`;
+      + `<div class="mr-hx">${i >= 0 ? (f.h ? '' : `<button onclick="toBench(${i})">La rezervă</button>`) : (mxBusy(f) ? '<button disabled>Plecat</button>' : teamCtl(f))}</div></div>`;
   }).join('');
   const bb = BL().b || 0;
   return `<section><h2>Hanul: mercenarii tăi</h2><div class="mute">Cinci tovarăși, câte unul din fiecare clasă, care rămân cu tine pentru totdeauna. Trei intră în luptă alături de erou; ceilalți așteaptă în rezervă. Puterea lor vine din erou: un Recrut are cam 85% din forța de bază a eroului în specialitatea lui, o Legendă cam 98%, dar nimeni nu trece de 95% din viața, atacul sau apărarea eroului. Faima: +1 la fiecare luptă câștigată, +3 la căpitani și raiduri${bb ? `, plus ${bb * 5}% de la Han` : ''}. Cei din rezervă pot pleca în <b>expediții</b> de 1, 4 sau 8 ore, din care se întorc cu aur, materiale și faimă.</div><div class="mr-list">${cards}</div></section>` + mrBld('b');
@@ -247,7 +267,8 @@ function dcView() {
 (function () {
   if (typeof document === 'undefined' || !document.head) return;
   const st = document.createElement('style');
-  st.textContent = `.mx-r{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;font-size:13.5px}.mx-r button{padding:3px 10px;font-size:13px}
+  st.textContent = `.tm-swap{max-width:100%;padding:5px 8px;font-size:13.5px}
+.mx-r{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;font-size:13.5px}.mx-r button{padding:3px 10px;font-size:13px}
 .dc-t{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin:10px 0}.dc-d{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border:1px solid var(--line);border-radius:8px;text-align:center;background:#0e1214}
 .dc-d b{font:700 12px Cinzel,serif;color:var(--mute)}.dc-d span{font-size:20px}.dc-d small{font-size:11px;color:var(--mute);line-height:1.2}
 .dc-d.ok{opacity:.5}.dc-d.ok b::after{content:' ✓';color:#7fd88c}.dc-d.now{border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold2),0 0 14px #f0d27a44}.dc-d.now b{color:var(--gold2)}
