@@ -186,32 +186,32 @@ main{padding:8px 24px;max-width:940px}
 </style>
 <link rel="stylesheet" href="tema.css?v=2026.10.30-3">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="world-data.js?v=2026.11.02-3"></script>
-<script src="tron-logic.js?v=2026.11.02-3"></script>
-<script src="cladiri-art.js?v=2026.11.02-3"></script>
-<script src="teritorii.js?v=2026.11.02-3"></script>
-<script src="inventar.js?v=2026.11.02-3"></script>
-<script src="panou.js?v=2026.11.02-3"></script>
-<script src="ghid.js?v=2026.11.02-3"></script>
-<script src="mercenari.js?v=2026.11.02-3"></script>
-<script src="specializari.js?v=2026.11.02-3"></script>
-<script src="tron.js?v=2026.11.02-3"></script>
-<script src="lume-art.js?v=2026.11.02-3"></script>
-<script src="sat.js?v=2026.11.02-3"></script>
-<script src="lupta-vs.js?v=2026.11.02-3"></script>
-<script src="temnite.js?v=2026.11.02-3"></script>
-<script src="trepte.js?v=2026.11.02-3"></script>
-<script src="turn.js?v=2026.11.02-3"></script>
-<script src="harta.js?v=2026.11.02-3"></script>
-<script src="lume.js?v=2026.11.02-3"></script>
-<script src="lume-pictat.js?v=2026.11.02-3"></script>
-<script src="tinut.js?v=2026.11.02-3"></script>
-<script src="tema.js?v=2026.11.02-3"></script>
-<script src="echipa.js?v=2026.11.02-3"></script>
-<script src="erou.js?v=2026.11.02-3"></script>
-<script src="cont.js?v=2026.11.02-3"></script>
-<script src="istoric.js?v=2026.11.02-3"></script>
-<script src="portofel.js?v=2026.11.02-3"></script>
+<script src="world-data.js?v=2026.11.02-5"></script>
+<script src="tron-logic.js?v=2026.11.02-5"></script>
+<script src="cladiri-art.js?v=2026.11.02-5"></script>
+<script src="teritorii.js?v=2026.11.02-5"></script>
+<script src="inventar.js?v=2026.11.02-5"></script>
+<script src="panou.js?v=2026.11.02-5"></script>
+<script src="ghid.js?v=2026.11.02-5"></script>
+<script src="mercenari.js?v=2026.11.02-5"></script>
+<script src="specializari.js?v=2026.11.02-5"></script>
+<script src="tron.js?v=2026.11.02-5"></script>
+<script src="lume-art.js?v=2026.11.02-5"></script>
+<script src="sat.js?v=2026.11.02-5"></script>
+<script src="lupta-vs.js?v=2026.11.02-5"></script>
+<script src="temnite.js?v=2026.11.02-5"></script>
+<script src="trepte.js?v=2026.11.02-5"></script>
+<script src="turn.js?v=2026.11.02-5"></script>
+<script src="harta.js?v=2026.11.02-5"></script>
+<script src="lume.js?v=2026.11.02-5"></script>
+<script src="lume-pictat.js?v=2026.11.02-5"></script>
+<script src="tinut.js?v=2026.11.02-5"></script>
+<script src="tema.js?v=2026.11.02-5"></script>
+<script src="echipa.js?v=2026.11.02-5"></script>
+<script src="erou.js?v=2026.11.02-5"></script>
+<script src="cont.js?v=2026.11.02-5"></script>
+<script src="istoric.js?v=2026.11.02-5"></script>
+<script src="portofel.js?v=2026.11.02-5"></script>
 </head>
 <body>
 <header><h1><img class="hd-tron" src="imagini/logo-tron.webp" alt="" width="34" height="40"><span class="hd-nm">Silver Throne</span></h1><div class="hs" id="hs"></div></header>
@@ -328,7 +328,8 @@ const dCostAt=i=>{const g=DG[i||0],d=dMk(i);return g.ev?0:d.room>=d.rooms-1?2:1}
 function startD(i){const g=DG[i||0];if(S.lvl<g.lv){S.msg='Cerință: nivel '+g.lv+'.';return go()}if(S.d){S.msg='Termină întâi lupta în care ești.';return go()}if(!S.fs.some(f=>f.hp>0)){S.msg='Toți luptătorii sunt căzuți. Du-te la infirmerie.';return go()}
  const d=dMk(i),boss=d.room>=d.rooms-1,c=dCostAt(i);
  if(g.ev){if(d.room===0){const e=evs();if(e.k<=0){S.msg='Nu mai ai chei pentru evenimentul acestei săptămâni.';return go()}e.k--}}else if(S.pts<c){S.msg=`${boss?'Căpitanul costă':'Fiecare monstru costă'} ${c} ${c>1?'puncte':'punct'}. Se regenerează câte unul la 6 minute.`;return go()}else spend(c);
- S.d=d;S.fl=null;S.msg='';if(d.room===0)cn('d');S.tab='c';startF(boss);if(S.auto!==false){autoRun();return}go()}
+ S.d=d;S.fl=null;S.msg='';if(d.room===0)cn('d');S.tab='c';startF(boss);go();   /* cardul VS apare o clipă înainte ca lupta să se rezolve */
+ if(S.auto!==false)setTimeout(()=>{if(S.d===d&&S.d.f)autoRun()},650)}
 /* după fiecare monstru învins: prada se încasează, lista avansează (după căpitan o ia de la capăt) */
 function dOneDone(d,b){const band=typeof trBand==='function'?trBand():'',m=S.msg+band;(S.dp=S.dp||{})[d.dk]=b?0:d.room+1;leave();S.msg=(b?(d.cm?d.cm+' ':'')+`Căpitanul a căzut! ${DG[d.di].n} e terminată; lista o ia de la capăt. `:`${m} `)+S.msg;go()}
 /* o singură cameră înainte (luptă, comoară sau foc de tabără); ultima e căpitanul */
