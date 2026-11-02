@@ -26,6 +26,8 @@ const tmnMat = g => (g.rm >= 3 ? 'cristale, esențe și calități rare' : g.rm 
 /* ------------------------------------------------------------------ COBORÂREA */
 function vDung() {
   const list = DG.map((g, i) => [g, i]).filter(([g]) => !g.ev).sort((a, b) => a[0].lv - b[0].lv);
+  const openEntry = list.find(([g, i]) => S.lvl >= g.lv && typeof dOpen === 'function' && dOpen(i));
+  if (openEntry) return typeof trPage === 'function' ? trPage(openEntry[1]) : '';   /* pagina dedicată, odată intrat */
   const open = list.filter(([g]) => S.lvl >= g.lv), rec = open.length ? open[open.length - 1][1] : -1;
   const card = ([g, i]) => {
     const lock = S.lvl < g.lv, b = tmnBoss(g.bn), img = tmnImg(g.n);
@@ -34,7 +36,7 @@ function vDung() {
       + (i === rec ? '<span class="dg-tag">Recomandat</span>' : '') + (lock ? `<span class="dg-lock">🔒 nivel ${g.lv}</span>` : '')
       + (b ? `<span class="dg-boss" style="--aura:${b[1]}" title="Căpitan: ${g.bn}"><img src="imagini/monstri/${b[0]}.jpg" alt="" loading="lazy" onerror="this.parentNode.remove()"></span>` : '') + '</div>'
       + `<div class="dg-b"><div class="dg-h"><b>${g.n}</b>${tmnStars(g.k)}</div><div class="mute dg-i">nivel ${g.lv} · ${g.rooms - 1} monștri + căpitan · căpitan: ${g.bn}</div><div class="mute dg-i">Pradă: ${tmnMat(g)}</div>`
-      + `${!lock && typeof trChips === 'function' ? trChips(i) : ''}${!lock ? (typeof dOpen === 'function' && dOpen(i) ? trListBtns(i) : `<button class="p dg-enter" onclick="dToggle(${i})">Intră</button>`) : ''}</div></div>`;
+      + `${!lock ? `<button class="p dg-enter" onclick="dToggle(${i})">Intră</button>` : ''}</div></div>`;
   };
   const shown = list.filter(([g]) => S.lvl + 10 >= g.lv);   /* ca înainte: temnițele mult peste nivel rămân ascunse */
   return tmnEvent() + `<section class="dg-sec"><h2>Temnițe</h2><div class="dg-grid">${shown.map(card).join('')}</div></section>`;

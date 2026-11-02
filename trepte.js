@@ -172,6 +172,45 @@ function trListBtns(i) {
 }
 /* Cripta Furtunii (eveniment): fără listă de nume, un singur buton */
 function trEvBtn(i) { const g = DG[i], c = dCostAt(i); return `<button class="tr-b now" onclick="startD(${i})">Intră · ${c ? c + ' p' : 'gratuit, cu o cheie'}</button><button class="tr-close" onclick="dToggle(${i})">‹ Închide</button>`; }
+/* statisticile aproximative ale unui monstru de pe poziția idx (0 = primul), pentru previzualizare; aceeași formulă ca în luptă */
+function monStatsAt(i, idx, boss) {
+  const d = dMk(i), k = d.k || 1;
+  const hp = Math.round((12 + 5 * S.lvl + idx * 3) * (boss ? 2.4 : 1) * k * ENK);
+  const atk = Math.round((3 + S.lvl * 1.1 + idx * .5) * (boss ? 1.4 : 1) * k * ENK);
+  return { hp, atk };
+}
+/* echipament recomandat, după dificultatea temniței (aproximativ, nu o garanție) */
+function recGear(k) {
+  if (k < 1.8) return 'orice, chiar și Comun';
+  if (k < 3.5) return 'Magic sau Rar';
+  if (k < 5.5) return 'Rar; ideal Epic pentru căpitan';
+  return 'Epic; la Coșmar, Epic îmbunătățit la Fierărie';
+}
+/* fila aleasă pentru previzualizare: urmărește progresul (sare înainte după fiecare victorie), dar poți naviga liber */
+function trSel(i) { const d = dMk(i), k = d.dk; const cur = (S.dsel = S.dsel || {})[k]; if (cur == null || cur < d.room) { S.dsel[k] = d.room; return d.room; } return Math.min(cur, d.rooms - 1); }
+function trSelSet(i, k) { const d = dMk(i); (S.dsel = S.dsel || {})[d.dk] = Math.min(k, d.rooms - 1); go(); }
+/* pagina dedicată a unei temnițe, odată intrat: titlu, înapoi, banda cu toți monștrii, panoul de detalii pentru fila aleasă */
+function trPage(i) {
+  const g = DG[i], n = trNames(i); if (!n) return '';
+  const d = dMk(i), p = d.room, lastIdx = n.length - 1, bossNow = p >= lastIdx, D = trDef(g.n), B = tmnBoss(g.bn);
+  const sel = trSel(i), selBoss = sel === lastIdx, selName = n[sel];
+  const tabIco = (x, boss) => { const m = boss && B ? `imagini/monstri/${B[0]}.jpg` : monImg(x); return m ? `<img src="${m}" alt="" loading="lazy" onerror="this.remove()">` : ''; };
+  const tabs = n.map((x, k) => `<button class="tr-tab ${k < p ? 'done' : k === p ? 'now' : 'locked'}${k === sel ? ' sel' : ''}" onclick="trSelSet(${i},${k})">${tabIco(x, k === lastIdx)}<span>${k < p ? '✓ ' : k === lastIdx ? '♛ ' : ''}${x}</span></button>`).join('');
+  const stats = monStatsAt(i, sel, selBoss);
+  let det = `<div class="tr-det"><div class="tr-det-h">${tabIco(selName, selBoss) || ''}<b>${selName}</b>${selBoss ? ' <small class="mute">căpitan</small>' : ''}</div>`
+    + `<div class="tr-det-row"><b>Statistici</b><span>${stats.hp} viață · ${stats.atk} atac</span></div>`;
+  if (selBoss && D) det += `<div class="tr-det-row"><b>Abilitate</b><span>${TR_A[D.a]}</span></div>${trCtrTxt(D.a)}`;
+  det += sel === p ? `<div class="tr-det-row"><b>Șanse de câștig</b>${trOddsTag(dOddsAt(i))}</div>`
+    : sel < p ? `<div class="tr-det-row mute">L-ai trecut deja.</div>`
+    : `<div class="tr-det-row mute">Șansele apar când ajungi aici.</div>`;
+  det += `<div class="tr-det-row"><b>Echipament recomandat</b><span>${recGear(d.k)}</span></div>`;
+  if (sel === p) { const c = dCostAt(i); det += `<button class="p tr-fight${selBoss ? ' boss' : ''}" onclick="startD(${i})">${selBoss ? 'Înfruntă căpitanul' : 'Luptă'} · ${c ? c + ' p' : 'gratuit'}</button>`; }
+  det += '</div>';
+  return `<section class="dg-page"><div class="dg-page-top"><button class="tr-back" onclick="dToggle(${i})">‹ Înapoi</button><h2>${g.n}</h2>${typeof trChips === 'function' ? trChips(i) : ''}</div>`
+    + `<div class="tr-tabs">${tabs}</div>${det}`
+    + (!bossNow ? `<button class="tr-auto" onclick="trAutoL(${i})" title="Ia monștrii pe rând cât ai puncte și șanse de cel puțin 50%">Toți până la căpitan</button>` : '')
+    + '</section>';
+}
 const trOddsTag = v => v == null ? '' : `<span class="tr-odds ${v >= 75 ? 'ok' : v >= 45 ? 'mid' : 'bad'}">Șanse: ${v}%</span>`;
 (function () {
   if (typeof document === 'undefined' || !document.head) return;
@@ -189,6 +228,25 @@ const trOddsTag = v => v == null ? '' : `<span class="tr-odds ${v >= 75 ? 'ok' :
 .tr-b.now{color:#fff;border-color:var(--gold2,#f0d27a);background:linear-gradient(180deg,#3a2f10,#1c1608);font-weight:700;cursor:pointer}
 .tr-b.now.boss{border-color:#c0504a;background:linear-gradient(180deg,#3a1612,#1c0a08)}
 .tr-auto,.tr-close{padding:5px 10px;font-size:13px;margin-top:2px}
-.tr-close{opacity:.75}`;
+.tr-close{opacity:.75}
+.dg-page{background:#12161a;border:1px solid var(--line);border-radius:12px;padding:14px 16px 18px;margin-bottom:14px}
+.dg-page-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.dg-page-top h2{margin:0;font-size:19px;flex:1;min-width:120px}
+.tr-back{padding:5px 12px;font-size:13px}
+.tr-tabs{display:flex;gap:7px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px}
+.tr-tab{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;width:84px;padding:8px 6px;border-radius:10px;border:1px solid var(--line);background:#0e1214;color:var(--mute);font-size:11.5px;text-align:center}
+.tr-tab img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+.tr-tab span{line-height:1.2}
+.tr-tab.done{color:#9fe3ad;border-color:#2f5d3a;opacity:.8}
+.tr-tab.locked{opacity:.55}
+.tr-tab.now{color:var(--gold2,#f0d27a);border-color:var(--gold2,#f0d27a)}
+.tr-tab.sel{box-shadow:0 0 0 2px var(--gold2,#f0d27a)}
+.tr-det{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:#0e1214;margin-bottom:10px}
+.tr-det-h{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:16px}
+.tr-det-h img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+.tr-det-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:5px 0;border-top:1px dashed var(--line);font-size:13.5px}
+.tr-det-row:first-of-type{border-top:none}
+.tr-fight{width:100%;margin-top:8px}
+@media (max-width:600px){.tr-tab{width:72px}}`;
   document.head.appendChild(st);
 })();
