@@ -26,6 +26,19 @@ const TR_A = {
   invuln: 'la fiecare 4 ture devine de neatins o tură', burn: 'arde ținta la fiecare lovitură și își întărește armura în timp',
   rebirth: 'renaște o dată, cu o treime din viață', storm: 'la fiecare 2 ture trimite 3 fulgere asupra echipei'
 };
+const MON_SLUG = {
+  'Arbaletier': 'arbaletier', 'Broască otrăvită': 'broasca-otravita', 'Campion cenușiu': 'campion-cenusiu', 'Cavaler al tronului': 'cavaler-al-tronului',
+  'Cavaler înecat': 'cavaler-inecat', 'Corb al tunetului': 'corb-al-tunetului', 'Crab de turn': 'crab-de-turn', 'Curtean de cenușă': 'curtean-de-cenusa',
+  'Demon mărunt': 'demon-marunt', 'Dezertor': 'dezertor', 'Duh al furtunii': 'duh-al-furtunii', 'Duh de jar': 'duh-de-jar', 'Elementar de vânt': 'elementar-de-vant',
+  'Fierar blestemat': 'fierar-blestemat', 'Gardă regală căzută': 'garda-regala-cazuta', 'Ghoul de mină': 'ghoul-de-mina', 'Golem de zgură': 'golem-de-zgura',
+  'Lipitoare uriașă': 'lipitoare-uriasa', 'Lup de peșteră': 'lup-de-pestera', 'Lup fioros': 'lup-fioros', 'Lup tânăr': 'lup-tanar', 'Mag al regelui': 'mag-al-regelui',
+  'Miner blestemat': 'miner-blestemat', 'Ochi din adânc': 'ochi-din-adanc', 'Paznic al criptei': 'paznic-al-criptei', 'Paznic de fier': 'paznic-de-fier',
+  'Paznic de piatră': 'paznic-de-piatra', 'Pază coruptă': 'paza-corupta', 'Salamandră': 'salamandra', 'Schelet': 'schelet', 'Sergent renegat': 'sergent-renegat',
+  'Sirenă palidă': 'sirena-palida', 'Strajă de cenușă': 'straja-de-cenusa', 'Strigoi': 'strigoi', 'Troll de mlaștină': 'troll-de-mlastina', 'Umbră': 'umbra',
+  'Vrăjitoare de mlaștină': 'vrajitoare-de-mlastina', 'Vânător din abis': 'vanator-din-abis', 'Înecat': 'inecat', 'Șobolan de mină': 'sobolan-de-mina'
+};
+/* portretul unui monstru obișnuit (temniță sau Turn); fără imagine încă → fără portret, doar textul */
+const monImg = n => MON_SLUG[n] ? `imagini/monstri/${MON_SLUG[n]}.jpg` : null;
 const trDef = n => TR_D[n] || null;
 /* contracarări: fiecare abilitate e slăbită dacă în echipă e o anumită clasă (în viață); un ajutor, nu o obligație */
 const TR_C = { call: 'Mag', howl: 'Paznic', drain: 'Războinic', shield: 'Arcaș', wave: 'Paznic', poison: 'Vraci', invuln: 'Mag', burn: 'Războinic', rebirth: 'Vraci', storm: 'Arcaș' };
@@ -128,7 +141,7 @@ function dOddsAt(i, N) {
 }
 /* „Toți până la căpitan”: ia monștrii pe rând, cât timp ai puncte și șansele sunt de cel puțin 50%; se oprește la căpitan */
 function trAutoL(i) {
-  let n = 0, why = ''; const R = window.go; window.go = () => {};
+  let n = 0, why = ''; const R = window.go; window.go = () => {}; (S.deo = S.deo || {})[i] = true;
   try {
     for (; n < 12; n++) {
       if (S.d) break; const d = dMk(i); if (d.room >= d.rooms - 1) { why = 'Ai ajuns la căpitan: înfruntă-l când ești gata.'; break; }
@@ -141,6 +154,24 @@ function trAutoL(i) {
   } finally { window.go = R; }
   S.msg = (S.msg ? S.msg + ' ' : '') + (why || ''); go();
 }
+/* lista interactivă, odată ce ai apăsat „Intră”: un buton pe monstru, deblocat doar după ce l-ai trecut pe cel dinaintea lui */
+function trListBtns(i) {
+  const g = DG[i], n = trNames(i); if (!n) return trEvBtn(i);
+  const d = dMk(i), p = d.room, c = dCostAt(i), lastIdx = n.length - 1;
+  const ic = x => { const m = monImg(x); return m ? `<img class="tr-bi" src="${m}" alt="" loading="lazy" onerror="this.remove()">` : ''; };
+  const items = n.map((x, k) => {
+    if (k < p) return `<button class="tr-b done" disabled>${ic(x)}✓ ${x}</button>`;
+    if (k === p) { const boss = k === lastIdx, od = dOddsAt(i); return `<button class="tr-b now${boss ? ' boss' : ''}" onclick="startD(${i})">${ic(x)}${boss ? 'Înfruntă căpitanul' : 'Luptă'}: ${x} · ${c ? c + ' p' : 'gratuit'}</button>${trOddsTag(od)}`; }
+    return `<button class="tr-b locked" disabled>${ic(x)}🔒 ${x}</button>`;
+  });
+  const D = trDef(g.n), boss = p >= lastIdx;
+  return `<div class="tr-blist">${items.join('')}</div>`
+    + (boss && D ? `<div class="tr-bx"><span class="tr-ab">Abilitate: ${TR_A[D.a]}</span>${trCtrTxt(D.a)}</div>` : '')
+    + (!boss ? `<button class="tr-auto" onclick="trAutoL(${i})" title="Ia monștrii pe rând cât ai puncte și șanse de cel puțin 50%">Toți până la căpitan</button>` : '')
+    + `<button class="tr-close" onclick="dToggle(${i})">‹ Închide</button>`;
+}
+/* Cripta Furtunii (eveniment): fără listă de nume, un singur buton */
+function trEvBtn(i) { const g = DG[i], c = dCostAt(i); return `<button class="tr-b now" onclick="startD(${i})">Intră · ${c ? c + ' p' : 'gratuit, cu o cheie'}</button><button class="tr-close" onclick="dToggle(${i})">‹ Închide</button>`; }
 const trOddsTag = v => v == null ? '' : `<span class="tr-odds ${v >= 75 ? 'ok' : v >= 45 ? 'mid' : 'bad'}">Șanse: ${v}%</span>`;
 (function () {
   if (typeof document === 'undefined' || !document.head) return;
@@ -149,6 +180,15 @@ const trOddsTag = v => v == null ? '' : `<span class="tr-odds ${v >= 75 ? 'ok' :
 .tr-odds{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:9px;font-size:12.5px;font-weight:700}.tr-odds.ok{background:#1f4a2a;color:#9fe3ad}.tr-odds.mid{background:#4a3c14;color:#f0d27a}.tr-odds.bad{background:#4a1f1f;color:#f1a29b}
 .tr-ab{display:block;margin-top:2px;color:#f1a29b;font-size:13px}
 .tr-ls{list-style:none;margin:6px 0;padding:0;display:flex;flex-wrap:wrap;gap:4px}.tr-ls li{font-size:12px;padding:2px 8px;border-radius:9px;border:1px solid var(--line);color:var(--mute)}.tr-ls li.ok{color:#9fe3ad;border-color:#2f5d3a}.tr-ls li.now{color:#f0d27a;border-color:#f0d27a;font-weight:700}.tr-ls li.boss{border-style:dashed}.tr-ct{display:block;font-size:12.5px;color:var(--mute)}.tr-ct.on{color:#9fe3ad}.tr-bx{margin:0 0 6px}.tr-bx .tr-ab{font-size:12.5px}
-.tr-nx{display:flex;flex-wrap:wrap;gap:6px;align-items:center}`;
+.tr-nx{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.dg-enter{width:100%;margin-top:4px}
+.tr-blist{display:flex;flex-direction:column;gap:5px;margin:6px 0}
+.tr-b{width:100%;display:flex;align-items:center;gap:8px;text-align:left;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:#0e1214;color:var(--mute);font-size:13.5px}.tr-bi{width:28px;height:28px;border-radius:50%;object-fit:cover;flex:none;box-shadow:0 0 0 1px #0006}
+.tr-b.done{color:#9fe3ad;border-color:#2f5d3a;opacity:.75}
+.tr-b.locked{opacity:.5;cursor:not-allowed}
+.tr-b.now{color:#fff;border-color:var(--gold2,#f0d27a);background:linear-gradient(180deg,#3a2f10,#1c1608);font-weight:700;cursor:pointer}
+.tr-b.now.boss{border-color:#c0504a;background:linear-gradient(180deg,#3a1612,#1c0a08)}
+.tr-auto,.tr-close{padding:5px 10px;font-size:13px;margin-top:2px}
+.tr-close{opacity:.75}`;
   document.head.appendChild(st);
 })();

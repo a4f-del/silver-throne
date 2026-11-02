@@ -34,7 +34,7 @@ function vDung() {
       + (i === rec ? '<span class="dg-tag">Recomandat</span>' : '') + (lock ? `<span class="dg-lock">🔒 nivel ${g.lv}</span>` : '')
       + (b ? `<span class="dg-boss" style="--aura:${b[1]}" title="Căpitan: ${g.bn}"><img src="imagini/monstri/${b[0]}.jpg" alt="" loading="lazy" onerror="this.parentNode.remove()"></span>` : '') + '</div>'
       + `<div class="dg-b"><div class="dg-h"><b>${g.n}</b>${tmnStars(g.k)}</div><div class="mute dg-i">nivel ${g.lv} · ${g.rooms - 1} monștri + căpitan · căpitan: ${g.bn}</div><div class="mute dg-i">Pradă: ${tmnMat(g)}</div>`
-      + `${!lock && typeof trChips === 'function' ? trChips(i) : ''}${!lock && typeof trList === 'function' ? trList(i) : ''}<div class="tr-nx"><button class="${lock ? '' : 'p'}" onclick="startD(${i})"${lock ? ' disabled' : ''}>${lock ? 'Blocat' : typeof trNextLbl === 'function' ? trNextLbl(i) : 'Intră'}</button>${!lock && typeof dOddsAt === 'function' ? trOddsTag(dOddsAt(i)) : ''}${!lock && typeof trAutoL === 'function' && dMk(i).room < DG[i].rooms - 1 ? `<button onclick="trAutoL(${i})" title="Ia monștrii pe rând cât ai puncte și șanse de cel puțin 50%">Toți până la căpitan</button>` : ''}</div></div></div>`;
+      + `${!lock && typeof trChips === 'function' ? trChips(i) : ''}${!lock ? (typeof dOpen === 'function' && dOpen(i) ? trListBtns(i) : `<button class="p dg-enter" onclick="dToggle(${i})">Intră</button>`) : ''}</div></div>`;
   };
   const shown = list.filter(([g]) => S.lvl + 10 >= g.lv);   /* ca înainte: temnițele mult peste nivel rămân ascunse */
   return tmnEvent() + `<section class="dg-sec"><h2>Temnițe</h2><div class="dg-grid">${shown.map(card).join('')}</div></section>`;
@@ -53,7 +53,8 @@ function tmnEvent() {
 function enCard(e, i, t) {
   const st = `${e.bl ? ' · sângerează' : ''}${e.st ? ' · amețit' : ''}${e.bu ? ' · arde' : ''}${e.po ? ' · otrăvit' : ''}`;
   const b = e.b && tmnBoss(e.n);
-  if (!b) return `<button class="en${t ? ' t' : ''}${e.c ? ' en-c' : ''}" onclick="tgt(${i})">${e.c && typeof av === 'function' ? `<span class="en-av">${av({ n: e.n, c: e.c, ic: e.ic }, 34)}</span>` : ''}${e.n}${e.c ? ` <small class="mute">${e.c === 'Campion' ? 'erou' : e.c}</small>` : ''}${st}${bar(e.hp, e.mh, 'e')}<span class="mute">${e.hp}/${e.mh} viață</span></button>`;
+  const mimg = !e.c && typeof monImg === 'function' ? monImg(e.n) : null;
+  if (!b) return `<button class="en${t ? ' t' : ''}${e.c || mimg ? ' en-c' : ''}" onclick="tgt(${i})">${e.c && typeof av === 'function' ? `<span class="en-av">${av({ n: e.n, c: e.c, ic: e.ic }, 34)}</span>` : mimg ? `<span class="en-av"><img src="${mimg}" alt="" loading="lazy" onerror="const r=this.closest('.en');this.parentNode.remove();if(r)r.classList.remove('en-c')"></span>` : ''}${e.n}${e.c ? ` <small class="mute">${e.c === 'Campion' ? 'erou' : e.c}</small>` : ''}${st}${bar(e.hp, e.mh, 'e')}<span class="mute">${e.hp}/${e.mh} viață</span></button>`;
   const hit = e._ph != null && e.hp < e._ph, low = e.hp / e.mh < 0.3; e._ph = e.hp;
   return `<button class="en en-boss${t ? ' t' : ''}${hit ? ' hit' : ''}${low ? ' low' : ''}" style="--aura:${low ? '#ff3b30' : b[1]}" onclick="tgt(${i})" aria-label="${e.n}, căpitanul temniței, ${e.hp} din ${e.mh} viață">`
     + `<span class="eb-por"><span class="eb-ring"></span><img src="imagini/monstri/${b[0]}.jpg" alt="" onerror="this.style.display='none'">${'<i class="eb-em"></i>'.repeat(6)}</span>`
@@ -92,7 +93,7 @@ function bossMini(n) { const b = tmnBoss(n); return b ? `<span class="eb-mini" s
 .dg-ev{padding:0!important;overflow:hidden;border-color:#5cc8ff66!important;box-shadow:0 0 0 1px #5cc8ff44,0 0 26px #5cc8ff22!important}
 .dg-ev .dg-img{aspect-ratio:21/7}
 .dg-ev .dg-b{padding:12px 16px 14px}.dg-ev .dg-h{padding-right:84px}
-.dg-free{color:#7fd88c}.en.en-c{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center}.en.en-c .en-av{grid-row:span 3}.en.en-c>.bar,.en.en-c>.mute,.en.en-c>i{grid-column:2}.dg-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.dg-tip{margin:2px 0 6px;font-size:13.5px}.dg-auto{border-top:1px dashed #ffffff1a;padding-top:8px}.dg-next span small{font-size:12.5px}
+.dg-free{color:#7fd88c}.en.en-c{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center}.en .en-av img{width:34px;height:34px;border-radius:50%;object-fit:cover;display:block;box-shadow:0 0 0 1px #0006}.en.en-c .en-av{grid-row:span 3}.en.en-c>.bar,.en.en-c>.mute,.en.en-c>i{grid-column:2}.dg-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.dg-tip{margin:2px 0 6px;font-size:13.5px}.dg-auto{border-top:1px dashed #ffffff1a;padding-top:8px}.dg-next span small{font-size:12.5px}
 .dg-keys{display:flex;align-items:center;gap:4px;font-size:13.5px}.dg-keys i{font-style:normal;filter:grayscale(1) opacity(.35)}.dg-keys i.on{filter:drop-shadow(0 0 4px #5cc8ff)}.dg-keys span{margin-left:6px}
 /* căpitanul în luptă */
 .en-boss{display:flex!important;align-items:center;gap:14px;padding:10px 14px!important;margin:6px 0 10px!important;border:1px solid var(--gold)!important;border-radius:12px!important;background:radial-gradient(ellipse at 15% 50%,color-mix(in srgb,var(--aura) 14%,transparent),transparent 60%),linear-gradient(180deg,#221a12,#120e0a)!important;box-shadow:0 0 0 1px #000,0 0 18px color-mix(in srgb,var(--aura) 30%,transparent)!important}

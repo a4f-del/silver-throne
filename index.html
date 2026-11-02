@@ -186,32 +186,32 @@ main{padding:8px 24px;max-width:940px}
 </style>
 <link rel="stylesheet" href="tema.css?v=2026.10.30-3">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="world-data.js?v=2026.11.01-16"></script>
-<script src="tron-logic.js?v=2026.11.01-16"></script>
-<script src="cladiri-art.js?v=2026.11.01-16"></script>
-<script src="teritorii.js?v=2026.11.01-16"></script>
-<script src="inventar.js?v=2026.11.01-16"></script>
-<script src="panou.js?v=2026.11.01-16"></script>
-<script src="ghid.js?v=2026.11.01-16"></script>
-<script src="mercenari.js?v=2026.11.01-16"></script>
-<script src="specializari.js?v=2026.11.01-16"></script>
-<script src="tron.js?v=2026.11.01-16"></script>
-<script src="lume-art.js?v=2026.11.01-16"></script>
-<script src="sat.js?v=2026.11.01-16"></script>
-<script src="lupta-vs.js?v=2026.11.01-16"></script>
-<script src="temnite.js?v=2026.11.01-16"></script>
-<script src="trepte.js?v=2026.11.01-16"></script>
-<script src="turn.js?v=2026.11.01-16"></script>
-<script src="harta.js?v=2026.11.01-16"></script>
-<script src="lume.js?v=2026.11.01-16"></script>
-<script src="lume-pictat.js?v=2026.11.01-16"></script>
-<script src="tinut.js?v=2026.11.01-16"></script>
-<script src="tema.js?v=2026.11.01-16"></script>
-<script src="echipa.js?v=2026.11.01-16"></script>
-<script src="erou.js?v=2026.11.01-16"></script>
-<script src="cont.js?v=2026.11.01-16"></script>
-<script src="istoric.js?v=2026.11.01-16"></script>
-<script src="portofel.js?v=2026.11.01-16"></script>
+<script src="world-data.js?v=2026.11.02-3"></script>
+<script src="tron-logic.js?v=2026.11.02-3"></script>
+<script src="cladiri-art.js?v=2026.11.02-3"></script>
+<script src="teritorii.js?v=2026.11.02-3"></script>
+<script src="inventar.js?v=2026.11.02-3"></script>
+<script src="panou.js?v=2026.11.02-3"></script>
+<script src="ghid.js?v=2026.11.02-3"></script>
+<script src="mercenari.js?v=2026.11.02-3"></script>
+<script src="specializari.js?v=2026.11.02-3"></script>
+<script src="tron.js?v=2026.11.02-3"></script>
+<script src="lume-art.js?v=2026.11.02-3"></script>
+<script src="sat.js?v=2026.11.02-3"></script>
+<script src="lupta-vs.js?v=2026.11.02-3"></script>
+<script src="temnite.js?v=2026.11.02-3"></script>
+<script src="trepte.js?v=2026.11.02-3"></script>
+<script src="turn.js?v=2026.11.02-3"></script>
+<script src="harta.js?v=2026.11.02-3"></script>
+<script src="lume.js?v=2026.11.02-3"></script>
+<script src="lume-pictat.js?v=2026.11.02-3"></script>
+<script src="tinut.js?v=2026.11.02-3"></script>
+<script src="tema.js?v=2026.11.02-3"></script>
+<script src="echipa.js?v=2026.11.02-3"></script>
+<script src="erou.js?v=2026.11.02-3"></script>
+<script src="cont.js?v=2026.11.02-3"></script>
+<script src="istoric.js?v=2026.11.02-3"></script>
+<script src="portofel.js?v=2026.11.02-3"></script>
 </head>
 <body>
 <header><h1><img class="hd-tron" src="imagini/logo-tron.webp" alt="" width="34" height="40"><span class="hd-nm">Silver Throne</span></h1><div class="hs" id="hs"></div></header>
@@ -321,6 +321,7 @@ function revive(i,k){if(S.d){S.msg='În temniță nu poți folosi Infirmeria: vi
 /* temnițele ca listă de monștri până la căpitan: fiecare monstru e o luptă separată, 1 punct (căpitanul 2), luați pe rând.
    Locul din listă se păstrează (S.dp, pe temniță și dificultate); după căpitan lista o ia de la capăt. */
 const dKey=(i,ti)=>i+'_'+ti,dPos=(i,ti)=>((S.dp||{})[dKey(i,ti)]||0);
+const dOpen=i=>!!(S.deo&&S.deo[i]),dToggle=i=>{(S.deo=S.deo||{})[i]=!S.deo[i];go()};
 function dMk(i){const g=DG[i||0],ti=g.ev||typeof trTier!=='function'?0:trTier(i),kk=(g.ev?1.4+S.lvl*.055:g.k)*[1,1.15,1.45][ti],pk=g.ev?kk:(g.pk||g.k),p=Math.min(dPos(i,ti),g.rooms-1);
  return{one:1,dk:dKey(i,ti),tier:ti,room:p,rooms:g.rooms,k:kk,rw:(1+(pk-1)*.6)*[1,1.25,1.5][ti],bn:g.bn,di:i||0,ev:g.ev?1:0,loot:{gold:0,ore:0,xp:0,m:{}},f:null,done:false,doors:[]}}
 const dCostAt=i=>{const g=DG[i||0],d=dMk(i);return g.ev?0:d.room>=d.rooms-1?2:1};
