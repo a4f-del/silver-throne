@@ -18,7 +18,8 @@ function bhTitle(d) {
   if (d.lume) return 'Atac: ' + (d.rn || d.bn);
   if (d.tron) return 'Tronul de Argint · ' + d.bn;
   if (d.raid != null) return (d.lbl || 'Jaf') + ': ' + (d.rn || d.bn || 'sat');
-  const g = typeof DG !== 'undefined' && DG[d.di || 0]; return g ? g.n : 'Temniță';
+  const g = typeof DG !== 'undefined' && DG[d.di || 0], nm = d.one && typeof trNames === 'function' && trNames(d.di || 0);
+  return g ? g.n + (nm ? ' · ' + nm[Math.min(d.room, nm.length - 1)] : '') : 'Temniță';
 }
 /* res: 'win' (ieși după căpitan), 'retreat' (ieși sau fugi înainte), 'lost' (echipa a căzut) */
 function bhAdd(d, res, gold) {
@@ -31,6 +32,14 @@ function bhAdd(d, res, gold) {
 }
 const bhAgo = t => { const s = Math.max(0, (Date.now() - t) / 1000); return s < 60 ? 'acum' : s < 3600 ? `acum ${Math.floor(s / 60)} min` : s < 86400 ? `acum ${Math.floor(s / 3600)} h` : `acum ${Math.floor(s / 86400)} ${Math.floor(s / 86400) === 1 ? 'zi' : 'zile'}`; };
 const bhItem = i => `<span class="bh-it ${i.lg ? 'lg' : 'q' + i.r}">${tEsc(i.n)}</span>`;
+/* panoul „Ultima luptă” din Coborâre: ultima luptă dintr-o temniță, din ultimele 15 minute */
+function bhLast() {
+  const b = (S.bh || [])[0]; if (!b || b.k !== 'd' || Date.now() - b.t > 15 * 60e3) return '';
+  const RES = { win: ['Victorie', 'win'], retreat: ['Retragere', 'ret'], lost: ['Înfrângere', 'lost'] }, [rt, rc] = RES[b.res] || RES.retreat;
+  const gain = [b.g ? `+${b.g} aur` : '', b.o ? `+${b.o} minereu` : '', b.m ? `${b.m} materiale` : '', b.x ? `+${b.x} exp.` : ''].filter(Boolean).join(' · ');
+  return `<section class="bh-last"><h2>Ultima luptă <span class="bh-res ${rc}">${rt}</span></h2><div class="mute">${tEsc(b.n)} · ${gain || 'fără pradă'}${b.it.length ? ` · obiecte: ${b.it.map(bhItem).join(', ')}` : ''}</div>`
+    + `<details${b.res === 'lost' ? ' open' : ''}><summary>Jurnalul luptei</summary><div class="bh-log">${b.log.map(l => `<div${l.startsWith('—') ? ' class="bh-sep"' : ''}>${tEsc(l)}</div>`).join('')}</div></details></section>`;
+}
 function bhOpen() {
   const list = S.bh || [], RES = { win: ['Victorie', 'win'], retreat: ['Retragere', 'ret'], lost: ['Înfrângere', 'lost'] };
   const rows = list.map(b => {
@@ -48,6 +57,7 @@ function bhOpen() {
 .bh-k{width:30px!important;height:30px!important;flex:none}.bh-m{flex:1;min-width:0;font-size:14px}.bh-m small{color:var(--mute);margin-left:6px}.bh-m br+small{margin-left:0}
 .bh-res{font-size:11.5px;padding:1px 7px;border-radius:9px;margin-left:4px}.bh-res.win{background:#1f4a2a;color:#9fe3ad}.bh-res.ret{background:#3a3220;color:#f0d27a}.bh-res.lost{background:#4a1f1f;color:#f1a29b}
 .bh-log{border-top:1px solid var(--line);padding:8px 12px;font-size:12.5px;line-height:1.45;color:#cfd3d6;max-height:260px;overflow:auto}.bh-sep{color:var(--gold2);font-weight:700;margin-top:6px}
+.bh-last details{margin-top:6px}.bh-last summary{cursor:pointer;color:var(--gold2);font-size:13.5px}.bh-last .bh-log{border:1px solid var(--line);border-radius:8px;margin-top:6px;max-height:220px}
 .bh-it{font-weight:700}.bh-it.q0{color:#d4d4d4}.bh-it.q1{color:#7fd88c}.bh-it.q2{color:#73a9ff}.bh-it.q3{color:#c590ff}.bh-it.lg{color:#ffb347}`;
   document.head.appendChild(st);
 })();

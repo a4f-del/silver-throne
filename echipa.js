@@ -30,6 +30,16 @@ function tmPortrait(f) {
   const k = f.h ? null : TM_IMG[f.c];
   return `<div class="tm-bigav">${av(f, 110)}</div>`;   /* portretele pictate vin din av() */
 }
+/* portretul întreg al luptătorului ales (eroul: portretul ales sau skinul; mercenarii: portretul clasei) */
+function tmFullSrc(f) {
+  if (f.h) { if (typeof skinOn === 'function' && skinOn(f) && typeof HS !== 'undefined') return HS.umbra.av; return typeof heroId === 'function' && f.ic ? `imagini/eroi/${heroId(f.ic)}.jpg` : null; }
+  return typeof MPIC !== 'undefined' && MPIC[f.c] ? `imagini/mercenari/${MPIC[f.c]}.jpg` : null;
+}
+function tmFull(f, sub) {
+  const src = tmFullSrc(f);
+  return `<div class="tm-full${f.hp <= 0 ? ' dead' : ''}">${src ? `<img src="${src}" alt="${tEsc(f.n)}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'tm-full-av'}))">` : `<div class="tm-full-av">${av(f, 140)}</div>`}`
+    + `<div class="tm-full-tx"><h2 class="tm-h">${tEsc(f.n)}</h2><div class="tm-sub">${sub}</div></div></div>`;
+}
 /* butoanele de skin ale eroului (înainte stăteau sub portretul mare) */
 function tmSkin(f) {
   if (!f.h) return '';
@@ -51,7 +61,7 @@ function tmChar(inv) {
   const xp = f.h ? `<div class="tm-xp"><span class="mute">Nivel ${S.lvl} · ${S.xp}/${need(S.lvl)} exp.</span><i class="xpb"><i style="width:${Math.min(100, S.xp / need(S.lvl) * 100)}%"></i></i></div>` : '';
   const sub = `${f.h ? 'erou' : 'nivel ' + S.lvl + ' · ' + RK[f.rk || 0]} · ${tEsc(f.c)}${f.sp && typeof spDef0 === 'function' && spDef0(f) ? ' · ' + spDef0(f).n : ''}${f.sc ? ' · ' + f.sc + ' cicatrice' : ''}${f.t && f.t.length ? '<br>' + f.t.map(x => tEsc(x.n)).join(', ') : ''}`;
   const cd = typeof spCd === 'function' ? spCd(f) : 2;
-  let h = `<div class="tm-char"><section class="tm-left"><div class="tm-por">${tmPortrait(f)}</div><h2 class="tm-h">${tEsc(f.n)}</h2><div class="tm-sub mute">${sub}</div>`;
+  let h = `<div class="tm-char"><section class="tm-left tm-left2">${tmFull(f, sub)}`;
   h += `<div class="tm-hpbar"><span>${c.hp <= 0 ? '☠ căzut' : Math.round(c.hp) + ' / ' + c.max + ' viață'}</span><i class="bar${c.hp <= 0 ? ' e' : ''}"><i style="width:${c.p}%"></i></i></div>`;
   h += `<div class="tm-stats"><div><b>${c.max}</b><span>Viață</span></div><div><b>${Math.round(atkOf(f))}</b><span>Atac</span></div><div><b>${tmDef(f)}</b><span>Apărare</span></div></div>${extra ? `<div class="chips">${extra}</div>` : ''}`;
   h += `<div class="tm-sp"><b>${tEsc(CL[f.c].sp)}</b> <span class="mute">${tEsc(CL[f.c].d)}; se reîncarcă după ${cd} ${cd === 1 ? 'tură' : 'ture'}.</span></div>${typeof spPanel === 'function' ? spPanel(f) : ''}${hero}${xp}<div class="tm-act">${typeof teamCtl === 'function' ? teamCtl(f) : ''}${deadAll().length > 1 || (deadAll().length === 1 && c.hp > 0) ? reviveAllBtn() : ''}${rv}${hurt && !S.d ? `<button onclick="heal()">Vindecă răniții · ${healCost} aur</button>` : ''}${tmSkin(f)}</div></section>`;
@@ -132,5 +142,21 @@ function temaHdr() {
   .tm-left .tm-stats div{padding:4px 2px 3px}.tm-left .tm-stats b{font-size:17px}
 }
 `;
+  document.head.appendChild(st);
+})();
+
+/* pagina Echipă: portretul întreg sus în stânga, statisticile dedesubt; echipamentul și rucsacul în dreapta */
+(function () {
+  if (typeof document === 'undefined' || !document.head) return;
+  const st = document.createElement('style');
+  st.textContent = `.tm-left2{display:block!important}
+.tm-full{position:relative;margin:0 0 12px;border-radius:12px;overflow:hidden;border:1px solid var(--gold2,#f0d27a);box-shadow:0 8px 24px #000a,inset 0 0 0 1px #0006;aspect-ratio:1/1;background:#0e1214}
+.tm-full>img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 22%}
+.tm-full.dead>img{filter:grayscale(1) brightness(.6)}
+.tm-full-av{display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+.tm-full-tx{position:absolute;left:0;right:0;bottom:0;padding:34px 14px 10px;background:linear-gradient(180deg,transparent,#0b0e10e6 55%)}
+.tm-full-tx .tm-h{margin:0;font-size:22px;text-shadow:0 2px 6px #000}.tm-full-tx .tm-sub{color:#d6d9db;font-size:13.5px;line-height:1.35}
+@media (max-width:600px){.tm-full{aspect-ratio:5/4}}
+@media (min-width:960px){.tm-full{aspect-ratio:4/5}.tm-char{grid-template-columns:minmax(280px,320px) minmax(0,1fr)!important}}`;
   document.head.appendChild(st);
 })();

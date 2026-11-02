@@ -33,8 +33,8 @@ function vDung() {
       + `<div class="dg-img">${img ? `<img class="dg-bg" src="${img}" alt="" loading="lazy" onerror="this.remove()">` : ''}`
       + (i === rec ? '<span class="dg-tag">Recomandat</span>' : '') + (lock ? `<span class="dg-lock">🔒 nivel ${g.lv}</span>` : '')
       + (b ? `<span class="dg-boss" style="--aura:${b[1]}" title="Căpitan: ${g.bn}"><img src="imagini/monstri/${b[0]}.jpg" alt="" loading="lazy" onerror="this.parentNode.remove()"></span>` : '') + '</div>'
-      + `<div class="dg-b"><div class="dg-h"><b>${g.n}</b>${tmnStars(g.k)}</div><div class="mute dg-i">nivel ${g.lv} · ${g.rooms} încăperi · căpitan: ${g.bn}</div><div class="mute dg-i">Pradă: ${tmnMat(g)}</div>`
-      + `${!lock && typeof trChips === 'function' ? trChips(i) : ''}<button class="${lock ? '' : 'p'}" onclick="startD(${i})"${lock ? ' disabled' : ''}>${lock ? 'Blocat' : 'Intră' + (typeof trTier === 'function' && trTier(i) ? ' · ' + TR_T.n[trTier(i)] : '')}</button></div></div>`;
+      + `<div class="dg-b"><div class="dg-h"><b>${g.n}</b>${tmnStars(g.k)}</div><div class="mute dg-i">nivel ${g.lv} · ${g.rooms - 1} monștri + căpitan · căpitan: ${g.bn}</div><div class="mute dg-i">Pradă: ${tmnMat(g)}</div>`
+      + `${!lock && typeof trChips === 'function' ? trChips(i) : ''}${!lock && typeof trList === 'function' ? trList(i) : ''}<div class="tr-nx"><button class="${lock ? '' : 'p'}" onclick="startD(${i})"${lock ? ' disabled' : ''}>${lock ? 'Blocat' : typeof trNextLbl === 'function' ? trNextLbl(i) : 'Intră'}</button>${!lock && typeof dOddsAt === 'function' ? trOddsTag(dOddsAt(i)) : ''}${!lock && typeof trAutoL === 'function' && dMk(i).room < DG[i].rooms - 1 ? `<button onclick="trAutoL(${i})" title="Ia monștrii pe rând cât ai puncte și șanse de cel puțin 50%">Toți până la căpitan</button>` : ''}</div></div></div>`;
   };
   const shown = list.filter(([g]) => S.lvl + 10 >= g.lv);   /* ca înainte: temnițele mult peste nivel rămân ascunse */
   return tmnEvent() + `<section class="dg-sec"><h2>Temnițe</h2><div class="dg-grid">${shown.map(card).join('')}</div></section>`;
