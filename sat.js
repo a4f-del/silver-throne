@@ -119,7 +119,7 @@ function satStatus(k) {
     if (k === 'l') return [S.lvl < 6 ? 'se deschide la nivelul 6' : 'obiecte de calitate', 0];
     if (k === 'd') return [`minereu ${S.ore} · capacitate ${cap()}`, 0];
     if (k === 'z') { const t = (S.na || now) - now; return [`putere ${dpw()} · atac în ${sdT(t)}`, !!(S.al && S.al.length)]; }
-    if (k === 'q') return [S.prem ? (S.bot && S.bot.on ? 'pornit' : 'oprit') : 'premium', 0];
+    if (k === 'q') return [S.prem ? (S.bt && S.bt.on ? 'pornit' : 'oprit') : 'premium', 0];
     if (k === 'i') { const d = deadAll().length, h = mrAll().filter(f => f.hp > 0 && f.hp < mhp(f)).length; return [d ? `${d} ${d === 1 ? 'căzut' : 'căzuți'} de ridicat` : h ? `${h} ${h === 1 ? 'rănit' : 'răniți'}` : 'toți sănătoși', d > 0]; }
     if (k === 'g') return ['culoarea satului', 0];
   } catch (e) { /* o stare care nu se poate calcula nu oprește pagina */ }

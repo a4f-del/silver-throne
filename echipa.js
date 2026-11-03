@@ -122,9 +122,14 @@ function hdrSel(i) { S.sel = i; S.tab = 'e'; S.msg = ''; go(); }
 function temaHdr() {
   const h = S.fs.find(f => f.h) || S.fs[0], nd = need(S.lvl), xp = Math.max(0, Math.min(1, S.xp / Math.max(1, nd))), R = 25, C = 2 * Math.PI * R;
   const team = S.fs.map((f, i) => { const c = tmHp(f), dead = c.hp <= 0; return `<button class="hm${f === cur() && S.tab === 'e' ? ' on' : ''}${dead ? ' dead' : ''}" onclick="hdrSel(${S.fs.indexOf(f)})" title="${tEsc(f.n)} · ${Math.round(c.hp)}/${c.max} viață${f.h ? ' (erou)' : ''}"><span class="hm-av">${av(f, 36)}${dead ? '<b>☠</b>' : ''}</span><i class="hm-hp${c.p < 40 ? ' low' : ''}"><i style="width:${c.p}%"></i></i></button>`; }).join('');
+  const botOn = !!(S.prem && S.bt && S.bt.on), fxOn = !S.fxInstant, fxLock = typeof C === 'function' && C('w') === 0;
+  const ctl = ''   /* comenzi rapide: botul și redarea luptei, lovitură cu lovitură */
+    + `<button class="hq${botOn ? ' on' : ''}" onclick="${S.prem ? "btog('on')" : "tab('a');vil('q')"}" aria-pressed="${botOn}" title="${S.prem ? (botOn ? 'Bot pornit: apasă ca să-l oprești' : 'Bot oprit: apasă ca să-l pornești') : 'Botul joacă singur (premium)'}"><span class="hq-i">${typeof satIcon === 'function' ? satIcon('q') : '🤖'}</span><span class="hq-t">Bot<small>${S.prem ? (botOn ? 'pornit' : 'oprit') : 'premium'}</small></span></button>`
+    + `<button class="hq${fxOn || fxLock ? ' on' : ''}" onclick="fxToggleInstant()"${fxLock ? ' disabled' : ''} aria-pressed="${fxOn || fxLock}" title="${fxLock ? 'La prima luptă se vede mereu.' : fxOn ? 'Redarea luptei e pornită: apasă ca să sari direct la rezultat' : 'Redarea luptei e oprită: apasă ca s-o pornești'}"><span class="hq-i">⚔</span><span class="hq-t">Redare<small>${fxOn || fxLock ? 'pornită' : 'oprită'}</small></span></button>`;
   return ''   /* echipa nu mai apare în bara de sus: e în meniul și panoul din stânga, și în fila Echipă */
     + `<span class="rc" title="Puncte">${IC.p}<span><b id="pp">${S.pts}/${MXP()}</b><small id="pt">${S.bp > 0 ? 'rezervă +' + S.bp : S.pts < MXP() ? '(+1 în ' + fmt(PT - (Date.now() - S.ptsT)) + ')' : S.pts > MXP() ? 'peste maxim' : 'Puncte'}</small></span></span>`
     + `<span class="rc" title="Aur">${IC.g}<span><b>${S.gold}</b><small>Aur</small></span></span><span class="rc" title="Minereu">${IC.o}<span><b>${S.ore}</b><small>Minereu</small></span></span>`
+    + ctl
     + `<button class="hh" onclick="hdrSel(${Math.max(0, S.fs.indexOf(h))})" title="Eroul: nivel ${S.lvl}, ${S.xp}/${nd} experiență"><span class="hh-r"><svg viewBox="0 0 56 56" aria-hidden="true"><circle class="bg" cx="28" cy="28" r="${R}"/><circle class="fg" cx="28" cy="28" r="${R}" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C * (1 - xp)).toFixed(1)}"/></svg><span class="hh-a">${av(h, 40)}</span><b class="hh-l">${S.lvl}</b></span><span class="hh-t"><b>${tEsc(h.n)}</b><small>Nivel ${S.lvl} · ${S.xp}/${nd}</small></span></button>`;
 }
 
@@ -133,6 +138,12 @@ function temaHdr() {
   const st = document.createElement('style');
   /* pagina Echipă, compactă: se încarcă după tema.css, deci înlocuiește regulile de acolo pentru aceste elemente */
   st.textContent = `
+.hq{display:flex;align-items:center;gap:7px;padding:4px 12px 4px 8px;border-radius:6px;background:linear-gradient(180deg,#0e1214,#161b1e);border:1px solid var(--line);box-shadow:inset 0 0 0 1px #000;color:var(--mute);white-space:nowrap;min-height:0;flex:none}
+.hq:hover:not(:disabled){border-color:var(--gold);transform:none}.hq:disabled{opacity:.75;cursor:default}
+.hq-i{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;font-size:20px;line-height:1}.hq-i svg{width:26px;height:26px}
+.hq-t{display:flex;flex-direction:column;text-align:left;font:700 14px/1.1 Cinzel,serif;color:var(--ink)}.hq-t small{font:400 12px/1.1 Alegreya,Georgia,serif;color:var(--mute)}
+.hq.on{border-color:#4fa35e;box-shadow:inset 0 0 0 1px #000,0 0 8px #4fa35e44}.hq.on .hq-t small{color:#9be0a6}
+@media (max-width:959px){.hq{padding:3px 6px;gap:4px}.hq-t{display:none}.hq-i{width:22px;height:22px;font-size:17px}.hq-i svg{width:22px;height:22px}}
 .tm-strip{gap:8px;padding:2px 2px 8px;margin:0 0 10px}
 .tm-c{width:auto;min-width:150px;max-width:200px;flex-direction:row;align-items:center;gap:8px;padding:6px 12px 6px 6px;text-align:left}
 .tm-c.sel{transform:none}.tm-c.res{opacity:.82}.tm-c.res.sel{opacity:1}

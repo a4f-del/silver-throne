@@ -3,7 +3,7 @@
    Cardul „VS” de la începutul fiecărei lupte: echipa ta (stânga) față în față cu adversarul (dreapta),
    cu Viață, Atac, Apărare și Critic pentru fiecare parte și o estimare a șanselor.
    Stă în pagina temniței, deasupra luptei, până apeși „Mai departe” sau „Ieși cu prada”: mare la căpitani,
-   raiduri, Lume și Tron, mai mic la camerele obișnuite. „×” îl ascunde; S.vsOff îl oprește (comutatorul e în Coborâre).
+   raiduri, Lume și Tron, mai mic la camerele obișnuite. Apare la fiecare luptă și nu poate fi oprit sau ascuns.
    Apelat din startF (index.html), după ce inamicii sunt pregătiți. Se încarcă înaintea scriptului din pagină.
    ========================================================================== */
 const VS = { last: null };
@@ -27,7 +27,7 @@ const vsMonster = `<svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGrad
 
 function vsFlash() {
   try {
-    const d = S.d, f = d && d.f; if (!f || S.vsOff || typeof document === 'undefined') return;
+    const d = S.d, f = d && d.f; if (!f || typeof document === 'undefined') return;
     const es = f.es, boss = es.some(e => e.b), big = boss || d.lume || d.tron || d.raid != null;
     const enDef = es.length ? es.reduce((s, e) => s + e.def, 0) / es.length : 0;
     const me = vsSide(S.fs, true, enDef), en = vsSide(es, false, me.def), [odds, oc] = vsOdds(me, en);
@@ -39,7 +39,7 @@ function vsFlash() {
     if (b) { por = `<span class="vs-por boss" style="--aura:${b[1]}"><img src="imagini/monstri/${b[0]}.jpg" alt=""></span>`; name = es[0].n; }
     else if (d.lume || d.tron) { const gm = (d.ghost || []).slice(1); por = `<span class="vs-por pvp">${d.vsh && typeof av === 'function' ? av({ n: d.bn, c: d.vsh.c || 'Campion', ic: d.vsh.ic }, 84) : vsMonster}</span>${gm.length && typeof av === 'function' ? `<span class="vs-mates">${gm.map(u => av({ n: u.n, c: u.c }, big ? 30 : 24)).join('')}</span>` : ''}`; name = d.bn + (gm.length ? ` <small>+${gm.length}</small>` : ''); }   /* fantoma unui jucător: toată echipa lui, ca la tine */
     else { const mimg = typeof monImg === 'function' ? monImg(es[0].n) : null; por = `<span class="vs-por mob">${mimg ? `<img src="${mimg}" alt="" onerror="this.style.display='none'">` : vsMonster}</span>`; name = es.length > 1 ? es[0].n + ` <small>+${es.length - 1}</small>` : es[0].n; }
-    VS.last = { big, fresh: true, html: `<div class="vs-card"><button class="vs-x" onclick="vsClose()" aria-label="Ascunde cardul">×</button><div class="vs-ctx">${ctx}</div><div class="vs-row">`
+    VS.last = { big, fresh: true, html: `<div class="vs-card"><div class="vs-ctx">${ctx}</div><div class="vs-row">`
       + `<div class="vs-side l"><div class="vs-ph">${av(hero, big ? 84 : 60)}${mates.length ? `<span class="vs-mates">${mates.map(x => av(x, big ? 30 : 24)).join('')}</span>` : ''}</div><div class="vs-nm">${tEsc(hero.n)}${mates.length ? ` <small>+${mates.length}</small>` : ''}</div>${vsStats(me)}</div>`
       + `<div class="vs-mid"><b>VS</b><small class="vs-odds ${oc}">${odds}</small></div>`
       + `<div class="vs-side r"><div class="vs-ph">${por}</div><div class="vs-nm">${name}</div>${vsStats(en)}</div></div></div>` };
@@ -49,14 +49,12 @@ function vsFlash() {
 function vsPost() {
   try {
     const v = document.getElementById('v'), L = VS.last;
-    if (!v || !L || S.vsOff || S.tab !== 'c' || !S.d) return;
+    if (!v || !L || S.tab !== 'c' || !S.d) return;
     const el = document.createElement('div'); el.className = 'vs-in ' + (L.big ? 'full' : 'mini') + (L.fresh ? ' anim' : ''); el.setAttribute('role', 'status');
     el.innerHTML = L.html; v.insertBefore(el, v.firstChild); L.fresh = false;
   } catch (e) { /* aspectul nu blochează jocul */ }
 }
 function vsClear() { VS.last = null; }
-function vsClose() { VS.last = null; go(); }
-function vsToggle() { S.vsOff = !S.vsOff; S.msg = S.vsOff ? 'Cardurile de luptă sunt oprite.' : 'Cardurile de luptă sunt pornite.'; go(); }
 
 (function () {
   if (typeof document === 'undefined' || !document.head) return;
@@ -68,7 +66,6 @@ function vsToggle() { S.vsOff = !S.vsOff; S.msg = S.vsOff ? 'Cardurile de luptă
 .vs-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
 .vs-side{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0}
 .vs-in.anim .vs-card{animation:vsIn .3s ease-out both}.vs-in.anim .vs-side.l{animation:vsL .45s ease-out both}.vs-in.anim .vs-side.r{animation:vsR .45s ease-out both}
-.vs-x{position:absolute;top:4px;right:6px;padding:0 8px!important;min-height:0!important;font-size:18px;line-height:24px;background:none!important;border:0!important;color:var(--mute)!important;box-shadow:none!important}.vs-x:hover{color:var(--ink)!important}
 .vs-ph{position:relative;display:flex;align-items:flex-end;justify-content:center}
 .vs-mates{display:flex;margin-left:-8px}.vs-mates>*{margin-left:-6px;border-radius:50%;box-shadow:0 0 0 2px #101416}
 .vs-por{display:block;width:84px;height:84px;border-radius:50%;overflow:hidden;border:2px solid var(--gold)}
