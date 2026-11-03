@@ -42,13 +42,53 @@ function tmBigCard(f, i) {
     + `<span class="tm-big-hp${c.p < 40 ? ' low' : ''}"><i style="width:${c.p}%"></i></span><span class="tm-big-hpn mute">${Math.round(c.hp)}/${c.max} viață</span>`
     + `<span class="tm-big-eq">${eq}</span><span class="tm-big-tip">${tmRoleTip(f)}</span></button>`;
 }
-/* sus: cardurile mari ale echipei active; dedesubt, o bandă mai mică pentru rezervă (nu la fel de proeminentă) */
+/* sus: doar cardurile mari ale echipei active; rezerva stă ascunsă după un buton-scurtătură care deschide panoul de schimb */
+let tmRO = false, tmRP = -1;   /* panoul rezervei deschis? / indexul (în S.rs) al celui ales pentru schimb */
+function tmResT() { tmRO = !tmRO; tmRP = -1; go(); }
+function tmResP(j) { tmRP = tmRP === j ? -1 : j; go(); }
+function tmResSwap(ri, ti) { tmRO = false; tmRP = -1; S.sel = ti; swapTeam(ri, ti); }
+function tmResIn(ri) { tmRO = false; tmRP = -1; S.sel = S.fs.length; toParty(ri); }
+function tmResView(i) { tmRO = false; tmRP = -1; sel(i); }
+const tmBusy = f => typeof mxBusy === 'function' && mxBusy(f);
+/* butonul-scurtătură: avatarele mici ale celor din rezervă, numărul lor și un semn dacă cineva are nevoie de atenție */
+function tmResBtn(rest) {
+  const nfs = S.fs.length, curIn = S.sel >= nfs && rest.includes(cur());
+  const alert = rest.some(f => (typeof mxDone === 'function' && !f.h && mxDone(f)) || (typeof spNeed === 'function' && spNeed(f)));
+  const avs = rest.slice(0, 4).map(f => `<span class="tm-rb-a${f.hp <= 0 ? ' dead' : ''}">${av(f, 28)}</span>`).join('');
+  return `<button class="tm-rb${tmRO ? ' on' : ''}${curIn ? ' cur' : ''}" onclick="tmResT()" aria-expanded="${tmRO}" title="Vezi rezerva și schimbă luptătorii">`
+    + `<span class="tm-rb-s">${avs}</span><span class="tm-rb-t"><b>⇄ Rezervă · ${rest.length}</b><small>${curIn ? 'vezi acum: ' + tEsc(cur().n) : 'apasă ca să schimbi pe cineva'}</small></span>`
+    + `${alert ? '<b class="nb">!</b>' : ''}<span class="tm-rb-ch">${tmRO ? '▴' : '▾'}</span></button>`;
+}
+/* panoul rezervei: alegi pe cineva din rezervă, apoi pe cine înlocuiește din echipă */
+function tmResPanel() {
+  const nfs = S.fs.length, rs = S.rs, gd = S.gd || [], room = S.fs.length < TMAX();
+  if (tmRP >= rs.length) tmRP = -1;
+  const card = (f, i, j, guard) => {
+    const c = tmHp(f), dead = c.hp <= 0, busy = !guard && tmBusy(f), pick = !guard && tmRP === j;
+    const st = guard ? 'strajă · păzește satul' : busy ? (typeof mxDone === 'function' && mxDone(f) ? 's-a întors din expediție' : 'plecat în expediție') : dead ? '☠ căzut' : `${Math.round(c.hp)}/${c.max} viață`;
+    let act = '';
+    if (!guard && !busy && !S.d) act = room ? `<button class="p" onclick="tmResIn(${j})">Pune în echipă</button>` : `<button class="${pick ? 'p' : ''}" onclick="tmResP(${j})" aria-pressed="${pick}">${pick ? 'Anulează' : '⇄ Schimbă'}</button>`;
+    act += `<button onclick="tmResView(${i})">Echipament</button>`;
+    return `<div class="tm-rp-c${pick ? ' on' : ''}${dead ? ' dead' : ''}${busy || guard ? ' off' : ''}"><span class="tm-rp-av">${av(f, 44)}</span>`
+      + `<span class="tm-rp-tx"><b>${tEsc(f.n)}</b><small>${[!f.h && f.c !== 'Gardian' ? RK[f.rk || 0] : '', tEsc(f.c), roleOf(f)].filter(Boolean).join(' · ')}</small>`
+      + `<i class="tm-hp${c.p < 40 ? ' low' : ''}"><i style="width:${c.p}%"></i></i><small class="mute">${st}</small></span><span class="tm-rp-x">${act}</span></div>`;
+  };
+  let h = `<div class="tm-rp" role="region" aria-label="Rezervă">`;
+  if (S.d) h += `<div class="mute tm-rp-n">Nu poți schimba echipa în timpul coborârii.</div>`;
+  h += `<div class="tm-rp-l">${rs.map((f, j) => card(f, nfs + j, j, false)).join('')}${gd.map((f, k) => card(f, nfs + rs.length + k, -1, true)).join('')}</div>`;
+  if (tmRP >= 0 && rs[tmRP]) {
+    const a = rs[tmRP], tg = S.fs.map((x, i) => [x, i]).filter(([x]) => !x.h);
+    h += `<div class="tm-rp-sw"><div class="tm-rp-q">Pune pe <b>${tEsc(a.n)}</b> (${tEsc(a.c)}) în locul lui:</div><div class="tm-rp-tg">`
+      + tg.map(([x, i]) => { const c = tmHp(x); return `<button onclick="tmResSwap(${tmRP},${i})"><span class="tm-rp-av">${av(x, 36)}</span><span class="tm-rp-tx"><b>${tEsc(x.n)}</b><small>${tEsc(x.c)} · ${roleOf(x)} · ${Math.round(c.hp)}/${c.max}</small></span></button>`; }).join('')
+      + `</div></div>`;
+  }
+  return h + `</div>`;
+}
 function tmStrip() {
-  const ro = roster(), nfs = S.fs.length;
+  const ro = roster(), nfs = S.fs.length, rest = ro.slice(nfs);
   const squad = `<div class="tm-squad" role="group" aria-label="Echipa activă">${ro.slice(0, nfs).map((f, i) => tmBigCard(f, i)).join('')}</div>`;
-  const rest = ro.slice(nfs);
-  const res = rest.length ? `<div class="tm-res"><h3 class="tm-res-h">Rezervă <span class="mute">· ${rest.length}</span></h3><div class="tm-strip" role="group" aria-label="Rezervă">${rest.map((f, j) => tmCard(f, nfs + j)).join('')}</div></div>` : '';
-  return squad + res;
+  if (!rest.length) { tmRO = false; return squad; }
+  return squad + `<div class="tm-res">${tmResBtn(rest)}${tmRO ? tmResPanel() : ''}</div>`;
 }
 
 /* ----------------------------------------------------- luptătorul selectat */
@@ -250,7 +290,26 @@ function temaHdr() {
 .tm-eqi{width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:5px;background:#161b1e}
 .tm-eqi img,.tm-eqi .uii{width:16px;height:16px}.tm-eqi.em{opacity:.35}
 .tm-big-tip{font-size:10.5px;color:var(--mute);line-height:1.25;min-height:2.4em}
-.tm-res{margin:10px 0 6px}.tm-res-h{font:700 12.5px Cinzel,serif;color:var(--mute);margin:0 0 6px}
-@media (max-width:520px){.tm-squad{grid-template-columns:repeat(2,minmax(0,1fr))}}`;
+.tm-res{margin:8px 0 12px}
+.tm-rb{position:relative;display:flex;align-items:center;gap:10px;width:auto;min-height:0;padding:6px 12px 6px 8px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(180deg,#151a1d,#0e1214);color:var(--ink);text-align:left;cursor:pointer}
+.tm-rb:hover{border-color:var(--gold);transform:none}.tm-rb.on,.tm-rb.cur{border-color:var(--gold2,#f0d27a);box-shadow:0 0 0 1px #f0d27a55}
+.tm-rb-s{display:flex}.tm-rb-a{display:inline-flex;width:28px;height:28px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 2px #0e1214}.tm-rb-a+.tm-rb-a{margin-left:-9px}.tm-rb-a.dead{filter:grayscale(1) brightness(.6)}
+.tm-rb-t{display:flex;flex-direction:column}.tm-rb-t b{font:700 13.5px Cinzel,serif}.tm-rb-t small{font-size:12px;color:var(--mute)}
+.tm-rb-ch{color:var(--mute);font-size:13px;margin-left:2px}.tm-rb .nb{position:absolute;top:-6px;right:-6px;margin:0}
+.tm-rp{margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#0b0e10;animation:tmRp .18s ease-out}
+.tm-rp-n{font-size:13px;margin:0 0 8px}
+.tm-rp-l{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.tm-rp-c{display:flex;align-items:center;gap:10px;padding:7px 9px;border:1px solid var(--line);border-radius:10px;background:#11161a}
+.tm-rp-c.on{border-color:var(--gold2,#f0d27a);box-shadow:0 0 0 1px var(--gold2,#f0d27a)}.tm-rp-c.off{opacity:.7}.tm-rp-c.dead .tm-rp-av{filter:grayscale(1) brightness(.6)}
+.tm-rp-av{flex:none;display:inline-flex;border-radius:50%;overflow:hidden}
+.tm-rp-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.tm-rp-tx b{font:700 13.5px Cinzel,serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tm-rp-tx small{font-size:11.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm-rp-tx .tm-hp{height:5px;margin:2px 0 1px}
+.tm-rp-x{flex:none;display:flex;flex-direction:column;gap:4px}.tm-rp-x button{padding:3px 9px;font-size:12.5px;min-height:0}
+.tm-rp-sw{margin-top:10px;padding-top:10px;border-top:1px solid #ffffff1a}.tm-rp-q{font-size:13.5px;margin-bottom:6px}
+.tm-rp-tg{display:flex;flex-wrap:wrap;gap:8px}.tm-rp-tg button{display:flex;align-items:center;gap:8px;width:auto;min-width:180px;padding:5px 12px 5px 5px;text-align:left;border-radius:10px}
+.tm-rp-tg button:hover{border-color:var(--gold2,#f0d27a);transform:none}
+@keyframes tmRp{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.tm-rp{animation:none}}
+@media (max-width:520px){.tm-squad{grid-template-columns:repeat(2,minmax(0,1fr))}.tm-rb{width:100%}.tm-rp-l{grid-template-columns:1fr}.tm-rp-tg button{flex:1 1 100%}}`;
   document.head.appendChild(st);
 })();
