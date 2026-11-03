@@ -138,7 +138,7 @@ function vHub() {
   }
   const [bs] = satStatus('q');
   return `<section class="vh vh-sat"><h2>${typeof terStage === 'function' ? 'Satul tău · ' + terStage() : 'Satul tău'}</h2><div class="vh-map"><img src="imagini/sat/sat-${satImgN()}.jpg" alt="Satul tău, cu clădirile pe care le poți deschide" width="1152" height="928"><svg viewBox="0 0 1152 928" preserveAspectRatio="none" aria-hidden="true">${zones}</svg>${labels}</div>`
-    + `<div class="vh-more"><button class="vb-c" data-v="q" onclick="vil('q')"><span class="vb-i">${satIcon('q')}</span><span>Bot · ${bs}</span></button><span class="mute">Atinge o clădire ca s-o deschizi.</span></div></section>${typeof tronBanner === 'function' ? tronBanner() : ''}`;
+    + `<div class="vh-more"><button class="vb-c" data-v="q" onclick="vil('q')"><span class="vb-i">${satIcon('q')}</span><span>Bot · ${bs}</span></button><span class="mute">Atinge o clădire ca s-o deschizi.</span></div></section>${typeof drumPanel === 'function' ? drumPanel() : ''}${typeof tronBanner === 'function' ? tronBanner() : ''}`;
 }
 function satHov(k, on) { const z = document.querySelector(`.vh-z[data-z="${k}"]`); if (z) z.classList.toggle('on', !!on); }
 /* banda din interiorul unei clădiri: înapoi la Sat + celelalte clădiri */

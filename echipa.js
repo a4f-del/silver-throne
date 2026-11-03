@@ -68,7 +68,27 @@ function tmChar(inv) {
   h += `<div class="tm-right"><section class="tm-eq"><h2>Echipament · ${tEsc(f.n)}</h2>${vSlots()}</section>${inv || ''}</div></div>`;
   return h;
 }
-function vEquipTop(inv) { return tmStrip() + tmChar(inv); }
+/* indicator de sinergie: ce aduce echipa activă (S.fs), după clasele din ea, nu echipament */
+const SYN_LBL = ['Slabă', 'Medie', 'Bună', 'Foarte bună'];
+const synLbl = v => SYN_LBL[Math.max(0, Math.min(3, v))];
+function tmSynergy() {
+  const cls = S.fs.filter(f => !f.h).map(f => f.c);
+  let res = 1, dmg = 1, heal = 0;   /* eroul dă o bază solidă de rezistență și daune */
+  if (cls.includes('Paznic')) res += 2;
+  if (cls.includes('Războinic')) { res += 1; dmg += 1; }
+  if (cls.includes('Arcaș')) dmg += 2;
+  if (cls.includes('Mag')) dmg += 2;
+  const vr = S.fs.find(f => f.c === 'Vraci');
+  if (vr) heal = (vr.rk || 0) >= 3 ? 3 : 2;
+  const rows = [['Rezistență', res], ['Daune', dmg], ['Vindecare', heal]];
+  let tip = '';
+  if (!vr) tip = 'Un Vraci poate crește șansele de supraviețuire în temnițe.';
+  else if (!cls.includes('Paznic') && !cls.includes('Războinic')) tip = 'Un Paznic absoarbe lovituri și protejează restul echipei.';
+  else if (!cls.includes('Arcaș') && !cls.includes('Mag') && !cls.includes('Războinic')) tip = 'Un Arcaș sau un Mag ar grăbi luptele.';
+  else tip = 'Echipă echilibrată: acoperă rezistența, daunele și vindecarea.';
+  return `<section class="tm-syn"><h2>Compoziția echipei</h2><div class="tm-syn-rows">${rows.map(([n, v]) => `<div class="tm-syn-r"><span>${n}</span><b class="syn-${v >= 3 ? 'g2' : v >= 2 ? 'g1' : v >= 1 ? 'n' : 'b1'}">${synLbl(v)}</b></div>`).join('')}</div><div class="mute tm-syn-tip">Sfat: ${tip}</div></section>`;
+}
+function vEquipTop(inv) { return tmStrip() + tmSynergy() + tmChar(inv); }
 
 /* ----------------------------------------------------------------- bara de sus */
 function hdrSel(i) { S.sel = i; S.tab = 'e'; S.msg = ''; go(); }
@@ -158,5 +178,16 @@ function temaHdr() {
 .tm-full-tx .tm-h{margin:0;font-size:22px;text-shadow:0 2px 6px #000}.tm-full-tx .tm-sub{color:#d6d9db;font-size:13.5px;line-height:1.35}
 @media (max-width:600px){.tm-full{aspect-ratio:5/4}}
 @media (min-width:960px){.tm-full{aspect-ratio:4/5}.tm-char{grid-template-columns:minmax(280px,320px) minmax(0,1fr)!important}}`;
+  document.head.appendChild(st);
+})();
+
+(function () {
+  if (typeof document === 'undefined' || !document.head) return;
+  const st = document.createElement('style');
+  st.textContent = `.tm-syn{margin-bottom:14px}.tm-syn-rows{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.tm-syn-r{flex:1;min-width:110px;display:flex;flex-direction:column;gap:3px;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:#0e1214}
+.tm-syn-r span{font-size:12px;color:var(--mute)}.tm-syn-r b{font-size:14.5px}
+.syn-b1{color:#e8837b}.syn-n{color:#d6c56a}.syn-g1{color:#9fe3ad}.syn-g2{color:#7fd88c}
+.tm-syn-tip{font-size:13px}`;
   document.head.appendChild(st);
 })();
