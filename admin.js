@@ -48,15 +48,23 @@ function admGenHtml() {
 <div class="adm-g"><span>Legendar</span><div class="adm-bs">${sel('lg', lgs, g.lg)}<button class="p" onclick="admGen('lg')">Creează</button><button onclick="admGen('lgall')">Toate legendarele</button></div></div>`;
 }
 
-/* verifică pe server dacă acest cont e administrator (o dată, după pornirea jocului) */
+/* conturile de administrator cunoscute de joc: panoul apare pentru ele chiar dacă 06-admin.sql nu e rulat încă.
+   Fără SQL, generatorul de obiecte merge (obiectele sunt în salvarea ta), dar aurul mare e tăiat de portofel. */
+const ADM_EMAILS = ['meleycmetin@gmail.com'];
+/* verifică dacă acest cont e administrator: pe server (public.admins) sau după email */
 async function admCheck() {
-  if (typeof tronRpc !== 'function' || typeof CONT === 'undefined' || !CONT.user) return;
-  const r = await tronRpc('is_admin');
-  CONT.admin = !r.error && r.data === true;
+  if (typeof CONT === 'undefined' || !CONT.user || ADM.checking) return;
+  ADM.checking = 1;
+  const em = String(CONT.user.email || '').toLowerCase();
+  let srv = false;
+  if (typeof tronRpc === 'function') { const r = await tronRpc('is_admin'); srv = !r.error && r.data === true; ADM.srv = srv; }
+  CONT.admin = srv || ADM_EMAILS.includes(em);
+  ADM.checked = CONT.user.id; ADM.checking = 0;
   admBtn();
 }
 
 function admBtn() {
+  if (typeof CONT !== 'undefined' && CONT.user && ADM.checked !== CONT.user.id) admCheck();   /* contul s-a conectat după pornirea paginii */
   let b = document.getElementById('adm-b');
   const on = typeof DEV === 'function' && DEV() && typeof S !== 'undefined' && S && (typeof CONT === 'undefined' || CONT.booted);
   if (!on) { if (b) b.remove(); return; }
@@ -106,7 +114,7 @@ function admDraw() {
   if (!ADM.open) { if (o) o.remove(); return; }
   if (!o) { o = document.createElement('div'); o.id = 'adm-p'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-label', 'Panou de administrator'); document.body.appendChild(o); }
   const b = (k, v, t, c) => `<button${c ? ` class="${c}"` : ''} onclick="admDo('${k}',${v === undefined ? 'undefined' : JSON.stringify(v)})">${t}</button>`;
-  const who = typeof CONT !== 'undefined' && CONT.admin ? 'cont de administrator (serverul acceptă valorile)' : (typeof TW !== 'undefined' && !TW.CFG.prod ? 'mod de test (prod: false)' : 'local, ?dev=1');
+  const who = typeof CONT !== 'undefined' && CONT.admin ? (ADM.srv ? 'cont de administrator (serverul acceptă valorile)' : 'administrator după email · rulează 06-admin.sql ca serverul să accepte aurul mare') : (typeof TW !== 'undefined' && !TW.CFG.prod ? 'mod de test (prod: false)' : 'local, ?dev=1');
   o.innerHTML = `<div class="adm-h"><b>🛠 Administrator</b><button class="adm-x" onclick="ADM.open=false;admDraw()" aria-label="Închide">✕</button></div>
 <div class="adm-s">${who}${ADM.m ? ` · <span class="adm-ok">${tEsc(ADM.m)}</span>` : ''}</div>
 <div class="adm-g"><span>Pachet</span><div class="adm-bs">${b('all', 0, 'Tot din belșug', 'p')}</div></div>

@@ -13,12 +13,21 @@ const RW = { q: [], open: false };
 
 const rwXpTot = () => { let t = S.xp || 0; for (let l = 1; l < S.lvl; l++) t += need(l); return t; };
 function rwSnap() {
-  return { g: S.gold || 0, o: S.ore || 0, p: S.pts || 0, x: rwXpTot(), l: S.lvl, f: S.frag || 0, m: Object.assign({}, S.mat || {}), inv: new Set(S.inv || []) };
+  return { g: S.gold || 0, o: S.ore || 0, p: S.pts || 0, x: rwXpTot(), l: S.lvl, f: S.frag || 0, m: Object.assign({}, S.mat || {}), inv: new Set(S.inv || []), n: (S.inv || []).length,
+    eq: new Set([...(S.fs || []), ...(S.rs || []), ...(S.gd || [])].flatMap(f => Object.values(f.eq || {})).filter(Boolean)) };
 }
 function rwDiff(a) {
   const m = {}; for (const k in (S.mat || {})) { const d = (S.mat[k] || 0) - (a.m[k] || 0); if (d > 0) m[k] = d; }
   return { g: Math.max(0, (S.gold || 0) - a.g), o: Math.max(0, (S.ore || 0) - a.o), p: Math.max(0, (S.pts || 0) - a.p), x: Math.max(0, rwXpTot() - a.x),
-    l: S.lvl > a.l ? S.lvl : 0, f: Math.max(0, (S.frag || 0) - a.f), m, it: (S.inv || []).filter(it => !a.inv.has(it)) };
+    l: S.lvl > a.l ? S.lvl : 0, f: Math.max(0, (S.frag || 0) - a.f), m, it: rwNewItems(a) };
+}
+/* obiectele cu adevărat noi: nu erau nici în rucsac, nici echipate (o piesă scoasă de pe cineva nu e pradă),
+   și nu mai multe decât a crescut rucsacul; obiectele noi se adaugă la sfârșitul rucsacului */
+function rwNewItems(a) {
+  const inv = S.inv || [], grow = Math.max(0, inv.length - a.n);
+  let it = inv.filter(x => !a.inv.has(x) && !a.eq.has(x));
+  if (it.length > grow) it = grow ? inv.slice(-grow).filter(x => !a.inv.has(x)) : [];
+  return it;
 }
 const rwEmpty = r => !r.g && !r.o && !r.p && !r.x && !r.l && !r.f && !Object.keys(r.m).length && !r.it.length;
 const rwQuiet = () => (typeof S !== 'undefined' && S.prem && S.bt && S.bt.on) || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -27,8 +36,8 @@ const rwQuiet = () => (typeof S !== 'undefined' && S.prem && S.bt && S.bt.on) ||
 function rwWrap(name, how) {
   const f = window[name]; if (typeof f !== 'function' || f.__rw) return;
   const w = function (...a) {
-    const ctx = how.before ? how.before(...a) : null, s0 = rwSnap(), r = f.apply(this, a);
-    const done = () => { try { const d = rwDiff(s0); if (!rwEmpty(d)) rwShow(d, how.title(ctx, d, ...a), how.big(ctx, d, ...a)); } catch (e) { /* recompensa nu blochează jocul */ } };
+    const ctx = how.before ? how.before(...a) : null, loot = how.items ? how.items(ctx) : null, s0 = rwSnap(), r = f.apply(this, a);
+    const done = () => { try { const d = rwDiff(s0); if (loot) d.it = loot; if (!rwEmpty(d)) rwShow(d, how.title(ctx, d, ...a), how.big(ctx, d, ...a)); } catch (e) { /* recompensa nu blochează jocul */ } };
     if (r && typeof r.then === 'function') r.then(done, done); else done();
     return r;
   };
@@ -116,6 +125,7 @@ function rwHook() {
   const big = () => true;
   rwWrap('leave', {
     before: () => S.d,
+    items: d => d && d.loot && d.loot.it ? d.loot.it.slice() : [],
     title: d => !d ? 'Pradă' : d.tw ? 'Ai ieșit din Turn' : d.lume ? 'Atac reușit' : d.raid != null ? (d.done ? 'Raid încheiat' : 'Pradă') : d.done ? 'Căpitan învins!' : 'Pradă',
     big: d => !!d && (d.done || !!d.tw || d.raid != null || !!d.lume)
   });
