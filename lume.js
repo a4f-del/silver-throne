@@ -102,7 +102,7 @@ function lwFight(data) {
   const d = { room: 1, rooms: 1, k: 1, rw: 0, bn: data.name, di: 0, raid: -4, rn: 'satul lui ' + data.name, lbl: 'Atac', lume: 1, dlv: data.level, vsh: data.hero || null,
     rf: 1, fx: 1, loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false, em: { ghost: 1 }, ghost: g };
   S.d = d; startF(true); terFrom(); S.tab = 'c'; S.msg = 'Ataci satul lui ' + data.name + '. Apărarea lui e o fantomă a echipei sale.';
-  if (S.auto !== false) { autoRun(); return; } go();
+  if (S.auto !== false) { if (typeof fxAutoRun === 'function') fxAutoRun(); else autoRun(); return; } go();
 }
 /* victorie (apelat din terRl): prada o calculează jocul, ca la un raid pe un sat-bot de nivelul apărătorului.
    Un apărător mult mai slab dă mai puțin (fac), ca să nu merite vânați începătorii. Experiența e cu 50% mai mare. */

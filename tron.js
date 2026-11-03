@@ -88,7 +88,7 @@ function tronFight(data) {
   if (data.ghost && data.ghost.units) { d.ghost = data.ghost.units.map(u => TT.ghostUnit(u)); d.bn = data.holder_name || 'Regele'; d.em = { ghost: 1 }; }
   else { d.k = TW.kb(S.lvl) * TT.CFG.guardK; d.bn = 'Garda Regală'; d.em = { nm: ['Garda Regală'], hm: 1, am: 1, dm: 1 }; }
   S.d = d; startF(true); terFrom(); S.tab = 'c'; S.msg = 'Te lupți pentru Tronul de Argint: ' + d.bn + '.';
-  if (S.auto !== false) { autoRun(); return; } go();
+  if (S.auto !== false) { if (typeof fxAutoRun === 'function') fxAutoRun(); else autoRun(); return; } go();
 }
 /* unitățile fantomei înlocuiesc inamicii generați (apelat din terEm) */
 function tronGhostUnits(es, d) {
