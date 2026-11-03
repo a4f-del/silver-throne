@@ -12,7 +12,7 @@
    Se încarcă înaintea scriptului din pagină.
    ========================================================================== */
 const GH_TAB = { a: 'Sat', c: 'Coborâre', m: 'Hartă', r: 'Tron', e: 'Echipă' };
-const GH_MT = { h: 'Harta', l: 'Harta', b: 'Clasament', k: 'Campanie', t: 'Teritorii' };
+const GH_MT = { h: 'Harta', l: 'Lumea', b: 'Clasament', k: 'Campanie', t: 'Teritorii' };
 const ghQ = s => [...document.querySelectorAll(s)].filter(e => e.offsetParent !== null || e instanceof SVGElement);
 const ghB = (s, on) => ghQ('#v button[onclick^="' + s + '"]').filter(b => !on || !b.disabled);
 
@@ -31,14 +31,14 @@ const GHID = [
         const u = S.ui || {}; if (u.t != 'w') return ghQ('#v select[onchange^="ui(\'t\'"]'); if (+u.r !== 0) return ghQ('#v select[onchange^="ui(\'r\'"]'); return ghB('craft('); }
       const m = ghQ('#lgm .ipk-c button.p'); if (m.length) return m.slice(0, 1); const w = ghQ('#v button[onclick="invPick(\'w\')"]'); return w.length ? w : ghB('invPick(').concat(ghB('equip(')).slice(0, 1);
     },
-    d: 'Echipamentul se face în <b>Topitorie</b>: alege <b>Armă</b>, raritatea <b>Comun</b>, apasă <b>„Forjează”</b>, apoi <b>„Ridică”</b> (dacă eșuează, primești jumătate din materiale și mai încerci o dată). Du-te apoi în <b>Echipă</b>: la <b>Armă</b> apasă <b>„Alege”</b>, apoi <b>„Pune”</b>.' },
+    d: 'Echipamentul se face în <b>Topitorie</b>: alege <b>Armă</b>, raritatea <b>Comun</b>, apasă <b>„Forjează”</b>, apoi <b>„Ridică”</b> (forjarea asta reușește mereu). Du-te apoi în <b>Echipă</b>: la <b>Armă</b> apasă <b>„Alege”</b>, apoi <b>„Pune”</b>.' },
   { t: 'Antrenează eroul', p: { t: 'a', v: 't' }, c: () => C('t') >= 1, r: { g: 60 }, k: () => ghB('train(', 1).slice(0, 1),
     d: 'În <b>zona de antrenament</b> transformi aurul în putere pentru erou (iar mercenarii își trag puterea din el): Forță, Rezistență, Agilitate. Pricepere și Negoț ajută toată echipa. Antrenează o dată.' },
   { t: 'Hanul', p: { t: 'a', v: 'h' }, c: () => mrHas('Războinic') && !mrAll().some(f => f.nn), r: { g: 40 },
     k: () => { if ((S.mrOff || []).includes('Războinic')) return ghB("mrRecruit('Războinic')"); const n = ghQ('#mr-m button[onclick="mrName()"]'); return n.length ? n : ghQ('#v .mr-hc').slice(0, 1); },
-    d: 'La <b>Han</b> stau mercenarii tăi: câte unul din fiecare clasă, pentru totdeauna. Aici ți se alătură <b>Războinicul</b>: apasă „Recrutează”, apoi dă-i un nume. Echipa are 3 locuri; ceilalți stau în rezervă. Mercenarii cresc în rang luptând, iar puterea lor vine din erou.' },
+    d: 'La <b>Han</b> stau mercenarii tăi: câte unul din fiecare clasă, pentru totdeauna. Aici ți se alătură <b>Războinicul</b>: apasă „Recrutează”, apoi dă-i un nume. Paznicul și Arcașul ți s-au alăturat deja, iar echipa are 3 locuri: Războinicul stă în rezervă până îl pui în echipă. Mercenarii cresc în rang luptând, iar puterea lor vine din erou.' },
   { t: 'Misiunile zilnice', p: { t: 'a', v: 'x' }, c: () => S.tab === 'a' && S.vil === 'x', r: { g: 30 }, k: () => ghB('claim'),
-    d: 'În <b>Misiuni</b> primești în fiecare zi 3 sarcini cu recompense. Le termini jucând normal; revino aici să le revendici. Pe măsură ce înaintezi, mai apar mercenari de recrutat la Han, fără să te întrerupă: un mesaj discret și un semn pe clădire te anunță.' },
+    d: 'În <b>Misiuni</b> primești în fiecare zi mai multe sarcini cu recompense. Le termini jucând normal; revino aici să le revendici. Pe măsură ce înaintezi, mai apar mercenari de recrutat la Han, fără să te întrerupă: un mesaj discret și un semn pe clădire te anunță.' },
   { t: 'Jefuiește un sat', p: { t: 'm', m: 'l' }, c: () => C('r') >= 1, r: { g: 80, o: 20 },
     k: () => { const r = ghB('raid('); return r.length ? r : ghQ('#v g[onclick^="mv("]'); },
     d: 'Pe <b>Hartă</b>, în chenarul auriu din jurul satului tău, e <b>ținutul tău</b>: sate conduse de alții. Atinge unul și apasă <b>„Jefuiește”</b>. Mai târziu le poți și cuceri, ca teritorii.' },
@@ -57,7 +57,7 @@ function ghHints() {
   const L = [], seen = S.ghs || {}, own = () => (S.map ? terOwnedV().length : 0);
   L.push({ k: 'fall', when: () => !S.d && S.fs.some(f => f.hp <= 0), p: { t: 'e' }, done: () => !S.fs.some(f => f.hp <= 0), t: 'Un luptător a căzut',
     k2: () => { const a = ghB('reviveAll('), r = ghB('revive('); return a.length ? a.slice(0, 1) : r.length ? r.slice(0, 1) : ghQ('#v .tm-c.dead').slice(0, 1); },
-    d: 'Luptătorii căzuți nu mai intră în luptă până nu îi ridici. În <b>Echipă</b> apasă <b>„Ridică toți căzuții”</b> (sau „Ridică” la unul singur): costă aur și le lasă câte o cicatrice (−3 viață maximă). Răniții se vindecă mai ieftin, tot de acolo. Infirmeria din sat le face pe amândouă și le scade costul.' });
+    d: 'Luptătorii căzuți nu mai intră în luptă până nu îi ridici. În <b>Echipă</b> apasă <b>„Ridică toți căzuții”</b> (sau „Ridică” la unul singur): costă aur și le lasă câte o cicatrice (puțină viață maximă pierdută, care se vindecă la Infirmerie). Răniții se vindecă mai ieftin, tot de acolo. Infirmeria din sat le face pe amândouă și le scade costul.' });
   L.push({ k: 'atac', when: () => !!(S.al && S.al.length), p: { t: 'a', v: 'z' }, done: () => S.tab === 'a' && S.vil === 'z', t: 'Satul tău a fost atacat',
     d: 'Satele din regiune te atacă din când în când. Dacă apărarea ține, primești tribut; dacă nu, pierzi puțin aur și minereu. În <b>Apărare</b> angajezi străjeri și îmbunătățești Zidul.' });
   L.push({ k: 'spec', when: () => typeof spNeedN === 'function' && spNeedN() > 0, p: { t: 'e' }, done: () => typeof spNeedN === 'function' && spNeedN() === 0, t: 'Prima specializare',
@@ -68,12 +68,12 @@ function ghHints() {
   L.push({ k: 'leg', when: () => S.inv.some(x => x && x.lg), p: { t: 'e' }, done: () => S.tab === 'e', t: 'Un obiect legendar',
     d: 'Ai primit un obiect <b>legendar</b>: are un efect special pe care nu-l găsești la forjă. În <b>Echipă</b>, la slotul lui, apasă „Alege” sau „Înlocuiește” și pune-l pe luptătorul potrivit.' });
   L.push({ k: 'lume', when: () => S.lvl >= 5, p: { t: 'm', m: 'l' }, done: () => S.tab === 'm' && S.mt === 'l', t: 'S-a deschis Lumea',
-    d: 'Ai ajuns la nivelul 5. În <b>Hartă › Lumea</b> vezi satele celorlalți jucători și îi poți ataca. Atacurile au bara lor (18 pe zi), <b>nu costă puncte</b>, iar cel atacat nu pierde nimic. În <b>Clasament</b> vezi cine e cel mai puternic.' });
+    d: 'Ai ajuns la nivelul 5. În <b>Hartă › Lumea</b> vezi satele celorlalți jucători și îi poți ataca. Atacurile au bara lor (18 atacuri, care se reface într-o zi), <b>nu costă puncte</b>, iar cel atacat nu pierde nimic. În <b>Clasament</b> vezi cine e cel mai puternic.' });
   /* fiecare temniță nouă */
   DG.forEach((g, i) => { if (i > 0 && !g.ev && g.lv > 1) L.push({ k: 'dg' + i, when: () => S.lvl >= g.lv, p: { t: 'c' }, done: () => S.tab === 'c', t: 'Temniță nouă: ' + g.n,
     d: `La nivelul ${g.lv} s-a deschis <b>${g.n}</b>, în Coborâre: ${g.rooms} camere, căpitanul ${g.bn}${g.rm >= 2 ? ' și materiale mai rare' : ''}. Lupte mai grele, pradă mai bună.` }); });
-  L.push({ k: 'camp', when: () => S.lvl >= 2 && !!(S.ter && S.ter.camps && S.ter.camps.length), p: { t: 'm', m: 'l' }, done: () => S.tab === 'm' && (S.mt === 'h' || !S.mt ? 'l' : S.mt) === 'h', t: 'Tabere pe hartă',
-    d: 'Pe <b>Hartă</b>, în Regiune, apar <b>tabere</b> de bandiți care pleacă după câteva ore. Au mai multe lupte la rând și un căpitan, iar prada e mai bună decât la un jaf. Le vezi și în panoul „Acum”, cu timpul rămas.' });
+  L.push({ k: 'camp', when: () => S.lvl >= 2 && !!(S.ter && S.ter.camps && S.ter.camps.length), p: { t: 'm', m: 'l' }, done: () => S.tab === 'm' && (S.mt === 'h' || !S.mt ? 'l' : S.mt) === 'l', t: 'Tabere pe hartă',
+    d: 'Pe <b>Hartă › Lumea</b> apar <b>tabere</b> de bandiți care pleacă după câteva ore. Au mai multe lupte la rând și un căpitan, iar prada e mai bună decât la un jaf. Le vezi și în panoul „Acum”, cu timpul rămas.' });
   L.push({ k: 'conq', when: () => !!S.map && MPV().vs.some(v => v.o !== 'p' && (v.rw || 0) >= TP.conq.raids), p: { t: 'm', m: 'l' }, done: () => own() > 0, t: 'Poți cuceri un sat',
     d: `Ai jefuit un sat de ${TP.conq.raids} ori: acum îl poți <b>cuceri</b>. Pe Hartă, atinge-l și alege „Cucerește” (costă puncte și o taxă în aur). Un sat cucerit îți aduce bonusuri zilnice, dar are și o întreținere; le vezi la <b>Teritorii</b>.` });
   L.push({ k: 'fort', when: () => S.lvl >= TP.fort.lv && own() >= 1, p: { t: 'm', m: 't' }, done: () => S.tab === 'm' && S.mt === 't', t: 'Cetatea regiunii',
@@ -151,12 +151,14 @@ function ghSeen(h) { S.ghs[h.k] = 1; (h.also || []).forEach(k => { S.ghs[k] = 1;
 function ghHintOk() { const h = ghHint(); if (h) ghSeen(h); go(); }
 function ghHintOff() { S.ghOff = 1; go(); }
 
+/* sfatul „Un luptător a căzut” nu poate apărea cât timp ghidul e activ, dar e urgent: îl lipim de pasul curent */
+const ghFallNote = () => { try { return (!S.d && S.fs.some(f => f.hp <= 0)) ? '<div class="gh-d">⚠ <b>Un luptător a căzut.</b> În <b>Echipă</b> apasă <b>„Ridică toți căzuții”</b> (costă aur și lasă o cicatrice); până atunci nu poate lupta.</div>' : ''; } catch (e) { return ''; } };
 function tuH() {
   if (S.tu == null) return '';
   if (S.tu >= 0 && GHID[S.tu]) {
     const st = GHID[S.tu], n = GHID.length - 2, there = ghThere(st.p);
     const btn = st.e ? `<button class="p" onclick="tuSkip()">Închide ghidul</button>` : st.n ? `<button class="p" onclick="tuNext()">${S.tu === 0 ? 'Începe' : 'Mai departe'}</button>` : '';
-    return `<section class="gh"><h2>Ghid${S.tu > 0 && !st.e ? ` <span class="gh-n">${S.tu}/${n}</span>` : ''}: ${st.t}</h2><div class="gh-d">${st.d}</div>${st.p ? ghCrumb(st.p) : ''}`
+    return `<section class="gh"><h2>Ghid${S.tu > 0 && !st.e ? ` <span class="gh-n">${S.tu}/${n}</span>` : ''}: ${st.t}</h2><div class="gh-d">${st.d}</div>${ghFallNote()}${st.p ? ghCrumb(st.p) : ''}`
       + `<div class="gh-a">${btn}${st.p && !there ? `<button class="gh-l" onclick="tuGo()">Nu găsesc, du-mă acolo</button>` : ''}${st.e ? '' : `<button class="gh-l" onclick="tuSkip()">Sari peste ghid</button>`}</div></section>`;
   }
   const h = ghHint(); if (!h) return '';
@@ -165,6 +167,8 @@ function tuH() {
 }
 
 /* ------------------------------------------------------------------ CE POȚI FACE ACUM */
+/* are materialele (și fragmentele epice) pentru obiectul ales acum în Topitorie? */
+const ghCanCraft = () => { try { const nn = nd(S.ui); return Object.keys(nn).every(k => have(k) >= nn[k]) && !(S.ui.r == 3 && (S.frag || 0) < FE); } catch (e) { return true; } };
 /* doar acțiunile disponibile ACUM și fără puncte; apare în Sat și Coborâre când nu mai ai puncte */
 function ghIdle() {
   try {
@@ -173,7 +177,7 @@ function ghIdle() {
     const add = (ic, t, act) => it.push(`<button class="gh-i" onclick="${act}"><span class="gh-ic">${ic}</span><span>${t}</span><b>›</b></button>`);
     const rdy = typeof sdForgeReady === 'function' ? sdForgeReady() : 0, free = S.forge.slice(0, S.slots).some(x => !x);
     if (rdy) add('✔', `Ridică ${rdy === 1 ? 'obiectul forjat' : rdy + ' obiecte forjate'}`, "sdGo('a','vil','a')");
-    else if (free) add('⚒', 'Forjează: ai un loc liber în Topitorie', "sdGo('a','vil','a')");
+    else if (free && ghCanCraft()) add('⚒', 'Forjează: ai un loc liber în Topitorie', "sdGo('a','vil','a')");
     if (dmReady() > 0) add('🎯', 'Revendică recompensele misiunilor', "sdGo('a','vil','x')");
     const s = ST(), tc = ['f', 'r', 'a', 'p', 'n'].filter(k => s[k] < smax()).map(k => stc(s[k])).sort((a, b) => a - b)[0];
     if (tc != null && tc <= g) add('💪', `Antrenează eroul (de la ${tc} aur)`, "sdGo('a','vil','t')");

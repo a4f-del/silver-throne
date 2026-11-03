@@ -682,7 +682,7 @@ function terLegend() {
 }
 function terTabs() {
   const k = S.mt === 'h' || !S.mt ? 'l' : S.mt, r = cmpReady();
-  return `<div class="tabs">${[['l', 'Harta'], ['k', 'Campanie' + (r ? ' ●' : '')], ['t', 'Teritorii']].map(([x, n]) => `<button${x == k ? ' class="p"' : ''} onclick="mtab('${x}')">${n}</button>`).join('')}</div>`;
+  return `<div class="tabs">${[['l', 'Lumea'], ['k', 'Campanie' + (r ? ' ●' : '')], ['t', 'Teritorii']].map(([x, n]) => `<button${x == k ? ' class="p"' : ''} onclick="mtab('${x}')">${n}</button>`).join('')}</div>`;
 }
 function mtab(k) { S.mt = k; S.msg = ''; go(); }
 function vTer() {

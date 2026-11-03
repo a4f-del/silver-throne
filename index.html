@@ -189,10 +189,10 @@ main{padding:8px 24px;max-width:940px}
 <script src="world-data.js?v=2026.11.03-10"></script>
 <script src="tron-logic.js?v=2026.11.03-10"></script>
 <script src="cladiri-art.js?v=2026.11.03-10"></script>
-<script src="teritorii.js?v=2026.11.03-10"></script>
+<script src="teritorii.js?v=2026.11.03-11"></script>
 <script src="inventar.js?v=2026.11.03-10"></script>
 <script src="panou.js?v=2026.11.03-10"></script>
-<script src="ghid.js?v=2026.11.03-10"></script>
+<script src="ghid.js?v=2026.11.03-11"></script>
 <script src="mercenari.js?v=2026.11.03-10"></script>
 <script src="drum.js?v=2026.11.03-10"></script>
 <script src="specializari.js?v=2026.11.03-10"></script>
@@ -301,7 +301,7 @@ function chance(l,r,q){const d=l-S.lvl;let b=d>0?Math.max(10,40-5*(d-1)):d==0?55
 const cost=(l,r)=>Math.round(RAR[r].cost*(1+l*.3));
 function craft(){const u=S.ui,nn=nd(u),i=S.forge.findIndex(x=>!x);S.msg='';
  if(i<0)S.msg='Toate sloturile sunt ocupate.';else if(u.r==3&&(S.frag||0)<FE)S.msg=`Pentru un Epic îți trebuie ${FE} fragmente epice (ai ${S.frag||0}).`;else if(Object.keys(nn).some(k=>have(k)<nn[k]))S.msg='Nu ai destule materiale.';
- else{cn('f');for(const k in nn)take(k,nn[k]);const ok=(S.tu>=0&&S.tu<=3)||Math.random()*100<chance(u.l,u.r,u.q);   /* forjarea din ghid reușește mereu, altfel ghidul s-ar bloca la „Echipează arma” */if(ok)S.pity=0;else S.pity++;if(ok&&u.r==3)S.frag-=FE;S.forge[i]={end:Date.now()+fDur(u),ok,cm:nn,item:ok?mkItem(u.t,u.l,u.r,u.p,u.s,u.q,u.t=='w'?wfUi():null):null,label:SLN[u.t]+' '+RAR[u.r].n+' niv. '+u.l}}
+ else{cn('f');for(const k in nn)take(k,nn[k]);const ok=(S.tu>=0&&S.tu<=3&&u.r==0)||Math.random()*100<chance(u.l,u.r,u.q);   /* forjarea Comună din ghid reușește mereu, altfel ghidul s-ar bloca la „Echipează arma” */if(ok)S.pity=0;else S.pity++;if(ok&&u.r==3)S.frag-=FE;S.forge[i]={end:Date.now()+fDur(u),ok,cm:nn,item:ok?mkItem(u.t,u.l,u.r,u.p,u.s,u.q,u.t=='w'?wfUi():null):null,label:SLN[u.t]+' '+RAR[u.r].n+' niv. '+u.l}}
  go()}
 function collect(i){cn('c');const s=S.forge[i];if(s.ok){S.inv.push(s.item);S.msg='Reușit: '+s.item.name+'.'}else{const cm=s.cm||{ore:s.c||0};for(const k in cm)give(k,Math.floor(cm[k]/2));S.msg='Forjarea a eșuat. Recuperezi jumătate din materiale.'}S.forge[i]=null;go()}
 function ui(k,v){S.ui[k]=k=='t'?v:+v;S.msg='';go()}
