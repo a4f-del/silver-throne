@@ -31,7 +31,7 @@ function admBtn() {
 
 /* acțiunile panoului */
 function admDo(k, v) {
-  const lvl = n => { S.lvl = Math.max(1, Math.min(100, n)); S.xp = 0; S.pts = MXP(); S.ptsT = Date.now(); };
+  const lvl = n => { S.lvl = Math.max(1, Math.min(typeof LMAX !== 'undefined' ? LMAX : 50, n)); S.xp = 0; S.pts = MXP(); S.ptsT = Date.now(); };
   const mats = n => { for (const x of AFM) give(x, n); for (const r of [1, 2, 3]) for (let q = 0; q < 5; q++) give(RM[r] + q, Math.max(1, Math.round(n / 4))); };
   const all = () => [...S.fs, ...S.rs, ...(S.gd || [])];
   let m = '';
@@ -76,7 +76,7 @@ function admDraw() {
 <div class="adm-g"><span>Minereu · ${S.ore}</span><div class="adm-bs">${b('ore', 1000, '+1.000')}${b('ore', 10000, '+10.000')}</div></div>
 <div class="adm-g"><span>Materiale</span><div class="adm-bs">${b('mats', 100, '+100 din fiecare')}${b('mats', 1000, '+1.000 din fiecare')}</div></div>
 <div class="adm-g"><span>Puncte · ${S.pts}</span><div class="adm-bs">${b('pts', 0, 'Umple')}${b('pts', 100, '+100')}</div></div>
-<div class="adm-g"><span>Nivel · ${S.lvl}</span><div class="adm-bs">${b('lvl', 1, '+1')}${b('lvl', 5, '+5')}${b('lvl', 10, '+10')}<input id="adm-lv" type="number" min="1" max="100" placeholder="nivel" aria-label="Nivel">${b('setlvl', 0, 'Setează')}</div></div>
+<div class="adm-g"><span>Nivel · ${S.lvl}</span><div class="adm-bs">${b('lvl', 1, '+1')}${b('lvl', 5, '+5')}${b('lvl', 10, '+10')}<input id="adm-lv" type="number" min="1" max="50" placeholder="nivel" aria-label="Nivel">${b('setlvl', 0, 'Setează')}</div></div>
 <div class="adm-g"><span>Echipă</span><div class="adm-bs">${b('heal', 0, 'Vindecă tot')}${b('scars', 0, 'Șterge cicatricile')}${b('fame', 50, '+50 faimă')}${b('fame', 1000, 'Rang maxim')}</div></div>
 <div class="adm-g"><span>Timp</span><div class="adm-bs">${b('forge', 0, 'Termină forja')}${b('exp', 0, 'Termină expedițiile')}${b('daily', 0, 'Cufăr zilnic din nou')}</div></div>
 <div class="adm-g"><span>Obiecte</span><div class="adm-bs">${b('lg', 0, 'Armă legendară')}${b('prem', 0, 'Premium: ' + (S.prem ? 'pornit' : 'oprit'))}</div></div>

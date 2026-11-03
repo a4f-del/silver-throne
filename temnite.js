@@ -20,7 +20,7 @@ const TMN = {
 };
 const tmnImg = n => (TMN.dg[n] ? `imagini/temnite/${TMN.dg[n]}.jpg` : null);
 const tmnBoss = n => TMN.boss[n] || null;
-const tmnStars = k => { const n = Math.max(1, Math.min(5, Math.round((k - 1) / 0.95) + 1)); return `<span class="dg-st" title="Dificultate ${n} din 5">${'★'.repeat(n)}<i>${'★'.repeat(5 - n)}</i></span>`; };
+const tmnStars = lv => { const n = lv < 4 ? 1 : lv < 13 ? 2 : lv < 24 ? 3 : lv < 38 ? 4 : 5;   /* după nivelul temniței (tăria monștrilor crește odată cu tine) */ return `<span class="dg-st" title="Dificultate ${n} din 5">${'★'.repeat(n)}<i>${'★'.repeat(5 - n)}</i></span>`; };
 const tmnMat = g => (g.rm >= 3 ? 'cristale, esențe și calități rare' : g.rm == 2 ? 'cristale rare, calități medii' : 'cristale comune');
 
 /* ------------------------------------------------------------------ COBORÂREA */
@@ -35,17 +35,23 @@ function vDung() {
       + `<div class="dg-img">${img ? `<img class="dg-bg" src="${img}" alt="" loading="lazy" onerror="this.remove()">` : ''}`
       + (i === rec ? '<span class="dg-tag">Recomandat</span>' : '') + (lock ? `<span class="dg-lock">🔒 nivel ${g.lv}</span>` : '')
       + (b ? `<span class="dg-boss" style="--aura:${b[1]}" title="Căpitan: ${g.bn}"><img src="imagini/monstri/${b[0]}.jpg" alt="" loading="lazy" onerror="this.parentNode.remove()"></span>` : '') + '</div>'
-      + `<div class="dg-b"><div class="dg-h"><b>${g.n}</b>${tmnStars(g.k)}</div><div class="mute dg-i">nivel ${g.lv} · ${g.rooms - 1} monștri + căpitan · căpitan: ${g.bn}</div><div class="mute dg-i">Pradă: ${tmnMat(g)}</div>`
+      + `<div class="dg-b"><div class="dg-h"><b>${g.n}</b>${tmnStars(g.lv)}</div><div class="mute dg-i">nivel ${g.lv} · ${g.rooms - 1} monștri + căpitan · căpitan: ${g.bn}</div><div class="mute dg-i">Pradă: ${tmnMat(g)}</div>${tmnCtr(g)}`
       + `${!lock ? `<button class="p dg-enter" onclick="dToggle(${i})">Intră</button>` : ''}</div></div>`;
   };
   const shown = list.filter(([g]) => S.lvl + 10 >= g.lv);   /* ca înainte: temnițele mult peste nivel rămân ascunse */
   return tmnEvent() + `<section class="dg-sec"><h2>Temnițe</h2><div class="dg-grid">${shown.map(card).join('')}</div></section>`;
 }
+/* pe card: ce clasă contracarează căpitanul (trepte.js: TR_C) și dacă o ai în echipă */
+function tmnCtr(g) {
+  const D = typeof trDef === 'function' && trDef(g.n), c = D && typeof TR_C !== 'undefined' && TR_C[D.a]; if (!c) return '';
+  const on = S.fs.some(f => f.c === c), any = [...S.fs, ...S.rs].some(f => f.c === c);
+  return `<div class="dg-i dg-ctr${on ? ' on' : ''}" title="${tEsc(TR_A[D.a])}">${on ? '✔' : '⚑'} Căpitanul e mai slab contra: <b>${c}</b>${on ? '' : any ? ' (e în rezervă)' : ''}</div>`;
+}
 function tmnEvent() {
   const i = DG.findIndex(g => g.ev); if (i < 0) return '';
   const g = DG[i], e = evs(), ok = S.lvl >= g.lv, b = tmnBoss(g.bn), img = tmnImg(g.n), keys = [0, 1, 2].map(k => `<i class="${k < e.k ? 'on' : ''}">🗝</i>`).join('');
   return `<section class="dg-ev"><div class="dg-img">${img ? `<img class="dg-bg" src="${img}" alt="" loading="lazy" onerror="this.remove()">` : ''}<span class="dg-tag ev">Eveniment săptămânal</span>${b ? `<span class="dg-boss big" style="--aura:${b[1]}"><img src="imagini/monstri/${b[0]}.jpg" alt="" loading="lazy" onerror="this.parentNode.remove()"></span>` : ''}</div>`
-    + `<div class="dg-b"><div class="dg-h"><b>${g.n}</b>${tmnStars(1.4 + S.lvl * 0.055)}</div><div class="dg-keys">${keys}<span class="mute">${e.k} din 3 chei · se refac în ${evLeft()} ${evLeft() == 1 ? 'zi' : 'zile'}</span></div>`
+    + `<div class="dg-b"><div class="dg-h"><b>${g.n}</b>${tmnStars(13)}</div><div class="dg-keys">${keys}<span class="mute">${e.k} din 3 chei · se refac în ${evLeft()} ${evLeft() == 1 ? 'zi' : 'zile'}</span></div>`
     + `<div class="mute dg-i"><b class="dg-free">Fără puncte la intrare</b>: cere doar o cheie, iar căpitanul nu costă nimic; vindecarea între camere costă tot 2 puncte. Căpitan: ${g.bn}; la el ai 60% șansă la o relicvă de nivelul tău.</div>`
     + `<button class="p" onclick="startD(${i})"${ok && e.k > 0 ? '' : ' disabled'}>Intră (1 cheie)${ok ? '' : ', nivel ' + g.lv}</button></div></section>`;
 }
@@ -69,7 +75,8 @@ function bossMini(n) { const b = tmnBoss(n); return b ? `<span class="eb-mini" s
 (function () {
   if (typeof document === 'undefined' || !document.head) return;
   const st = document.createElement('style');
-  st.textContent = `
+  st.textContent = `.dg-ctr{font-size:12.5px;color:#f0b07b}.dg-ctr.on{color:#9be0a6}
+
 .dg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
 .dg-card{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#101416;box-shadow:0 6px 18px #0009;transition:transform .15s,border-color .15s}
 .dg-card:hover{transform:translateY(-2px);border-color:var(--gold)}

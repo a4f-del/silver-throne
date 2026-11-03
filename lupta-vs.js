@@ -2,6 +2,7 @@
    Silver Throne — lupta-vs.js
    Cardul „VS” de la începutul fiecărei lupte: echipa ta (stânga) față în față cu adversarul (dreapta),
    cu Viață, Atac, Apărare și Critic pentru fiecare parte și o estimare a șanselor.
+   Când șansele nu sunt bune, dedesubt apare „Ce-ți lipsește” (vsTips): viață, sloturi goale, echipament vechi sau Comun, antrenament.
    Stă în pagina temniței, deasupra luptei, până apeși „Mai departe” sau „Ieși cu prada”: mare la căpitani,
    raiduri, Lume și Tron, mai mic la camerele obișnuite. Apare la fiecare luptă și nu poate fi oprit sau ascuns.
    Apelat din startF (index.html), după ce inamicii sunt pregătiți. Se încarcă înaintea scriptului din pagină.
@@ -22,6 +23,21 @@ function vsOdds(a, b) {
   const r = (a.hp * a.eff) / Math.max(1, b.hp * b.eff);
   return r > 1.8 ? ['Avantaj clar', 'g2'] : r > 1.15 ? ['Avantaj', 'g1'] : r > 0.85 ? ['Echilibrat', 'n'] : r > 0.5 ? ['Dezavantaj', 'b1'] : ['Foarte periculos', 'b2'];
 }
+/* „ce-ți lipsește”: sfaturi concrete, în ordinea în care ajută cel mai mult (reglate prin simulare: de la nivelul 13,
+   echipamentul Magic+ și antrenamentul eroului fac diferența; înainte, viața echipei și sloturile goale) */
+function vsTips(max) {
+  const t = [], al = S.fs, lv = S.lvl, go2 = (k, txt) => `<button type="button" class="vs-go" onclick="tab('a');vil('${k}')">${txt}</button>`;
+  const hp = al.reduce((s, f) => s + Math.max(0, f.hp), 0) / Math.max(1, al.reduce((s, f) => s + mhp(f), 0));
+  if (hp < 0.7) t.push(`Echipa e rănită (${Math.round(hp * 100)}% din viață). Vindec-o înainte de luptă: ${go2('i', 'Infirmerie')}`);
+  const items = al.flatMap(f => SL.filter(k => k !== 'r').map(k => E(f)[k])), empty = items.filter(x => !x).length, have = items.filter(Boolean);
+  if (empty) t.push(`${empty} ${empty === 1 ? 'slot gol' : 'sloturi goale'} în echipă (armă, armură, coif, cizme, bijuterie). ${go2('a', 'Forjează')}`);
+  const avgL = have.length ? have.reduce((s, x) => s + (x.l || 1), 0) / have.length : lv;
+  if (have.length && avgL < lv - 4) t.push(`Echipamentul e în medie de nivel ${Math.round(avgL)}, iar tu ești la ${lv}. ${go2('a', 'Forjează piese noi')}`);
+  if (lv >= 10 && have.length && have.filter(x => (x.r || 0) === 0).length > have.length / 2) t.push(`Majoritatea pieselor sunt Comune; de la nivelul 13 îți trebuie Magic sau mai bune. ${go2('a', 'Topitorie')}`);
+  const s = ST(), cap = smax();
+  if (lv >= 10 && (s.f + s.r) / 2 < cap * 0.25) t.push(`Eroul e neantrenat: Forță ${s.f}, Rezistență ${s.r} din ${cap}. Câteva ranguri ajung, sunt ieftine. ${go2('t', 'Antrenament')}`);
+  return t.slice(0, max || 2);
+}
 const vsStats = s => `<div class="vs-st"><span><i>❤</i><b>${Math.round(s.hp)}</b><small>/${Math.round(s.mh)} viață</small></span><span><i>⚔</i><b>${s.atk}</b><small>atac</small></span><span><i>🛡</i><b>${s.def}</b><small>apărare</small></span><span><i>✦</i><b>${s.crit}%</b><small>critic</small></span></div>`;
 const vsMonster = `<svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="vs-mg"><stop offset="0" stop-color="#5a2420"/><stop offset="1" stop-color="#1a0c0a"/></radialGradient></defs><circle cx="32" cy="32" r="31" fill="url(#vs-mg)"/><path d="M18 46L30 20M26 48L38 22M34 50L46 24" stroke="#e8837b" stroke-width="4" stroke-linecap="round" opacity=".9"/></svg>`;
 
@@ -32,7 +48,7 @@ function vsFlash() {
     const enDef = es.length ? es.reduce((s, e) => s + e.def, 0) / es.length : 0;
     const me = vsSide(S.fs, true, enDef), en = vsSide(es, false, me.def), [odds, oc] = vsOdds(me, en);
     const hero = S.fs.find(x => x.h) || S.fs[0], mates = me.al.filter(x => x !== hero).slice(0, 3);
-    const ctx = d.lume ? 'Atac în Lume' : d.tron ? 'Lupta pentru Tron' : d.raid != null ? (d.lbl || 'Raid') + ': ' + (d.rn || d.bn) : (DG[d.di || 0] || {}).n + (boss ? ' · căpitanul' : ` · camera ${d.room} din ${d.rooms}`);
+    const ctx = d.lume ? 'Atac în Lume' : d.tron ? 'Lupta pentru Tron' : d.raid != null ? (d.lbl || 'Raid') + ': ' + (d.rn || d.bn) : (DG[d.di || 0] || {}).n + (boss ? ' · căpitanul' : ` · camera ${d.room + 1} din ${d.rooms}`);
     /* dreapta: căpitanul cu portret, jucătorul atacat, sau monștri obișnuiți */
     const b = boss && typeof tmnBoss === 'function' ? tmnBoss(es[0].n) : null;
     let por, name;
@@ -42,7 +58,8 @@ function vsFlash() {
     VS.last = { big, fresh: true, html: `<div class="vs-card"><div class="vs-ctx">${ctx}</div><div class="vs-row">`
       + `<div class="vs-side l"><div class="vs-ph">${av(hero, big ? 84 : 60)}${mates.length ? `<span class="vs-mates">${mates.map(x => av(x, big ? 30 : 24)).join('')}</span>` : ''}</div><div class="vs-nm">${tEsc(hero.n)}${mates.length ? ` <small>+${mates.length}</small>` : ''}</div>${vsStats(me)}</div>`
       + `<div class="vs-mid"><b>VS</b><small class="vs-odds ${oc}">${odds}</small></div>`
-      + `<div class="vs-side r"><div class="vs-ph">${por}</div><div class="vs-nm">${name}</div>${vsStats(en)}</div></div></div>` };
+      + `<div class="vs-side r"><div class="vs-ph">${por}</div><div class="vs-nm">${name}</div>${vsStats(en)}</div></div>`
+      + (oc === 'n' || oc === 'b1' || oc === 'b2' ? (tp => tp.length ? `<div class="vs-tip"><b>Ce-ți lipsește</b>${tp.map(x => `<div>${x}</div>`).join('')}</div>` : '')(vsTips(2)) : '') + `</div>` };
   } catch (e) { /* cardul nu trebuie să oprească lupta */ }
 }
 /* cardul stă în pagina temniței, deasupra luptei, până treci în camera următoare sau ieși */
@@ -81,6 +98,8 @@ function vsClear() { VS.last = null; }
 .vs-odds{font:700 11.5px Cinzel,serif;padding:2px 8px;border-radius:9px;white-space:nowrap;border:1px solid}
 .vs-odds.g2{color:#9be0a6;border-color:#4fa35e}.vs-odds.g1{color:#c6e8a0;border-color:#7aa046}.vs-odds.n{color:#f0d27a;border-color:#9b7424}.vs-odds.b1{color:#f0b07b;border-color:#c0703a}.vs-odds.b2{color:#ff8a80;border-color:#d4564f}
 
+.vs-tip{margin-top:10px;padding:8px 10px;border-radius:9px;border:1px solid #c0703a66;background:#c0703a14;font-size:13px;line-height:1.4;text-align:left}.vs-tip>b{display:block;font:700 11.5px Cinzel,serif;letter-spacing:.06em;text-transform:uppercase;color:#f0b07b;margin-bottom:3px}.vs-tip>div+div{margin-top:3px}
+.vs-go,.msg .vs-go{width:auto;min-height:0;padding:1px 8px;margin-left:4px;font-size:12px;border-radius:6px;vertical-align:baseline}
 .vs-in.mini .vs-card{padding:7px 12px 10px}.vs-in.mini .vs-ctx{font-size:10.5px;margin-bottom:4px}.vs-in.mini .vs-por{width:60px;height:60px}.vs-in.mini .vs-mid b{font-size:28px}.vs-in.mini .vs-nm{font-size:13.5px}
 .vs-in.mini .vs-st{font-size:12px;gap:1px 8px}
 @keyframes vsIn{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}

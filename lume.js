@@ -261,7 +261,7 @@ function vLume() {
   if (!LUME.loading && (!LUME.st || Date.now() - LUME.at > 45000 || (Date.now() - LUME.at > 8000 && JSON.stringify(lwSnap()) !== LUME.pubSig))) lwSync();
   if (!LUME.st) return `<section><h2>Lumea</h2><p class="mute">${LUME.err ? tEsc(LUME.err) : 'Se încarcă harta lumii…'}</p>${LUME.err ? '<button onclick="lwSync(true)">Încearcă din nou</button>' : ''}</section>`;
   const n = LUME.st.players.length, c = lwCfg();
-  let h = `<section><h2>Harta</h2><div class="mute">Satele tuturor jucătorilor, în jurul Tronului de Argint. În jurul satului tău, în chenarul auriu, e <b>ținutul tău</b>: satele de jefuit și de cucerit, taberele, locurile de interes și zonele din ceață, pe care doar tu le vezi. Acum: <b>${n}</b> ${n === 1 ? 'sat' : 'sate'} de jucători.</div>${LUME.err ? `<p class="r4">${tEsc(LUME.err)}</p>` : ''}${LUME.repErr ? `<p class="r4">Rezultatul ultimului atac nu a ajuns la server (${tEsc(LUME.repErr)}). Se retrimite automat.</p>` : ''}${lwEnBar()}${lwMap()}`;
+  let h = `<section><h2>Harta</h2><div class="mute">Satele tuturor jucătorilor, în jurul Tronului de Argint. În jurul satului tău, în chenarul auriu, e <b>ținutul tău</b>: satele de jefuit și de cucerit, taberele, și locurile de interes, pe care doar tu le vezi. Acum: <b>${n}</b> ${n === 1 ? 'sat' : 'sate'} de jucători.</div>${LUME.err ? `<p class="r4">${tEsc(LUME.err)}</p>` : ''}${LUME.repErr ? `<p class="r4">Rezultatul ultimului atac nu a ajuns la server (${tEsc(LUME.repErr)}). Se retrimite automat.</p>` : ''}${lwEnBar()}${lwMap()}`;
   h += `<div class="st-lg"><span><i style="background:#f0d27a"></i>Satul tău</span><span><i style="background:#c0504a"></i>Poate fi atacat</span><span><i style="background:#7b7f82"></i>Începător (sub nivelul ${c.min_level}) sau atacat recent de tine</span><span>👑 auriu: regele săptămânii · argintiu: pe Tron acum</span><span>Satul crește cu nivelul jucătorului: palisadă la 10, zid și turn la 20, fortificații la 25, castel de la 30</span></div></section>`;
   return h + lwSelPanel() + lwLog() + `<section><h2>Reguli</h2><div class="mute">• Bara are ${c.en_max} atacuri și se reface câte unul la ${c.en_regen_min} de minute, adică ${Math.round(24 * 60 / c.en_regen_min)} pe zi.<br>• Același jucător îl poți ataca o dată la ${c.same_h} ore. Începătorii (sub nivelul ${c.min_level}) nu pot fi atacați și nu pot ataca.<br>• Lupți cu fantoma echipei lui, cu aceleași plafoane ca la Tron. Dacă învingi, iei prada calculată de joc și experiență în plus. Apărătorul nu pierde niciodată nimic, doar află din jurnal.<br>• Satele din Lume nu se pot cuceri; teritoriile rămân în regiunea ta.</div></section>`;
 }
@@ -284,6 +284,9 @@ function lwVal(k, r) {
   if (k === 'tron') return tronHM(r.seconds) + ` <small class="mute">· ${r.crowns} ${r.crowns === 1 ? 'încoronare' : 'încoronări'}</small>`;
   return 'Nivel ' + r.level;
 }
+/* nivelul maxim (50): fum auriu în jurul portretului și o coroană deasupra (clasament și profilul din Lume) */
+const MX_CR = '<svg viewBox="-14 -13 28 22" aria-hidden="true"><defs><linearGradient id="mx-gd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1b8"/><stop offset=".5" stop-color="#f0d27a"/><stop offset="1" stop-color="#a8781c"/></linearGradient></defs><path d="M-11 5L-13-7-6-1 0-11 6-1 13-7 11 5Z" fill="url(#mx-gd)" stroke="#5c430c" stroke-width="1" stroke-linejoin="round"/><rect x="-11" y="4" width="22" height="3.6" rx="1" fill="url(#mx-gd)" stroke="#5c430c" stroke-width=".8"/><circle cx="0" cy="-11" r="1.8" fill="#ff5a5a"/><circle cx="-13" cy="-7" r="1.4" fill="#7cc8ff"/><circle cx="13" cy="-7" r="1.4" fill="#7cc8ff"/></svg>';
+const lwMaxAv = (lv, html, big) => lv >= (typeof LMAX !== 'undefined' ? LMAX : 50) ? `<span class="mx-av${big ? ' big' : ''}" title="Nivel maxim">${html}<i class="mx-s a"></i><i class="mx-s b"></i><i class="mx-s c"></i><b class="mx-cr">${MX_CR}</b></span>` : html;
 function vBoard() {
   const k = LUME.bk, b = LUME.board[k], me = LUME.st && LUME.st.me && LUME.st.me.user_id;
   if (!LUME.bLoad[k] && (!b || Date.now() - (LUME.bAt[k] || 0) > 60000)) lwBoard(k);
@@ -292,7 +295,7 @@ function vBoard() {
   if (!b) return h + `<p class="mute">${LUME.bErr ? tEsc(LUME.bErr) : 'Se încarcă…'}</p></section>`;
   if (!b.rows.length) return h + `<p class="mute">${k === 'tron' ? 'Nu sunt încă date despre domnii la Tron.' : 'Nimeni în clasament încă.'}</p></section>`;
   const medal = r => (r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : r);
-  h += `<div class="lw-board">${b.rows.map(r => `<button class="lw-br${r.id === me ? ' me' : ''}" onclick="lwProfile('${r.id}')"><span class="lw-rk">${medal(r.rank)}</span>${av({ n: r.name, c: (r.hero && r.hero.c) || 'Campion', ic: r.hero && r.hero.ic }, 36)}<span class="lw-bn"><b>${tEsc(r.name)}${r.id === me ? ' <span class="mute">(tu)</span>' : ''}</b><small>${r.title ? '♛ ' + tEsc(r.title) + ' · ' : ''}${tEsc(r.stage_name)}${k !== 'level' ? ' · nivel ' + r.level : ''}</small></span><span class="lw-bv">${lwVal(k, r)}</span></button>`).join('')}</div>`;
+  h += `<div class="lw-board">${b.rows.map(r => `<button class="lw-br${r.id === me ? ' me' : ''}" onclick="lwProfile('${r.id}')"><span class="lw-rk">${medal(r.rank)}</span>${lwMaxAv(r.level, av({ n: r.name, c: (r.hero && r.hero.c) || 'Campion', ic: r.hero && r.hero.ic }, 36))}<span class="lw-bn"><b>${tEsc(r.name)}${r.id === me ? ' <span class="mute">(tu)</span>' : ''}</b><small>${r.title ? '♛ ' + tEsc(r.title) + ' · ' : ''}${tEsc(r.stage_name)}${k !== 'level' ? ' · nivel ' + r.level : ''}</small></span><span class="lw-bv">${lwVal(k, r)}</span></button>`).join('')}</div>`;
   if (b.me && !b.rows.some(r => r.id === me)) h += `<div class="lw-br me static"><span class="lw-rk">${b.me.rank}</span><span class="lw-bn"><b>Tu</b><small>din ${b.total}</small></span><span class="lw-bv">${lwVal(k, b.me)}</span></div>`;
   return h + `<div class="mute" style="margin-top:8px">${b.total > 50 ? `Primii 50 din ${b.total} de jucători.` : `Toți cei ${b.total} ${b.total === 1 ? 'jucător' : 'jucători'}.`} Puterea e suma echipei active: viață + 6 × atac + 10 × apărare. Datele se actualizează când fiecare jucător intră în joc.</div></section>`;
 }
@@ -307,7 +310,7 @@ async function lwProfile(id) {
   const can = !p.me && wp ? lwCan(Object.assign({}, wp, { cd: p.cd })) : null;
   const units = (p.units || []).map(u => `<div class="lwp-u"><b>${tEsc(u.n)}</b><span class="mute">${tEsc(u.c)}</span><span>${lwNum(u.hp)} viață · ${lwNum(u.atk)} atac · ${lwNum(u.def)} apărare</span></div>`).join('');
   const rec = (p.recent || []).map(x => `<div class="row"><span>${x.att ? (x.win ? '⚔ A învins satul lui ' : '⚔ A pierdut la satul lui ') : (x.win ? '🛡 A fost învins de ' : '🛡 L-a respins pe ')}${tEsc(x.other)}</span><span class="mute">${lwAgo(x.t)}</span></div>`).join('');
-  mdl(`<div class="lwp"><div class="lwp-hd">${av({ n: p.hero.n || p.name, c: p.hero.c || 'Campion', ic: p.hero.ic }, 76)}<div><h3>${tEsc(p.name)}${p.me ? ' <span class="mute">(tu)</span>' : ''}</h3><div class="lwp-t">${p.title ? '♛ ' + tEsc(p.title) : '<span class="mute">Fără titlu</span>'}</div><div class="mute">${tEsc(p.stage_name)} · joacă din ${lwDate(p.joined)}</div></div></div>`
+  mdl(`<div class="lwp"><div class="lwp-hd">${lwMaxAv(p.level, av({ n: p.hero.n || p.name, c: p.hero.c || 'Campion', ic: p.hero.ic }, 76), 1)}<div><h3>${tEsc(p.name)}${p.me ? ' <span class="mute">(tu)</span>' : ''}</h3><div class="lwp-t">${p.title ? '♛ ' + tEsc(p.title) : '<span class="mute">Fără titlu</span>'}</div><div class="mute">${tEsc(p.stage_name)} · joacă din ${lwDate(p.joined)}</div></div></div>`
     + `<div class="lw-stats"><div><b>${p.level}</b><span>Nivel</span></div><div><b>${lwNum(p.power)}</b><span>Putere</span></div><div><b>${p.territories}</b><span>Teritorii</span></div></div>`
     + `<div class="lwp-rk mute">Locul <b>${rk.level}</b> la nivel și <b>${rk.power}</b> la putere, din ${rk.total} jucători.</div>`
     + `<h4>Echipa</h4>${units || '<p class="mute">Nepublicată.</p>'}`
@@ -361,7 +364,16 @@ if (typeof setInterval === 'function') setInterval(() => {
 (function () {
   if (typeof document === 'undefined' || !document.head) return;
   const st = document.createElement('style');
-  st.textContent = `
+  st.textContent = `.mx-av{position:relative;display:inline-flex;flex:none;border-radius:50%;box-shadow:0 0 0 2px #f0d27a,0 0 12px #f0d27aaa;margin-top:8px}
+.mx-av>:first-child{position:relative;z-index:1}
+.mx-s{position:absolute;left:50%;bottom:-10%;width:120%;height:120%;border-radius:50%;background:radial-gradient(circle,#fff0b8ee,#e8c25a88 40%,transparent 70%);filter:blur(5px);transform:translate(-50%,0) scale(.6);opacity:0;animation:mxSmk 3.4s ease-out infinite;z-index:0;pointer-events:none}
+.mx-s.b{animation-delay:1.1s;left:30%}.mx-s.c{animation-delay:2.2s;left:70%}
+.mx-cr{position:absolute;left:50%;top:-15px;width:26px;height:20px;transform:translateX(-50%);z-index:2;filter:drop-shadow(0 0 5px #f0d27a) drop-shadow(0 1px 1px #000)}
+.mx-cr svg{width:100%;height:100%;display:block}
+.mx-av.big{margin-top:14px;box-shadow:0 0 0 3px #f0d27a,0 0 22px #f0d27acc}.mx-av.big .mx-cr{top:-26px;width:44px;height:34px}
+@keyframes mxSmk{0%{opacity:0;transform:translate(-50%,0) scale(.6)}25%{opacity:1}100%{opacity:0;transform:translate(-50%,-80%) scale(1.4)}}
+@media (prefers-reduced-motion:reduce){.mx-s{animation:none;opacity:.4}}
+
 #lwmap{display:block;width:100%;aspect-ratio:16/10;cursor:grab;touch-action:none}
 #lwmap.drag{cursor:grabbing}
 .lw-map{position:relative;border:7px solid #4a3220;border-radius:6px;box-shadow:inset 0 0 0 2px #8a6a3e,0 0 0 1px #1a120a,0 10px 30px #000a;background:#3d5530}

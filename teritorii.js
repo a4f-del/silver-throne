@@ -41,7 +41,9 @@ function terInit() {
     t.fort = Object.assign({ x: L.fort.x, y: L.fort.y, o: 'n', cq: 0, sg: 0, lost: 0 }, t.fort || {});
     t.poi = (t.poi || L.poi).map(p => Object.assign({ cd: 0, dep: [] }, p));
   }
-  if (!t.fog.length) terRev(TW.CAP[0], TW.CAP[1], 1);
+  /* fără ceață: tot ținutul e vizibil de la început (satele, locurile de interes, Bastionul) */
+  if (t.fog.length < TW.GW * TW.GH) { t.fog = []; for (let i = 0; i < TW.GW; i++) for (let j = 0; j < TW.GH; j++) t.fog.push(i + ',' + j); }
+  t.poi.forEach(p => { t.dsc[p.id] = 1; }); t.dsc.fort = 1;
   m.vs.forEach(v => { if (v.o !== 'p') v.o = 'n'; v.g = Math.max(0, Math.min(TP.gar.max, Math.floor(+v.g || 0))); });
   t.fort.g = Math.max(0, Math.min(TP.gar.max, Math.floor(+t.fort.g || 0)));
   const c = (S.camp && typeof S.camp === 'object') ? S.camp : (S.camp = {});
@@ -287,7 +289,7 @@ function poiGo(id) {
   spend(c); const now = Date.now();
   if (p.t === 'tu') {
     const cells = terRev(p.x, p.y, 2), g = Math.round(TW.rawGold(S.lvl) * .3); S.gold += g; p.cd = Infinity; p.cd = now + 36500 * 864e5; t.poiT.tu = 1; t.st.poi++;
-    S.msg = 'Din turn vezi mult mai departe (' + cells.length + ' zone noi, +' + g + ' aur). ' + terDisc(cells) + terClue(p.id); S.msel = null; return go();
+    S.msg = 'Din vârful turnului cercetezi ținutul (+' + g + ' aur). ' + terClue(p.id); S.msel = null; return go();
   }
   p.cd = now + T.cd * 3600000; t.poiT[p.t] = 1; t.st.poi++;
   let f = 1; if (p.t === 'pe') { p.dep = (p.dep || []).filter(ts => ts > now - 48 * 3600000); f = Math.max(.5, 1 - .25 * p.dep.length); p.dep.push(now); }
@@ -358,7 +360,6 @@ function fortCheck() {
   const t = S.ter, f = t.fort, re = !!f.lost, fee = Math.round(TW.fortFee(S.lvl) * (re ? TP.conq.reFee : 1)), pts = Math.max(1, TP.fort.pts - terB('trav'));
   const n = Object.keys(t.hist).filter(k => k !== 'fort').length;
   const a = [
-    { ok: !!t.dsc.fort, t: 'Fortăreața descoperită (explorează zona sau urcă într-un turn)' },
     { ok: S.lvl >= TP.fort.lv, t: 'Nivel ' + TP.fort.lv + ' (ai ' + S.lvl + ')' },
     { ok: n >= 1, t: 'Cel puțin un sat cucerit vreodată' },
     { ok: S.gold >= fee, t: 'Taxă de asediu: ' + fee + ' aur' },
@@ -438,7 +439,7 @@ function vCamp() {
     h += `<section style="border-left-color:var(--ember)"><h2>Capitolul ${cur.id}: ${cur.nm}</h2><div class="mute">${cur.reg} · recomandat nivel ${cur.lv}${S.lvl < cur.lv ? ' <b class="r4">(ai ' + S.lvl + ')</b>' : ''}</div><p>${cur.tx}</p>` + cur.obj.map(o => `<div class="${objDone(o) ? 'r2' : ''}">${objDone(o) ? '✔' : '○'} ${o.t}${o.n ? ' <span class="mute">(' + objProg(o) + ')</span>' : ''}</div>`).join('') +
       `<div class="row"><span class="mute">Recompensă unică: ${Object.entries(TW.chRw(cur.rw, Math.max(S.lvl, cur.lv))).filter(([, v]) => v).map(([k, v]) => v + ' ' + ({ g: 'aur', o: 'minereu', x: 'exp' })[k]).join(', ')}${cur.rw.item ? ', un obiect' : ''}${cur.rw.relic ? ', o relicvă' : ''}${cur.rw.mat ? ', materiale' : ''}${cur.rw.cr ? ', cristale' : ''}${cur.rw.legend ? ', Sabia Runelor' : ''}</span><button class="p" onclick="cmpClaim(${cur.id})"${ok ? '' : ' disabled'}>Încheie capitolul</button></div></section>`;
   } else h += `<section><h2>Tronul de Argint e al tău</h2><p>Toate cele șase sigilii au ars. Ținutul e liber, iar Tronul Cenușiu își așteaptă regele. Explorarea, taberele și satele rămân deschise.</p></section>`;
-  h += `<section><h2>Obiective secundare</h2><div class="mute">Recompense unice pentru explorare. Se revendică o singură dată.</div>` + TW.SEC.map(s => { const d = objDone(s), cl = S.camp.sec[s.id]; return `<div class="row"><span>${cl ? '✔' : d ? '★' : '○'} <b>${s.nm}</b>: ${s.t} <span class="mute">${s.n ? '(' + objProg(s) + ')' : ''}</span></span>${cl ? '<span class="mute">Revendicat</span>' : `<button class="p" onclick="secClaim('${s.id}')"${d ? '' : ' disabled'}>Revendică</button>`}</div>`; }).join('') + '</section>';
+  h += `<section><h2>Obiective secundare</h2><div class="mute">Recompense unice. Se revendică o singură dată.</div>` + TW.SEC.map(s => { const d = objDone(s), cl = S.camp.sec[s.id]; return `<div class="row"><span>${cl ? '✔' : d ? '★' : '○'} <b>${s.nm}</b>: ${s.t} <span class="mute">${s.n ? '(' + objProg(s) + ')' : ''}</span></span>${cl ? '<span class="mute">Revendicat</span>' : `<button class="p" onclick="secClaim('${s.id}')"${d ? '' : ' disabled'}>Revendică</button>`}</div>`; }).join('') + '</section>';
   const cls = Object.keys(S.ter.cl);
   h += `<section><h2>Jurnal de indicii (${cls.length}/${Object.keys(TW.CLUES).length})</h2>` + (cls.length ? cls.map(k => `<div style="margin:4px 0">• ${TW.CLUES[k]}</div>`).join('') : '<p class="mute">Vizitează ruine, peșteri, sanctuare și turnuri ca să afli ce se întâmplă în ținut.</p>') + '</section>';
   const done = TW.CH.filter(c => S.camp.rw[c.id]); if (done.length) h += `<section><h2>Capitole încheiate</h2>` + done.map(c => `<div style="margin:6px 0"><b>${c.id}. ${c.nm}</b><br><span class="mute">${c.out}</span></div>`).join('') + '</section>';
@@ -643,7 +644,7 @@ function terIcon(x, y, ic, col, sel, onclick, label, badge) {
   return `<g class="st-v${sel ? ' on' : ''}" onclick="${onclick}" tabindex="0" role="button" aria-label="${label}" transform="translate(${x} ${y})"><circle r="14" fill="transparent"/><circle r="10.5" fill="#12181a" fill-opacity=".92" stroke="${col}" stroke-width="1.4"/><text y="4.2" text-anchor="middle" style="font:13px sans-serif" pointer-events="none">${ic}</text>${badge ? `<g transform="translate(8 -9)"><rect x="-8" y="-5" width="16" height="9" rx="3" fill="#0b0e10" stroke="${col}" stroke-width=".6"/><text y="2" text-anchor="middle" fill="${col}" style="font:700 6.5px Alegreya,serif" pointer-events="none">${badge}</text></g>` : ''}${sel ? `<circle r="15" fill="none" stroke="${TCOL}" stroke-width="1.6"/>` : ''}</g>`;
 }
 function terMarks() {
-  const t = S.ter, sl = S.msel, c = p => [p.x * SMCL + SMCL / 2, p.y * SMCL + SMCL / 2]; let s = '';
+  const t = S.ter, sl = S.msel, c = p => smPush(p.x * SMCL + SMCL / 2, p.y * SMCL + SMCL / 2); let s = '';
   t.poi.forEach(p => { if (!terCell(p.x, p.y)) return; const [x, y] = c(p), T = TW.poiT(p.t), left = poiLeft(p); s += terIcon(x, y, T.ic, left > 0 ? '#6b6755' : '#8fb0c8', sl && sl.k === 'p' && sl.a === p.id, `terSel('p','${p.id}')`, T.nm, left > 0 ? '' : '!'); });
   { const f = t.fort; if (terCell(f.x, f.y)) { const [x, y] = c(f); s += terIcon(x, y, TW.FORT.ic, f.o === 'p' ? TCOL : '#c0504a', sl && sl.k === 'f', `terSel('f')`, TW.FORT.nm, f.o === 'p' ? 'tău' : ''); } }
   t.camps.forEach(cp => { const [x, y] = c(cp), T = TW.camp(cp.t), h = Math.max(1, Math.round((cp.exp - Date.now()) / 3600000)); s += terIcon(x, y, T.ic, '#d4564f', sl && sl.k === 'c' && sl.a === cp.id, `terSel('c','${cp.id}')`, T.nm, '☠'.repeat(T.stars) + ' ' + h + 'h'); });
@@ -677,10 +678,10 @@ function terPanel() {
       (f.o === 'p' ? `<div class="row"><span style="color:var(--gold2)"><b>În stăpânirea ta</b>${f.sg > Date.now() ? ' · protejat încă ' + tDur(f.sg - Date.now()) : ''}</span><span class="mute">Întreținere ${Math.round(TW.upk(S.lvl, 3, TP, f.g) * TP.fort.upkMul)} aur/zi</span></div>` + garRow('f', f) + abRow('f', 0)
         : (f.lost ? '<div class="r4">Pierdut: recucerire cu taxă redusă și apărători mai slabi.</div>' : '') + c.a.map(x => `<div class="${x.ok ? 'r2' : 'r4'}" style="font-size:15px">${x.ok ? '✔' : '✖'} ${x.t}</div>`).join('') + `<div class="row"><span class="mute">Eșecul nu pierde progresul campaniei.</span><button class="p" onclick="fortGo()"${c.ok ? '' : ' disabled'}>${c.re ? 'Recucerește' : 'Asediază'}</button></div>`) + '</section>';
   }
-  return h || '<p class="mute">Atinge un sat, o tabără sau un loc de pe hartă ca să-l vezi. Zonele întunecate se explorează.</p>';
+  return h || '<p class="mute">Atinge un sat, o tabără sau un loc de pe hartă ca să-l vezi.</p>';
 }
 function terLegend() {
-  return `<div class="st-lg"><span>🏛⛏✦🛒🗼 locuri de interes</span><span><i style="background:#d4564f"></i>tabere (cu timp limitat)</span><span><i style="background:${TCOL}"></i>teritoriile tale</span><span>? zonă de explorat</span></div>`;
+  return `<div class="st-lg"><span>🏛⛏✦🛒🗼 locuri de interes</span><span><i style="background:#d4564f"></i>tabere (cu timp limitat)</span><span><i style="background:${TCOL}"></i>teritoriile tale</span></div>`;
 }
 function terTabs() {
   const k = S.mt === 'h' || !S.mt ? 'l' : S.mt, r = cmpReady();

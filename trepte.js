@@ -139,7 +139,7 @@ function dOddsAt(i, N) {
   finally { S = JSON.parse(snap); Object.assign(window, { go: keep.go, render: keep.render, vsFlash: keep.vs, bhPush: keep.bp, bhAdd: keep.ba }); }
   const v = w < 0 ? null : Math.round(w / N * 100); TR_OC[i] = { k: key, v }; return v;
 }
-/* „Toți până la căpitan”: ia monștrii pe rând, cât timp ai puncte și șansele sunt de cel puțin 50%; se oprește la căpitan */
+/* „Toți până la căpitan” (butonul a fost scos, noiembrie 2026; funcția rămâne nefolosită): ia monștrii pe rând, cât timp ai puncte și șansele sunt de cel puțin 50%; se oprește la căpitan */
 function trAutoL(i) {
   let n = 0, why = ''; const R = window.go; window.go = () => {}; (S.deo = S.deo || {})[i] = true;
   try {
@@ -167,7 +167,6 @@ function trListBtns(i) {
   const D = trDef(g.n), boss = p >= lastIdx;
   return `<div class="tr-blist">${items.join('')}</div>`
     + (boss && D ? `<div class="tr-bx"><span class="tr-ab">Abilitate: ${TR_A[D.a]}</span>${trCtrTxt(D.a)}</div>` : '')
-    + (!boss ? `<button class="tr-auto" onclick="trAutoL(${i})" title="Ia monștrii pe rând cât ai puncte și șanse de cel puțin 50%">Toți până la căpitan</button>` : '')
     + `<button class="tr-close" onclick="dToggle(${i})">‹ Închide</button>`;
 }
 /* Cripta Furtunii (eveniment): fără listă de nume, un singur buton */
@@ -208,7 +207,6 @@ function trPage(i) {
   det += '</div>';
   return `<section class="dg-page"><div class="dg-page-top"><button class="tr-back" onclick="dToggle(${i})">‹ Înapoi</button><h2>${g.n}</h2>${typeof trChips === 'function' ? trChips(i) : ''}</div>`
     + `<div class="tr-tabs">${tabs}</div>${det}`
-    + (!bossNow ? `<button class="tr-auto" onclick="trAutoL(${i})" title="Ia monștrii pe rând cât ai puncte și șanse de cel puțin 50%">Toți până la căpitan</button>` : '')
     + '</section>';
 }
 const trOddsTag = v => v == null ? '' : `<span class="tr-odds ${v >= 75 ? 'ok' : v >= 45 ? 'mid' : 'bad'}">Șanse: ${v}%</span>`;

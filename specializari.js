@@ -155,6 +155,17 @@ function spRoundEnd(L) {
   S.fs.forEach(x => { const s = x._x; if (!s) return; ['ab', 'cb', 'dfb'].forEach(k => { if (s[k] > 0) s[k]--; }); s.sh = 0; });
   const v = spTeam('sf', 4); if (v) { spAlive().forEach(x => { x.hp = Math.min(mhp(x), x.hp + Math.max(1, Math.round(mhp(x) * 0.02))); }); L.push('Echipa își trage sufletul (+2% viață).'); }
 }
+/* Vraciul îngrijește echipa după fiecare luptă câștigată cu monștri, nu în PvP. În temnițe o face deja trBand (trepte.js, +15%);
+   aici: Turnul (mai puțin), raidurile și taberele. În Turn nu există Infirmerie: în afară de Vraci, echipa se odihnește doar la focul
+   de după fiecare străjer (la 10 etaje, turn.js). Reglat prin simulare. */
+const VR_CARE = { pvm: 0.15, turn: 0.08 };
+function vrCare(d) {
+  if (!d || d.lume || d.tron || d.ghost || (d.one && !d.tw)) return '';   /* temnițele: trBand */
+  const v = S.fs.find(x => x.c === 'Vraci' && x.hp > 0); if (!v) return '';
+  const k = d.tw ? VR_CARE.turn : VR_CARE.pvm; let n = 0;
+  S.fs.forEach(x => { if (x.hp > 0 && x.hp < mhp(x)) { x.hp = Math.min(mhp(x), x.hp + Math.round(mhp(x) * k)); n++; } });
+  return n ? ` ${v.n} îngrijește echipa după luptă (+${Math.round(k * 100)}% viață).` : '';
+}
 function spFightStart() { S.fs.forEach(x => { x._x = {}; }); }
 
 /* ------------------------------------------------------------------ FAIMĂ ȘI RANG (win) */

@@ -20,6 +20,9 @@ const lpImg = (src, w, h, x, y, extra) => `<image href="imagini/${src}.webp" x="
 LWA.defs += `<pattern id="lw-grass" patternUnits="userSpaceOnUse" width="440" height="440"><image href="imagini/lume/iarba.jpg" width="440" height="440"/></pattern>
 <radialGradient id="lw-tg"><stop offset="0" stop-color="#9fdcff" stop-opacity=".75"/><stop offset=".45" stop-color="#5cb6ff" stop-opacity=".28"/><stop offset="1" stop-color="#5cb6ff" stop-opacity="0"/></radialGradient>
 <radialGradient id="lw-fl"><stop offset="0" stop-color="#e6f7ff" stop-opacity=".95"/><stop offset=".4" stop-color="#7cc8ff" stop-opacity=".55"/><stop offset="1" stop-color="#7cc8ff" stop-opacity="0"/></radialGradient>
+<radialGradient id="lw-smk"><stop offset="0" stop-color="#fff0b8" stop-opacity=".95"/><stop offset=".45" stop-color="#e8c25a" stop-opacity=".55"/><stop offset="1" stop-color="#c9952a" stop-opacity="0"/></radialGradient>
+<filter id="lw-smkb" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+<filter id="lw-crg" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
 <linearGradient id="lw-beam" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#cfefff" stop-opacity=".75"/><stop offset=".55" stop-color="#9fdcff" stop-opacity=".22"/><stop offset="1" stop-color="#9fdcff" stop-opacity="0"/></linearGradient>`;
 
 /* locul pe hartă: mai departe de centru, ca Tronul mare să aibă loc */
@@ -44,6 +47,17 @@ lwTerrain = function (ps, F) {
   const nearVil = (x, y, m) => ps.some(p => { const [vx, vy] = pos.get(p.id); return Math.hypot(x - vx, (y - vy) * 1.4) < m; });
   const inside = (x, y, m) => Math.hypot(x, y * 1.35) < LWP.TW * 0.62 + m * 0.4 || nearVil(x, y, m + 62) || nearSeg(x, y, 16 + m * 0.2) || (typeof tnInside === 'function' && tnInside(x, y)) || (typeof wnNear === 'function' && (wnList(), wnNear(x, y))) || (typeof twNear === 'function' && twNear(x, y));
   const outer = (x, y) => Math.abs(x) / R.x + Math.abs(y) / R.y > 1;
+  /* decorul nu are voie să atingă satele: se verifică tot desenul (pădurea, muntele), nu doar mijlocul lui */
+  const vbox = ps.map(p => { const [vx, vy] = pos.get(p.id), [, iw, ih, W] = LWP.tier[LWA.tier(p.level)], H = W * ih / iw; return [vx - W * 0.62, vy - H * 0.72, vx + W * 0.62, vy + H * 0.8]; });
+  const dbox = (k, x, y, w) => { const [iw, ih] = LWP.deco[k], h = w * ih / iw; return [x - w * 0.46, y - h * 0.58, x + w * 0.46, y + h * 0.3]; };
+  const hit = (a, b) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1];
+  const busy = (x, y) => Math.hypot(x, y * 1.35) < LWP.TW * 0.7 || nearSeg(x, y, 12) || (typeof tnInside === 'function' && tnInside(x, y)) || (typeof wnNear === 'function' && wnNear(x, y)) || (typeof twNear === 'function' && twNear(x, y));
+  const free = (k, x, y, w) => {
+    const b = dbox(k, x, y, w); if (vbox.some(v => hit(b, v))) return false;
+    for (const sx of [b[0], (b[0] + b[2]) / 2, b[2]]) for (const sy of [b[1], (b[1] + b[3]) / 2, b[3]]) if (busy(sx, sy)) return false;
+    return true;
+  };
+  const place = (k, x, y, w) => { if (free(k, x, y, w)) put(k, x, y, w); };
   let low = `<rect x="${lpF(F.x - 600)}" y="${lpF(F.y - 600)}" width="${lpF(F.w + 1200)}" height="${lpF(F.h + 1200)}" fill="url(#lw-grass)"/>`;
   for (let i = 0; i < Math.round(F.w * F.h / 22000); i++) { const x = F.x + r() * F.w, y = F.y + r() * F.h; low += `<ellipse cx="${lpF(x)}" cy="${lpF(y)}" rx="${lpF(60 + r() * 140)}" ry="${lpF(26 + r() * 60)}" fill="${r() < 0.5 ? '#5f7a45' : '#16241a'}" opacity="${lpF(0.1 + r() * 0.14)}"/>`; }
   /* râul, ca înainte, pe marginea de sus a zonei locuite */
@@ -60,32 +74,48 @@ lwTerrain = function (ps, F) {
   for (let y = F.y - 20; y < top; y += 70) for (let x = F.x - 40; x < F.x + F.w + 40; x += 120) {
     const px = x + (r() - 0.5) * 70, py = y + (r() - 0.5) * 40, edge = Math.min(px - F.x, F.x + F.w - px) / F.w;
     if (!outer(px, py) || inside(px, py, 70)) continue;
-    if (r() < (py < F.y + F.h * 0.1 ? 0.4 : 0.12) + (edge < 0.18 ? 0.3 : 0)) put('munte', px, py, 140 + r() * 110);
+    if (r() < (py < F.y + F.h * 0.1 ? 0.4 : 0.12) + (edge < 0.18 ? 0.3 : 0)) place('munte', px, py, 140 + r() * 110);
   }
   for (let y = top - 40; y < F.y + F.h + 60; y += 95) for (let x = F.x - 40; x < F.x + F.w + 60; x += 135) {
     const px = x + (r() - 0.5) * 80, py = y + (r() - 0.5) * 50;
     if (inside(px, py, 60)) continue;
-    if (outer(px, py)) { if (r() < 0.42) put('padure', px, py, 95 + r() * 120); }
-    else { const k = r(); if (k < 0.09) put('padure', px, py, 80 + r() * 30); else if (k < 0.13) put('pietre', px, py, 78 + r() * 18); }
+    if (outer(px, py)) { if (r() < 0.42) place('padure', px, py, 95 + r() * 120); }
+    else { const k = r(); if (k < 0.09) place('padure', px, py, 80 + r() * 30); else if (k < 0.13) place('pietre', px, py, 78 + r() * 18); }
   }
   LUME.terr = { key, low, high: items.sort((a, b) => a[0] - b[0]).map(x => x[1]).join('') };
   return LUME.terr;
 };
 
 /* ------------------------------------------------------------------ SATELE */
+/* nivelul maxim (50): fum auriu care urcă din sat și o coroană mare deasupra */
+const lpMax = lv => lv >= (typeof LMAX !== 'undefined' ? LMAX : 50);
+function lpSmoke(W, H, top) {
+  let s = `<g class="lw-smk" filter="url(#lw-smkb)" aria-hidden="true">`;
+  for (let i = 0; i < 9; i++) { const x = (i - 4) * W * 0.12, r = W * (0.2 + (i % 3) * 0.05); s += `<circle cx="${lpF(x)}" cy="${lpF(H * 0.12)}" r="${lpF(r)}" fill="url(#lw-smk)" style="animation-delay:${(i * 0.45).toFixed(2)}s"/>`; }
+  return s + `<ellipse cx="0" cy="${lpF(H * 0.22)}" rx="${lpF(W * 0.62)}" ry="${lpF(W * 0.2)}" fill="url(#lw-smk)" class="lw-smkb"/></g>`;
+}
+function lpCrown(top, W) {
+  const k = Math.max(1.6, W / 60);
+  return `<g class="lw-crown" transform="translate(0 ${lpF(top - 14)}) scale(${lpF(k)})" filter="url(#lw-crg)"><title>Nivel maxim</title>`
+    + `<path d="M-11 5L-13-7-6-1 0-11 6-1 13-7 11 5Z" fill="url(#lwa-gd)" stroke="#5c430c" stroke-width="1" stroke-linejoin="round"/>`
+    + `<rect x="-11" y="4" width="22" height="3.6" rx="1" fill="url(#lwa-gd)" stroke="#5c430c" stroke-width=".8"/>`
+    + `<circle cx="0" cy="-11" r="1.8" fill="#ff5a5a"/><circle cx="-13" cy="-7" r="1.4" fill="#7cc8ff"/><circle cx="13" cy="-7" r="1.4" fill="#7cc8ff"/><circle cx="0" cy="5.8" r="1.2" fill="#ff5a5a"/></g>`;
+}
 lwVil = function (p, sel, mine, K) {
   const t = LWA.tier(p.level), [src, iw, ih, W] = LWP.tier[t], H = W * ih / iw, [cx, cy] = lwPos(p), c = lwCfg();
   const prot = p.level < c.min_level, cd = p.cd && p.cd > lwNow(), won = K && K.win && K.win.id === p.id, cur = K && K.cur && K.cur.id === p.id;
-  const nm = (mine ? 'Tu · ' : '') + p.name, top = -H * 0.62;
+  const nm = (mine ? 'Tu · ' : '') + p.name, top = -H * 0.62, mx = lpMax(p.level);
   let h = `<g class="st-v lw-v${sel ? ' on' : ''}${mine ? ' me' : ''}" onclick="lwPick('${p.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lwPick('${p.id}')}" tabindex="0" role="button" aria-label="${tEsc(p.name)}, nivel ${p.level}${mine ? ', satul tău' : ''}" transform="translate(${lpF(cx)} ${lpF(cy)})">`;
   h += `<rect x="${lpF(-W / 2)}" y="${lpF(top)}" width="${lpF(W)}" height="${lpF(H)}" fill="transparent"/>`;
   h += `<ellipse cx="0" cy="${lpF(H * 0.3)}" rx="${lpF(W * 0.46)}" ry="${lpF(W * 0.15)}" fill="#000" opacity=".32"/>`;
   h += `<ellipse class="st-sel" cx="0" cy="${lpF(H * 0.18)}" rx="${lpF(W * 0.6)}" ry="${lpF(W * 0.26)}" fill="none" stroke="#f0d27a" stroke-opacity=".3" stroke-width="7"/>`;
   if (mine) h += `<ellipse cx="0" cy="${lpF(H * 0.2)}" rx="${lpF(W * 0.58)}" ry="${lpF(W * 0.24)}" fill="#f0d27a" fill-opacity=".1" stroke="#f0d27a" stroke-width="1.6" stroke-dasharray="6 4"/>`;
+  if (mx) h += lpSmoke(W, H, top);
   h += lpImg(src, W, H, -W / 2, top);
+  if (mx) h += lpCrown(top, W);
   const fl = mine ? '#f0d27a' : prot || cd ? '#8a8f93' : '#c0504a';
   h += `<g transform="translate(${lpF(-W * 0.44)} ${lpF(-H * 0.12)})"><path d="M0 0V-18" stroke="#2a1d10" stroke-width="1.1"/><path d="M0 -18l9 3-9 3z" fill="${fl}" stroke="#12181a" stroke-width=".5"/></g>`;
-  if (won || cur) h += `<g transform="translate(0 ${lpF(top - 8)}) scale(1.3)"><title>${won ? 'Regele săptămânii ' + K.week : ''}${won && cur ? ' · ' : ''}${cur ? 'Ține Tronul acum' : ''}</title><path d="M-9 4L-7-6-3-1 0-8 3-1 7-6 9 4Z" fill="${won ? 'url(#lwa-gd)' : '#d7dde0'}" stroke="#5c430c" stroke-width="1" stroke-linejoin="round"/>${won && cur ? '<ellipse cx="0" cy="-1" rx="1.6" ry="1.6" fill="#c0504a"/>' : ''}</g>`;
+  if (won || cur) h += `<g transform="translate(${mx ? lpF(W * 0.36) : 0} ${lpF(top - 8)}) scale(1.3)"><title>${won ? 'Regele săptămânii ' + K.week : ''}${won && cur ? ' · ' : ''}${cur ? 'Ține Tronul acum' : ''}</title><path d="M-9 4L-7-6-3-1 0-8 3-1 7-6 9 4Z" fill="${won ? 'url(#lwa-gd)' : '#d7dde0'}" stroke="#5c430c" stroke-width="1" stroke-linejoin="round"/>${won && cur ? '<ellipse cx="0" cy="-1" rx="1.6" ry="1.6" fill="#c0504a"/>' : ''}</g>`;
   h += `<ellipse class="st-sel" cx="0" cy="${lpF(H * 0.18)}" rx="${lpF(W * 0.6)}" ry="${lpF(W * 0.26)}" fill="none" stroke="#f0d27a" stroke-width="1.8"/>`;
   return h + `<g transform="scale(1.2)">${LWA.plate((H * 0.4 + 12) / 1.2, tEsc(nm), mine, false, nm.length, p.level)}</g></g>`;
 };
@@ -116,7 +146,14 @@ lwThrone = function (K) {
 (function () {
   if (typeof document === 'undefined' || !document.head) return;
   const st = document.createElement('style');
-  st.textContent = `
+  st.textContent = `.lw-smk circle{transform-box:fill-box;transform-origin:center;animation:lwSmk 3.8s ease-out infinite;opacity:0}
+.lw-smkb{animation:lwSmkB 2.6s ease-in-out infinite alternate}
+.lw-crown{animation:lwCr 2.4s ease-in-out infinite alternate}
+@keyframes lwSmk{0%{opacity:0;transform:translateY(0) scale(.6)}20%{opacity:1}100%{opacity:0;transform:translateY(-110px) scale(1.8)}}
+@keyframes lwSmkB{from{opacity:.5}to{opacity:.95}}
+@keyframes lwCr{from{opacity:.9}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.lw-smk circle{animation:none;opacity:.5}.lw-smkb,.lw-crown{animation:none}}
+
 .lw-tr{cursor:pointer}
 .lt-glow{animation:ltPulse 3.6s ease-in-out infinite}
 .lt-rune{transform-box:fill-box;transform-origin:center}

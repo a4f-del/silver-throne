@@ -187,7 +187,7 @@
     { id: 'pe', nm: 'Peșteră', ic: '⛏', n: 2, cd: 12, pts: 2, d: 'Minereu și materiale rare. Vena se epuizează dacă o storci des.' },
     { id: 'sa', nm: 'Sanctuar', ic: '✦', n: 1, cd: 20, pts: 1, d: 'Primești o binecuvântare temporară în schimbul unei ofrande.' },
     { id: 'dr', nm: 'Drum comercial abandonat', ic: '🛒', n: 1, cd: 8, pts: 1, d: 'Căruțe părăsite și un depozit al tâlharilor. Aur și materiale.' },
-    { id: 'tu', nm: 'Turn de observație', ic: '🗼', n: 2, cd: 0, pts: 1, d: 'Urci în vârf și dezvălui zonele din jur. O singură dată.' }
+    { id: 'tu', nm: 'Turn de observație', ic: '🗼', n: 2, cd: 0, pts: 1, d: 'Urci în vârf și cercetezi ținutul: aur și un indiciu. O singură dată.' }
   ];
   W.poiT = id => W.POI.find(p => p.id === id);
   /* Amplasare deterministă: fortăreața pe marginea hărții (distanța 3), apoi locurile de interes.
@@ -284,7 +284,7 @@
       rw: { g: 3, o: 2, x: 2, mat: 4 }, out: 'Sigiliul Cenușii e al tău. Sub el era o hartă a ținutului: drumurile duc spre alți căpitani.' },
     { id: 2, nm: 'Drumul Lupilor', lv: 4, reg: 'Peștera Lupilor',
       tx: 'Satele din jur plătesc tribut Regelui Cenușiu și drumurile sunt păzite de haite dresate. Alfa Haitei ține al doilea sigiliu. Dacă vrei să stăpânești drumul, trebuie să ai sate care ți se supun.',
-      obj: [{ k: 'boss', di: 4, t: 'Înfrânge Alfa Haitei (Peștera Lupilor)' }, { k: 'conq', n: 1, t: 'Cucerește un sat' }, { k: 'poi', n: 2, t: 'Descoperă 2 locuri de interes' }],
+      obj: [{ k: 'boss', di: 4, t: 'Înfrânge Alfa Haitei (Peștera Lupilor)' }, { k: 'conq', n: 1, t: 'Cucerește un sat' }, { k: 'poit', n: 2, t: 'Vizitează 2 tipuri de locuri de interes' }],
       rw: { g: 4, o: 3, x: 3, item: [1, 1] }, out: 'Prima ta stăpânire pe hartă. Drumul spre Catacombe e deschis.' },
     { id: 3, nm: 'Bastionul Corbilor', lv: 8, reg: 'Catacombele Uitate',
       tx: 'Corbii Regelui păzesc singurul drum către Catacombe, din fortăreața de pe marginea ținutului. Dincolo de ea, Regele Oaselor ține al treilea sigiliu.',
@@ -303,9 +303,8 @@
       obj: [{ k: 'boss', di: 3, t: 'Înfrânge Stăpânul Abisului' }, { k: 'boss', di: 7, t: 'Înfrânge Fierarul Ars (Forja Veche)' }, { k: 'boss', di: 8, t: 'Înfrânge Regele Cenușiu (Tronul Cenușiu)' }],
       rw: { g: 30, o: 20, x: 25, legend: 'runic' }, out: 'Tronul de Argint are din nou un stăpân.' }
   ];
-  /* Obiective secundare: recompense unice, pentru explorare */
+  /* Obiective secundare: recompense unice */
   W.SEC = [
-    { id: 'cart', nm: 'Cartograf', t: 'Dezvăluie întreaga hartă', k: 'fog', n: 35, rw: { g: 2, o: 1, mat: 4 } },
     { id: 'pust', nm: 'Pustnic', t: 'Vizitează toate cele 5 tipuri de locuri', k: 'poit', n: 5, rw: { g: 2, x: 2, item: [1, 2] } },
     { id: 'stap', nm: 'Stăpân de văi', t: 'Controlează 3 sate în același timp', k: 'own', n: 3, rw: { g: 4, x: 2 } },
     { id: 'vana', nm: 'Vânătorul de tabere', t: 'Elimină 10 tabere de bandiți', k: 'camp', n: 10, rw: { g: 3, x: 3, relic: 1 } },

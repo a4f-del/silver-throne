@@ -35,7 +35,7 @@ function tmBigCard(f, i) {
   const sel = f === cur(), c = tmHp(f), dead = c.hp <= 0, src = tmFullSrc(f), role = roleOf(f);
   const rank = f.h ? '' : RK[f.rk || 0], spec = f.sp && typeof spDef0 === 'function' && spDef0(f) ? spDef0(f).n : '';
   const eq = SL.map(k => { const it = E(f)[k]; return `<span class="tm-eqi${it ? '' : ' em'}" title="${it ? tEsc(it.name) : SLN[k] + ': gol'}">${it ? iic(it) : UI(UISL[k])}</span>`; }).join('');
-  return `<button class="tm-big${sel ? ' sel' : ''}${dead ? ' dead' : ''}" onclick="sel(${i})" aria-pressed="${sel}">`
+  return `<button class="tm-big${sel ? ' sel' : ''}${dead ? ' dead' : ''}" onclick="sel(${i})" ondblclick="if(typeof prOpen==='function')prOpen(${i})" title="Dublu clic: profilul" aria-pressed="${sel}">`
     + `<span class="tm-big-role r-${role}">${role}</span>`
     + `<span class="tm-big-av">${src ? `<img src="${src}" alt="" onerror="this.style.display='none'">` : av(f, 96)}${dead ? '<b class="sk">☠</b>' : ''}</span>`
     + `<span class="tm-big-n">${tEsc(f.n)}</span><span class="tm-big-k mute">${[rank, spec].filter(Boolean).join(' · ') || tEsc(f.c)}</span>`
@@ -68,7 +68,7 @@ function tmResPanel() {
     const st = guard ? 'strajă · păzește satul' : busy ? (typeof mxDone === 'function' && mxDone(f) ? 's-a întors din expediție' : 'plecat în expediție') : dead ? '☠ căzut' : `${Math.round(c.hp)}/${c.max} viață`;
     let act = '';
     if (!guard && !busy && !S.d) act = room ? `<button class="p" onclick="tmResIn(${j})">Pune în echipă</button>` : `<button class="${pick ? 'p' : ''}" onclick="tmResP(${j})" aria-pressed="${pick}">${pick ? 'Anulează' : '⇄ Schimbă'}</button>`;
-    act += `<button onclick="tmResView(${i})">Echipament</button>`;
+    act += typeof prBtn === 'function' ? `<button onclick="tmRO=false;tmRP=-1;prOpen(${i})">Profil</button>` : `<button onclick="tmResView(${i})">Echipament</button>`;
     return `<div class="tm-rp-c${pick ? ' on' : ''}${dead ? ' dead' : ''}${busy || guard ? ' off' : ''}"><span class="tm-rp-av">${av(f, 44)}</span>`
       + `<span class="tm-rp-tx"><b>${tEsc(f.n)}</b><small>${[!f.h && f.c !== 'Gardian' ? RK[f.rk || 0] : '', tEsc(f.c), roleOf(f)].filter(Boolean).join(' · ')}</small>`
       + `<i class="tm-hp${c.p < 40 ? ' low' : ''}"><i style="width:${c.p}%"></i></i><small class="mute">${st}</small></span><span class="tm-rp-x">${act}</span></div>`;
@@ -102,9 +102,9 @@ function tmFullSrc(f) {
   if (f.h) { if (typeof skinOn === 'function' && skinOn(f) && typeof HS !== 'undefined') return HS.umbra.av; return typeof heroId === 'function' && f.ic ? `imagini/eroi/${heroId(f.ic)}.jpg` : null; }
   return typeof MPIC !== 'undefined' && MPIC[f.c] ? `imagini/mercenari/${MPIC[f.c]}.jpg` : null;
 }
-function tmFull(f, sub) {
+function tmFull(f, sub, i) {
   const src = tmFullSrc(f);
-  return `<div class="tm-full${f.hp <= 0 ? ' dead' : ''}">${src ? `<img src="${src}" alt="${tEsc(f.n)}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'tm-full-av'}))">` : `<div class="tm-full-av">${av(f, 140)}</div>`}`
+  return `<div class="tm-full${f.hp <= 0 ? ' dead' : ''}">${typeof prBtn === 'function' && i >= 0 ? prBtn(i) : ''}${src ? `<img src="${src}" alt="${tEsc(f.n)}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'tm-full-av'}))">` : `<div class="tm-full-av">${av(f, 140)}</div>`}`
     + `<div class="tm-full-tx"><h2 class="tm-h">${tEsc(f.n)}</h2><div class="tm-sub">${sub}</div></div></div>`;
 }
 /* butoanele de skin ale eroului (înainte stăteau sub portretul mare) */
@@ -128,7 +128,7 @@ function tmChar(inv) {
   const xp = f.h ? `<div class="tm-xp"><span class="mute">Nivel ${S.lvl} · ${S.xp}/${need(S.lvl)} exp.</span><i class="xpb"><i style="width:${Math.min(100, S.xp / need(S.lvl) * 100)}%"></i></i></div>` : '';
   const sub = `${f.h ? 'erou' : 'nivel ' + S.lvl + ' · ' + RK[f.rk || 0]} · ${tEsc(f.c)}${f.sp && typeof spDef0 === 'function' && spDef0(f) ? ' · ' + spDef0(f).n : ''}${f.sc ? ' · ' + f.sc + ' cicatrice' : ''}${f.t && f.t.length ? '<br>' + f.t.map(x => tEsc(x.n)).join(', ') : ''}`;
   const cd = typeof spCd === 'function' ? spCd(f) : 2;
-  let h = `<div class="tm-char"><section class="tm-left tm-left2">${tmFull(f, sub)}`;
+  let h = `<div class="tm-char"><section class="tm-left tm-left2">${tmFull(f, sub, i)}`;
   h += `<div class="tm-hpbar"><span>${c.hp <= 0 ? '☠ căzut' : Math.round(c.hp) + ' / ' + c.max + ' viață'}</span><i class="bar${c.hp <= 0 ? ' e' : ''}"><i style="width:${c.p}%"></i></i></div>`;
   h += `<div class="tm-stats"><div><b>${c.max}</b><span>Viață</span></div><div><b>${Math.round(atkOf(f))}</b><span>Atac</span></div><div><b>${tmDef(f)}</b><span>Apărare</span></div></div>${extra ? `<div class="chips">${extra}</div>` : ''}`;
   h += `<div class="tm-sp"><b>${tEsc(CL[f.c].sp)}</b> <span class="mute">${tEsc(CL[f.c].d)}; se reîncarcă după ${cd} ${cd === 1 ? 'tură' : 'ture'}.</span></div>${typeof spPanel === 'function' ? spPanel(f) : ''}${hero}${xp}<div class="tm-act">${typeof teamCtl === 'function' ? teamCtl(f) : ''}${deadAll().length > 1 || (deadAll().length === 1 && c.hp > 0) ? reviveAllBtn() : ''}${rv}${hurt && !S.d ? `<button onclick="heal()">Vindecă răniții · ${healCost} aur</button>` : ''}${tmSkin(f)}</div></section>`;
@@ -149,10 +149,10 @@ function tmSynergy() {
   if (vr) heal = (vr.rk || 0) >= 3 ? 3 : 2;
   const rows = [['Rezistență', res], ['Daune', dmg], ['Vindecare', heal]];
   let tip = '';
-  if (!vr) tip = 'Un Vraci poate crește șansele de supraviețuire în temnițe.';
-  else if (!cls.includes('Paznic') && !cls.includes('Războinic')) tip = 'Un Paznic absoarbe lovituri și protejează restul echipei.';
+  if (!cls.includes('Paznic') && !cls.includes('Războinic')) tip = 'Un Paznic absoarbe lovituri și protejează restul echipei.';
   else if (!cls.includes('Arcaș') && !cls.includes('Mag') && !cls.includes('Războinic')) tip = 'Un Arcaș sau un Mag ar grăbi luptele.';
-  else tip = 'Echipă echilibrată: acoperă rezistența, daunele și vindecarea.';
+  else if (!vr) tip = 'Un Vraci e cel mai bun în luptele lungi: în Turn, la căpitanii care otrăvesc sau renasc, și îngrijește echipa după fiecare victorie. La căpitanii care lovesc tare, un Arcaș termină lupta mai repede.';
+  else tip = 'Vraciul ține echipa în viață în Turn și în luptele lungi și o îngrijește după fiecare victorie (+15%). Contra căpitanilor care lovesc tare, schimbă-l pe un Arcaș sau un Mag.';
   return `<section class="tm-syn"><h2>Compoziția echipei</h2><div class="tm-syn-rows">${rows.map(([n, v]) => `<div class="tm-syn-r"><span>${n}</span><b class="syn-${v >= 3 ? 'g2' : v >= 2 ? 'g1' : v >= 1 ? 'n' : 'b1'}">${synLbl(v)}</b></div>`).join('')}</div><div class="mute tm-syn-tip">Sfat: ${tip}</div></section>`;
 }
 /* pagina Echipă pe file: Echipament (portret, statistici, sloturi; pe ecran lat și rucsacul), Rucsac (doar pe telefon), Compoziție (sinergie + presetări) */
