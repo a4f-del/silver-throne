@@ -11,8 +11,8 @@
   const W = {};
 
   /* Configurare de livrare. La publicare: ST_PROD=true ascunde panoul „Opțiuni de test”
-     (butoane pentru +aur, +niveluri, Premium de test). Implicit false, ca până acum. */
-  W.CFG = { prod: false };
+     (butoane pentru +aur, +niveluri, Premium de test). Administratorii îl văd oricum (admin.js, supabase/06-admin.sql). */
+  W.CFG = { prod: true };
 
   /* ---------------------------------------------------------------- PARAMETRI
      Valorile de aici au fost alese cu simulatorul din dev/ (vezi RAPORT-ECHILIBRU.md). */

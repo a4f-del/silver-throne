@@ -63,28 +63,38 @@ function mrMig() {
 
 /* ------------------------------------------------------------------ NUMIREA */
 function mrName() {
-  const f = mrAll().find(x => x.nn), inp = document.getElementById('mr-in');
-  if (!f || !inp) return;
-  const v = inp.value.trim().replace(/\s+/g, ' ').slice(0, 16);
-  if (!v) { inp.focus(); inp.classList.add('err'); return; }
-  f.n = v; delete f.nn; S.msg = `${v} (${f.c}) s-a alăturat ${S.fs.includes(f) ? 'echipei' : 'rezervei'}.`;
+  const fs = mrAll().filter(x => x.nn); if (!fs.length) return;
+  const ins = fs.map((f, i) => document.getElementById('mr-in-' + i));
+  if (ins.some(x => !x)) return;
+  const vs = ins.map(x => x.value.trim().replace(/[<>"&]/g, '').replace(/\s+/g, ' ').slice(0, 16));
+  const bad = vs.findIndex(v => !v); if (bad >= 0) { ins[bad].focus(); ins[bad].classList.add('err'); return; }
+  fs.forEach((f, i) => { f.n = vs[i]; delete f.nn; });
+  S.msg = fs.length === 1 ? `${vs[0]} (${fs[0].c}) s-a alăturat ${S.fs.includes(fs[0]) ? 'echipei' : 'rezervei'}.` : `${vs.join(' și ')} s-au alăturat echipei.`;
+  delete S.giftL;
   document.getElementById('mr-m')?.remove(); go();
 }
+/* o singură fereastră pentru toți tovarășii noi (și, dacă tocmai a venit, cadoul de început), nu câte una pentru fiecare */
 function mrPost() {
   try {
     mrTick();
-    const f = mrAll().find(x => x.nn), old = document.getElementById('mr-m');
+    const fs = mrAll().filter(x => x.nn), old = document.getElementById('mr-m');
     const gate = document.getElementById('gate'), busy = (gate && !gate.classList.contains('g-out')) || document.querySelector('.hc');
-    if (!f || busy) { if (old && !f) old.remove(); if (f && busy && !MR.wait) { MR.wait = 1; setTimeout(() => { MR.wait = 0; mrPost(); }, 500); } return; }   /* ecranul eroului e încă deschis: încearcă din nou */
-    if (old && old.dataset.c === f.c) return;
+    if (!fs.length || busy) { if (old && !fs.length) old.remove(); if (fs.length && busy && !MR.wait) { MR.wait = 1; setTimeout(() => { MR.wait = 0; mrPost(); }, 500); } return; }   /* ecranul eroului e încă deschis: încearcă din nou */
+    const key = fs.map(f => f.c).join(',') + (S.giftL ? '+g' : '');
+    if (old && old.dataset.c === key) return;
     if (old) old.remove();
-    const used = new Set(mrAll().map(x => x.n)), sg = MR.sug[f.c].find(n => !used.has(n)) || MR.sug[f.c][0];
-    const sp = (typeof SP !== 'undefined' && SP.T[f.c] || []).map(s => s.n).join(' sau ');
-    const m = document.createElement('div'); m.id = 'mr-m'; m.dataset.c = f.c; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-labelledby', 'mr-t');
-    m.innerHTML = `<div class="mr-c"><div class="mr-k">Un nou tovarăș</div><div class="mr-av">${av({ c: f.c, n: f.c }, 96)}</div><h3 id="mr-t">${f.c}</h3><p class="mute">${MR.rol[f.c]}.${sp ? ` De la rangul Veteran își alege o specializare: ${sp}.` : ''}</p>`
-      + `<label for="mr-in">Cum se numește?</label><input id="mr-in" maxlength="16" value="${sg}" autocomplete="off" onkeydown="if(event.key==='Enter')mrName()">`
-      + `<button class="p" onclick="mrName()">Primește-l în echipă</button><p class="mute mr-f">Mercenarii rămân cu tine pentru totdeauna și cresc în rang luptând.</p></div>`;
-    document.body.appendChild(m); setTimeout(() => { const i = document.getElementById('mr-in'); if (i) { i.focus(); i.select(); } }, 60);
+    const used = new Set(mrAll().map(x => x.n));
+    const one = fs.map((f, i) => {
+      const sg = MR.sug[f.c].find(n => !used.has(n)) || MR.sug[f.c][0]; used.add(sg);
+      const sp = (typeof SP !== 'undefined' && SP.T[f.c] || []).map(s => s.n).join(' sau ');
+      return `<div class="mr-one"><div class="mr-av">${av({ c: f.c, n: f.c }, fs.length > 1 ? 72 : 96)}</div><h3${i ? '' : ' id="mr-t"'}>${f.c}</h3><p class="mute">${MR.rol[f.c]}.${sp ? ` De la rangul Veteran își alege o specializare: ${sp}.` : ''}</p>`
+        + `<label for="mr-in-${i}">Cum se numește?</label><input id="mr-in-${i}" maxlength="16" value="${tEsc(sg)}" autocomplete="off" onkeydown="if(event.key==='Enter')mrName()"></div>`;
+    }).join('');
+    const gift = S.giftL ? `<div class="mr-gift"><b>Și un cadou de început</b>, pus deja pe cei care au nevoie de el:<ul>${S.giftL.map(n => `<li>${tEsc(n)}</li>`).join('')}</ul></div>` : '';
+    const m = document.createElement('div'); m.id = 'mr-m'; m.dataset.c = key; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-labelledby', 'mr-t');
+    m.innerHTML = `<div class="mr-c${fs.length > 1 ? ' mr-many' : ''}"><div class="mr-k">${fs.length > 1 ? 'Noi tovarăși' : 'Un nou tovarăș'}</div><div class="mr-row">${one}</div>${gift}`
+      + `<button class="p" onclick="mrName()">${fs.length > 1 ? 'Primește-i în echipă' : 'Primește-l în echipă'}</button><p class="mute mr-f">Mercenarii rămân cu tine pentru totdeauna și cresc în rang luptând.</p></div>`;
+    document.body.appendChild(m); setTimeout(() => { const i = document.getElementById('mr-in-0'); if (i) { i.focus(); i.select(); } }, 60);
   } catch (e) { /* numirea nu blochează jocul */ }
 }
 
@@ -152,6 +162,7 @@ function stGift() {
     const old = f && f.eq && f.eq[it.t];
     if (f && (!old || bsc(it, f) > bsc(old, f))) { if (old) S.inv.push(old); f.eq[it.t] = it; f.hp = Math.min(mhp(f), Math.max(f.hp, 1)); } else S.inv.push(it);
   }
+  if (mrAll().some(x => x.nn)) { S.giftL = got; return; }   /* intră în fereastra tovarășilor noi, nu într-una separată */
   setTimeout(() => mdl(`<h3>Cadoul de început</h3><p>Pentru drumul de acum înainte primești <b>Spada mare de gheață</b>, o armă legendară care poate îngheța dușmanii, și un pachet de echipament Epic. Le-am pus deja pe cei care au nevoie de ele.</p><ul style="text-align:left;display:inline-block;margin:0 0 12px">${got.map(n => `<li>${tEsc(n)}</li>`).join('')}</ul><br><button class="p" onclick="lgClose();S.tab='e';go()">Vezi echipa</button>`, 'gift'), 300);
 }
 /* schimbarea echipei: un mercenar din rezervă intră în locul unuia din echipă (eroul rămâne mereu) */
@@ -200,7 +211,7 @@ function mrRes() { return `<section><h2>La ce folosește fiecare resursă</h2><d
   const st = document.createElement('style');
   st.textContent = `
 #mr-m{position:fixed;inset:0;z-index:25000;display:flex;align-items:center;justify-content:center;padding:16px;background:#05070acc;backdrop-filter:blur(3px)}
-.mr-c{width:min(420px,100%);padding:18px 20px 16px;text-align:center;border-radius:14px;border:1px solid var(--gold);background:radial-gradient(ellipse at 50% 0,#2a3236,#101416 70%);box-shadow:0 20px 60px #000e;animation:mrIn .35s ease-out}
+.mr-c{width:min(420px,100%);max-height:calc(100vh - 32px);overflow-y:auto;box-sizing:border-box;padding:18px 20px 16px;text-align:center;border-radius:14px;border:1px solid var(--gold);background:radial-gradient(ellipse at 50% 0,#2a3236,#101416 70%);box-shadow:0 20px 60px #000e;animation:mrIn .35s ease-out}
 .mr-k{font:700 12px Cinzel,serif;letter-spacing:.1em;text-transform:uppercase;color:var(--gold2)}
 .mr-av{display:flex;justify-content:center;margin:10px 0 4px}.mr-av>*{border-radius:50%;box-shadow:0 0 0 2px var(--gold),0 0 24px #f0d27a44}
 .mr-c h3{margin:4px 0 2px;font:700 22px Cinzel,Georgia,serif;color:var(--ink)}
@@ -208,6 +219,9 @@ function mrRes() { return `<section><h2>La ce folosește fiecare resursă</h2><d
 .mr-c input{width:100%;box-sizing:border-box;padding:10px 12px;font-size:17px;border-radius:8px;border:1px solid var(--line);background:#0b0e10;color:var(--ink)}
 .mr-c input.err{border-color:#d4564f}
 .mr-c button{margin-top:12px;width:100%;padding:10px}
+.mr-c.mr-many{width:min(640px,100%)}.mr-row{display:flex;gap:16px}.mr-one{flex:1;min-width:0;display:flex;flex-direction:column}.mr-one label{margin-top:auto!important;padding-top:12px}.mr-many .mr-one h3{font-size:19px}.mr-many .mr-one p{font-size:13.5px;margin:4px 0}
+.mr-gift{margin-top:12px;padding:10px 12px;border:1px solid #f0d27a44;border-radius:10px;background:#f0d27a0d;text-align:left;font-size:14px}.mr-gift ul{margin:6px 0 0;padding-left:20px}
+@media (max-width:560px){.mr-row{flex-direction:column;gap:6px}.mr-many .mr-av>*{width:56px!important;height:56px!important}}
 .mr-f{font-size:13px;margin:10px 0 0}
 @keyframes mrIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
 .mr-list{display:grid;gap:8px;margin-top:10px}

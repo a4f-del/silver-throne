@@ -105,6 +105,7 @@ function contBoot(key, src) {
   if (typeof hcNeed === 'function' && hcNeed()) { hcStart('new'); contShow('hero'); } else contHide();     /* cont nou: întâi eroul (erou.js) */
   contPush(); try { tronInit(); tronSync(); } catch (e) { /* Tronul se reîncearcă singur */ }
   try { lwSync(); } catch (e) { /* Lumea se reîncearcă singură */ }
+  if (typeof admCheck === 'function') admCheck();   /* administrator? (admin.js) */
 }
 
 /* ---------------------------------------------------------------- ECRANUL */

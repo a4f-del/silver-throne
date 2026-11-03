@@ -155,7 +155,21 @@ function tmSynergy() {
   else tip = 'Echipă echilibrată: acoperă rezistența, daunele și vindecarea.';
   return `<section class="tm-syn"><h2>Compoziția echipei</h2><div class="tm-syn-rows">${rows.map(([n, v]) => `<div class="tm-syn-r"><span>${n}</span><b class="syn-${v >= 3 ? 'g2' : v >= 2 ? 'g1' : v >= 1 ? 'n' : 'b1'}">${synLbl(v)}</b></div>`).join('')}</div><div class="mute tm-syn-tip">Sfat: ${tip}</div></section>`;
 }
-function vEquipTop(inv) { return tmStrip() + tmSynergy() + tmChar(inv); }
+/* pagina Echipă pe file: Echipament (portret, statistici, sloturi; pe ecran lat și rucsacul), Rucsac (doar pe telefon), Compoziție (sinergie + presetări) */
+let tmTab = 'eq';
+function tmTabSet(t) { tmTab = t; go(); }
+function vEquipTop(inv, pre) {
+  const wide = typeof matchMedia === 'function' && matchMedia('(min-width:960px)').matches;
+  if (wide && tmTab === 'inv') tmTab = 'eq';
+  const n = (S.inv || []).length, f = cur();
+  const tabs = [['eq', 'Echipament'], ...(wide ? [] : [['inv', `Rucsac${n ? ' · ' + n : ''}`]]), ['co', 'Compoziție și presetări']];
+  const bar = `<div class="tm-tabs" role="tablist">${tabs.map(([k, t]) => `<button role="tab" aria-selected="${tmTab === k}" class="${tmTab === k ? 'on' : ''}" onclick="tmTabSet('${k}')">${t}</button>`).join('')}</div>`;
+  let body;
+  if (tmTab === 'co') body = tmSynergy() + (pre || '');
+  else if (tmTab === 'inv') body = `<div class="tm-for mute">Echipezi pe <b>${tEsc(f.n)}</b> · alege altul din cardurile de sus.</div><div class="tm-right">${inv || ''}</div>`;
+  else body = tmChar(wide ? inv : '');
+  return tmStrip() + bar + body;
+}
 
 /* ----------------------------------------------------------------- bara de sus */
 function hdrSel(i) { S.sel = i; S.tab = 'e'; S.msg = ''; go(); }
@@ -311,5 +325,18 @@ function temaHdr() {
 @keyframes tmRp{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.tm-rp{animation:none}}
 @media (max-width:520px){.tm-squad{grid-template-columns:repeat(2,minmax(0,1fr))}.tm-rb{width:100%}.tm-rp-l{grid-template-columns:1fr}.tm-rp-tg button{flex:1 1 100%}}`;
+  document.head.appendChild(st);
+})();
+
+(function () {
+  if (typeof document === 'undefined' || !document.head) return;
+  const st = document.createElement('style');
+  st.textContent = `.tm-tabs{display:flex;gap:4px;margin:0 0 12px;padding:4px;border:1px solid var(--line);border-radius:10px;background:#0b0e10;overflow-x:auto;scrollbar-width:none}
+.tm-tabs button{flex:0 0 auto;width:auto;min-height:0;padding:7px 12px;font:700 13.5px Cinzel,serif;border:0;border-radius:7px;background:transparent;color:var(--mute);box-shadow:none;white-space:nowrap}
+.tm-tabs button:hover{color:var(--ink);transform:none}.tm-tabs button.on{background:linear-gradient(180deg,#3a2e12,#241c0b);color:var(--gold2,#f0d27a);box-shadow:inset 0 0 0 1px #f0d27a55}
+.tm-for{font-size:13.5px;margin:0 0 8px}
+@media (max-width:959px){.tm-tabs button{flex:1 0 auto}}
+@media (max-width:520px){.tm-squad{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px}.tm-big{padding:24px 4px 8px}.tm-big-av{width:56px;height:56px}.tm-big-n{font-size:12.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tm-big-k{font-size:10.5px}.tm-big-eq,.tm-big-tip{display:none}.tm-big-role{top:5px;left:5px;font-size:9.5px;padding:1px 6px}}
+@media (max-width:859px){.tm-full{aspect-ratio:auto!important;height:200px}.tm-full>img{object-position:center 18%}}`;
   document.head.appendChild(st);
 })();

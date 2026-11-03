@@ -10,7 +10,9 @@
    Datele și formulele pure sunt în world-data.js (ST_W).
    ========================================================================== */
 const TW = ST_W, TP = TW.P;
-const DEV = () => !TW.CFG.prod || /[?&]dev=1/.test((typeof location !== 'undefined' && location.search) || '');
+/* panoul de test: în modul de test, pentru administratori (admin.js) sau local cu ?dev=1 */
+const DEV = () => !TW.CFG.prod || !!(typeof CONT !== 'undefined' && CONT.admin)
+  || (typeof location !== 'undefined' && /[?&]dev=1/.test(location.search) && (!location.hostname || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)));
 const tEsc = s => String(s).replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
 const tDur = ms => { const m = Math.max(0, Math.ceil(ms / 60000)); return m >= 60 ? Math.floor(m / 60) + ' h ' + (m % 60) + ' min' : m + ' min'; };
 const tLvl = v => Math.max(1, S.lvl + v.dl);
