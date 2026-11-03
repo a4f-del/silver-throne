@@ -68,8 +68,8 @@ function spMul(a, e) {
   return m;
 }
 const spCrit = a => (spOn(a, 'lun', 1) ? 15 : 0);
-const spCm = a => (spOn(a, 'lun', 2) ? 2 : 1.5);
-function spDef(a, e, o) { const d = e.def * (e.dd > 0 ? 0.7 : 1), ign = o.ign != null ? o.ign : (o.n && spOn(a, 'arc', 2) ? 0.6 : 0); return d * (1 - ign); }
+const spCm = a => Math.max(spOn(a, 'lun', 2) ? 2 : 1.5, (typeof lgFx === 'function' && lgFx(a).critx) || 0);
+function spDef(a, e, o) { const d = e.def * (e.dd > 0 ? 0.7 : 1), pr = o.n && typeof wfFx === 'function' ? (wfFx(a).pr || 0) : 0, ign = o.ign != null ? o.ign : Math.max(pr, o.n && spOn(a, 'arc', 2) ? 0.6 : 0); return d * (1 - ign); }   /* pr: armele care trec prin armură (WF.fx) */
 function spAfter(a, e, dm, cr, L) {
   if (spOn(a, 'ber', 2) && a.hp > 0) { const h = Math.max(1, Math.round(dm * 0.2)); a.hp = Math.min(mhp(a), a.hp + h); }
   if (cr && e.hp > 0 && spOn(a, 'due', 2)) { e.bl = Math.max(e.bl || 0, 3); L.push(e.n + ' sângerează.'); }
@@ -142,6 +142,7 @@ function spEnemyHit(e, al, L) {
   const raw = Math.round(e.atk * R(0.8, 1.2) * (e.bu > 0 && spTeam('pir', 4) ? 0.8 : 1));
   const dmOn = u => { let d = Math.max(1, raw - bon(u).def * (1 + bon(u).pf / 100) - tr(u, 'def') - (spX(u).dfb > 0 ? 5 : 0)); if (spOn(u, 'scu', 2)) d = Math.max(1, Math.round(d * 0.7)); return d; };
   let dm = dmOn(t);
+  if (typeof lgHit === 'function') dm = lgHit(t, e, dm, L);   /* legendare: ferire, daune reduse */
   const sh = spX(t).sh || 0; if (sh > 0) { const a = Math.min(sh, dm); spX(t).sh = sh - a; dm -= a; if (a) L.push(`Scutul lui ${t.n} oprește ${a}.`); }
   if (t.hp - dm <= 0) {
     const g = al.find(x => x !== t && spOn(x, 'scu', 4) && !spX(x).grd && x.hp > dmOn(x));
@@ -149,6 +150,7 @@ function spEnemyHit(e, al, L) {
   }
   if (t.hp - dm <= 0 && spOn(t, 'ber', 4) && !spX(t).last) { spX(t).last = 1; dm = t.hp - 1; L.push(`${t.n} refuză să cadă!`); }
   t.hp = Math.max(0, t.hp - dm); L.push(`${e.n} lovește ${t.n} (-${dm}).` + (t.hp === 0 ? ' ' + t.n + ' cade!' : ''));
+  if (typeof lgThorn === 'function') lgThorn(t, e, dm, L);
   if (dm > 0 && spOn(t, 'scu', 3) && e.hp > 0) { const r = Math.max(1, Math.round(dm * 0.4)); e.hp -= r; L.push(`${t.n} întoarce ${r}.` + (e.hp <= 0 ? ' ' + e.n + ' cade!' : '')); }
 }
 function spRoundEnd(L) {

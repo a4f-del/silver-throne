@@ -41,6 +41,29 @@ function prProg(f) {
   const a = SP.RKF[rk], b = SP.RKF[rk + 1];
   return { lbl: `Faimă ${fm} / ${b}`, p: Math.max(0, Math.min(100, (fm - a) / (b - a) * 100)), sub: `${RK[rk + 1]} la ${b} faimă` };
 }
+/* ce înseamnă fiecare statistică (fereastra la trecerea cursorului; pe telefon, la atingere) */
+function prTipTxt(n, f) {
+  const cm = typeof spCm === 'function' ? spCm(f) : 1.5, bl = 2 + Math.floor(S.lvl / 2);
+  const T = {
+    'Viață': 'Câte daune poate primi luptătorul. La 0 cade din luptă; îl ridici la Infirmerie, dar rămâne cu o cicatrice.',
+    'Atac': 'Daunele unei lovituri normale (variază cu ±15%). Din ele se scade apărarea inamicului; abilitățile lovesc de mai multe ori atacul.',
+    'Apărare': 'Se scade din fiecare lovitură primită (orice lovitură face cel puțin 1). Contează mult contra monștrilor care lovesc des.',
+    'Critic': `Șansa ca o lovitură să fie critică: face ×${String(cm).replace('.', ',')} daune. Toți pornesc de la 5%.`,
+    'Sângerare': `Șansa ca o lovitură normală să facă inamicul să sângereze: pierde ${bl} viață pe tură, 3 ture.`,
+    'Vindecare': 'Crește puterea vindecărilor. La Vraci, Vindecarea lui crește cu acest procent.',
+    'Aur în plus': 'Aur în plus la ieșirea din temnițe și raiduri. Se adună procentele întregii echipe active.',
+    'Atac în plus': 'Procent adăugat la atacul total, după echipament.',
+    'Viață în plus': 'Procent adăugat la viața maximă, după echipament.',
+    'Apărare în plus': 'Procent adăugat la apărare, după echipament.',
+    'Cicatrici': 'Primite când luptătorul cade. Fiecare scade viața maximă; se vindecă la Infirmerie, cu aur.',
+    'Forță': 'Antrenament: +2% atac pe rang, doar pentru erou (Sat › Antrenament).',
+    'Rezistență': 'Antrenament: +3% viață pe rang, doar pentru erou (Sat › Antrenament).',
+    'Agilitate': 'Antrenament: +0,8% șansă de critic pe rang, doar pentru erou (Sat › Antrenament).',
+    'Tank': 'Rol: atrage loviturile și protejează echipa.', 'DPS': 'Rol: face daunele.', 'Suport': 'Rol: ține echipa în viață (vindecare, întăriri).'
+  };
+  return T[n] || '';
+}
+const prTipA = (n, f) => { const t = prTipTxt(n, f); return t ? ` data-tip="${typeof tipAttr === 'function' ? tipAttr(`<b>${n}</b><br>${t}`) : tEsc(t)}" tabindex="0"` : ''; };
 function prStats(f) {
   const b = bon(f), m = mhp(f), hp = Math.max(0, Math.round(f.hp)), crit = 5 + b.crit + tr(f, 'crit') + (f.h ? ST().a * 0.8 : 0) + (typeof spCrit === 'function' ? spCrit(f) : 0);
   const rows = [
@@ -56,7 +79,7 @@ function prStats(f) {
     ['◈', 'Apărare în plus', b.pf ? prPct(b.pf) : ''],
     ['☠', 'Cicatrici', f.sc ? `${f.sc} (−${typeof scL === 'function' ? scL(f) : ''} viață)` : '', 'low']
   ].filter(r => r[2] !== '' && r[2] != null);
-  return rows.map(([i, n, v, c]) => `<div class="pr-sr${c ? ' ' + c : ''}"><i>${i}</i><span>${n}</span><b>${v}</b></div>`).join('');
+  return rows.map(([i, n, v, c]) => `<div class="pr-sr${c ? ' ' + c : ''}"${prTipA(n, f)}><i>${i}</i><span>${n}</span><b>${v}</b></div>`).join('');
 }
 function prSlot(f, k) {
   const it = E(f)[k];
@@ -67,8 +90,8 @@ function prBag(f) {
   const inv = S.inv || [];
   if (!inv.length) return '<div class="mute pr-empty">Rucsacul e gol.</div>';
   const cells = inv.map((it, i) => {
-    const cur = E(f)[it.t], up = typeof bsc === 'function' && (!cur || bsc(it, f) > bsc(cur, f) * 1.02);
-    return `<button class="pr-it q${it.lg ? 'l' : it.r}${up ? ' up' : ''}" onclick="prEq(${i})"${typeof itTipA === 'function' ? itTipA(it, cur) : ` title="${tEsc(it.name)}"`} aria-label="Echipează ${tEsc(it.name)}">${iic(it)}${up ? '<b class="pr-up">▲</b>' : ''}</button>`;
+    const cur = E(f)[it.t], ok = typeof wfOk !== 'function' || wfOk(f, it), up = ok && typeof bsc === 'function' && (!cur || bsc(it, f) > bsc(cur, f) * 1.02);
+    return `<button class="pr-it q${it.lg ? 'l' : it.r}${up ? ' up' : ''}${ok ? '' : ' no'}" onclick="prEq(${i})"${typeof itTipA === 'function' ? itTipA(it, cur) : ` title="${tEsc(it.name)}"`} aria-label="Echipează ${tEsc(it.name)}">${iic(it)}${up ? '<b class="pr-up">▲</b>' : ''}</button>`;
   }).join('');
   return `<div class="pr-grid">${cells}</div>`;
 }
@@ -80,14 +103,14 @@ function prDraw() {
   const lvl = f.h ? S.lvl : (f.lv || S.lvl), cls = CL[f.c] || CL.Campion;
   const spec = f.sp && typeof spDef0 === 'function' && spDef0(f);
   const traits = (f.t || []).map(x => `<span class="pr-tag" title="${tEsc(x.d || '')}">${tEsc(x.n)}</span>`).join('');
-  const train = f.h ? (s => `<div class="pr-tr"><span>Forță <b>${s.f}</b></span><span>Rezistență <b>${s.r}</b></span><span>Agilitate <b>${s.a}</b></span><small>din ${smax()}</small></div>`)(ST()) : '';
+  const train = f.h ? (s => `<div class="pr-tr"><span${prTipA('Forță', f)}>Forță <b>${s.f}</b></span><span${prTipA('Rezistență', f)}>Rezistență <b>${s.r}</b></span><span${prTipA('Agilitate', f)}>Agilitate <b>${s.a}</b></span><small>din ${smax()}</small></div>`)(ST()) : '';
   const L = ['h', 'a', 'b'], R = ['w', 'j', 'r'];
   o.innerHTML = `<div class="pr-c${dead ? ' dead' : ''}">
 <button class="pr-x" onclick="prClose()" aria-label="Închide profilul" title="Închide (Esc)">✕</button>
 <section class="pr-l">
   <div class="pr-ban">${n > 1 ? `<button class="pr-nav" onclick="prNext(-1)" aria-label="Personajul anterior">‹</button>` : ''}<h2 id="pr-n">${tEsc(f.n)}</h2>${n > 1 ? `<button class="pr-nav" onclick="prNext(1)" aria-label="Personajul următor">›</button>` : ''}</div>
   <div class="pr-lv"><span class="pr-lvn" title="Nivel">${lvl}</span><div class="pr-pg">${pg ? `<div class="pr-pgl"><span>${pg.lbl}</span></div><i class="pr-bar"><i style="width:${pg.p}%"></i></i><small>${pg.sub}</small>` : ''}</div></div>
-  <div class="pr-ti">${tEsc(prTitle(f))}${typeof roleOf === 'function' && f.c !== 'Gardian' ? ` <span class="pr-role r-${roleOf(f)}">${roleOf(f)}</span>` : ''}</div>
+  <div class="pr-ti">${tEsc(prTitle(f))}${typeof roleOf === 'function' && f.c !== 'Gardian' ? ` <span class="pr-role r-${roleOf(f)}"${prTipA(roleOf(f), f)}>${roleOf(f)}</span>` : ''}</div>
   ${traits ? `<div class="pr-tags">${traits}</div>` : ''}
   <div class="pr-st">${prStats(f)}</div>
   ${typeof setLine === 'function' ? setLine(f) : ''}
@@ -131,6 +154,7 @@ const prBtn = i => `<button class="pr-open" onclick="prOpen(${i})">👤 Profil</
 .pr-tags{display:flex;flex-wrap:wrap;gap:4px;padding:6px 14px 0}.pr-tag{font-size:11.5px;padding:1px 7px;border-radius:8px;border:1px solid #ffffff22;color:#d6d9db}
 .pr-st{margin:10px 10px 0;border:1px solid #ffffff14;border-radius:8px;overflow:hidden}
 .pr-sr{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:6px;padding:6px 10px;font-size:14px;background:#0f1416}.pr-sr:nth-child(even){background:#131a1d}
+.pr-sr{cursor:help}.pr-sr:hover,.pr-sr:focus{background:#1c2428;outline:none}.pr-tr span,.pr-role{cursor:help}
 .pr-sr i{font-style:normal;text-align:center;font-size:13px}.pr-sr span{color:#c9cdcf}.pr-sr b{color:#fff;font-variant-numeric:tabular-nums}.pr-sr.low b{color:#f0b07b}.pr-sr.bad b{color:#e8837b}
 .pr-tr{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;padding:8px 14px 0;font-size:12.5px;color:var(--mute)}.pr-tr b{color:var(--ink)}
 .pr-ab{margin:10px 14px 0;font-size:13px;line-height:1.4;color:var(--mute)}.pr-ab b{color:var(--ink)}.pr-ab div{margin-top:4px}
@@ -153,6 +177,7 @@ const prBtn = i => `<button class="pr-open" onclick="prOpen(${i})">👤 Profil</
 .pr-it{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;width:auto;min-height:0;padding:0;border:2px solid #3a3f42;border-radius:7px;background:#0b0e10;box-shadow:inset 0 0 8px #000}
 .pr-it:hover{transform:none;border-color:var(--gold2)}.pr-it .ico,.pr-it .uii{width:36px;height:36px;font-size:20px;margin:0}
 .pr-it.q1{border-color:#4f86c6aa}.pr-it.q2{border-color:#e0c040aa}.pr-it.q3{border-color:#a35cd8aa}.pr-it.ql{border-color:#e8722c}
+.pr-it.no{opacity:.35;filter:grayscale(.7)}
 .pr-up{position:absolute;top:1px;right:3px;font-size:11px;color:#7fd88c;text-shadow:0 1px 2px #000}
 .pr-empty{font-size:13.5px}
 .pr-open{width:auto}

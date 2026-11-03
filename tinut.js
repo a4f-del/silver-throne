@@ -118,5 +118,5 @@ function wnRaid(id) {
 function wnRl(d) {
   const vl = d.wl || S.lvl;
   d.loot.gold += Math.round((60 + 30 * vl) * 1.2); d.loot.ore += 5 + vl; d.loot.xp += Math.round(20 + 8 * vl);
-  if (Math.random() < .15) { const it = mkItem(P(['w', 'a', 'h', 'b']), Math.max(1, vl), P([1, 1, 2, 2, 3])); S.inv.push(it); d.cm = 'Printre prăzi: ' + it.name + '.'; }
+  if (Math.random() < .15) { const it = lootItem(['w', 'a', 'h', 'b'], Math.max(1, vl), P([1, 1, 2, 2, 3])); S.inv.push(it); d.cm = 'Printre prăzi: ' + it.name + '.'; }
 }

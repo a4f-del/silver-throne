@@ -125,7 +125,7 @@ function terGrant(r, lvl) {
   if (g.x) { const up = terXp(g.x); out.push('+' + g.x + ' exp' + (up ? ' (nivel nou!)' : '')); }
   if (r.mat) { const m = {}; for (let i = 0; i < r.mat; i++) { const k = TW.pickMat(Math.random, lvl); m[k] = (m[k] || 0) + 1; } const l = stash({ ore: 0, m }); out.push(r.mat + ' materiale' + (l ? ' (' + l + ' pierdute: depozit plin)' : '')); }
   if (r.cr) { stash({ ore: 0, m: { [r.cr[0]]: r.cr[1] } }); out.push(r.cr[1] + ' × ' + mn(r.cr[0])); }
-  if (r.item) { const it = mkItem(P(['w', 'a', 'h', 'b']), lvl, RI(r.item[0], r.item[1])); S.inv.push(it); out.push('obiect: ' + it.name); }
+  if (r.item) { const it = lootItem(['w', 'a', 'h', 'b'], lvl, RI(r.item[0], r.item[1])); S.inv.push(it); out.push('obiect: ' + it.name); }
   if (r.relic) { const it = terRelic(Math.max(8, lvl)); S.inv.push(it); out.push('relicvă: ' + it.name); }
   if (r.legend) { const it = mkLegendary(r.legend, lvl); if (it) { S.inv.push(it); out.push('obiect legendar: ' + it.name); } }
   return out.join(', ');
@@ -198,7 +198,7 @@ function terCampWin(d) {
   L.gold += g; L.ore += o; L.xp += x; out.push('+' + g + ' aur');
   for (let i = 0; i < (r.mats || 0); i++) lm(TW.pickMat(rng, lv), 1);
   (r.cr || []).forEach(([k, n, p]) => { if (rng() < p) { lm(k, n); out.push(n + ' × ' + mn(k)); } });
-  if (r.item) { const it = mkItem(P(['w', 'a', 'h', 'b']), Math.max(1, lv), RI(r.item[0], r.item[1])); (L.it || (L.it = [])).push(it); out.push('obiect: ' + it.name); }
+  if (r.item) { const it = lootItem(['w', 'a', 'h', 'b'], Math.max(1, lv), RI(r.item[0], r.item[1])); (L.it || (L.it = [])).push(it); out.push('obiect: ' + it.name); }
   if (r.relic) { const it = terRelic(Math.max(8, lv)); (L.it || (L.it = [])).push(it); out.push('relicvă: ' + it.name); }
   if (r.merc) L.merc = 1;
   t.cdn[c.id] = 1; t.camps = t.camps.filter(z => z.id !== c.id); t.st.camp++;
@@ -377,7 +377,7 @@ function fortGo() {
 }
 function terFortWin(d) {
   const t = S.ter, f = t.fort, re = !!f.lost, now = Date.now(), L = d.loot, out = [TW.FORT.nm + ' e al tău! ' + TW.FORT.bd];
-  if (!t.hist.fort) { const g = Math.round(TW.rawGold(S.lvl) * TW.FORT.first.g), x = Math.round(TW.rawXp(S.lvl) * TW.FORT.first.x); L.gold += g; L.xp += x; const it = mkItem(P(['w', 'a', 'h', 'b']), S.lvl, TW.FORT.first.item[0]); (L.it || (L.it = [])).push(it); out.push('Prima cucerire: +' + g + ' aur, +' + x + ' exp, ' + it.name + '.'); }
+  if (!t.hist.fort) { const g = Math.round(TW.rawGold(S.lvl) * TW.FORT.first.g), x = Math.round(TW.rawXp(S.lvl) * TW.FORT.first.x); L.gold += g; L.xp += x; const it = lootItem(['w', 'a', 'h', 'b'], S.lvl, TW.FORT.first.item[0]); (L.it || (L.it = [])).push(it); out.push('Prima cucerire: +' + g + ' aur, +' + x + ' exp, ' + it.name + '.'); }
   f.o = 'p'; f.cq = now; f.sg = now + TP.fort.immuneH * 3600000; f.lost = 0; t.hist.fort = (t.hist.fort || 0) + 1; if (re) t.st.recon++; if (!t.upT) t.upT = now;
   terLog(TW.FORT.nm + (re ? ' a fost recucerit.' : ' a fost cucerit.')); d.cm = out.join(' ');
 }

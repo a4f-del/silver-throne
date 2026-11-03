@@ -260,7 +260,7 @@ function mxClaim(c) {
   const t = MX.T[mxOf(f).k], L = S.lvl, g = Math.round((8 + 5 * L) * t[1] ** .85); S.gold += g;
   let m = `+${g} aur, +${t[2]} faimă`;
   if (t[3]) { const k = P(AFM.filter(x => (MLV[x] || 0) <= L)), n = t[3] + RI(0, 1); give(k, n); m += `, ${n} × ${MA[k]}`; }
-  if (Math.random() < t[4]) { const it = mkItem(P(['w', 'a', 'h', 'b', 'j']), L, P([1, 1, 2, 2, 3])); S.inv.push(it); m += `, obiect: ${it.name}`; }
+  if (Math.random() < t[4]) { const it = lootItem(['w', 'a', 'h', 'b', 'j'], L, P([1, 1, 2, 2, 3])); S.inv.push(it); m += `, obiect: ${it.name}`; }
   f.fm = (f.fm || 0) + t[2]; let up = '';
   while ((f.rk || 0) < 4 && f.fm >= SP.RKF[(f.rk || 0) + 1]) { f.rk = (f.rk || 0) + 1; up = ` ${f.n} a urcat la rangul ${RK[f.rk]}!`; }
   delete S.mx[c]; S.msg = `${f.n} s-a întors din expediție: ${m}.${up}`; go();
@@ -288,7 +288,7 @@ function dcOpen() {
   else if (n === 4) { const g = 2 * (20 + 6 * L); S.gold += g; m = `+${g} aur`; }
   else if (n === 5) { const k = P(AFM.filter(x => (MLV[x] || 0) <= L)); give(k, 4); m = `4 × ${MA[k]}`; }
   else if (n === 6) { S.pts += 8; m = '+8 puncte'; }
-  else { const it = mkItem(P(['w', 'a', 'h', 'b', 'j', 'r']), L, Math.random() < .25 ? 3 : 2); S.inv.push(it); m = 'obiect: ' + it.name; }
+  else { const it = lootItem(['w', 'a', 'h', 'b', 'j', 'r'], L, Math.random() < .25 ? 3 : 2); S.inv.push(it); m = 'obiect: ' + it.name; }
   S.dc = { day: dk(), streak: n }; cn('k'); S.msg = `Cufărul zilei ${n}: ${m}.${n < 7 ? ' Revino mâine pentru ziua ' + (n + 1) + '.' : ' Ai încheiat seria de 7 zile!'}`; go();
 }
 function dcView() {

@@ -151,7 +151,7 @@ const tipAttr = h => String(h).replace(/&/g, '&amp;').replace(/"/g, '&quot;').re
 /* conținutul ferestrei pentru un obiect; cmp = comparația față de cel echipat (HTML) */
 function itTip(it, cmp) {
   const L = typeof INV_L !== 'undefined' ? INV_L : {}, rows = Object.keys(it.s || {}).filter(k => it.s[k]).map(k => `<li class="${it.s[k] < 0 ? 'neg' : ''}"><b>${it.s[k] > 0 ? '+' : '−'}${Math.abs(it.s[k])}</b> ${L[k] || k}</li>`).join('');
-  const wt = typeof WF !== 'undefined' && it.t === 'w' && WF[wfOf(it)], wcl = wt && (wt.c === 'Campion' ? 'erou' : wt.c), wline = wt ? `<div class="tp-w">${wt.n} · potrivită pentru ${wcl} (+30% din atacul armei)<br><span>${wt.d}</span></div>` : '';
+  const wt = typeof WF !== 'undefined' && it.t === 'w' && WF[wfOf(it)], wcl = wt && (wt.c === 'Campion' ? 'erou' : wt.c), wline = wt ? `<div class="tp-w">${wt.n} · ${wt.ex ? `<b class="tp-ex">armă de clasă: doar ${wcl}</b>` : `potrivită pentru ${wcl} (+30% din atacul armei)`}<br><span>${wt.d}</span></div>` : '';
   const r = it.lg ? 'Legendar' : RAR[it.r].n;
   return `<div class="tp-h ${it.lg ? 'rl' : 'r' + (it.r + 1)}">${it.name}</div><div class="tp-s">nivel ${it.l} · ${r}${it.q != null ? ' · ' + QN[it.q] : ''}</div>${wline}${rows ? `<ul class="tp-l">${rows}</ul>` : ''}${it.lg && typeof LG !== 'undefined' && LG[it.lg] && LG[it.lg].d ? `<div class="tp-x">${LG[it.lg].d}</div>` : ''}${cmp ? `<div class="tp-c">${cmp}</div>` : ''}`;
 }
