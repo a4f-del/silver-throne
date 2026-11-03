@@ -54,7 +54,7 @@ input{font:inherit;color:var(--ink);background:#0b0e10;border:1px solid var(--li
 .log div:last-child{color:var(--ink)}
 .en{width:100%;text-align:left;margin:4px 0;display:block}
 .en.t{border-color:var(--ember);box-shadow:inset 3px 0 var(--ember)}
-.r1{color:#c4bfae}.r2{color:#5fc470}.r3{color:var(--ember)}.r4{color:var(--blood)}
+.r1{color:#b9b9b9}.r2{color:#62c879}.r3{color:#62a9ff}.r4{color:#c18aff}.rl{color:#ff9a3d;text-shadow:0 0 8px #ff9a3d44}
 .tabs{display:flex;gap:4px;overflow-x:auto;margin:0 0 14px;padding-bottom:0;border-bottom:1px solid var(--gold);scrollbar-width:thin}
 .tabs button{flex:none;border-radius:4px 4px 0 0;font-family:Cinzel,serif;font-weight:700;font-size:13px;color:var(--mute);background:linear-gradient(180deg,#181e21,#0e1214)}
 .tabs button.p{background:linear-gradient(180deg,#4a3b17,#241c0b);color:var(--gold2);border-color:var(--gold);text-shadow:none}
@@ -98,7 +98,7 @@ main{padding:8px 24px;max-width:940px}
 /* ===== Legendary items + premium hero (efecte vizuale) ===== */
 [data-fx=runic]{--c1:#f0d27a;--c2:#49b6ff}
 /* exemplu pentru un viitor legendar: [data-fx=ember]{--c1:#ffb35a;--c2:#ff4d2e} */
-.rl{color:#f0d27a;text-shadow:0 0 8px #c9a24b66}
+.rl{color:#ff9a3d;text-shadow:0 0 8px #ff9a3d55}
 .ico.lg{width:46px;height:46px;cursor:pointer;isolation:isolate;overflow:visible;border:1px solid var(--c1);background:#141416;animation:lgGlow 3.2s ease-in-out infinite;-webkit-tap-highlight-color:transparent}
 .ico.lg::before{content:"";position:absolute;top:-4px;right:-4px;bottom:-4px;left:-4px;border-radius:8px;background:conic-gradient(from 0deg,var(--c1),transparent 28%,var(--c2),transparent 62%,var(--c1));opacity:.55;filter:blur(3px);z-index:-1;animation:lgSpin 7s linear infinite}
 .ico.lg .lgi{border-radius:3px;z-index:1}.ico.lg .rn{z-index:2;opacity:.8}.ico.lg .pt{z-index:3}
@@ -506,22 +506,26 @@ addEventListener('resize',()=>fxL.forEach(o=>o.w=0));
 function hero(){return`<div class="hero">${heroBg()}<div class="hero-in"><span class="crest">🏰</span><span><b>Capitala</b><small>Nivel ${S.lvl} · ${terStage()}</small></span></div><div class="hero-cta"><span>Cucerește noi teritorii</span><span><button class="p" onclick="tab('m')">Vezi harta</button> <button onclick="tab('c')">Coboară</button></span></div></div>`}
 function av0(f,z){z=z||44;const i=AV[f.c];if(i){const u=S.prem&&i.a?i.a:i.s;if(u)return`<img src="${u}" width="${z}" height="${z}" alt="${f.c}" style="border-radius:50%;object-fit:cover;flex:none">`}
  return`<svg viewBox="0 0 48 48" width="${z}" height="${z}" style="flex:none" role="img" aria-label="${f.c}"><circle cx="24" cy="24" r="22.5" style="fill:var(--bg);stroke:${f.h?'var(--ember)':'var(--line)'};stroke-width:3"/><path d="${AG[f.c]||AG['Campion']}" style="fill:var(--acc)" transform="translate(7.2 7.2) scale(.7)"/></svg>`}
-const MA={zim:'Colți zimțati',sng:'Sânge închegat',bli:'Plăci de oțel',cal:'Cărbune de forjă',vul:'Pene de vultur',pra:'Monede vechi',rab:'Rășină',izv:'Apă de izvor',pia:'Piatră cioplită',ven:'Venin de viperă',fie:'Fier negru',cen:'Cenușă vie',osn:'Oase de monstru',jwf:'Cristal pal',jwb:'Cristal albastru',esf:'Esență de foc'};
-const MU={ore:'bază pentru orice forjare',zim:'prefix Zimțat',sng:'prefix Sângeros',bli:'prefix Blindat',cal:'prefix Călit',vul:'sufix al Vulturului',pra:'sufix al Prăzii',rab:'sufix al Răbdării',izv:'sufix al Izvorului',ven:'prefix Otrăvit',fie:'afixe de oțel: Ascuțit, Masiv, Întrit, al Titanului',cen:'afixe de nivel mare (20+)',osn:'afixe: Fărâmător, al Lupului',pia:'iteme de apărare a satului',jwf:'raritate Magic',jwb:'raritate Rar',esf:'raritate Epic'};
+const MA={afm:'Materiale de forjă',zim:'Colți zimțati',sng:'Sânge închegat',bli:'Plăci de oțel',cal:'Cărbune de forjă',vul:'Pene de vultur',pra:'Monede vechi',rab:'Rășină',izv:'Apă de izvor',pia:'Piatră cioplită',ven:'Venin de viperă',fie:'Fier negru',cen:'Cenușă vie',osn:'Oase de monstru',jwf:'Cristal pal',jwb:'Cristal albastru',esf:'Esență de foc'};
+const MU={ore:'baza oricărei forjări',afm:'resursă comună pentru affix-uri',zim:'material vechi (convertit la forjă)',sng:'material vechi (convertit la forjă)',bli:'material vechi (convertit la forjă)',cal:'material vechi (convertit la forjă)',vul:'material vechi (convertit la forjă)',pra:'material vechi (convertit la forjă)',rab:'material vechi (convertit la forjă)',izv:'material vechi (convertit la forjă)',ven:'material vechi (convertit la forjă)',fie:'material vechi (convertit la forjă)',cen:'material vechi (convertit la forjă)',osn:'material vechi (convertit la forjă)',pia:'material vechi (convertit la forjă)',jwf:'raritate Magic',jwb:'raritate Rar',esf:'raritate Epic'};
 const AFM=['zim','sng','bli','cal','vul','pra','rab','izv','pia','ven','fie','cen','osn'],RM=[null,'jwf','jwb','esf'];
-const MT=()=>S.mat||(S.mat={}),have=k=>k=='ore'?S.ore:(MT()[k]||0),give=(k,n)=>{if(k=='ore')S.ore+=n;else MT()[k]=(MT()[k]||0)+n},take=(k,n)=>give(k,-n),cap=()=>300+150*(BL().d||0),pls=u=>u.t=='w'?PW:PA;
+/* Un singur material comun pentru prefixe/sufixe. Cheile vechi rămân citibile pentru salvările existente și pentru sincronizarea Supabase. */
+const AFM_CORE='afm';
+const afmTotal=()=>{const m=MT();return Math.max(0,Math.floor(+m[AFM_CORE]||0))+AFM.reduce((n,k)=>n+Math.max(0,Math.floor(+m[k]||0)),0)};
+const isAfm=k=>k===AFM_CORE||AFM.includes(k);
+const MT=()=>S.mat||(S.mat={}),have=k=>k=='ore'?S.ore:(isAfm(k)?afmTotal():(MT()[k]||0)),give=(k,n)=>{if(k=='ore')S.ore+=n;else MT()[isAfm(k)?AFM_CORE:k]=(MT()[isAfm(k)?AFM_CORE:k]||0)+n},take=(k,n)=>{if(k=='ore'){S.ore=Math.max(0,S.ore-n);return}if(isAfm(k)){let left=n,m=MT();for(const key of [AFM_CORE,...AFM]){const v=Math.max(0,+m[key]||0),d=Math.min(v,left);m[key]=v-d;left-=d;if(left<=0)break}return}give(k,-n)},cap=()=>300+150*(BL().d||0),pls=u=>u.t=='w'?PW:PA;
 function lm(k,n){const l=S.d.loot,m=l.m||(l.m={});m[k]=(m[k]||0)+n}
-function nd(u){const o={ore:cost(u.l,u.r)},R=RAR[u.r],n=2+Math.floor(u.l/5),a=pls(u)[u.p||0],b=SF[u.s||0];if(R.aff>=1)o[a.m]=n;if(R.aff>=2)o[b.m]=(o[b.m]||0)+n;if(u.r>0)o[RM[u.r]+(u.q||0)]=u.r;return o}
+function nd(u){const o={ore:cost(u.l,u.r)},R=RAR[u.r],n=2+Math.floor(u.l/5);if(R.aff>0)o[AFM_CORE]=n*R.aff;if(u.r>0)o[RM[u.r]+(u.q||0)]=u.r;return o}
 const nh=u=>Object.entries(nd(u)).map(([k,n])=>`<span class="${have(k)<n?'r4':''}">${mn(k)} ${have(k)}/${n}</span>`).join(' · ');
 /* ce nu mai încape în Depozit se vinde automat (minereul 1 aur, materialele 3, materialele de raritate 5 × treapta), nu se pierde */
-const SELLP=k=>k==='ore'?1:AFM.includes(k)?3:5*Math.max(1,RM.indexOf(String(k).slice(0,3)));
-function stash(l){let lost=0,sold=0;const a=Object.assign({},l.m||{});a.ore=(a.ore||0)+(l.ore||0);for(const k in a){const n=Math.min(a[k],Math.max(0,cap()-have(k)));give(k,n);const x=a[k]-n;if(x>0){lost+=x;sold+=x*SELLP(k)}}if(sold){S.gold+=sold;l._sold=(l._sold||0)+sold}return lost}
+const SELLP=k=>k==='ore'?1:isAfm(k)?3:5*Math.max(1,RM.indexOf(String(k).slice(0,3)));
+function stash(l){let lost=0,sold=0;const a=Object.assign({},l.m||{});a.ore=(a.ore||0)+(l.ore||0);let common=+a[AFM_CORE]||0;for(const k of AFM)common+=(+a[k]||0);for(const k of AFM)delete a[k];if(common)a[AFM_CORE]=common;for(const k in a){const n=Math.min(a[k],Math.max(0,cap()-have(k)));give(k,n);const x=a[k]-n;if(x>0){lost+=x;sold+=x*SELLP(k)}}if(sold){S.gold+=sold;l._sold=(l._sold||0)+sold}return lost}
 const SH=[['w','Armurierul'],['a','Fierarul de armuri'],['h','Coifarul'],['b','Cizmarul'],['j','Bijutierul']],ip=it=>Math.round((25+it.l*14)*(1+it.r*1.1));
 function shop(){const s=S.shop||(S.shop={t:0,w:[],a:[],j:[]});if(Date.now()>s.t||!s.w.length||!s.h){for(const [k] of SH){s[k]=[];for(let i=0;i<3;i++)s[k].push(mkItem(k,Math.max(1,S.lvl+RI(-1,1)),P([0,1,1,1,2,2,3])))}s.t=Date.now()+12e5}return s}
 function buy(k,i){const s=shop(),it=s[k][i],c=ip(it);if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;s[k].splice(i,1);S.inv.push(it);S.msg='Ai cumpărat '+it.name+'.'}go()}
 function reshop(){const c=15*S.lvl;if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;S.shop.t=0;S.msg='Negustorii au adus marfă nouă.'}go()}
 function vP(){const s=shop();return SH.map(([k,n])=>`<section><h2>${n}</h2>${s[k].length?s[k].map((it,i)=>`<div class="row"><span class="ic-n"${itTipA(it)}>${iname(it)}</span><button class="p" onclick="buy('${k}',${i})">${ip(it)} aur</button></div>`).join(''):'<p class="mute">Stoc epuizat.</p>'}</section>`).join('')+`<div class="row"><span class="mute">Marfa se schimbă la 20 de minute</span><button onclick="reshop()">${15*S.lvl} aur</button></div>`}
-function vD(){const rows=[['ore','Minereu',S.ore],...AFM.map(k=>[k,MA[k],MT()[k]||0])];return`<section><h2>Depozit</h2><div class="mute">Capacitate: ${cap()} din fiecare material. O poți mări la Curte. Dezmembrarea îi dă înapoi materialele afixelor.</div>${rows.map(([k,n,v])=>`<div class="row"><span>${n}<br><span class="mute">${MU[k]}</span></span><span><b>${v}</b>/${cap()}</span></div>${bar(v,cap())}`).join('')}${[1,2,3].map(r=>`<div class="row"><span>${MA[RM[r]]}<br><span class="mute">raritate ${RAR[r].n}</span></span><span>${QN.map((n,q)=>`${n} <b>${MT()[RM[r]+q]||0}</b>`).join(' · ')}</span></div>`).join('')}</section>`}
+function vD(){const rows=[['ore','Minereu',S.ore],['afm',MA.afm,afmTotal()]];return`<section><h2>Depozit</h2><div class="mute">Capacitate: ${cap()} pentru fiecare resursă. Materialele vechi de affix sunt reunite într-o singură resursă comună; affix-urile rămân proprietăți ale echipamentului.</div>${rows.map(([k,n,v])=>`<div class="row"><span>${n}<br><span class="mute">${MU[k]}</span></span><span><b>${v}</b>/${cap()}</span></div>${bar(v,cap())}`).join('')}${[1,2,3].map(r=>`<div class="row"><span>${MA[RM[r]]}<br><span class="mute">raritate ${RAR[r].n}</span></span><span>${QN.map((n,q)=>`${n} <b>${MT()[RM[r]+q]||0}</b>`).join(' · ')}</span></div>`).join('')}</section>`}
 const VL=[['a','Topitorie'],['p','Piață'],['l','Negustor'],['h','Han'],['i','Infirmerie'],['t','Antrenament'],['x','Misiuni'],['d','Depozit'],['z','Apărare'],['g','Steag'],['q','Bot']];
 function vil(k){S.vil=k;S.msg='';go()}
 /* Satul: fără S.vil = pagina de start cu clădirile (sat.js); altfel banda „‹ Sat” + clădirea */
@@ -529,7 +533,7 @@ function vV(){const k=S.vil;if(!k||!VL.some(x=>x[0]===k))return vHub();return vB
 const QN=['alb','verde','albastru','mov','roșu'];
 /* k = tăria monștrilor (reglată prin simulare, noiembrie 2026: primele temnițe cer deja echipament, de la Fortul încolo un jucător neantrenat dar echipat mai poate câștiga); pk = recompensa, separată de k */
 const DG=[{n:'Mina Cenușie',lv:1,k:1.6,pk:1,rooms:4,w:[100],rm:1,bn:'Căpitanul Cenușii'},{n:'Catacombele Uitate',lv:8,k:3.8,pk:1.5,rooms:4,w:[60,30,10],rm:2,bn:'Regele Oaselor'},{n:'Cetatea Scufundată',lv:18,k:6.3,pk:2.1,rooms:5,w:[35,35,20,10],rm:3,bn:'Căpitanul Înecat'},{n:'Abisul Cenușiu',lv:30,k:9.1,pk:3,rooms:6,w:[15,25,30,20,10],rm:3,bn:'Stăpânul Abisului'}];
-const mn=k=>/\d$/.test(k)?MA[k.slice(0,-1)]+' ('+QN[+k.slice(-1)]+')':(k=='ore'?'Minereu':MA[k]);
+const mn=k=>/\d$/.test(k)?MA[k.slice(0,-1)]+' ('+QN[+k.slice(-1)]+')':(k=='ore'?'Minereu':(isAfm(k)?MA[AFM_CORE]:MA[k]));
 /* obiecte găsite în temnițe: luptele obișnuite rar (până la Rar), căpitanii des (Rar–Epic), Legendare doar la căpitanii temnițelor de nivel 30+;
    fragmentele epice (pentru Epicele de la forjă) vin de la căpitani */
 const FE=5,IDW=[[75,25,0],[45,40,15],[25,45,30],[15,40,45]],IDB=[[0,65,35,0],[0,30,55,15],[0,15,55,30],[0,5,50,45]];

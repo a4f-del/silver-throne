@@ -67,7 +67,7 @@ const invBulkSet = () => S.inv.map((it, i) => ({ it, i })).filter(x => x.it && !
 function invBulk(kind) {
   const set = invBulkSet(); if (!set.length) { S.msg = 'Nimic de curățat.'; return go(); }
   const gold = set.reduce((s, x) => s + invVal(x.it), 0), ore = set.reduce((s, x) => s + invOre(x.it), 0);
-  const q = kind === 'sell' ? `Vinzi ${set.length} obiecte (Comun și Magic, neblocate) pentru ${gold} aur?` : `Dezmembrezi ${set.length} obiecte (Comun și Magic, neblocate)? Primești ${ore} minereu și materialele afixelor.`;
+  const q = kind === 'sell' ? `Vinzi ${set.length} obiecte (Comun și Magic, neblocate) pentru ${gold} aur?` : `Dezmembrezi ${set.length} obiecte (Comun și Magic, neblocate)? Primești ${ore} minereu și materiale de forjă.`;
   if (typeof confirm === 'function' && !confirm(q)) return;
   const ids = new Set(set.map(x => x.i));
   if (kind === 'sell') S.gold += gold; else { S.ore += ore; set.forEach(x => (x.it.m || []).forEach(k => give(k, 1))); }
