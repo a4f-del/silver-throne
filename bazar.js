@@ -1,6 +1,6 @@
 /* ============================================================================
    Silver Throne — bazar.js
-   Bazarul între jucători: o clădire nouă în Sat („Bazar”, cheia 'y').
+   Bazarul între jucători: a treia filă a Pieței (Piață › Bazar; piata.js), cheia 'y'.
    Serverul (supabase/07-bazar.sql) ține obiectele puse la vânzare și mută aurul; clientul nu schimbă niciodată
    singur aurul din bazar: totul vine prin wallet_sync (pend_gold), deci după fiecare operație apelăm pfSync().
      Cumpără        — ofertele altor jucători (bazar_browse), cu filtre; „Cumpără” → bazar_buy
@@ -8,7 +8,7 @@
      Ofertele mele  — ofertele tale (bazar_mine), „Retrage” → bazar_cancel
    Cutia poștală: obiectele cumpărate, retrase sau expirate (bazar_claim) intră în rucsac la pornire, la intrarea în Bazar
    și o dată pe minut; fereastra de recompense le arată cu titlul „Bazar”.
-   Legendarele nu se vând (sunt legate de cont). Bazarul se deschide la nivelul 10. Botul nu-l folosește.
+   Legendarele nu se vând (sunt legate de cont). Bazarul se deschide la nivelul 15. Botul nu-l folosește.
    Imaginea clădirii: imagini/ui/bazar.webp (dacă lipsește, apare o iconiță de rezervă).
    ========================================================================== */
 const BZ = {
@@ -16,7 +16,7 @@ const BZ = {
   rows: null, total: 0, mine: null, inbox: 0, open: 0,
   busy: 0, msg: '', err: '', px: new WeakMap(), lastClaim: 0, off: 0
 };
-const BZ_MIN = 10, BZ_FEE = 0.02, BZ_CUT = 0.05, BZ_MULT = 50;
+const BZ_MIN = 15, BZ_FEE = 0.02, BZ_CUT = 0.05, BZ_MULT = 50;
 const BZ_T = [['', 'Toate'], ['w', 'Arme'], ['a', 'Armuri'], ['h', 'Coifuri'], ['b', 'Cizme'], ['j', 'Bijuterii'], ['r', 'Relicve']];
 const bzShop = it => 4 + it.l * 3 * (it.r + 1);                                   /* ca la Piață: sell() */
 const bzMax = it => Math.floor(bzShop(it) * BZ_MULT * (1 + (it.up || 0) / 3));
@@ -40,7 +40,7 @@ async function bzSync() {
   for (let i = 0; i < 40 && typeof PF !== 'undefined' && PF.busy; i++) await new Promise(r => setTimeout(r, 150));
   await pfSync();
 }
-function bzUi() { try { if (S.tab === 'a' && S.vil === 'y') go(); } catch (e) { /* se redesenează la următoarea acțiune */ } }
+function bzUi() { try { if (S.tab === 'a' && S.vil === 'p' && S.pt === 'y') go(); } catch (e) { /* se redesenează la următoarea acțiune */ } }
 
 /* ------------------------------------------------------------------ CUTIA POȘTALĂ */
 async function bzClaim(force) {
@@ -176,7 +176,7 @@ function vBazar() {
   let body;
   if (!bzOn()) body = '<p class="mute">Bazarul e între jucători: conectează-te cu un cont ca să cumperi și să vinzi.</p>';
   else if (BZ.off) body = '<p class="mute">Bazarul nu e încă deschis pe server. (Administratorul trebuie să ruleze supabase/07-bazar.sql.)</p>';
-  else if ((S.lvl || 1) < BZ_MIN) body = `<p class="mute">Bazarul se deschide la nivelul ${BZ_MIN}. Până atunci poți cumpăra de la Piață și Negustor.</p>`;
+  else if ((S.lvl || 1) < BZ_MIN) body = `<p class="mute">Bazarul se deschide la nivelul ${BZ_MIN}. Până atunci poți cumpăra din celelalte două file.</p>`;
   else {
     if (Date.now() - BZ.lastClaim > 50000) setTimeout(() => bzClaim(), 0);
     const tabs = [['c', 'Cumpără'], ['v', 'Vinde'], ['m', 'Ofertele mele' + (BZ.inbox ? ` <b class="bz-dot">${BZ.inbox}</b>` : '')]];
@@ -190,10 +190,8 @@ function vBazar() {
 /* ------------------------------------------------------------------ LEGAREA ÎN SAT */
 function bzHook() {
   if (typeof VL === 'undefined' || typeof SAT_B === 'undefined') return;
-  if (!VL.some(x => x[0] === 'y')) VL.push(['y', 'Bazar']);
-  if (!SAT_B.some(x => x[0] === 'y')) SAT_B.splice(Math.max(0, SAT_B.findIndex(x => x[0] === 'q')), 0, ['y', 'Bazar', 'schimb între jucători']);
   if (typeof SAT_ICON !== 'undefined') SAT_ICON.y = '<img class="bz-ico" src="imagini/ui/bazar.webp" alt="" onerror="this.outerHTML=\'<span class=&quot;bz-ico bz-ico-f&quot;>⚖️</span>\'">';
-  if (typeof vV === 'function' && !vV.__bz) { const f = vV; window.vV = function () { return S.vil === 'y' ? vBar('y') + vBazar() : f.apply(this, arguments); }; window.vV.__bz = 1; }
+  /* pagina și butonul din Sat le face piata.js (Piață › Bazar) */
   if (typeof satStatus === 'function' && !satStatus.__bz) {
     const f = satStatus;
     window.satStatus = function (k) {
@@ -202,14 +200,6 @@ function bzHook() {
       return [BZ.inbox ? `${BZ.inbox} ${BZ.inbox === 1 ? 'obiect' : 'obiecte'} de ridicat` : BZ.open ? `${BZ.open} ${BZ.open === 1 ? 'ofertă activă' : 'oferte active'}` : 'schimb între jucători', BZ.inbox > 0];
     };
     window.satStatus.__bz = 1;
-  }
-  if (typeof vHub === 'function' && !vHub.__bz) {
-    const f = vHub;
-    window.vHub = function () {
-      const [st] = satStatus('y');
-      return f().replace('<span class="mute">Atinge o clădire', `<button class="vb-c" data-v="y" onclick="vil('y')"><span class="vb-i">${satIcon('y')}</span><span>Bazar · ${st}</span></button><span class="mute">Atinge o clădire`);
-    };
-    window.vHub.__bz = 1;
   }
   /* cutia poștală: la pornire (după ce contul s-a încărcat) și o dată pe minut */
   let n = 0; const t = setInterval(() => { if (typeof CONT !== 'undefined' && CONT.booted && CONT.user) { clearInterval(t); bzClaim(true); } else if (++n > 120) clearInterval(t); }, 1000);
