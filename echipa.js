@@ -19,9 +19,36 @@ function tmCard(f, i) {
   const k = [!f.h && MP[f.c] ? RK[f.rk || 0] : f.rk ? RK[f.rk] : '', tEsc(f.c), where].filter(Boolean).join(' · ');
   return `<button class="tm-c${sel ? ' sel' : ''}${dead ? ' dead' : ''}${where === 'rezervă' || where === 'strajă' ? ' res' : ''}" onclick="sel(${i})" aria-pressed="${sel}" title="${tEsc(f.n)}: ${Math.round(c.hp)}/${c.max} viață"><span class="tm-av">${av(f, 40)}${dead ? '<b class="sk">☠</b>' : ''}</span><span class="tm-tx"><span class="tm-n">${tEsc(f.n)}</span><span class="tm-k">${k}</span><i class="tm-hp${c.p < 40 ? ' low' : ''}"><i style="width:${c.p}%"></i></i></span>${typeof spNeed === 'function' && spNeed(f) ? '<b class="nb" title="Poate primi o specializare">!</b>' : ''}</button>`;
 }
+/* rolul clasei, pentru cardul mare: Tank / DPS / Suport */
+const ROLE = { Paznic: 'Tank', Războinic: 'DPS', Arcaș: 'DPS', Mag: 'DPS', Vraci: 'Suport', Campion: 'DPS' };
+const roleOf = f => ROLE[f.h ? 'Campion' : f.c] || 'DPS';
+/* un sfat scurt despre echipament, legat de rol */
+function tmRoleTip(f) {
+  const w = E(f).w, ideal = typeof WFC !== 'undefined' ? WFC[f.h ? 'Campion' : f.c] : null;
+  if (!w) return 'Fără armă echipată.';
+  if (ideal && typeof wfOf === 'function' && wfOf(w) !== ideal) return `Arma potrivită pentru acest rol: ${WF[ideal].n}.`;
+  if (!E(f).a) return 'Fără armură echipată.';
+  return 'Bine echipat pentru rolul lui.';
+}
+/* cardul mare, pentru cei trei (sau patru) din echipa activă: portret, rol, viață, rang, specializare, echipament, sfat */
+function tmBigCard(f, i) {
+  const sel = f === cur(), c = tmHp(f), dead = c.hp <= 0, src = tmFullSrc(f), role = roleOf(f);
+  const rank = f.h ? '' : RK[f.rk || 0], spec = f.sp && typeof spDef0 === 'function' && spDef0(f) ? spDef0(f).n : '';
+  const eq = SL.map(k => { const it = E(f)[k]; return `<span class="tm-eqi${it ? '' : ' em'}" title="${it ? tEsc(it.name) : SLN[k] + ': gol'}">${it ? iic(it) : UI(UISL[k])}</span>`; }).join('');
+  return `<button class="tm-big${sel ? ' sel' : ''}${dead ? ' dead' : ''}" onclick="sel(${i})" aria-pressed="${sel}">`
+    + `<span class="tm-big-role r-${role}">${role}</span>`
+    + `<span class="tm-big-av">${src ? `<img src="${src}" alt="" onerror="this.style.display='none'">` : av(f, 96)}${dead ? '<b class="sk">☠</b>' : ''}</span>`
+    + `<span class="tm-big-n">${tEsc(f.n)}</span><span class="tm-big-k mute">${[rank, spec].filter(Boolean).join(' · ') || tEsc(f.c)}</span>`
+    + `<span class="tm-big-hp${c.p < 40 ? ' low' : ''}"><i style="width:${c.p}%"></i></span><span class="tm-big-hpn mute">${Math.round(c.hp)}/${c.max} viață</span>`
+    + `<span class="tm-big-eq">${eq}</span><span class="tm-big-tip">${tmRoleTip(f)}</span></button>`;
+}
+/* sus: cardurile mari ale echipei active; dedesubt, o bandă mai mică pentru rezervă (nu la fel de proeminentă) */
 function tmStrip() {
-  const ro = roster();
-  return `<div class="tm-strip" role="group" aria-label="Luptători">${ro.map(tmCard).join('')}</div>`;
+  const ro = roster(), nfs = S.fs.length;
+  const squad = `<div class="tm-squad" role="group" aria-label="Echipa activă">${ro.slice(0, nfs).map((f, i) => tmBigCard(f, i)).join('')}</div>`;
+  const rest = ro.slice(nfs);
+  const res = rest.length ? `<div class="tm-res"><h3 class="tm-res-h">Rezervă <span class="mute">· ${rest.length}</span></h3><div class="tm-strip" role="group" aria-label="Rezervă">${rest.map((f, j) => tmCard(f, nfs + j)).join('')}</div></div>` : '';
+  return squad + res;
 }
 
 /* ----------------------------------------------------- luptătorul selectat */
@@ -189,5 +216,30 @@ function temaHdr() {
 .tm-syn-r span{font-size:12px;color:var(--mute)}.tm-syn-r b{font-size:14.5px}
 .syn-b1{color:#e8837b}.syn-n{color:#d6c56a}.syn-g1{color:#9fe3ad}.syn-g2{color:#7fd88c}
 .tm-syn-tip{font-size:13px}`;
+  document.head.appendChild(st);
+})();
+
+(function () {
+  if (typeof document === 'undefined' || !document.head) return;
+  const st = document.createElement('style');
+  st.textContent = `.tm-squad{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:6px}
+.tm-big{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:30px 10px 10px;border:1px solid var(--line);border-radius:12px;background:#0e1214;text-align:center;cursor:pointer}
+.tm-big.sel{border-color:var(--gold2,#f0d27a);box-shadow:0 0 0 1px var(--gold2,#f0d27a),0 0 16px #f0d27a33}
+.tm-big.dead{opacity:.6}
+.tm-big-role{position:absolute;top:8px;left:8px;font:700 10.5px Cinzel,serif;letter-spacing:.04em;padding:2px 8px;border-radius:8px}
+.tm-big-role.r-Tank{background:#17324a;color:#7fb3ff}.tm-big-role.r-DPS{background:#4a2414;color:#f0a06a}.tm-big-role.r-Suport{background:#1f4a2a;color:#9fe3ad}
+.tm-big-av{width:84px;height:84px;border-radius:50%;overflow:hidden;background:#161b1e;display:flex;align-items:center;justify-content:center;position:relative}
+.tm-big-av img{width:100%;height:100%;object-fit:cover;object-position:center 20%}
+.tm-big .sk{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;background:#000a}
+.tm-big-n{font:700 14.5px Cinzel,serif;margin-top:2px}.tm-big-k{font-size:11.5px}
+.tm-big-hp{display:block;width:100%;height:6px;border-radius:3px;background:#1c2226;overflow:hidden;margin-top:2px}
+.tm-big-hp i{display:block;height:100%;background:linear-gradient(90deg,#4a8f55,#7fd88c)}.tm-big-hp.low i{background:linear-gradient(90deg,#8a3a32,#e8837b)}
+.tm-big-hpn{font-size:11px}
+.tm-big-eq{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin-top:3px}
+.tm-eqi{width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:5px;background:#161b1e}
+.tm-eqi img,.tm-eqi .uii{width:16px;height:16px}.tm-eqi.em{opacity:.35}
+.tm-big-tip{font-size:10.5px;color:var(--mute);line-height:1.25;min-height:2.4em}
+.tm-res{margin:10px 0 6px}.tm-res-h{font:700 12.5px Cinzel,serif;color:var(--mute);margin:0 0 6px}
+@media (max-width:520px){.tm-squad{grid-template-columns:repeat(2,minmax(0,1fr))}}`;
   document.head.appendChild(st);
 })();
