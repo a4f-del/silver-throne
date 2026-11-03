@@ -8,7 +8,45 @@
    serverul acceptă valorile mari doar pentru conturile din public.admins (altfel portofelul le taie).
    Se încarcă după cont.js.
    ========================================================================== */
-const ADM = { open: false };
+const ADM = { open: false, gen: { t: 'w', wf: 'sab', r: 3, set: 'rand', l: 0, up: 0, n: 1, lg: 'maree' } };
+
+/* ------------------------------------------------------------------ GENERATORUL DE OBIECTE */
+const ADM_T = [['w', 'Armă'], ['a', 'Armură'], ['h', 'Coif'], ['b', 'Cizme'], ['j', 'Bijuterie'], ['r', 'Relicvă']];
+function admGenSet(k, v) { ADM.gen[k] = ['r', 'l', 'up', 'n'].includes(k) ? +v : v; if (k === 't') admDraw(); }
+/* o relicvă ca cele de la căpitani (index.html: relic), la nivelul și calitatea alese */
+function admRelic(l, q) {
+  const ks = ['pd', 'ph', 'heal', 'pf'].sort(() => Math.random() - 0.5).slice(0, 2), s = {}, v = Math.round((3 + l * 0.18) * (1 + 0.1 * q));
+  ks.forEach(k => { s[k] = v; });
+  return { t: 'r', l, r: 3, q, name: P(['Ochiul Cenușii', 'Colții Haitei', 'Inima Mlaștinii', 'Cenușa Veche', 'Pecetea Regelui', 'Lacrima Izvorului']), s, m: [] };
+}
+function admGen(kind) {
+  const g = ADM.gen, l = Math.max(1, Math.min(60, g.l || S.lvl)), n = Math.max(1, Math.min(20, g.n || 1)), out = [];
+  const up = it => { if (g.up > 0 && it && it.t !== 'r' && typeof upApply === 'function') { it.up = Math.min(9, g.up); upApply(it); } return it; };
+  if (kind === 'lgall') { for (const id in LG) out.push(up(mkLegendary(id, l))); }
+  else for (let i = 0; i < n; i++) {
+    let it;
+    if (kind === 'lg') it = mkLegendary(g.lg, l);
+    else if (g.t === 'r') it = admRelic(l, Math.max(0, Math.min(4, g.r)));
+    else {
+      it = mkItem(g.t, l, Math.max(0, Math.min(3, g.r)), null, null, g.r >= 3 ? 2 : 0, g.t === 'w' ? g.wf : undefined);
+      if (['a', 'h', 'b', 'j'].includes(g.t) && typeof SETS !== 'undefined') { if (g.set === '') delete it.set; else if (g.set !== 'rand' && SETS[g.set]) it.set = g.set; }
+    }
+    out.push(up(it));
+  }
+  const ok = out.filter(Boolean); ok.forEach(it => S.inv.push(it));
+  ADM.m = ok.length === 1 ? `${ok[0].name} adăugat în rucsac` : `${ok.length} obiecte adăugate în rucsac`;
+  S.msg = ''; go(); admDraw();
+}
+function admGenHtml() {
+  const g = ADM.gen, sel = (k, opts, cur) => `<select onchange="admGenSet('${k}',this.value)" aria-label="${k}">${opts.map(([v, t]) => `<option value="${v}"${String(v) === String(cur) ? ' selected' : ''}>${tEsc(t)}</option>`).join('')}</select>`;
+  const rar = [[0, 'Comun'], [1, 'Magic'], [2, 'Rar'], [3, 'Epic']];
+  const wfs = typeof WF !== 'undefined' ? Object.entries(WF).map(([k, v]) => [k, `${v.n} · ${v.c === 'Campion' ? 'erou' : v.c}${v.ex ? ' (de clasă)' : ''}`]) : [];
+  const sets = [['rand', 'set: la întâmplare'], ['', 'fără set'], ...(typeof SETS !== 'undefined' ? Object.entries(SETS).map(([k, v]) => [k, 'set: ' + v.n]) : [])];
+  const lgs = typeof LG !== 'undefined' ? Object.entries(LG).map(([k, v]) => [k, `${v.n}${v.cls ? ' · ' + (v.cls === 'Campion' ? 'erou' : v.cls) : ''}`]) : [];
+  return `<div class="adm-g"><span>Obiect</span><div class="adm-bs">${sel('t', ADM_T, g.t)}${g.t === 'w' ? sel('wf', wfs, g.wf) : ''}${g.t === 'r' ? '' : sel('r', rar, g.r)}${['a', 'h', 'b', 'j'].includes(g.t) ? sel('set', sets, g.set) : ''}</div></div>
+<div class="adm-g"><span></span><div class="adm-bs"><label class="adm-l">nivel <input type="number" min="1" max="60" value="${g.l || S.lvl}" onchange="admGenSet('l',this.value)"></label><label class="adm-l">Fierărie + <input type="number" min="0" max="9" value="${g.up}" onchange="admGenSet('up',this.value)"></label><label class="adm-l">bucăți <input type="number" min="1" max="20" value="${g.n}" onchange="admGenSet('n',this.value)"></label><button class="p" onclick="admGen('item')">Creează</button></div></div>
+<div class="adm-g"><span>Legendar</span><div class="adm-bs">${sel('lg', lgs, g.lg)}<button class="p" onclick="admGen('lg')">Creează</button><button onclick="admGen('lgall')">Toate legendarele</button></div></div>`;
+}
 
 /* verifică pe server dacă acest cont e administrator (o dată, după pornirea jocului) */
 async function admCheck() {
@@ -79,7 +117,8 @@ function admDraw() {
 <div class="adm-g"><span>Nivel · ${S.lvl}</span><div class="adm-bs">${b('lvl', 1, '+1')}${b('lvl', 5, '+5')}${b('lvl', 10, '+10')}<input id="adm-lv" type="number" min="1" max="50" placeholder="nivel" aria-label="Nivel">${b('setlvl', 0, 'Setează')}</div></div>
 <div class="adm-g"><span>Echipă</span><div class="adm-bs">${b('heal', 0, 'Vindecă tot')}${b('scars', 0, 'Șterge cicatricile')}${b('fame', 50, '+50 faimă')}${b('fame', 1000, 'Rang maxim')}</div></div>
 <div class="adm-g"><span>Timp</span><div class="adm-bs">${b('forge', 0, 'Termină forja')}${b('exp', 0, 'Termină expedițiile')}${b('daily', 0, 'Cufăr zilnic din nou')}</div></div>
-<div class="adm-g"><span>Obiecte</span><div class="adm-bs">${b('lg', 0, 'Armă legendară')}${b('prem', 0, 'Premium: ' + (S.prem ? 'pornit' : 'oprit'))}</div></div>
+${admGenHtml()}
+<div class="adm-g"><span>Premium</span><div class="adm-bs">${b('prem', 0, 'Premium: ' + (S.prem ? 'pornit' : 'oprit'))}</div></div>
 <div class="adm-g"><span>Forjă</span><div class="adm-bs">${[4, 6, 8].map(n => b('slots', n, n + ' sloturi', n == S.slots ? 'p' : '')).join('')}</div></div>
 <div class="adm-g"><span>Joc</span><div class="adm-bs">${b('tu', 0, 'Repornește ghidul')}${b('reset', 0, 'Resetează jocul', 'd')}</div></div>`;
 }
@@ -97,6 +136,8 @@ function admDraw() {
 .adm-g{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-top:1px solid #ffffff14}
 .adm-g>span{flex:0 0 112px;font-size:12.5px;color:var(--mute);padding-top:5px}.adm-bs{flex:1;display:flex;flex-wrap:wrap;gap:5px}
 .adm-g button{width:auto;min-height:0;padding:4px 9px;font-size:12.5px}
+.adm-g select{max-width:100%;padding:4px 6px;font-size:12.5px;border-radius:6px;border:1px solid var(--line);background:#0b0e10;color:var(--ink)}
+.adm-l{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--mute)}.adm-l input{width:56px!important}
 .adm-g input{width:70px;padding:4px 6px;font-size:13px;border-radius:6px;border:1px solid var(--line);background:#0b0e10;color:var(--ink)}
 @media (max-width:520px){.adm-g{flex-direction:column;gap:4px}.adm-g>span{flex-basis:auto;padding:0}}`;
   document.head.appendChild(st);
