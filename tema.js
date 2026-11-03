@@ -48,15 +48,14 @@ function temaVTabs(k) {
 }
 
 /* ------------------------------------------------------ SLOTURI DE FORJĂ */
+function collectAll() { for (let i = S.slots - 1; i >= 0; i--) { const s = S.forge[i]; if (s && Date.now() >= s.end) collect(i); } }
 function forgeSlots() {
-  const now = Date.now(); let h = '<div class="fgrid">';
-  for (let i = 0; i < S.slots; i++) {
-    const s = S.forge[i];
+  const now = Date.now(); let h = '', ready = 0;
+  for (let i = 0; i < S.slots; i++) { const s = S.forge[i];
     if (!s) h += '<div class="fslot"><span class="fi">⚒</span><b>Slot liber</b><span class="mute">Forjează un obiect mai jos</span></div>';
     else if (now < s.end) h += `<div class="fslot busy"><span class="fi">🔥</span><b>${s.label}</b><span class="fti" data-end="${s.end}">${fmt(s.end - now)}</span></div>`;
-    else h += `<div class="fslot rdy"><span class="fi">✔</span><b>${s.label}</b><button class="p" onclick="collect(${i})">Ridică</button></div>`;
-  }
-  return h + '</div>';
+    else { ready++; h += `<div class="fslot rdy"><span class="fi">✔</span><b>${s.label}</b><button class="p" onclick="collect(${i})">Ridică</button></div>`; } }
+  return (ready >= 2 ? `<button class="fgrid-all" onclick="collectAll()">Ridică tot (${ready})</button>` : '') + '<div class="fgrid">' + h + '</div>';
 }
 
 /* ------------------------------------------------ VERIFICARE DE VERSIUNE */
@@ -94,3 +93,10 @@ function temaPost() {
     el.onclick = () => { S.msg = ''; _tmMsg = ''; el.classList.add('out'); setTimeout(() => el.remove(), 300); };
   } catch (e) { /* aspectul nu trebuie să blocheze jocul */ }
 }
+
+(function () {
+  if (typeof document === 'undefined' || !document.head) return;
+  const st = document.createElement('style');
+  st.textContent = `.fgrid-all{display:block;width:100%;margin-bottom:8px;padding:7px;font-weight:700;color:var(--gold2,#f0d27a);background:#1c2015;border:1px solid var(--gold2,#f0d27a)}`;
+  document.head.appendChild(st);
+})();

@@ -51,9 +51,10 @@ function twWin(d, b) {
 }
 /* cardul din Coborâre */
 function twCard() {
+  if (S.lvl < TWR.lv - 5) return '';   /* la nivelul 1 nu are rost: apare abia cu 5 niveluri înainte de deblocare */
   const t = twSt(), lock = S.lvl < TWR.lv, nx = TWR.up.find(f => t.best < f);
   return `<section class="tw-c"><div class="tw-img"><img src="imagini/lume/turn.webp" alt=""></div><div><h2>Turnul</h2>`
-    + `<div class="mute">Etaje tot mai grele, câte o luptă pe etaj și un străjer la fiecare 10. Fiecare intrare o ia de la etajul 1; rămâne recordul tău. Fără vindecare, în afară de un foc de tabără după fiecare străjer. Recordul deblochează treptele +6…+9 la Fierărie.</div>`
+    + `<div class="info"><div class="mute">Etaje tot mai grele, câte o luptă pe etaj.</div><details><summary>ⓘ Cum funcționează</summary><div class="mute">Un străjer la fiecare 10 etaje. Fiecare intrare o ia de la etajul 1; rămâne recordul tău. Fără vindecare, în afară de un foc de tabără după fiecare străjer. Recordul deblochează treptele +6…+9 la Fierărie.</div></details></div>`
     + (lock ? `<div class="row"><span class="mute">Se deschide la nivelul ${TWR.lv}.</span></div>` :
       `<div class="tw-st"><span>Recordul tău<b>${t.best ? 'etajul ' + t.best : '—'}</b></span><span>Săptămâna asta<b>${t.wb ? 'etajul ' + t.wb : '—'}</b></span><span>Urcări azi<b>${twLeft()} / ${TWR.day}</b></span><span>Fierăria<b>până la +${twUpMax()}</b></span></div>`
       + `<div class="row"><span class="mute">${nx ? `Următoarea treaptă (+${5 + TWR.up.indexOf(nx) + 1}) la etajul ${nx}.` : 'Ai deblocat toate treptele Fierăriei.'}</span><button class="p" onclick="twEnter()"${twLeft() && !S.d ? '' : ' disabled'}>Intră · ${TWR.cost} puncte</button></div>`)

@@ -57,28 +57,33 @@ function sdRow(ic, txt, right, onclick, hot) {
   return `<button class="sd-r${hot ? ' hot' : ''}" onclick="${onclick}"><span class="sd-i">${im}</span><span class="sd-x">${txt}</span><span class="sd-v">${right || ''}</span></button>`;
 }
 
+/* fiecare rând e urgent (hot) sau nu; rândurile urgente apar mereu, restul sunt plafonate la 5, cu un buton „+N mai multe” */
 function sdTasks() {
-  const r = [], now = Date.now();
-  if (S.d) r.push(sdRow('⛏', 'În coborâre', '', "sdGo('c')", true));
-  if (S.ex) r.push(sdRow('🧭', 'Expediție în curs', 'continuă', "sdGo('m','mt','l')", true));
+  const hot = [], rest = [], now = Date.now();
+  const push = (ic, txt, right, onclick, h) => (h ? hot : rest).push(sdRow(ic, txt, right, onclick, h));
+  if (S.d) push('⛏', 'În coborâre', '', "sdGo('c')", true);
+  if (S.ex) push('🧭', 'Expediție în curs', 'continuă', "sdGo('m','mt','l')", true);
   const busy = sdForgeBusy(), ready = sdForgeReady(), slots = (S.forge || []).length;
-  if (ready) r.push(sdRow('✔', `Forjă: ${ready} ${ready === 1 ? 'obiect gata' : 'obiecte gata'}`, 'ridică', "sdGo('a','vil','a')", true));
-  if (busy.length) { const nx = Math.min(...busy.map(x => +x.end)); r.push(sdRow('⚒', `Forjă ${busy.length}/${slots}`, `<span data-end="${nx}">${fmt(nx - now)}</span>`, "sdGo('a','vil','a')")); }
+  if (ready) push('✔', `Forjă: ${ready} ${ready === 1 ? 'obiect gata' : 'obiecte gata'}`, 'ridică', "sdGo('a','vil','a')", true);
+  if (busy.length) { const nx = Math.min(...busy.map(x => +x.end)); push('⚒', `Forjă ${busy.length}/${slots}`, `<span data-end="${nx}">${fmt(nx - now)}</span>`, "sdGo('a','vil','a')"); }
   const cp = ((S.ter && S.ter.camps) || []).filter(c => c && Number.isFinite(+c.exp));
-  if (cp.length) { const nx = Math.min(...cp.map(c => +c.exp)); r.push(sdRow('⚔', `Tabere: ${cp.length}`, sdT(nx - now), "sdGo('m','mt','l')")); }
-  for (const b of ((S.ter && S.ter.buf) || [])) if (b && Number.isFinite(+b.exp) && Number.isFinite(+b.v) && b.exp > now) r.push(sdRow('✦', `+${b.v}% ${({ pd: 'atac', pf: 'apărare', ph: 'viață' })[b.k] || b.k}`, `<span data-end="${b.exp}">${fmt(b.exp - now)}</span>`, "sdGo('m','mt','l')"));
+  if (cp.length) { const nx = Math.min(...cp.map(c => +c.exp)); push('⚔', `Tabere: ${cp.length}`, sdT(nx - now), "sdGo('m','mt','l')"); }
+  for (const b of ((S.ter && S.ter.buf) || [])) if (b && Number.isFinite(+b.exp) && Number.isFinite(+b.v) && b.exp > now) push('✦', `+${b.v}% ${({ pd: 'atac', pf: 'apărare', ph: 'viață' })[b.k] || b.k}`, `<span data-end="${b.exp}">${fmt(b.exp - now)}</span>`, "sdGo('m','mt','l')");
   const m = dm(), dr = dmReady(), done = m.list.filter(x => x.c).length;
-  if (typeof dcReady === 'function' && dcReady()) r.push(sdRow('🎯', 'Cufărul zilnic', 'deschide', "sdGo('a','vil','x')", true));
-  if (typeof mxReady === 'function' && mxReady()) r.push(sdRow('🧭', 'Expediții întoarse', mxReady(), "sdGo('a','vil','h')", true));
-  r.push(sdRow('🎯', 'Misiuni zilnice', dr ? `${dr} de ridicat` : `${done}/${m.list.length}`, "sdGo('a','vil','x')", dr > 0));
+  if (typeof dcReady === 'function' && dcReady()) push('🎯', 'Cufărul zilnic', 'deschide', "sdGo('a','vil','x')", true);
+  if (typeof mxReady === 'function' && mxReady()) push('🧭', 'Expediții întoarse', mxReady(), "sdGo('a','vil','h')", true);
+  push('🎯', 'Misiuni zilnice', dr ? `${dr} de ridicat` : `${done}/${m.list.length}`, "sdGo('a','vil','x')", dr > 0);
   const ch = chCur();
-  if (ch) { const d = ch.obj.filter(objDone).length, rd = chReady(ch); r.push(sdRow('👑', `Cap. ${ch.id}: ${tEsc(ch.nm)}`, rd ? 'gata!' : `${d}/${ch.obj.length}`, "sdGo('m','mt','k')", rd)); }
-  else r.push(sdRow('👑', 'Campanie încheiată', '✔', "sdGo('m','mt','k')"));
-  if (typeof tronRow === 'function') { const x = tronRow(); if (x) r.push(x); }
-  if (typeof lumeRow === 'function') { const x = lumeRow(); if (x) r.push(x); }
+  if (ch) { const d = ch.obj.filter(objDone).length, rd = chReady(ch); push('👑', `Cap. ${ch.id}: ${tEsc(ch.nm)}`, rd ? 'gata!' : `${d}/${ch.obj.length}`, "sdGo('m','mt','k')", rd); }
+  else push('👑', 'Campanie încheiată', '✔', "sdGo('m','mt','k')");
+  if (typeof tronRow === 'function') { const x = tronRow(); if (x) rest.push(x); }
+  if (typeof lumeRow === 'function') { const x = lumeRow(); if (x) rest.push(x); }
   const own = terOwnedV().length, debt = S.ter && S.ter.debt > 0;
-  r.push(sdRow(debt ? '⚠' : '🚩', `Teritorii: ${own}/${S.map.vs.length}`, debt ? 'datorie' : '', "sdGo('m','mt','t')", debt));
-  return `<div class="sd-t">Acum</div>${r.join('')}`;
+  push(debt ? '⚠' : '🚩', `Teritorii: ${own}/${S.map.vs.length}`, debt ? 'datorie' : '', "sdGo('m','mt','t')", debt);
+  const CAP = 5, cut = Math.max(0, CAP - hot.length), open = !!S.sdMore;
+  const shown = open ? rest : rest.slice(0, cut), more = open ? [] : rest.slice(cut);
+  const toggle = more.length ? `<button class="sd-more" onclick="S.sdMore=1;go()">+${more.length} mai multe</button>` : '';
+  return `<div class="sd-t">Acum</div>${hot.join('')}${shown.join('')}${toggle}`;
 }
 
 function sideHtml() {
@@ -102,5 +107,12 @@ function sideHtml() {
     + '.sd-r:hover{border-color:var(--gold)}.sd-r.hot{border-color:var(--gold);box-shadow:inset 3px 0 var(--gold),0 0 8px #c9a24b33}'
     + '.sd-i{flex:none;width:20px;text-align:center}.sd-x{flex:1;min-width:0}.sd-v{flex:none;font-size:12px;color:var(--mute);white-space:nowrap}.sd-r.hot .sd-v{color:var(--gold2)}'
     + '.sd-end{text-align:center;margin:14px 0 4px;color:var(--line);font-size:20px}}';
+  document.head.appendChild(st);
+})();
+
+(function () {
+  if (typeof document === 'undefined' || !document.head) return;
+  const st = document.createElement('style');
+  st.textContent = `.sd-more{width:100%;text-align:left;padding:5px 10px;font-size:12px;color:var(--mute);background:none;border:1px dashed var(--line)}`;
   document.head.appendChild(st);
 })();

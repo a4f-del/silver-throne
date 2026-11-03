@@ -21,24 +21,19 @@ const ghB = (s, on) => ghQ('#v button[onclick^="' + s + '"]').filter(b => !on ||
 const GHID = [
   { t: 'Bine ai venit!', n: 1,
     d: 'Ești eroul unui sat. Cobori în temnițe după pradă, forjezi echipament, îți strângi o echipă și, mai târziu, te lupți cu ceilalți jucători pentru Tronul de Argint. Ghidul îți arată unde e fiecare lucru: urmează săgeata aurie.' },
-  { t: 'Prima coborâre', p: { t: 'c' }, c: () => C('d') >= 1, k: () => ghB('startD(0)'),
-    d: 'În <b>Coborâre</b> sunt temnițele. Fiecare temniță e o listă de monștri până la căpitan. Apasă butonul de luptă de la <b>Mina Cenușie</b>: fiecare monstru costă 1 punct, căpitanul 2. Ai 30 de puncte, iar unul nou vine la 6 minute (îl vezi sus, lângă fulger).' },
-  { t: 'Mergi prin temniță', p: { t: 'c' }, c: () => C('l') >= 1, r: { g: 30, o: 15 },
-    k: () => { if (!S.d) return ghB('startD(0)'); if (S.d.f) return []; const d = ghB('door(', 1), l = ghB('leave('); return d.length ? [...d, ...l] : l; },
-    d: 'Ia monștrii pe rând, cu butonul de luptă de pe cardul Minei, până la căpitan. Luptele se dau singure. Luptele se dau singure. În temnițe nu există vindecare: înaintea fiecărui pas vezi <b>șansele de câștig</b> și alegi dacă mai continui. Când vrei să te oprești, apasă <b>„Ieși cu prada”</b>: tot ce ai strâns ajunge în sat. Dacă echipa cade, pierzi prada din acea coborâre.' },
-  { t: 'Forjează o armă', p: { t: 'a', v: 'a' }, c: () => C('f') >= 1, r: { o: 15 },
-    k: () => { const u = S.ui || {}; if (u.t != 'w') return ghQ('#v select[onchange^="ui(\'t\'"]'); if (+u.r !== 0) return ghQ('#v select[onchange^="ui(\'r\'"]'); return ghB('craft('); },
-    d: 'Echipamentul se face în <b>Topitorie</b>, din minereu și materiale. Alege <b>Armă</b>, raritatea <b>Comun</b> și apasă <b>„Forjează”</b>. Timerul merge și cât faci altceva.' },
-  { t: 'Ridică arma', p: { t: 'a', v: 'a' }, c: () => S.inv.length > 0 || roster().some(f => SL.some(k => E(f)[k])),
-    k: () => { const c = ghB('collect('); if (c.length) return c; const t = ghQ('#v .fslot [data-end], #v [data-end]'); return t.length ? t.slice(0, 1) : ghB('craft(');   /* forjarea a eșuat: încă o dată */ },
-    d: 'Când timerul se termină, apasă <b>„Ridică”</b>. Dacă forjarea eșuează, primești înapoi jumătate din materiale și săgeata îți arată din nou „Forjează”: șansa crește după fiecare eșec.' },
-  { t: 'Echipează arma', p: { t: 'e' }, c: () => C('e') >= 1, r: { g: 60 },
-    k: () => { const m = ghQ('#lgm .ipk-c button.p'); if (m.length) return m.slice(0, 1); const w = ghQ('#v button[onclick="invPick(\'w\')"]'); return w.length ? w : ghB('invPick(').concat(ghB('equip(')).slice(0, 1); },
-    d: 'În <b>Echipă</b> vezi sloturile luptătorului ales. La <b>Armă</b> apasă <b>„Alege”</b>, apoi <b>„Pune”</b> lângă obiect. Fiecare luptător are sloturile lui; îi alegi din banda de sus.' },
+  { t: 'Prima coborâre', p: { t: 'c' }, c: () => C('l') >= 1, r: { g: 30, o: 15 },
+    k: () => { if (!S.d) return (typeof dOpen === 'function' && !dOpen(0)) ? ghB('dToggle(0)') : ghB('startD(0)'); if (S.d.f) return []; const d = ghB('startD(', 1), l = ghB('leave('); return d.length ? [...d, ...l] : l; },
+    d: 'În <b>Coborâre</b> sunt temnițele. Apasă <b>„Intră”</b> la <b>Mina Cenușie</b>, apoi ia monștrii pe rând, până la căpitan: fiecare costă 1 punct, căpitanul 2. Înaintea fiecărui pas vezi <b>șansele de câștig</b>. Când vrei să te oprești, apasă <b>„Ieși cu prada”</b>.' },
+  { t: 'Fă-ți prima armă', p: () => (S.inv.some(it => it.t === 'w') && !roster().some(f => E(f).w)) ? { t: 'e' } : { t: 'a', v: 'a' }, c: () => C('e') >= 1, r: { g: 60, o: 15 },
+    k: () => {
+      const hasW = S.inv.some(it => it.t === 'w');
+      if (!hasW) { const c = ghB('collect('); if (c.length) return c; const t = ghQ('#v .fslot [data-end], #v [data-end]'); if (t.length) return t.slice(0, 1);
+        const u = S.ui || {}; if (u.t != 'w') return ghQ('#v select[onchange^="ui(\'t\'"]'); if (+u.r !== 0) return ghQ('#v select[onchange^="ui(\'r\'"]'); return ghB('craft('); }
+      const m = ghQ('#lgm .ipk-c button.p'); if (m.length) return m.slice(0, 1); const w = ghQ('#v button[onclick="invPick(\'w\')"]'); return w.length ? w : ghB('invPick(').concat(ghB('equip(')).slice(0, 1);
+    },
+    d: 'Echipamentul se face în <b>Topitorie</b>: alege <b>Armă</b>, raritatea <b>Comun</b>, apasă <b>„Forjează”</b>, apoi <b>„Ridică”</b> (dacă eșuează, primești jumătate din materiale și mai încerci o dată). Du-te apoi în <b>Echipă</b>: la <b>Armă</b> apasă <b>„Alege”</b>, apoi <b>„Pune”</b>.' },
   { t: 'Antrenează eroul', p: { t: 'a', v: 't' }, c: () => C('t') >= 1, r: { g: 60 }, k: () => ghB('train(', 1).slice(0, 1),
     d: 'În <b>zona de antrenament</b> transformi aurul în putere pentru erou (iar mercenarii își trag puterea din el): Forță, Rezistență, Agilitate. Pricepere și Negoț ajută toată echipa. Antrenează o dată.' },
-  { t: 'Îmbunătățește o clădire', p: { t: 'a', v: 'a' }, c: () => { const b = BL(); return ['f', 'i', 'b', 'd', 'z'].some(k => (b[k] || 0) >= 1); }, r: { o: 20 }, k: () => ghB('build(', 1).slice(0, 1),
-    d: 'Fiecare clădire se îmbunătățește din pagina ei. Începe cu <b>Topitoria</b>: la fiecare nivel forjezi mai repede. La fel: Infirmeria vindecă mai ieftin, Hanul dă mai multă faimă mercenarilor, Depozitul ține mai multe materiale.' },
   { t: 'Hanul', p: { t: 'a', v: 'h' }, c: () => S.tab === 'a' && S.vil === 'h' && !mrAll().some(f => f.nn), r: { g: 40 }, k: () => ghQ('#v .mr-hc').slice(0, 1),
     d: 'La <b>Han</b> stau mercenarii tăi: câte unul din fiecare clasă, pentru totdeauna. Aici ți se alătură <b>Războinicul</b>: dă-i un nume. Echipa are 3 locuri; ceilalți stau în rezervă. Mercenarii cresc în rang luptând, iar puterea lor vine din erou.' },
   { t: 'Misiunile zilnice', p: { t: 'a', v: 'x' }, c: () => S.tab === 'a' && S.vil === 'x', r: { g: 30 }, k: () => ghB('claim'),
@@ -96,15 +91,16 @@ const ghVilN = v => (Object.fromEntries(VL)[v] || v);
 /* elementul următor din drum (butonul din meniu, grupul, fila) sau null dacă ești deja acolo */
 function ghPath(p) {
   if (!p) return null;
+  p = typeof p === 'function' ? p() : p; if (!p) return null;
   if (S.tab !== p.t) return ghQ(`#nv button[onclick="tab('${p.t}')"]`)[0] || null;
   if (p.v && S.vil !== p.v) return ghQ(`#v .vh-lb[data-v="${p.v}"], #v .vh-card[data-v="${p.v}"], #v .vb-c[data-v="${p.v}"]`)[0] || null;   /* pagina de start a satului sau banda din clădiri */
   if (p.m && (S.mt === 'h' || !S.mt ? 'l' : S.mt) !== p.m) return ghQ(`#v button[onclick="mtab('${p.m}')"]`)[0] || null;
   return null;
 }
-const ghThere = p => !p || (S.tab === p.t && (!p.v || S.vil === p.v) && (!p.m || (S.mt === 'h' || !S.mt ? 'l' : S.mt) === p.m));
+const ghThere = p => { p = typeof p === 'function' ? p() : p; return !p || (S.tab === p.t && (!p.v || S.vil === p.v) && (!p.m || (S.mt === 'h' || !S.mt ? 'l' : S.mt) === p.m)); };
 /* „Unde: Sat › Producție › Topitorie”, cu bucățile deja parcurse bifate */
 function ghCrumb(p) {
-  if (!p) return '';
+  p = typeof p === 'function' ? p() : p; if (!p) return '';
   const seg = [[GH_TAB[p.t], S.tab === p.t]];
   if (p.v) seg.push([ghVilN(p.v), S.tab === p.t && S.vil === p.v]);
   if (p.m) seg.push([GH_MT[p.m], S.tab === p.t && (S.mt === 'h' || !S.mt ? 'l' : S.mt) === p.m]);
