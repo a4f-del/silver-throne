@@ -7,8 +7,11 @@
    Se încarcă după ghid.js și înaintea scriptului din pagină.
    ========================================================================== */
 const MR = {
-  /* ordinea și pasul din ghid la care se alătură fiecare */
-  order: [['Paznic', null], ['Arcaș', null], ['Războinic', 'Hanul'], ['Vraci', 'Misiunile zilnice'], ['Mag', 'Jefuiește un sat']],
+  /* ordinea și la ce se deblochează fiecare: null = de la început; text = pasul din ghid; funcție = condiție proprie.
+     Paznic și Arcaș se alătură automat (fac parte din prezentarea inițială); Războinic, Vraci și Mag devin mai întâi
+     o OFERTĂ discretă la Han (toast + indicator pe clădire), cu portret și statistici, recrutabilă oricând, gratuit. */
+  order: [['Paznic', null], ['Arcaș', null], ['Războinic', 'Hanul'], ['Vraci', () => C('bs') >= 1], ['Mag', () => S.lvl >= 5]],
+  hint: { 'Războinic': 'Se alătură la pasul „Hanul” din ghid.', 'Vraci': 'Se alătură după ce termini prima temniță cu căpitan.', 'Mag': 'Se alătură la nivelul 5, când se deschide Lumea.' },
   rol: { 'Războinic': 'luptător echilibrat, lovește greu și poate ameți', 'Arcaș': 'atac mare de la distanță, provoacă sângerare', 'Paznic': 'atrage loviturile și apără echipa', 'Mag': 'cel mai mare atac, ignoră apărarea', 'Vraci': 'vindecă echipa în luptă' },
   sug: { 'Războinic': ['Radu', 'Bogdan', 'Mircea'], 'Arcaș': ['Ilinca', 'Lia', 'Anca'], 'Paznic': ['Toma', 'Petru', 'Costea'], 'Mag': ['Ioana', 'Dana', 'Sorin'], 'Vraci': ['Matei', 'Vlad', 'Dragoș'] }
 };
@@ -17,15 +20,26 @@ const mrHas = c => mrAll().some(f => !f.h && f.c === c);
 const mrStep = t => (typeof GHID !== 'undefined' ? GHID.findIndex(s => s.t === t) : -1);
 function mrDue(step) {
   if (step == null) return true;
+  if (typeof step === 'function') { try { return !!step(); } catch (e) { return false; } }
   if (S.tu == null || S.tu < 0 || (GHID[S.tu] && GHID[S.tu].e)) return true;   /* ghid terminat sau sărit: toți */
   const i = mrStep(step); return i < 0 || S.tu >= i;
 }
+/* statisticile aproximative ale unui mercenar neîncă recrutat, pentru cartea de ofertă */
+function mrPreview(c) { const cand = { c, rk: 0, eq: {}, t: [] }; return { hp: Math.round(mhp(cand)), atk: Math.round(atkOf(cand)) }; }
+function mrRecruit(c) { const i = (S.mrOff || []).indexOf(c); if (i < 0) return go(); S.mrOff.splice(i, 1); mrNew(c); go(); }
 function mrNew(c) {
   const f = { n: c, c, hp: 0, sc: 0, t: [], rk: 0, fm: 0, nn: 1, eq: { w: null, a: null } };
   f.hp = mhp(f); f.t = [P(TR)]; (S.fs.length < TMAX() && !S.d ? S.fs : S.rs).push(f); return f;
 }
 /* la fiecare desenare: se alătură cine a ajuns la pasul lui */
-function mrTick() { if (!S || S.mrv !== 2) return; for (const [c, st] of MR.order) if (!mrHas(c) && mrDue(st)) mrNew(c);
+function mrTick() {
+  if (!S || S.mrv !== 2) return;
+  for (const [c, st] of MR.order) {
+    if (mrHas(c) || (S.mrOff || []).includes(c) || !mrDue(st)) continue;
+    if (st == null) { mrNew(c); continue; }   /* Paznic/Arcaș: se alătură direct, ca parte din prezentarea inițială */
+    (S.mrOff = S.mrOff || []).push(c);          /* Războinic/Vraci/Mag: ofertă discretă la Han, nu o fereastră forțată */
+    if (!(S.mrSeen = S.mrSeen || []).includes(c)) { S.mrSeen.push(c); S.msg = (S.msg ? S.msg + ' ' : '') + `Un nou mercenar e disponibil la Han: ${c}.`; }
+  }
   mrAll().forEach(f => { if (!f.h && !(f.t && f.t.length)) f.t = [P(TR)]; });   /* trăsătura fiecărui mercenar (și pentru cei existenți) */
   if (S.lvl >= 30 && !S.t4) { S.t4 = 1; S.msg = (S.msg ? S.msg + ' ' : '') + 'Al 4-lea loc în echipă s-a deschis: alege încă un luptător din Han.'; }
   stGift(); }
@@ -164,7 +178,11 @@ function mrHan() {
   const fm = f => Math.floor(f.fm || 0), nx = f => (f.rk || 0) < 4 ? SP.RKF[(f.rk || 0) + 1] : null;
   const cards = MR.order.map(([c, st]) => {
     const f = mrAll().find(x => !x.h && x.c === c);
-    if (!f) return `<div class="mr-hc lock"><div class="mr-hp">${av({ c, n: c }, 56)}<b>🔒</b></div><div><b>${c}</b><div class="mute">${MR.rol[c]}</div><div class="mute">Se alătură la pasul „${st}” din ghid.</div></div></div>`;
+    if (!f && (S.mrOff || []).includes(c)) {
+      const pv = mrPreview(c), role = typeof roleOf === 'function' ? roleOf({ c }) : '';
+      return `<div class="mr-hc offer"><div class="mr-hp">${av({ c, n: c }, 56)}<b class="nb">✦</b></div><div><b>${c}</b>${role ? ` <span class="mute">· ${role}</span>` : ''}<div class="mute">${MR.rol[c]}</div><div class="mute">~${pv.hp} viață · ~${pv.atk} atac</div><button class="p" onclick="mrRecruit('${c}')">Recrutează · gratuit</button></div></div>`;
+    }
+    if (!f) return `<div class="mr-hc lock"><div class="mr-hp">${av({ c, n: c }, 56)}<b>🔒</b></div><div><b>${c}</b><div class="mute">${MR.rol[c]}</div><div class="mute">${MR.hint[c] || ''}</div></div></div>`;
     const i = S.fs.indexOf(f), j = S.rs.indexOf(f), n = nx(f), p0 = SP.RKF[f.rk || 0] || 0, pc = n ? Math.min(100, Math.round((fm(f) - p0) / (n - p0) * 100)) : 100;
     const spn = f.sp && typeof spDef0 === 'function' && spDef0(f) ? spDef0(f).n : (f.rk ? 'alege specializarea în Echipă' : 'specializare de la Veteran');
     return `<div class="mr-hc"><div class="mr-hp">${av(f, 56)}</div><div class="mr-hb"><b>${tEsc(f.n)}</b> <span class="mute">${f.c} · ${RK[f.rk || 0]}</span><div class="mute">${spn}</div>`
@@ -273,5 +291,12 @@ function dcView() {
 .dc-d b{font:700 12px Cinzel,serif;color:var(--mute)}.dc-d span{font-size:20px}.dc-d small{font-size:11px;color:var(--mute);line-height:1.2}
 .dc-d.ok{opacity:.5}.dc-d.ok b::after{content:' ✓';color:#7fd88c}.dc-d.now{border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold2),0 0 14px #f0d27a44}.dc-d.now b{color:var(--gold2)}
 @media (max-width:600px){.dc-t{grid-template-columns:repeat(4,minmax(0,1fr))}}`;
+  document.head.appendChild(st);
+})();
+
+(function () {
+  if (typeof document === 'undefined' || !document.head) return;
+  const st = document.createElement('style');
+  st.textContent = `.mr-hc.offer{border-color:var(--gold2,#f0d27a)}.mr-hc.offer .mr-hp b.nb{background:var(--gold2,#f0d27a);color:#1a1406}.mr-hc.offer button{margin-top:4px}`;
   document.head.appendChild(st);
 })();
