@@ -16,7 +16,7 @@ const BZ = {
   rows: null, total: 0, mine: null, inbox: 0, open: 0,
   busy: 0, msg: '', err: '', px: new WeakMap(), lastClaim: 0, off: 0
 };
-const BZ_MIN = 15, BZ_FEE = 0.02, BZ_CUT = 0.05, BZ_MULT = 50;
+const BZ_MIN = 15, BZ_FEE = 0.02, BZ_CUT = 0.05, BZ_MULT = 5000;
 const BZ_T = [['', 'Toate'], ['w', 'Arme'], ['a', 'Armuri'], ['h', 'Coifuri'], ['b', 'Cizme'], ['j', 'Bijuterii'], ['r', 'Relicve']];
 const bzShop = it => 4 + it.l * 3 * (it.r + 1);                                   /* ca la Piață: sell() */
 const bzMax = it => Math.floor(bzShop(it) * BZ_MULT * (1 + (it.up || 0) / 3));
