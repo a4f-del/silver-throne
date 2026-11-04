@@ -53,7 +53,11 @@ function fxPlay(frames, cb, first) {
   const cast = FX.cast, hp = { fs: cast.fs.map(x => x.hp), es: cast.es.map(x => x.hp) };   /* viața reală de la începutul luptei, salvată în fxCast() */
   FX.playing = true;
   const m = document.createElement('div'); m.id = 'fx-m'; m.setAttribute('role', 'status'); m.setAttribute('aria-live', 'polite');
-  const row = (side, x, i) => `<div class="fx-r" data-s="${side}" data-i="${i}"><span class="fx-av">${x.img ? `<img src="${x.img}" alt="">` : av({ n: x.n, c: x.c, ic: x.ic, h: x.h }, 44)}</span><span class="fx-b"><b>${tEsc(x.n)}</b><i class="fx-hp"><i style="width:${Math.round(hp[side][i] / x.mh * 100)}%"></i></i><small>${hp[side][i]}/${x.mh}</small></span></div>`;
+  /* portrete mari: mărimea scade doar când sunt mulți luptători (pe ecran lat stau pe două coloane, pe telefon unul sub altul) */
+  const narrow = innerWidth < 640, most = Math.max(cast.fs.length, cast.es.length), tot = cast.fs.length + cast.es.length;
+  const FZ = narrow ? (tot <= 2 ? 96 : tot <= 4 ? 76 : tot <= 6 ? 62 : 50) : (most <= 1 ? 132 : most === 2 ? 112 : most === 3 ? 96 : 76);
+  m.style.setProperty('--fz', FZ + 'px');
+  const row = (side, x, i) => `<div class="fx-r" data-s="${side}" data-i="${i}"><span class="fx-av">${x.img ? `<img src="${x.img}" alt="">` : av({ n: x.n, c: x.c, ic: x.ic, h: x.h }, FZ)}</span><span class="fx-b"><b>${tEsc(x.n)}</b><i class="fx-hp"><i style="width:${Math.round(hp[side][i] / x.mh * 100)}%"></i></i><small>${hp[side][i]}/${x.mh}</small></span></div>`;
   m.innerHTML = `<div class="fx-c"><div class="fx-side">${cast.fs.map((x, i) => row('fs', x, i)).join('')}</div><div class="fx-vs">VS</div><div class="fx-side">${cast.es.map((x, i) => row('es', x, i)).join('')}</div><div class="fx-log" id="fx-log"></div><button class="fx-skip" onclick="fxSkip()">Sari peste ›</button></div>`;
   document.body.appendChild(m);
   let n = 0;
@@ -89,23 +93,25 @@ function fxToggleInstant() { S.fxInstant = !S.fxInstant; go(); }
   if (typeof document === 'undefined' || !document.head) return;
   const st = document.createElement('style');
   st.textContent = `#fx-m{position:fixed;inset:0;z-index:24000;display:flex;align-items:center;justify-content:center;padding:14px;background:#05070ae0;backdrop-filter:blur(2px)}
-.fx-c{width:100%;max-width:640px;background:#12161a;border:1px solid var(--gold2,#f0d27a);border-radius:14px;padding:16px 16px 54px;box-shadow:0 20px 60px #000a;position:relative}
-.fx-side{display:flex;flex-direction:column;gap:8px;margin:6px 0}
-.fx-vs{text-align:center;font:700 13px Cinzel,serif;color:var(--gold2,#f0d27a);letter-spacing:.1em;margin:6px 0}
+.fx-c{width:100%;max-width:900px;max-height:100%;overflow-y:auto;background:#12161a;border:1px solid var(--gold2,#f0d27a);border-radius:14px;padding:16px 16px 54px;box-shadow:0 20px 60px #000a;position:relative}
+.fx-c{display:grid;grid-template-columns:1fr;gap:0 18px}.fx-c>.fx-vs,.fx-c>.fx-log,.fx-c>.fx-skip{grid-column:1/-1}
+.fx-side{display:flex;flex-direction:column;gap:12px;margin:6px 0;min-width:0}
+@media (min-width:640px){.fx-c{grid-template-columns:1fr auto 1fr;align-items:center}.fx-c>.fx-vs{grid-column:2;grid-row:1;font-size:26px;margin:0}.fx-c>.fx-side:nth-child(1){grid-column:1;grid-row:1}.fx-c>.fx-side:nth-child(3){grid-column:3;grid-row:1}.fx-c>.fx-side:nth-child(3) .fx-r{flex-direction:row-reverse;text-align:right}.fx-c>.fx-side:nth-child(3) .fx-num{left:auto;right:calc(var(--fz) + 4px)}}
+.fx-vs{text-align:center;font:700 18px Cinzel,serif;color:var(--gold2,#f0d27a);letter-spacing:.1em;margin:6px 0}
 .fx-r{display:flex;align-items:center;gap:10px;position:relative;transition:opacity .3s}.fx-r.down{opacity:.4}
-.fx-av{width:44px;height:44px;border-radius:50%;overflow:hidden;flex:none;position:relative;box-shadow:0 0 0 1px #0006}
-.fx-av img,.fx-av svg{width:100%;height:100%;object-fit:cover}
-.fx-b{flex:1;min-width:0}.fx-b b{display:block;font-size:13.5px}
-.fx-hp{display:block;width:100%;height:7px;border-radius:4px;background:#1c2226;overflow:hidden;margin:3px 0 2px}
+.fx-av{width:var(--fz,44px);height:var(--fz,44px);border-radius:50%;overflow:hidden;flex:none;position:relative;box-shadow:0 0 0 2px var(--gold,#c9a24b),0 4px 14px #0008}.fx-r[data-s="es"] .fx-av{box-shadow:0 0 0 2px #a0443c,0 4px 14px #0008}
+.fx-av img,.fx-av svg,.fx-av .avw{width:100%!important;height:100%!important;object-fit:cover}
+.fx-b{flex:1;min-width:0}.fx-b b{display:block;font-size:15.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fx-hp{display:block;width:100%;height:9px;border-radius:4px;background:#1c2226;overflow:hidden;margin:3px 0 2px}
 .fx-hp i{display:block;height:100%;background:linear-gradient(90deg,#4a8f55,#7fd88c);transition:width .45s ease-out}
 .fx-r[data-s="es"] .fx-hp i{background:linear-gradient(90deg,#8a3a32,#e8837b)}
-.fx-b small{color:var(--mute);font-size:11px}
-.fx-num{position:absolute;left:46px;top:-4px;font:700 15px Cinzel,serif;pointer-events:none;animation:fxrise .9s ease-out forwards}
-.fx-num.dmg{color:#ff8a7a}.fx-num.crit{color:#ffb347;font-size:20px}.fx-num.heal{color:#8fe3a0}
+.fx-b small{color:var(--mute);font-size:12.5px}
+.fx-num{position:absolute;left:calc(var(--fz,44px) + 4px);top:-4px;font:700 20px Cinzel,serif;pointer-events:none;animation:fxrise .9s ease-out forwards}
+.fx-num.dmg{color:#ff8a7a}.fx-num.crit{color:#ffb347;font-size:27px}.fx-num.heal{color:#8fe3a0}
 @keyframes fxrise{0%{opacity:0;transform:translateY(4px) scale(.8)}15%{opacity:1;transform:translateY(-6px) scale(1.15)}100%{opacity:0;transform:translateY(-34px) scale(1)}}
 .fx-av.shake{animation:fxshake .4s}@keyframes fxshake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
 .fx-av.flash{animation:fxflash .5s}@keyframes fxflash{0%,100%{box-shadow:0 0 0 1px #0006}40%{box-shadow:0 0 0 3px var(--gold2,#f0d27a),0 0 16px var(--gold2,#f0d27a)}}
-.fx-log{min-height:34px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:12.5px;color:#cfd3d6;opacity:0}
+.fx-log{min-height:38px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:14.5px;color:#cfd3d6;opacity:0}
 .fx-log.go{animation:fxlog .35s ease-out forwards}@keyframes fxlog{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
 .fx-skip{position:absolute;right:14px;bottom:14px;padding:6px 12px;font-size:12.5px}
 @media (prefers-reduced-motion:reduce){.fx-num,.fx-av.shake,.fx-av.flash,.fx-log.go{animation:none}.fx-hp i{transition:none}}`;
