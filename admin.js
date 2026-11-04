@@ -50,15 +50,15 @@ function admGenHtml() {
 
 /* conturile de administrator cunoscute de joc: panoul apare pentru ele chiar dacă 06-admin.sql nu e rulat încă.
    Fără SQL, generatorul de obiecte merge (obiectele sunt în salvarea ta), dar aurul mare e tăiat de portofel. */
-const ADM_EMAILS = ['meleycmetin@gmail.com'];
+
 /* verifică dacă acest cont e administrator: pe server (public.admins) sau după email */
 async function admCheck() {
   if (typeof CONT === 'undefined' || !CONT.user || ADM.checking) return;
   ADM.checking = 1;
-  const em = String(CONT.user.email || '').toLowerCase();
+  
   let srv = false;
   if (typeof tronRpc === 'function') { const r = await tronRpc('is_admin'); srv = !r.error && r.data === true; ADM.srv = srv; }
-  CONT.admin = srv || ADM_EMAILS.includes(em);
+  CONT.admin = srv;
   ADM.checked = CONT.user.id; ADM.checking = 0;
   admBtn();
 }
