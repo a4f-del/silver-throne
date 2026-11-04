@@ -48,27 +48,40 @@ function fxAutoRun() {
 const fxWantPlay = first => first || !S.fxInstant;
 
 /* ------------------------------------------------------------------ FEREASTRA DE REDARE */
+/* Portrete mari, unul în spatele celuilalt (primul din față); bara de viață stă sub fiecare portret.
+   Cel care atacă sau e lovit „vine în față” (se mărește și urcă deasupra celorlalți) pe durata loviturii. */
+const FX_OV = 0.38;   /* cât din portret acoperă vecinul din spate */
 function fxPlay(frames, cb, first) {
   if (!frames || !frames.length || !fxWantPlay(first) || !FX.cast) { cb(); return; }
   const cast = FX.cast, hp = { fs: cast.fs.map(x => x.hp), es: cast.es.map(x => x.hp) };   /* viața reală de la începutul luptei, salvată în fxCast() */
   FX.playing = true;
   const m = document.createElement('div'); m.id = 'fx-m'; m.setAttribute('role', 'status'); m.setAttribute('aria-live', 'polite');
-  /* portrete mari: mărimea scade doar când sunt mulți luptători (pe ecran lat stau pe două coloane, pe telefon unul sub altul) */
-  const narrow = innerWidth < 640, most = Math.max(cast.fs.length, cast.es.length), tot = cast.fs.length + cast.es.length;
-  const FZ = narrow ? (tot <= 2 ? 96 : tot <= 4 ? 76 : tot <= 6 ? 62 : 50) : (most <= 1 ? 132 : most === 2 ? 112 : most === 3 ? 96 : 76);
+  /* mărimea portretelor: cât încape pe lățime (ambele grămezi + „VS”), cu plafon pe înălțime */
+  const stackW = n => 1 + Math.max(0, n - 1) * (1 - FX_OV), avail = Math.min(innerWidth, 940) - 28 - 56 - 56;
+  const FZ = Math.round(Math.max(48, Math.min(176, innerHeight * 0.34, avail / (stackW(cast.fs.length) + stackW(cast.es.length)))));
   m.style.setProperty('--fz', FZ + 'px');
-  const row = (side, x, i) => `<div class="fx-r" data-s="${side}" data-i="${i}"><span class="fx-av">${x.img ? `<img src="${x.img}" alt="">` : av({ n: x.n, c: x.c, ic: x.ic, h: x.h }, FZ)}</span><span class="fx-b"><b>${tEsc(x.n)}</b><i class="fx-hp"><i style="width:${Math.round(hp[side][i] / x.mh * 100)}%"></i></i><small>${hp[side][i]}/${x.mh}</small></span></div>`;
-  m.innerHTML = `<div class="fx-c"><div class="fx-side">${cast.fs.map((x, i) => row('fs', x, i)).join('')}</div><div class="fx-vs">VS</div><div class="fx-side">${cast.es.map((x, i) => row('es', x, i)).join('')}</div><div class="fx-log" id="fx-log"></div><button class="fx-skip" onclick="fxSkip()">Sari peste ›</button></div>`;
+  const stack = (side, list) => `<div class="fx-side" data-s="${side}">${list.map((x, i) => {
+    const w = i === list.length - 1 ? FZ : Math.round(FZ * (1 - FX_OV));   /* coloana ultimului portret e întreagă, celelalte arată doar partea vizibilă */
+    return `<div class="fx-r" data-s="${side}" data-i="${i}" style="width:${w}px;z-index:${20 - i}"><span class="fx-nm">${tEsc(x.n)}</span><span class="fx-av">${x.img ? `<img src="${x.img}" alt="">` : av({ n: x.n, c: x.c, ic: x.ic, h: x.h }, FZ)}</span><i class="fx-hp"><i style="width:${Math.round(hp[side][i] / x.mh * 100)}%"></i></i><small class="fx-t">${hp[side][i]}/${x.mh}</small></div>`;
+  }).join('')}</div>`;
+  m.innerHTML = `<div class="fx-c"><div class="fx-row">${stack('fs', cast.fs)}<div class="fx-vs">VS</div>${stack('es', cast.es)}</div><div class="fx-log" id="fx-log"></div><button class="fx-skip" onclick="fxSkip()">Sari peste ›</button></div>`;
   document.body.appendChild(m);
-  let n = 0;
-  const finish = () => { FX.playing = false; m.remove(); window.__fxSkip = null; cb(); };
+  let n = 0, frontT = null;
+  const finish = () => { FX.playing = false; clearTimeout(frontT); m.remove(); window.__fxSkip = null; cb(); };
+  const front = (list, ms) => {   /* aduce în față luptătorii din listă [[side, i], ...] */
+    m.querySelectorAll('.fx-r.front').forEach(r => r.classList.remove('front'));
+    list.forEach(([sd, i]) => { const r = m.querySelector(`.fx-r[data-s="${sd}"][data-i="${i}"]`); if (r) r.classList.add('front'); });
+    clearTimeout(frontT); frontT = setTimeout(() => m.querySelectorAll('.fx-r.front').forEach(r => r.classList.remove('front')), ms);
+  };
   const showFrame = fr => {
     const log = document.getElementById('fx-log'); if (log) { log.textContent = fr.txt; log.classList.remove('go'); void log.offsetWidth; log.classList.add('go'); }
     let crit = /critic/i.test(fr.txt), ability = /sângerea|ameți|îngheață|arde|otrăv|cheamă|urlă|renaște|scut|vindec|leagă rănile|fulger/i.test(fr.txt);
+    const act = fr.actor && fr.actor.side ? [[fr.actor.side, fr.actor.i]] : [];
+    front([...act, ...['fs', 'es'].flatMap(sd => fr[sd].map(d => [sd, d.i]))], Math.max(350, FX.delay - 80));
     for (const side of ['fs', 'es']) for (const d of fr[side]) {
       hp[side][d.i] = Math.max(0, Math.min(cast[side][d.i].mh, hp[side][d.i] + d.v));
       const r = m.querySelector(`.fx-r[data-s="${side}"][data-i="${d.i}"]`); if (!r) continue;
-      const bar = r.querySelector('.fx-hp i'), txt = r.querySelector('.fx-b small'), av0 = r.querySelector('.fx-av');
+      const bar = r.querySelector('.fx-hp i'), txt = r.querySelector('.fx-t'), av0 = r.querySelector('.fx-av');
       if (bar) bar.style.width = Math.round(hp[side][d.i] / cast[side][d.i].mh * 100) + '%';
       if (txt) txt.textContent = `${hp[side][d.i]}/${cast[side][d.i].mh}`;
       const num = document.createElement('span'); num.className = 'fx-num ' + (d.v < 0 ? (crit ? 'crit' : 'dmg') : 'heal'); num.textContent = (d.v > 0 ? '+' : '') + d.v; r.appendChild(num);
@@ -76,7 +89,7 @@ function fxPlay(frames, cb, first) {
       if (crit && d.v < 0 && av0) { av0.classList.remove('shake'); void av0.offsetWidth; av0.classList.add('shake'); }
       if (hp[side][d.i] <= 0) r.classList.add('down');
     }
-    if (ability) { const act = fr.actor; const r = act && act.side ? m.querySelector(`.fx-r[data-s="${act.side}"][data-i="${act.i}"] .fx-av`) : null; if (r) { r.classList.remove('flash'); void r.offsetWidth; r.classList.add('flash'); } }
+    if (ability) { const r = act.length ? m.querySelector(`.fx-r[data-s="${act[0][0]}"][data-i="${act[0][1]}"] .fx-av`) : null; if (r) { r.classList.remove('flash'); void r.offsetWidth; r.classList.add('flash'); } }
   };
   const step1 = () => {
     if (n >= frames.length) return finish();
@@ -93,27 +106,33 @@ function fxToggleInstant() { S.fxInstant = !S.fxInstant; go(); }
   if (typeof document === 'undefined' || !document.head) return;
   const st = document.createElement('style');
   st.textContent = `#fx-m{position:fixed;inset:0;z-index:24000;display:flex;align-items:center;justify-content:center;padding:14px;background:#05070ae0;backdrop-filter:blur(2px)}
-.fx-c{width:100%;max-width:900px;max-height:100%;overflow-y:auto;background:#12161a;border:1px solid var(--gold2,#f0d27a);border-radius:14px;padding:16px 16px 54px;box-shadow:0 20px 60px #000a;position:relative}
-.fx-c{display:grid;grid-template-columns:1fr;gap:0 18px}.fx-c>.fx-vs,.fx-c>.fx-log,.fx-c>.fx-skip{grid-column:1/-1}
-.fx-side{display:flex;flex-direction:column;gap:12px;margin:6px 0;min-width:0}
-@media (min-width:640px){.fx-c{grid-template-columns:1fr auto 1fr;align-items:center}.fx-c>.fx-vs{grid-column:2;grid-row:1;font-size:26px;margin:0}.fx-c>.fx-side:nth-child(1){grid-column:1;grid-row:1}.fx-c>.fx-side:nth-child(3){grid-column:3;grid-row:1}.fx-c>.fx-side:nth-child(3) .fx-r{flex-direction:row-reverse;text-align:right}.fx-c>.fx-side:nth-child(3) .fx-num{left:auto;right:calc(var(--fz) + 4px)}}
-.fx-vs{text-align:center;font:700 18px Cinzel,serif;color:var(--gold2,#f0d27a);letter-spacing:.1em;margin:6px 0}
-.fx-r{display:flex;align-items:center;gap:10px;position:relative;transition:opacity .3s}.fx-r.down{opacity:.4}
-.fx-av{width:var(--fz,44px);height:var(--fz,44px);border-radius:50%;overflow:hidden;flex:none;position:relative;box-shadow:0 0 0 2px var(--gold,#c9a24b),0 4px 14px #0008}.fx-r[data-s="es"] .fx-av{box-shadow:0 0 0 2px #a0443c,0 4px 14px #0008}
-.fx-av img,.fx-av svg,.fx-av .avw{width:100%!important;height:100%!important;object-fit:cover}
-.fx-b{flex:1;min-width:0}.fx-b b{display:block;font-size:15.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.fx-hp{display:block;width:100%;height:9px;border-radius:4px;background:#1c2226;overflow:hidden;margin:3px 0 2px}
+.fx-c{width:100%;max-width:940px;max-height:100%;overflow:visible;background:#12161a;border:1px solid var(--gold2,#f0d27a);border-radius:14px;padding:68px 28px 58px;box-shadow:0 20px 60px #000a;position:relative}
+.fx-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.fx-side{display:flex;align-items:flex-start;min-width:0}.fx-side[data-s="es"]{flex-direction:row-reverse}
+.fx-vs{align-self:center;text-align:center;font:700 clamp(16px,4vw,26px) Cinzel,serif;color:var(--gold2,#f0d27a);letter-spacing:.1em;flex:none;margin-top:calc(var(--fz,96px) * -.2)}
+.fx-r{position:relative;display:flex;flex-direction:column;align-items:flex-start;flex:none;transition:opacity .3s}
+.fx-side[data-s="es"] .fx-r{align-items:flex-end}
+.fx-r.down{opacity:.45}.fx-r.down .fx-av{filter:grayscale(1) brightness(.6)}
+.fx-av{width:var(--fz,96px);height:var(--fz,96px);border-radius:50%;overflow:hidden;flex:none;position:relative;box-shadow:0 0 0 3px var(--gold,#c9a24b),0 6px 18px #000a;transition:transform .25s cubic-bezier(.2,1.4,.4,1),box-shadow .25s;transform-origin:50% 100%}
+.fx-r[data-s="es"] .fx-av{box-shadow:0 0 0 3px #a0443c,0 6px 18px #000a}
+.fx-r.front .fx-av{transform:translateY(-12px) scale(1.14);box-shadow:0 0 0 3px var(--gold2,#f0d27a),0 0 26px #f0d27a99,0 10px 24px #000c}
+.fx-r.front[data-s="es"] .fx-av{box-shadow:0 0 0 3px #e8837b,0 0 26px #e8837b88,0 10px 24px #000c}
+.fx-av img,.fx-av svg,.fx-av .avw{width:100%!important;height:100%!important;object-fit:cover;display:block}
+.fx-nm{position:absolute;top:calc(var(--fz,96px) * -.3 - 14px);left:0;right:auto;white-space:nowrap;font:700 14px Cinzel,serif;color:var(--ink,#eee);text-shadow:0 1px 3px #000;opacity:0;transition:opacity .2s;pointer-events:none}
+.fx-side[data-s="es"] .fx-nm{left:auto;right:0}.fx-r.front .fx-nm{opacity:1}
+.fx-hp{display:block;width:100%;height:9px;border-radius:5px;background:#1c2226;overflow:hidden;margin:9px 0 3px;border:1px solid #000a}
 .fx-hp i{display:block;height:100%;background:linear-gradient(90deg,#4a8f55,#7fd88c);transition:width .45s ease-out}
 .fx-r[data-s="es"] .fx-hp i{background:linear-gradient(90deg,#8a3a32,#e8837b)}
-.fx-b small{color:var(--mute);font-size:12.5px}
-.fx-num{position:absolute;left:calc(var(--fz,44px) + 4px);top:-4px;font:700 20px Cinzel,serif;pointer-events:none;animation:fxrise .9s ease-out forwards}
-.fx-num.dmg{color:#ff8a7a}.fx-num.crit{color:#ffb347;font-size:27px}.fx-num.heal{color:#8fe3a0}
-@keyframes fxrise{0%{opacity:0;transform:translateY(4px) scale(.8)}15%{opacity:1;transform:translateY(-6px) scale(1.15)}100%{opacity:0;transform:translateY(-34px) scale(1)}}
-.fx-av.shake{animation:fxshake .4s}@keyframes fxshake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
-.fx-av.flash{animation:fxflash .5s}@keyframes fxflash{0%,100%{box-shadow:0 0 0 1px #0006}40%{box-shadow:0 0 0 3px var(--gold2,#f0d27a),0 0 16px var(--gold2,#f0d27a)}}
-.fx-log{min-height:38px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:14.5px;color:#cfd3d6;opacity:0}
+.fx-t{color:var(--mute);font-size:12.5px;white-space:nowrap}
+.fx-num{position:absolute;top:calc(var(--fz,96px) * .25);left:6px;font:700 22px Cinzel,serif;text-shadow:0 2px 4px #000;pointer-events:none;animation:fxrise .9s ease-out forwards;z-index:30}
+.fx-side[data-s="es"] .fx-num{left:auto;right:6px}
+.fx-num.dmg{color:#ff8a7a}.fx-num.crit{color:#ffb347;font-size:30px}.fx-num.heal{color:#8fe3a0}
+@keyframes fxrise{0%{opacity:0;transform:translateY(4px) scale(.8)}15%{opacity:1;transform:translateY(-8px) scale(1.15)}100%{opacity:0;transform:translateY(-40px) scale(1)}}
+.fx-av.shake{animation:fxshake .4s}@keyframes fxshake{10%,90%{translate:-1px}20%,80%{translate:2px}30%,50%,70%{translate:-4px}40%,60%{translate:4px}}
+.fx-av.flash{animation:fxflash .5s}@keyframes fxflash{0%,100%{filter:none}40%{filter:brightness(1.5) drop-shadow(0 0 12px var(--gold2,#f0d27a))}}
+.fx-log{min-height:38px;margin-top:14px;padding-top:10px;border-top:1px dashed var(--line);font-size:14.5px;color:#cfd3d6;opacity:0}
 .fx-log.go{animation:fxlog .35s ease-out forwards}@keyframes fxlog{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
 .fx-skip{position:absolute;right:14px;bottom:14px;padding:6px 12px;font-size:12.5px}
-@media (prefers-reduced-motion:reduce){.fx-num,.fx-av.shake,.fx-av.flash,.fx-log.go{animation:none}.fx-hp i{transition:none}}`;
+@media (prefers-reduced-motion:reduce){.fx-num,.fx-av.shake,.fx-av.flash,.fx-log.go{animation:none}.fx-hp i,.fx-av{transition:none}}`;
   document.head.appendChild(st);
 })();
