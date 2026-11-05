@@ -132,7 +132,6 @@ function rwHook() {
   rwWrap('claim', { title: () => 'Misiune îndeplinită!', big });
   rwWrap('claimB', { title: () => 'Bonusul zilei', big });
   rwWrap('dcOpen', { title: () => 'Cufărul zilei', big });
-  rwWrap('drumClaim', { title: () => 'Drumul eroului', big });
   rwWrap('cmpClaim', { title: () => 'Capitol încheiat!', big });
   rwWrap('secClaim', { title: () => 'Obiectiv îndeplinit!', big });
   rwWrap('mxClaim', { title: () => 'Expediție încheiată', big });
