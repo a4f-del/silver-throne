@@ -74,6 +74,8 @@ function wnList() {
   WN.key = key; WN.list = out; return out;
 }
 const wnLeft = v => Math.max(0, ((S.wn || {})[v.id] || 0) + WN.cd - Date.now(), ((LUME.npc || {})[v.id] || 0) - lwNow());
+/* nivelul efectiv al satului pentru tine: nivelul lui, dar nu cu mai mult de WN.gap față de al tău */
+const wnEff = v => Math.max(1, Math.max(S.lvl - WN.gap, Math.min(S.lvl + WN.gap, v.lvl)));
 async function wnSync() {
   if (WN.off || typeof tronRpc !== 'function' || typeof CONT === 'undefined' || !CONT.user) return;
   LUME.npcAt = Date.now();
