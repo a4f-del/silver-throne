@@ -33,9 +33,21 @@ function hrBgN() {
   if (!(m.bgi >= 1 && m.bgi <= HR.N)) { let h = 7; for (const c of m.vs.map(v => v.x + ',' + v.y).join('|')) h = (h * 31 + c.charCodeAt(0)) | 0; m.bgi = 1 + Math.abs(h) % HR.N; }
   return m.bgi;
 }
+
 function hrTerrain(T) {
-  const roads = Object.values(T.roads || {}).map(r => `<path d="${r.d}" fill="none" stroke="#2a1d10" stroke-opacity=".5" stroke-width="5" stroke-linecap="round"/><path d="${r.d}" fill="none" stroke="#b39566" stroke-opacity=".85" stroke-width="3" stroke-linecap="round"/><path d="${r.d}" fill="none" stroke="#d8c296" stroke-opacity=".55" stroke-width=".7" stroke-dasharray="3 4"/>`).join('');
-  return `${T.s}<image href="imagini/harta/regiune-${hrBgN()}.jpg" x="0" y="0" width="${SMW}" height="${SMH}" preserveAspectRatio="none"/><rect width="${SMW}" height="${SMH}" fill="#0b0e10" fill-opacity=".12"/>${roads}`;
+  return `${T.s}
+    <image
+      href="imagini/harta/regiune-test.png"
+      x="0" y="0"
+      width="${SMW}" height="${SMH}"
+      preserveAspectRatio="none"
+    />
+    <rect
+      width="${SMW}" height="${SMH}"
+      fill="#0b0e10"
+      fill-opacity=".12"
+    />
+  `;
 }
 
 /* capitala jucătorului */
