@@ -284,8 +284,8 @@
       rw: { g: 3, o: 2, x: 2, mat: 4 }, out: 'Sigiliul Cenușii e al tău. Sub el era o hartă a ținutului: drumurile duc spre alți căpitani.' },
     { id: 2, nm: 'Drumul Lupilor', lv: 4, reg: 'Peștera Lupilor',
       tx: 'Satele din jur plătesc tribut Regelui Cenușiu și drumurile sunt păzite de haite dresate. Alfa Haitei ține al doilea sigiliu. Dacă vrei să stăpânești drumul, trebuie să ai sate care ți se supun.',
-      obj: [{ k: 'boss', di: 4, t: 'Înfrânge Alfa Haitei (Peștera Lupilor)' }, { k: 'raid', n: 5, t: 'Jefuiește 5 sate' }, { k: 'poit', n: 2, t: 'Vizitează 2 tipuri de locuri de interes' }],rw: { g: 4, o: 3, x: 3, item: [1, 1] }, out: 'Prima ta prada. Drumul spre Catacombe e deschis.' },
-    { id: 3, nm: 'Bastionul Corbilor', lv: 8, reg: 'Catacombele Uitate',
+       obj: [{ k: 'boss', di: 4, t: 'Înfrânge Alfa Haitei (Peștera Lupilor)' }, { k: 'raid', n: 5, t: 'Jefuiește 5 sate' }, { k: 'poit', n: 2, t: 'Vizitează 2 tipuri de locuri de interes' }],rw: { g: 4, o: 3, x: 3, item: [1, 1] }, out: 'Prima ta prada. Drumul spre Catacombe e deschis.' },
+   { id: 3, nm: 'Bastionul Corbilor', lv: 8, reg: 'Catacombele Uitate',
       tx: 'Corbii Regelui păzesc singurul drum către Catacombe, din fortăreața de pe marginea ținutului. Dincolo de ea, Regele Oaselor ține al treilea sigiliu.',
       obj: [{ k: 'clue', n: 3, t: 'Adună 3 indicii din ținut' }, { k: 'fort', t: 'Cucerește Bastionul Corbilor' }, { k: 'boss', di: 1, t: 'Înfrânge Regele Oaselor (Catacombele Uitate)' }],
       rw: { g: 6, o: 4, x: 5, item: [2, 2] }, out: 'Bastionul îți aparține. Corbii au plecat, iar Catacombele sunt deschise.' },
@@ -305,7 +305,7 @@
   /* Obiective secundare: recompense unice */
   W.SEC = [
     { id: 'pust', nm: 'Pustnic', t: 'Vizitează toate cele 5 tipuri de locuri', k: 'poit', n: 5, rw: { g: 2, x: 2, item: [1, 2] } },
-    { id: 'vana', nm: 'Vânătorul de tabere', t: 'Elimină 10 tabere de bandiți', k: 'camp', n: 10, rw: { g: 3, x: 3, relic: 1 } },
+    { id: 'vana', nm: 'Vânătorul de tabere', t: 'Elimină 10 tabere de bandiți', k: 'camp', n: 10, rw: { g: 3, x: 3, relic: 1 } }
   ];
   W.chRw = (rw, lvl) => ({ g: Math.round((rw.g || 0) * W.rawGold(lvl)), o: Math.round((rw.o || 0) * W.rawOre(lvl) * 4), x: Math.round((rw.x || 0) * W.rawXp(lvl)) });
 
