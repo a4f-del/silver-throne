@@ -61,7 +61,7 @@ lwPos = function (p) {
 
 /* ------------------------------------------------------------------ TEREN */
 lwTerrain = function (ps, F) {
-  const key = 'p2-forest-variety|' + ps.map(p => p.id + p.x + ',' + p.y).join('|') + '|' + Math.round(F.w);
+  const key = 'p3-organic-mountains|' + ps.map(p => p.id + p.x + ',' + p.y).join('|') + '|' + Math.round(F.w);
   if (LUME.terr && LUME.terr.key === key) return LUME.terr;
   const cell = new Map(ps.map(p => [p.x + ',' + p.y, p])), pos = new Map(ps.map(p => [p.id, lwPos(p)])), R = lwHull(ps), r = LWA.rng(4242);
   /* drumuri: spre vecinul de pe inelul dinăuntru sau spre Tron */
@@ -155,10 +155,40 @@ low += segs.map(([a, b], i) => {
     return Math.max(.14, Math.min(1.45, .74 + .33 * a + .29 * b));
   };
   const top = F.y + F.h * 0.32;
-  for (let y = F.y - 20; y < top; y += 70) for (let x = F.x - 40; x < F.x + F.w + 40; x += 120) {
-    const px = x + (r() - 0.5) * 70, py = y + (r() - 0.5) * 40, edge = Math.min(px - F.x, F.x + F.w - px) / F.w;
-    if (!outer(px, py) || inside(px, py, 70)) continue;
-    if (r() < (py < F.y + F.h * 0.1 ? 0.4 : 0.12) + (edge < 0.18 ? 0.3 : 0)) place('munte', px, py, 140 + r() * 110);
+  /* Lanțuri muntoase în loc de blocuri aleatorii: creste șerpuite, trecători
+     și dealuri izolate la poale. Funcționează și când harta se extinde. */
+  const mountainRidge = x => {
+    const u = (x - F.x) / F.w;
+    return F.y + F.h * (.11 + .040 * Math.sin(u * Math.PI * 3.2 + .4)
+      + .025 * Math.sin(u * Math.PI * 7.1 + 1.6));
+  };
+  const mountainGap = x => {
+    const u = (x - F.x) / F.w;
+    /* Trecători între masive, inclusiv una aproape de mijloc. */
+    return Math.max(
+      Math.exp(-Math.pow((u - .31) / .055, 2)),
+      Math.exp(-Math.pow((u - .60) / .065, 2)),
+      Math.exp(-Math.pow((u - .83) / .042, 2))
+    );
+  };
+  const mountainPlaced = [];
+  for (let y = F.y - 35; y < top + 35; y += 88) {
+    for (let x = F.x - 55; x < F.x + F.w + 55; x += 118) {
+      const px = x + (r() - .5) * 75, py = y + (r() - .5) * 65;
+      if (!outer(px, py) || inside(px, py, 90)) continue;
+      const dist = Math.abs(py - mountainRidge(px));
+      const core = Math.max(0, 1 - dist / (F.h * .17));
+      const edge = Math.min((px - F.x) / F.w, (F.x + F.w - px) / F.w);
+      const pass = mountainGap(px);
+      const probability = Math.min(.66, (.10 + .53 * core + (edge < .14 ? .12 : 0)) * (1 - .91 * pass));
+      if (r() >= probability) continue;
+      const w = 105 + r() * 105 + core * 28;
+      /* Evităm suprapunerile grosiere; vecinii mai apropiați rămân un masiv. */
+      if (mountainPlaced.some(q => Math.hypot((px - q[0]) / .85, (py - q[1]) / 1.15) < (w + q[2]) * .30)) continue;
+      if (!free('munte', px, py, w)) continue;
+      put('munte', px, py, w);
+      mountainPlaced.push([px, py, w]);
+    }
   }
   for (let y = top - 40; y < F.y + F.h + 60; y += 95) for (let x = F.x - 40; x < F.x + F.w + 60; x += 135) {
     const px = x + (r() - 0.5) * 80, py = y + (r() - 0.5) * 50;
