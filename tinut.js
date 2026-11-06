@@ -73,18 +73,6 @@ function wnList() {
   }
   WN.key = key; WN.list = out; return out;
 }
-  cand.sort((a, b) => a.h - b.h);
-  const want = Math.max(6, Math.round(ps.length / 3)), out = [], used = new Set();
-  const nm = h => { for (let i = 0; i < WN.names.length; i++) { const n = WN.names[(h + i) % WN.names.length]; if (!used.has(n)) { used.add(n); return n; } } return WN.names[h % WN.names.length] + ' ' + (used.size + 1); };
-  for (const c of cand) {
-    if (out.length >= want) break;
-    const id = 'wn' + c.x + '_' + c.y, pos = lwPos({ id, x: c.x, y: c.y });
-    if (typeof tnInside === 'function' && tnInside(pos[0], pos[1])) continue;
-    const near = ps.map(p => [Math.hypot(p.x - c.x, p.y - c.y), p.level]).sort((a, b) => a[0] - b[0]).slice(0, 3);
-    out.push({ id, x: c.x, y: c.y, pos, lvl: Math.max(1, Math.round(near.reduce((s, n) => s + n[1], 0) / near.length)), n: nm(c.h) });
-  }
-  WN.key = key; WN.list = out; return out;
-}
 const wnLeft = v => Math.max(0, ((S.wn || {})[v.id] || 0) + WN.cd - Date.now(), ((LUME.npc || {})[v.id] || 0) - lwNow());
 async function wnSync() {
   if (WN.off || typeof tronRpc !== 'function' || typeof CONT === 'undefined' || !CONT.user) return;
