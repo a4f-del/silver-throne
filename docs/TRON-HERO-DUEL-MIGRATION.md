@@ -22,3 +22,8 @@ Fișierul `supabase/01-throne.sql` la care face referire `tron.js` **nu există 
 6. Calibrat multiplicatorul fantomei 1.62 într-un duel 1v1 (poate favoriza mult apărătorul).
 
 **Nu merge-uiți acest PR până nu se finalizează migrarea Supabase și testele.** Nu schimbă `index.html`, nu e o livrare live completă.
+
+## SQL real recuperat
+Sursa SQL a fost furnizată din Supabase. Migrarea exactă este în `supabase/06-tron-duel-1v1.sql`: introduce `duel_version`, cere publicarea explicită a unui singur erou (`v:2`) și elimină plafonul jocului pentru Tron. Apărările vechi nu sunt convertite arbitrar: regele trebuie să republice apărarea; până atunci provocările sunt blocate fără a consuma încercări.
+
+**Securitate:** serverul încă acceptă statistici din browser. Limita numerică de tip `integer` este doar tehnică, nu o protecție anti-trișat. Pentru competiții reale, valorile trebuie calculate din inventarul/statisticile autoritative de pe server.
