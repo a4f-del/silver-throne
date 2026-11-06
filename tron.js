@@ -77,7 +77,7 @@ async function tronPublish(quiet) {
   if (S.lvl < TT.CFG.minLevel) { if (!quiet) { S.msg = 'Nivel minim ' + TT.CFG.minLevel + ' pentru Tron.'; go(); } return false; }
   if (!(await tronUid())) { if (!quiet) { S.msg = 'Conectează-te la cont ca să participi la Tron.'; go(); } return false; }
   const h = S.fs.find(f => f.h) || S.fs[0], local = tronUnits();
-  const r = await tronRpc('throne_publish', { p_name: h.n, p_level: S.lvl, p_ghost: { v: 1, units: local } });
+  const r = await tronRpc('throne_publish', { p_name: h.n, p_level: S.lvl, p_ghost: { v: 2, units: local } });
   if (r.error) { if (!quiet) { S.msg = 'Nu am putut publica apărarea: ' + r.error; go(); } return false; }
   TRON.pub = r.data.units.map((u, i) => Object.assign({}, u, { capped: !!(local[i] && (local[i].hp > u.hp || local[i].atk > u.atk || local[i].def > u.def)) })); TRON.pubAt = Date.now();
   if (!quiet) { S.msg = 'Apărarea ta a fost actualizată.'; await tronSync(); go(); }
