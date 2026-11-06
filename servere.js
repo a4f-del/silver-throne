@@ -2,8 +2,8 @@
    Cheile publicabile Supabase sunt publice prin definitie. NU pune aici
    secret keys, service_role, parole sau tokenuri de administrator. */
 const ST_BETA_CONFIG = {
-  url: '',            // Project URL: https://<project-ref>.supabase.co
-  publishableKey: ''   // Cheia publishable (NU secret/service_role)
+  url: 'https://yyqnnzezogcsfcuhwvkh.supabase.co',
+  publishableKey: 'sb_publishable_eggRz-y6Rl8VnW3pvvbJiA_MrgHr-3Z'   // Doar cheia publica BETA
 };
 const ST_BETA_READY = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(ST_BETA_CONFIG.url)
   && /^(sb_publishable_|eyJ)/.test(ST_BETA_CONFIG.publishableKey);
