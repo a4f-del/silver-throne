@@ -32,7 +32,7 @@ const lwDate = ms => new Date(ms).toLocaleDateString('ro-RO', { day: 'numeric', 
 /* ------------------------------------------------------------------ INSTANTANEUL TĂU */
 /* ce văd ceilalți: numele și nivelul eroului, puterea, satul, teritoriile, titlul și echipa (aceeași ca la Tron) */
 function lwSnap() {
-  const h = S.fs.find(f => f.h) || S.fs[0], units = tronUnits(), b = BL(), tot = BN.reduce((s, [k]) => s + (b[k] || 0), 0), si = TW.stage(tot);
+  const h = S.fs.find(f => f.h) || S.fs[0], units = tronTeamUnits(), b = BL(), tot = BN.reduce((s, [k]) => s + (b[k] || 0), 0), si = TW.stage(tot);
   const own = S.map ? terOwnedV().length : 0, fort = S.ter && S.ter.fort && S.ter.fort.o === 'p' ? 1 : 0;
   return { name: h.n, level: S.lvl, power: Math.round(TT.power(units)), territories: own + fort, stage: si, stage_name: TW.STAGES[si][1],
     title: (S.tron && S.tron.title) || '', hero: { n: h.n, c: h.c, ic: h.ic || '' }, units };
