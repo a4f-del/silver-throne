@@ -701,3 +701,8 @@ function flagRow() {
 }
 
 if (typeof document !== 'undefined' && typeof Image !== 'undefined') artPreload();
+function lootItem(types, l, r, pi, si, q) {
+  const t = P(types), lv = Math.max(1, l || S.lvl);
+  if (t === 'r') return terRelic(lv);
+  return mkItem(t, lv, Math.max(0, Math.min(3, r || 0)), pi, si, q || 0);
+}
