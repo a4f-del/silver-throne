@@ -17,7 +17,7 @@
     anchorLocal: { y: 2026, m: 10, d: 30, h: 15, mi: 0 },
     weekDays: 7,
     minLevel: 10,               /* nivel minim pentru participare */
-    ghostCapLevel: 40,          /* plafon: statisticile fantomei nu depășesc ale unui luptător de nivel 40 cu echipament Epic complet */
+    ghostCapLevel: 40,          /* păstrat numai pentru luptele din Lume; Tronul folosește throneDuelUnit */
     maxUnits: 3,                /* luptători în fantomă */
     protectMin: 30,             /* minute de protecție pentru un rege proaspăt încoronat */
     cooldownS: 120,             /* pauză între două provocări ale aceluiași jucător (secunde) */
@@ -89,6 +89,15 @@
     const atk = Math.max(1, Math.min(Math.round(fin(u.atk, 1) * cfg.ghostAtkMult), Math.round(cap.atk * cfg.ghostAtkMult)));
     const def = Math.max(0, Math.min(Math.round(fin(u.def, 0)), cap.def));
     return { n: String(u.n || 'Luptător').slice(0, 20), c: u.c, hp, atk, def };
+  };
+  /* Duel la Tron: fără plafon pe viață/atac/apărare; păstrăm multiplicatorul
+     de atac al fantomei până la calibrarea separată a duelurilor 1v1. */
+  T.throneDuelUnit = function (u, cfg) {
+    cfg = cfg || T.CFG;
+    const hp = Math.max(1, Math.round(fin(u.hp, 1) * (cfg.ghostHpMult || 1)));
+    const atk = Math.max(1, Math.round(fin(u.atk, 1) * cfg.ghostAtkMult));
+    const def = Math.max(0, Math.round(fin(u.def, 0)));
+    return { n: String(u.n || 'Erou').slice(0, 20), c: u.c, hp, atk, def };
   };
   /* validare pe server/client a unui instantaneu: 1..3 unități, clase cunoscute, valori finite */
   T.validGhost = function (g) {

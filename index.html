@@ -767,7 +767,7 @@ function hdr(){const h=S.fs.find(f=>f.h)||S.fs[0];
 function render(){sync();q('#v').innerHTML=''+''+(S.msg?`<p class="msg">${S.msg}</p>`:'')+tuH()+(typeof rtBanner==='function'?rtBanner():'')+ghIdle()+(S.tab=='a'?vV():S.tab=='c'?vC():S.tab=='m'?vM():S.tab=='r'?vTron():S.tab=='k'?vBoard():vE());   /* k = clasamentul, deschis din bara de sus */hdr();fxScan();temaPost();satPost();if(typeof vsPost==='function')vsPost();if(typeof mrPost==='function')mrPost()}
 function go(){pool();shop();MPV();terTick();atkCheck();tuChk();botLife();loginChk();tronCheck();lumeCheck();terBack();if(typeof mrTick==='function')mrTick();save();render()}
 /* pornirea jocului o face cont.js, după conectare: boot(salvare) */
-function boot(src){load(src);terNorm();spNorm();if(S.d&&S.d.f&&!S.d.f.es.some(e=>e.hp>0))win();pool();shop();MPV();terTick();atkCheck();botLife();loginChk();save();render()}
+function boot(src){load(src);if(typeof tronDuelRestore==='function')tronDuelRestore();terNorm();spNorm();if(S.d&&S.d.f&&!S.d.f.es.some(e=>e.hp>0))win();pool();shop();MPV();terTick();atkCheck();botLife();loginChk();save();render()}
 contStart();
 setInterval(()=>{if(!S)return;const n=Date.now();sync();botTick();{const b=S.al&&S.al[0];atkCheck();if((S.al&&S.al[0])!==b){save();render()}}const a=q('#pp');if(a)a.textContent=S.pts+'/'+MXP();const t=q('#pt');if(t)t.textContent=S.bp>0?'rezervă +'+S.bp:S.pts<MXP()?'(+1 în '+fmt(PTX()-(n-S.ptsT))+')':S.pts>MXP()?'peste maxim':'Puncte';
  let done=false;qa('[data-end]').forEach(e=>{const r=+e.dataset.end-n;if(r<=0)done=true;else e.textContent=fmt(r)});if(done)render()},1000);
