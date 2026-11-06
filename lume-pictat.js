@@ -10,6 +10,11 @@ const LWP = {
   /* treapta satului (LWA.tier: 1–9, 10–19, 20–24, 25–29, 30+) → iconița, lățimea pe hartă */
   tier: [['harta/sat-mic', 363, 380, 104], ['harta/sat-mare', 353, 380, 112], ['lume/sat-zid', 354, 380, 118], ['harta/capitala', 379, 380, 126], ['lume/castel-mare', 379, 380, 156]],
   deco: { padure: [353, 380], munte: [420, 344], pietre: [420, 399] },
+  /* Imagini noi 3:2, salvate direct în imagini/lume/. Ruinele sunt intenționat rare. */
+  forests: [
+    ['padure-deasa', 5], ['padure-brazi', 5], ['padure-stanci', 3],
+    ['padure-ceata', 3], ['padure-ruine', 1]
+  ],
   TW: 320      /* lățimea Tronului pe hartă (castelul cu tronul) */
 };
 LW.IA = 172; LW.IB = 104;    /* sate mai mari → mai mult loc între ele */
@@ -40,9 +45,6 @@ LWA.defs += `
   </filter>
 `;
 
-/* Pădurile au o bază pictată în asset; estompăm baza fără a afecta vârfurile brazilor. */
-LWA.defs += `<linearGradient id="lp-forest-fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="white"/><stop offset=".66" stop-color="white"/><stop offset=".84" stop-color="white" stop-opacity=".88"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient>`;
-
 LWA.defs += `<pattern id="lw-grass" patternUnits="userSpaceOnUse" width="440" height="440"><image href="imagini/lume/iarba.jpg" width="440" height="440"/></pattern>
 <radialGradient id="lw-tg"><stop offset="0" stop-color="#9fdcff" stop-opacity=".75"/><stop offset=".45" stop-color="#5cb6ff" stop-opacity=".28"/><stop offset="1" stop-color="#5cb6ff" stop-opacity="0"/></radialGradient>
 <radialGradient id="lw-fl"><stop offset="0" stop-color="#e6f7ff" stop-opacity=".95"/><stop offset=".4" stop-color="#7cc8ff" stop-opacity=".55"/><stop offset="1" stop-color="#7cc8ff" stop-opacity="0"/></radialGradient>
@@ -59,7 +61,7 @@ lwPos = function (p) {
 
 /* ------------------------------------------------------------------ TEREN */
 lwTerrain = function (ps, F) {
-  const key = 'p|' + ps.map(p => p.id + p.x + ',' + p.y).join('|') + '|' + Math.round(F.w);
+  const key = 'p2-forest-variety|' + ps.map(p => p.id + p.x + ',' + p.y).join('|') + '|' + Math.round(F.w);
   if (LUME.terr && LUME.terr.key === key) return LUME.terr;
   const cell = new Map(ps.map(p => [p.x + ',' + p.y, p])), pos = new Map(ps.map(p => [p.id, lwPos(p)])), R = lwHull(ps), r = LWA.rng(4242);
   /* drumuri: spre vecinul de pe inelul dinăuntru sau spre Tron */
@@ -75,7 +77,7 @@ lwTerrain = function (ps, F) {
   const outer = (x, y) => Math.abs(x) / R.x + Math.abs(y) / R.y > 1;
   /* decorul nu are voie să atingă satele: se verifică tot desenul (pădurea, muntele), nu doar mijlocul lui */
   const vbox = ps.map(p => { const [vx, vy] = pos.get(p.id), [, iw, ih, W] = LWP.tier[LWA.tier(p.level)], H = W * ih / iw; return [vx - W * 0.62, vy - H * 0.72, vx + W * 0.62, vy + H * 0.8]; });
-  const dbox = (k, x, y, w) => { const [iw, ih] = LWP.deco[k], h = w * ih / iw; return [x - w * 0.46, y - h * 0.58, x + w * 0.46, y + h * 0.3]; };
+  const dbox = (k, x, y, w) => { const [iw, ih] = k === 'padure' ? [3, 2] : LWP.deco[k], h = w * ih / iw; return [x - w * .50, y - h * .78, x + w * .50, y + h * .22]; };
   const hit = (a, b) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1];
   const busy = (x, y) => Math.hypot(x, y * 1.35) < LWP.TW * 0.7 || nearSeg(x, y, 12) || (typeof tnInside === 'function' && tnInside(x, y)) || (typeof wnNear === 'function' && wnNear(x, y)) || (typeof twNear === 'function' && twNear(x, y));
   const free = (k, x, y, w) => {
@@ -122,35 +124,35 @@ low += segs.map(([a, b], i) => {
 }).join('');
 /* decorul pictat: munți sus și în colțuri, păduri pe margini, câteva pâlcuri și pietre printre sate */
   const items = [];
+  const chooseForest = () => {
+    const total = LWP.forests.reduce((sum, item) => sum + item[1], 0);
+    let pick = r() * total;
+    for (const [name, weight] of LWP.forests) {
+      pick -= weight;
+      if (pick < 0) return name;
+    }
+    return LWP.forests[0][0];
+  };
   const put = (k, x, y, w) => {
-    const [iw, ih] = LWP.deco[k], h = w * ih / iw, flip = r() < 0.5;
     const forest = k === 'padure';
-    const sx = x - w / 2, sy = y - h * 0.62;
-    const id = 'lp-forest-mask-' + items.length;
-    const forestGround = forest ? `
-      <g pointer-events="none">
-        <ellipse cx="${lpF(x)}" cy="${lpF(y + h * .13)}"
-          rx="${lpF(w * .54)}" ry="${lpF(w * .20)}"
-          fill="#091b18" opacity=".35" filter="url(#lp-soft-shadow)"/>
-        <ellipse cx="${lpF(x - w * .13)}" cy="${lpF(y + h * .12)}"
-          rx="${lpF(w * .30)}" ry="${lpF(w * .11)}"
-          fill="#23372a" opacity=".20" filter="url(#lp-soft-shadow)"/>
-        <ellipse cx="${lpF(x + w * .15)}" cy="${lpF(y + h * .14)}"
-          rx="${lpF(w * .28)}" ry="${lpF(w * .10)}"
-          fill="#142820" opacity=".23" filter="url(#lp-soft-shadow)"/>
-      </g>` : '';
-    /* Fade pe sfertul inferior al sprite-ului: maschează marginea insulei deja pictate.
-       Mască locală unică pentru fiecare grup; copacii și evenimentele hărții rămân intacte. */
-    const mask = forest ? `<mask id="${id}" maskUnits="userSpaceOnUse" x="${lpF(sx)}" y="${lpF(sy)}" width="${lpF(w)}" height="${lpF(h)}"><rect x="${lpF(sx)}" y="${lpF(sy)}" width="${lpF(w)}" height="${lpF(h)}" fill="url(#lp-forest-fade)"/></mask>` : '';
+    const src = forest ? chooseForest() : k;
+    /* Toate pădurile noi sunt 3:2, deci nu trebuie întinse ca vechiul sprite. */
+    const [iw, ih] = forest ? [3, 2] : LWP.deco[k];
+    const h = w * ih / iw, flip = r() < .5;
+    const sx = x - w / 2, sy = y - h * (forest ? .78 : .62);
     const art = (flip ? `<g transform="translate(${lpF(2 * x)} 0) scale(-1 1)">` : '')
-      + lpImg('lume/' + k, w, h, sx, sy)
+      + lpImg('lume/' + src, w, h, sx, sy)
       + (flip ? '</g>' : '');
-    items.push([
-      y,
-      (forest ? forestGround : lpShadow(x, y + h * .12, w * .36, w * .09, .12))
-      + mask
-      + (forest ? `<g mask="url(#${id})">${art}</g>` : art)
-    ]);
+    const shadow = forest
+      ? lpShadow(x, y + h * .08, w * .34, w * .09, .08)
+      : lpShadow(x, y + h * .12, w * .36, w * .09, .12);
+    items.push([y, shadow + art]);
+  };
+  /* Patch-uri mari de vegetație, stabile la fiecare rerender, nu o grilă uniformă. */
+  const forestPatch = (x, y) => {
+    const a = Math.sin(x / 220 + y / 410 + 1.8);
+    const b = Math.sin(y / 190 - x / 380 + .7);
+    return Math.max(.14, Math.min(1.45, .74 + .33 * a + .29 * b));
   };
   const top = F.y + F.h * 0.32;
   for (let y = F.y - 20; y < top; y += 70) for (let x = F.x - 40; x < F.x + F.w + 40; x += 120) {
@@ -161,8 +163,13 @@ low += segs.map(([a, b], i) => {
   for (let y = top - 40; y < F.y + F.h + 60; y += 95) for (let x = F.x - 40; x < F.x + F.w + 60; x += 135) {
     const px = x + (r() - 0.5) * 80, py = y + (r() - 0.5) * 50;
     if (inside(px, py, 60)) continue;
-    if (outer(px, py)) { if (r() < 0.42) place('padure', px, py, 95 + r() * 120); }
-    else { const k = r(); if (k < 0.09) place('padure', px, py, 80 + r() * 30); else if (k < 0.13) place('pietre', px, py, 78 + r() * 18); }
+    if (outer(px, py)) {
+      if (r() < .30 * forestPatch(px, py)) place('padure', px, py, 90 + r() * 105);
+    } else {
+      const k = r();
+      if (k < .055 * forestPatch(px, py)) place('padure', px, py, 75 + r() * 38);
+      else if (k < .09) place('pietre', px, py, 78 + r() * 18);
+    }
   }
   /* Lumina rece si umbrele adauga profunzime fara a ascunde interactiunile SVG. */
   low += `<rect x="${lpF(F.x - 600)}" y="${lpF(F.y - 600)}" width="${lpF(F.w + 1200)}" height="${lpF(F.h + 1200)}" fill="#061017" opacity=".12" pointer-events="none"/>`;
