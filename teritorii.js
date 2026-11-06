@@ -75,7 +75,6 @@ function terUpkeep() {
   if (days > 0) { t.debt = Math.min(t.debt + Math.min(days, TP.upkeep.maxDays) * d, TP.upkeep.maxDays * d); t.upT += days * 864e5; }
   if (t.debt > 0 && S.gold >= t.debt) { terLog('Întreținere plătită: -' + t.debt + ' aur.'); S.gold -= t.debt; t.debt = 0; }
 }
-function terPay() { const t = S.ter; if (t.debt > 0) { if (S.gold >= t.debt) { S.gold -= t.debt; terLog('Întreținere plătită: -' + t.debt + ' aur.'); t.debt = 0; S.msg = 'Întreținerea a fost plătită. Bonusurile sunt din nou active.'; } else S.msg = 'Îți trebuie ' + t.debt + ' aur.'; } go(); }
 function terXp(n) { S.xp += n; let up = 0; while (S.xp >= need(S.lvl)) { S.xp -= need(S.lvl); S.lvl++; up++; S.pts = MXP(); S.ptsT = Date.now(); } return up; }
 const trvD = d => Math.max(1, 1 + d - (d >= 3 ? terB('trav') : 0));
 const trv = v => trvD(dst(v));
@@ -197,75 +196,10 @@ function terCampWin(d) {
 }
 
 /* ------------------------------------------------------------ CUCERIREA SATELOR */
-function vInfoT(v) { return TW.vil(v.id) || { tip: 'gold', tier: 1, nm: v.n, d: '', def: [] }; }
-function terConqCheck(v) {
-  const I = vInfoT(v), re = (v.lost || 0) > 0, fee = TW.conqFee(tLvl(v), I.tier, re), pts = trv(v) + 1, sc = v.sc && Date.now() - v.sc < 18e5, rw = v.rw || 0;
-  const a = [
-    { ok: re || rw >= TP.conq.raids, t: re ? 'Cunoști deja apărarea (recucerire)' : 'Raiduri reușite pe acest sat: ' + Math.min(rw, TP.conq.raids) + '/' + TP.conq.raids },
-    { ok: !!sc, t: 'Iscodire recentă (cunoști apărătorii)' },
-    { ok: S.gold >= fee, t: 'Taxă de garnizoană: ' + fee + ' aur' },
-    { ok: S.pts >= pts, t: 'Puncte: ' + pts },
-    { ok: S.fs.some(f => f.hp > 0) && !S.d, t: 'Echipă în stare de luptă, fără coborâre activă' }
-  ];
-  return { a, ok: a.every(x => x.ok), fee, pts, re, I };
-}
-function conq(id) {
-  terInit(); const v = MPV().vs.find(x => x.id === id), c = v && terConqCheck(v);
-  if (!v || v.o === 'p') { S.msg = 'Satul îți aparține deja.'; return go(); }
-  if (!c.ok) { S.msg = 'Condițiile de cucerire nu sunt îndeplinite.'; return go(); }
-  cn('r'); spend(c.pts); S.gold -= c.fee;
-  const I = c.I, k = Math.max(vk(v), TW.kb(S.lvl)) * TP.conq.ck[I.tier - 1] * (c.re ? TP.conq.reK : 1);
-  v.t = Date.now(); v.gd = Math.min(5, (v.gd || 0) + 1);
-  S.d = { room: 1, rooms: 2, k, rw: TP.conq.rw, bn: 'Stăpânul ' + v.b, di: 0, raid: v.id, rn: v.n, lbl: 'Cucerire', conq: 1, rf: 1, fx: 1, xn: TP.conq.xn[I.tier - 1], loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false, em: { nm: I.def, hm: 1, am: 1, dm: 1 } };
-  startF(false); terFrom(); S.tab = 'c'; S.msg = 'Asediezi ' + v.n + '. Apărătorii nu se predau ușor.';
-  if (S.auto !== false) { autoRun(); return; } go();
-}
-function terConqWin(d) {
-  const t = S.ter, v = MPV().vs.find(x => x.id === d.raid), I = vInfoT(v), vl = tLvl(v), re = (v.lost || 0) > 0, L = d.loot, now = Date.now(), out = [];
-  const g = Math.round(TW.rawGold(vl) * TP.conq.reLoot * v.r), x = Math.round(TW.rawXp(vl) * TP.conq.reLoot);
-  L.gold += g; L.xp += x;
-  if (!t.hist[v.id]) { const fg = Math.round(TW.rawGold(vl) * TP.conq.first.gold), fx = Math.round(TW.rawXp(vl) * TP.conq.first.xp); L.gold += fg; L.xp += fx; out.push('prima cucerire: +' + fg + ' aur, +' + fx + ' exp'); }
-  v.o = 'p'; v.cq = now; v.sg = now + TP.conq.immuneH * 3600000; v.lost = 0; t.hist[v.id] = (t.hist[v.id] || 0) + 1; t.st.conq++; if (re) t.st.recon++;
-  if (!t.upT) t.upT = now;
-  out.unshift(v.n + ' e al tău. ' + TW.TIPN[I.tip] + ': ' + (I.tip === 'pts' ? '+' + TW.bVal(I.tip, I.tier) : (I.tip === 'bld' || I.tip === 'forge' ? '-' : '+') + TW.bVal(I.tip, I.tier) + '%') + ' (de bază)');
-  terLog(v.n + (re ? ' a fost recucerit.' : ' a fost cucerit.')); d.cm = out.join('; ') + '.';
-}
-function terVilBtns(sv) {
-  if (sv.o === 'p') return '<span class="mute">Satul tău</span>';
-  const c = terConqCheck(sv);
-  return `<button class="p" onclick="raid(${sv.id})">Jefuiește (${trv(sv)}+1 p)</button> <button onclick="conq(${sv.id})"${c.ok ? '' : ' disabled'} title="${c.ok ? '' : 'Condiții neîndeplinite'}">${c.re ? 'Recucerește' : 'Cucerește'}</button>`;
-}
-function terBTxt(tip, tier) { const v = TW.bVal(tip, tier); return tip === 'pts' ? '+' + v + ' puncte maxime' : tip === 'trav' ? '-1 punct la drumuri lungi' : (tip === 'bld' || tip === 'forge' ? '-' : '+') + v + '% ' + TW.TIPN[tip]; }
-function terVilInfo(sv) {
-  const I = vInfoT(sv), c = terConqCheck(sv), t = S.ter, now = Date.now();
-  let h = `<div class="row"><span><b>${I.nm}</b> · treapta ${['mică', 'mijlocie', 'mare'][I.tier - 1]}<br><span class="mute">${I.d}</span></span></div>`;
-  h += `<div class="row"><span>Bonus la stăpânire: <b>${terBTxt(I.tip, I.tier)}</b><br><span class="mute">${TW.TIPD[I.tip]}</span></span></div>`;
-  if (sv.o === 'p') {
-    const act = !t.debt, up = TW.upk(tLvl(sv), I.tier, TP, sv.g);
-    h += `<div class="row"><span>Stare: <b style="color:var(--gold2)">în stăpânirea ta</b>${sv.sg > now ? ' · protejat încă ' + tDur(sv.sg - now) : ''}<br><span class="mute">Întreținere ${up} aur/zi. Bonus ${act ? 'activ' : '<b class="r4">suspendat (datorie de întreținere)</b>'}.</span></span></div>` + garRow('v', sv) + abRow('v', sv.id);
-  } else {
-    h += `<div class="row"><span>Stare: ${(sv.lost || 0) > 0 ? '<b class="r4">pierdut, poate fi recucerit mai ieftin</b>' : 'controlat de ' + sv.b + ' (NPC)'}</span></div>`;
-    h += `<div class="mute" style="margin:4px 0">Condiții de ${c.re ? 'recucerire' : 'cucerire'} (3 lupte, apărători mai puternici decât la raid):</div>` + c.a.map(x => `<div class="${x.ok ? 'r2' : 'r4'}" style="font-size:15px">${x.ok ? '✔' : '✖'} ${x.t}</div>`).join('');
-    h += `<div class="mute">Întreținere după cucerire: ${TW.upk(tLvl(sv), I.tier)} aur/zi.</div>`;
-  }
-  return h;
-}
+
 
 /* ---------------------------------------------------------- PIERDERE / RECUCERIRE */
-function terSeize(att) {
-  const t = S.ter, now = Date.now(); if (now - t.ll < TP.seize.cdH * 3600000) return '';
-  const c = terOwnedV().filter(v => (v.sg || 0) < now).map(v => ({ v, w: 1 })); if (t.fort.o === 'p' && (t.fort.sg || 0) < now) c.push({ f: 1, w: TP.seize.fortMul });
-  if (!c.length) return '';
-  c.forEach(q => { q.w *= 1 - TP.gar.seizeRelief * ((q.f ? t.fort.g : q.v.g) || 0); });
-  const wl = 60 * (1 - Math.pow(.92, BL().z)), p = TP.seize.p * (1 - Math.min(.6, wl / 100 * TP.seize.wallRelief * 2));
-  let x = Math.random() * c.reduce((s, q) => s + q.w, 0), pick = c[0]; for (const q of c) { x -= q.w; if (x <= 0) { pick = q; break; } }
-  /* garnizoana reduce și șansa de reușită a ocupării teritoriului ales (nu doar alegerea lui) */
-  if (Math.random() >= p * (1 - TP.gar.seizeRelief * ((pick.f ? t.fort.g : pick.v.g) || 0))) return '';
-  t.ll = now;
-  if (pick.f) { t.fort.o = 'n'; t.fort.lost = 1; t.fort.sg = 0; t.fort.g = Math.max(0, (t.fort.g || 0) - TP.gar.loseOnSeize); terLog(TW.FORT.nm + ' a fost ocupat de ' + att.b + '.'); return ' ' + TW.FORT.nm + ' a căzut în mâinile lor! Îl poți recuceri cu o taxă redusă.'; }
-  pick.v.o = 'n'; pick.v.lost = now; pick.v.sg = 0; pick.v.g = Math.max(0, (pick.v.g || 0) - TP.gar.loseOnSeize); pick.v.gd = Math.min(5, (pick.v.gd || 0) + 2); terLog(pick.v.n + ' a fost ocupat de ' + att.b + '.');
-  return ' ' + pick.v.n + ' a fost ocupat! Poți să-l recucerești mai ieftin, fără să repeți cerința de raiduri.';
-}
+
 
 /* ------------------------------------------------------------- LOCURI DE INTERES */
 function poiCost(p) { const T = TW.poiT(p.t), d = TW.cheb(p.x, p.y); return Math.max(1, T.pts + (d >= 3 ? 1 : 0) - (d >= 3 ? terB('trav') : 0)); }
@@ -374,7 +308,7 @@ function terFortWin(d) {
 
 /* ----------------------------------------------- CÂRLIGE ÎN RL / WIN / LEAVE ---- */
 function terRl(d) {
-  if (d.conq) terConqWin(d); else if (d.camp) terCampWin(d); else if (d.fort) terFortWin(d); else if (d.tron) tronWin(d); else if (d.lume) lumeWin(d);
+   if (d.camp) terCampWin(d); else if (d.fort) terFortWin(d); else if (d.tron) tronWin(d); else if (d.lume) lumeWin(d);
 }
 function terRaidStat(v) { v.rw = (v.rw || 0) + 1; S.ter.st.raid++; }
 function campBoss(d) { if (d.di != null) S.camp.bk[d.di] = 1; }
@@ -622,14 +556,7 @@ const terStage = () => { const b = BL(), n = Object.values(S.ren || {}).reduce((
 
 /* ----------------------------------------------------- HARTA: SVG ȘI PANOURI --- */
 const TCOL = '#f0d27a';
-function terFog() {
-  const t = S.ter; let s = '<g>';
-  for (let x = 0; x < TW.GW; x++) for (let y = 0; y < TW.GH; y++) {
-    if (terCell(x, y)) continue; const adj = terAdj(x, y), cx = x * SMCL, cy = y * SMCL;
-    s += `<g class="st-v" onclick="terSel('z',${x},${y})" tabindex="0" role="button" aria-label="Zonă neexplorată"><rect x="${cx}" y="${cy}" width="${SMCL}" height="${SMCL}" fill="#0b0e10" fill-opacity="${adj ? .55 : .72}" stroke="#2a2418" stroke-width=".6" stroke-dasharray="2 3"/>${adj ? `<text x="${cx + SMCL / 2}" y="${cy + SMCL / 2 + 4}" text-anchor="middle" fill="${TCOL}" fill-opacity=".75" style="font:700 14px Cinzel,serif" pointer-events="none">?</text>` : ''}</g>`;
-  }
-  return s + '</g>';
-}
+
 function terIcon(x, y, ic, col, sel, onclick, label, badge) {
   return `<g class="st-v${sel ? ' on' : ''}" onclick="${onclick}" tabindex="0" role="button" aria-label="${label}" transform="translate(${x} ${y})"><circle r="14" fill="transparent"/><circle r="10.5" fill="#12181a" fill-opacity=".92" stroke="${col}" stroke-width="1.4"/><text y="4.2" text-anchor="middle" style="font:13px sans-serif" pointer-events="none">${ic}</text>${badge ? `<g transform="translate(8 -9)"><rect x="-8" y="-5" width="16" height="9" rx="3" fill="#0b0e10" stroke="${col}" stroke-width=".6"/><text y="2" text-anchor="middle" fill="${col}" style="font:700 6.5px Alegreya,serif" pointer-events="none">${badge}</text></g>` : ''}${sel ? `<circle r="15" fill="none" stroke="${TCOL}" stroke-width="1.6"/>` : ''}</g>`;
 }
@@ -640,11 +567,7 @@ function terMarks() {
   t.camps.forEach(cp => { const [x, y] = c(cp), T = TW.camp(cp.t), h = Math.max(1, Math.round((cp.exp - Date.now()) / 3600000)); s += terIcon(x, y, T.ic, '#d4564f', sl && sl.k === 'c' && sl.a === cp.id, `terSel('c','${cp.id}')`, T.nm, '☠'.repeat(T.stars) + ' ' + h + 'h'); });
   return s;
 }
-function terVil(v, html) {
-  let x = ''; if (v.o === 'p') x = `<circle r="29.5" fill="none" stroke="${TCOL}" stroke-width="1.8"/><g transform="translate(-3 -26)"><path d="M0 0v-9" stroke="#2a1d10"/><path class="st-fl" d="M0-9l8 2.6-8 2.6z" fill="${flagCol()}" stroke="#6b4a06" stroke-width=".5"/></g>`;
-  else if ((v.lost || 0) > 0) x = `<circle r="29.5" fill="none" stroke="#d4564f" stroke-width="1.4" stroke-dasharray="3 3"/>`;
-  return x ? html.replace(/<\/g>$/, x + '</g>') : html;
-}
+
 function terPanel() {
   const s = S.msel, t = S.ter; let h = '';
   if (s && s.k === 'z') {
@@ -665,7 +588,7 @@ function terPanel() {
   } else if (s && s.k === 'f') {
     const f = t.fort, c = fortCheck();
     h = `<section><h2>${TW.FORT.ic} ${TW.FORT.nm}</h2><div class="mute">Fortăreața Regelui pe marginea ținutului: 3 lupte (poartă, curte, castelan), fără odihnă între ele.</div><div class="row"><span>Beneficiu: <b>${TW.FORT.bd}</b></span></div>` +
-      (f.o === 'p' ? `<div class="row"><span style="color:var(--gold2)"><b>În stăpânirea ta</b>${f.sg > Date.now() ? ' · protejat încă ' + tDur(f.sg - Date.now()) : ''}</span><span class="mute">Întreținere ${Math.round(TW.upk(S.lvl, 3, TP, f.g) * TP.fort.upkMul)} aur/zi</span></div>` + garRow('f', f) + abRow('f', 0)
+      (f.o === 'p' ? `<div class="row"><span style="color:var(--gold2)"><b>În stăpânirea ta</b></span></div>`
         : (f.lost ? '<div class="r4">Pierdut: recucerire cu taxă redusă și apărători mai slabi.</div>' : '') + c.a.map(x => `<div class="${x.ok ? 'r2' : 'r4'}" style="font-size:15px">${x.ok ? '✔' : '✖'} ${x.t}</div>`).join('') + `<div class="row"><span class="mute">Eșecul nu pierde progresul campaniei.</span><button class="p" onclick="fortGo()"${c.ok ? '' : ' disabled'}>${c.re ? 'Recucerește' : 'Asediază'}</button></div>`) + '</section>';
   }
   return h || '<p class="mute">Atinge un sat, o tabără sau un loc de pe hartă ca să-l vezi.</p>';
@@ -676,18 +599,6 @@ function terLegend() {
 function terTabs() {
   const k = S.mt === 'k' ? 'k' : 'l', r = cmpReady();
   return `<div class="tabs">${[['l', 'Lumea'], ['k', 'Campanie' + (r ? ' ●' : '')]].map(([x, n]) => `<button${x == k ? ' class="p"' : ''} onclick="mtab('${x}')">${n}</button>`).join('')}</div>`;
-}
-function mtab(k) { S.mt = k; S.msg = ''; go(); }
-function vTer() {
-  const t = S.ter, own = terOwnedV(), d = terDaily();
-  const lines = ['gold', 'mat', 'bld', 'forge', 'pts', 'trav'].map(k => { const b = terB(k), T = TP.terr[k]; return b || k !== 'trav' && true ? `<div class="row"><span>${TW.TIPN[k][0].toUpperCase() + TW.TIPN[k].slice(1)}</span><span><b>${k === 'pts' ? '+' + b : (k === 'bld' || k === 'forge' ? '−' : '+') + b + '%'}</b> <span class="mute">/ limita ${k === 'pts' ? '+' + T.cap : T.cap + '%'}</span></span></div>` : ''; }).join('');
-  let h = `<section><h2>Bonusuri active</h2><div class="mute">Se calculează doar din teritoriile în stăpânire și întreținute. Al doilea bonus de același tip valorează ${Math.round(TP.terr.dim * 100)}%, al treilea ${Math.round(TP.terr.dim * TP.terr.dim * 100)}%, și fiecare tip are o limită.</div>${lines}`;
-  h += `<div class="row"><span>Întreținere: <b>${d} aur/zi</b>${t.debt ? ` · <b class="r4">datorie ${t.debt} aur: bonusurile sunt suspendate</b>` : ''}</span>${t.debt ? `<button class="p" onclick="terPay()">Plătește</button>` : ''}</div><div class="mute">Întreținerea se plătește automat din aur, o dată pe zi. Dacă nu ai aur, bonusurile se opresc, dar teritoriile nu se pierd din cauza asta. Absența nu costă mai mult de ${TP.upkeep.maxDays} zile.</div></section>`;
-  h += `<section><h2>Sate (${own.length}/${S.map.vs.length})</h2>` + S.map.vs.map(v => { const I = vInfoT(v), o = v.o === 'p'; return `<div class="row"><span><b>${I.nm}</b> <span class="mute">(${v.n}, ${o ? 'al tău' : (v.lost ? 'pierdut' : 'NPC: ' + v.b)})</span><br><span class="mute">${terBTxt(I.tip, I.tier)}${o ? ' · garnizoană ' + (v.g || 0) + '/' + TP.gar.max + ' · întreținere ' + TW.upk(tLvl(v), I.tier, TP, v.g) + '/zi' : ''}</span></span><span><button onclick="tab('m');mtab('h');mv(${v.id})">Pe hartă</button></span></div>`; }).join('') + '</section>';
-  const f = t.fort; h += `<section><h2>${TW.FORT.ic} ${TW.FORT.nm}</h2><div class="row"><span>${f.o === 'p' ? '<b style="color:var(--gold2)">În stăpânirea ta</b>' : !t.dsc.fort ? 'Nedescoperit' : f.lost ? '<b class="r4">Pierdut</b>' : 'Descoperit, necucerit'}<br><span class="mute">${TW.FORT.bd}</span></span><button onclick="tab('m');mtab('h');terSel('f')"${t.dsc.fort ? '' : ' disabled'}>Pe hartă</button></div></section>`;
-  h += `<section><h2>Reguli</h2><div class="mute">• Cucerirea cere raiduri reușite, iscodire, taxă și 3 lupte mai grele decât un raid.<br>• Un sat cucerit e protejat ${TP.conq.immuneH} h. Dacă o oaste inamică îți sparge apărarea, poate ocupa un teritoriu (cel mult unul la ${TP.seize.cdH} h; zidul scade șansa). Poți recuceri mai ieftin și fără raiduri.<br>• Bonusul se acordă cât timp ai satul, nu la cucerire: nu poate fi încasat de două ori. Recompensa de primă cucerire se dă o singură dată pe sat.<br>• Satele din regiunea ta sunt controlate de NPC. Atacurile între jucători sunt în Lumea și nu pot cuceri teritorii.</div></section>`;
-  h += `<section><h2>Jurnal</h2>${t.lg.map(x => `<div class="mute">${tEsc(x)}</div>`).join('') || '<p class="mute">Nimic încă.</p>'}</section>`;
-  return h;
 }
 function vM() {
   if (S.mt !== 'k') S.mt = 'l';
@@ -701,28 +612,7 @@ function vM() {
    (toate se plătesc doar cu aur câștigat; Premium nu intră în nicio formulă de aici)
    =================================================================================== */
 /* ---- garnizoane ---- */
-function garRow(kind, o) {
-  const tier = kind === 'f' ? 3 : vInfoT(o).tier, g = o.g || 0, c = TW.garCost(S.lvl, tier, g, TP), id = kind === 'f' ? 0 : o.id;
-  const eff = `−${Math.round(TP.gar.seizeRelief * 100)}% șansa de ocupare${kind === 'f' ? '' : `, +${Math.round(TP.gar.bonusK * 100)}% din bonusul satului (în limita plafonului)`}, +${Math.round(TP.gar.upkK * 100)}% întreținere, pe nivel. Dacă teritoriul e ocupat, pierzi ${TP.gar.loseOnSeize} niveluri.`;
-  return `<div class="row"><span>Garnizoană: <b>${g}/${TP.gar.max}</b><br><span class="mute">${eff}</span></span>${c == null ? '<span class="mute">Maxim</span>' : `<button onclick="garBuy('${kind}',${id})"${S.gold >= c ? '' : ' disabled'}>${c} aur</button>`}</div>`;
-}
-function garBuy(kind, id) {
-  terInit(); const o = kind === 'f' ? S.ter.fort : S.map.vs.find(x => x.id === id);
-  if (!o || o.o !== 'p') { S.msg = 'Poți întări doar un teritoriu al tău.'; return go(); }
-  const tier = kind === 'f' ? 3 : vInfoT(o).tier, g = o.g || 0, c = TW.garCost(S.lvl, tier, g, TP);
-  if (c == null) { S.msg = 'Garnizoana e la nivel maxim.'; return go(); }
-  if (S.gold < c) { S.msg = 'Îți trebuie ' + c + ' aur.'; return go(); }
-  S.gold -= c; o.g = g + 1; terLog('Garnizoană ' + o.g + '/' + TP.gar.max + (kind === 'f' ? ' la ' + TW.FORT.nm : ' la ' + o.n) + ' (−' + c + ' aur).'); S.msg = 'Garnizoana a fost întărită la nivelul ' + o.g + '.'; go();
-}
-function abRow(kind, id) {
-  return `<div class="row"><span class="mute">Renunți la stăpânire: oprești întreținerea și pierzi garnizoana. Ca să-l ai din nou cucerești de la zero (taxă întreagă și cerințe).</span><button onclick="terAbandon('${kind}',${id})">Renunță</button></div>`;
-}
-function terAbandon(kind, id) {
-  terInit(); const o = kind === 'f' ? S.ter.fort : S.map.vs.find(x => x.id === id);
-  if (!o || o.o !== 'p') { S.msg = 'Nu e al tău.'; return go(); }
-  if (typeof confirm === 'function' && !confirm('Renunți la ' + (kind === 'f' ? TW.FORT.nm : o.n) + '? Garnizoana se pierde și va trebui să-l cucerești din nou.')) return;
-  o.o = 'n'; o.g = 0; o.lost = 0; o.sg = 0; terLog('Ai renunțat la ' + (kind === 'f' ? TW.FORT.nm : o.n) + '.'); S.msg = 'Ai renunțat la stăpânire. Întreținerea s-a oprit.'; go();
-}
+
 
 /* ---- negustor de lux + schimb aur → cristale ---- */
 const luxP = it => TW.luxPrice(ip(it), it.q, TP);
