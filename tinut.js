@@ -6,7 +6,8 @@
    Fără server (Lumea nu se poate încărca), fila Hartă arată harta veche a regiunii, ca jocul să meargă oricum.
    Se încarcă după lume-pictat.js.
    ========================================================================== */
-const TN = { s: 1.15, cx: 210, cy: 150, rx: 300, ry: 215 };   /* scara ținutului și zona lui (în unități ale Lumii) */
+const smPush = (x, y) => [x, y];
+   const TN = { s: 1.15, cx: 210, cy: 150, rx: 300, ry: 215 };   /* scara ținutului și zona lui (în unități ale Lumii) */
 LW.IA = 330; LW.IB = 200;    /* satele jucătorilor mai departe unele de altele, ca fiecare ținut să încapă */
 const tnF = n => Math.round(n * 10) / 10;
 function tnMe() { const st = LUME.st; if (!st || !st.me) return null; const me = st.players.find(p => p.id === st.me.user_id); return me ? lwPos(me) : null; }

@@ -35,7 +35,7 @@ function terInit() {
   t.v = 2; t.hist = t.hist || {}; t.dsc = t.dsc || {}; t.cl = t.cl || {}; t.rw = t.rw || {}; t.poiT = t.poiT || {}; t.cdn = t.cdn || {};
   t.st = t.st || {}; ['raid', 'conq', 'camp', 'recon', 'poi'].forEach(k => { t.st[k] = +t.st[k] || 0; });
   t.fog = Array.isArray(t.fog) ? t.fog : []; t.camps = Array.isArray(t.camps) ? t.camps : []; t.buf = Array.isArray(t.buf) ? t.buf : []; t.lg = Array.isArray(t.lg) ? t.lg : [];
-  t.debt = +t.debt || 0; t.upT = +t.upT || 0; t.ll = +t.ll || 0; t.cslot = +t.cslot || 0;
+  t.debt = 0; t.upT = +t.upT || 0; t.ll = +t.ll || 0; t.cslot = +t.cslot || 0;
   if (!t.poi || !t.fort) {
     const L = TW.layout(terKey(), m.vs);
     t.fort = Object.assign({ x: L.fort.x, y: L.fort.y, o: 'n', cq: 0, sg: 0, lost: 0 }, t.fort || {});
@@ -63,19 +63,10 @@ function terTick() { if (!S || !S.fs) return; terInit(); terUpkeep(); terCamps()
 function terLog(m) { const l = S.ter.lg; l.unshift(m); l.length = Math.min(l.length, ENT.has('cosm') ? 30 : 8); }
 
 /* Bonusuri active = doar teritoriile în stăpânire ȘI întreținute (fără datorie). */
-function terAct() {
-  const t = (typeof S !== 'undefined') && S && S.ter; if (!t || !S.map || t.debt > 0) return [];
-  const a = []; for (const v of S.map.vs) if (v.o === 'p') { const i = TW.vil(v.id); if (i) a.push({ tip: i.tip, tier: i.tier, m: 1 + TP.gar.bonusK * (v.g || 0) }); }
-  if (t.fort && t.fort.o === 'p') a.push({ tip: TW.FORT.bonus, tier: 1 });
-  return a;
-}
-function terB(k) { if (typeof S === 'undefined' || !S || !S.ter) return 0; return TW.bonusOf(k, terAct()); }
+function terAct() { return []; }
+function terB() { return 0; }
 function terOwnedV() { return S.map.vs.filter(v => v.o === 'p'); }
-function terDaily() {
-  let s = 0; terOwnedV().forEach(v => { s += TW.upk(tLvl(v), TW.vil(v.id).tier, TP, v.g); });
-  if (S.ter.fort.o === 'p') s += Math.round(TW.upk(S.lvl, 3, TP, S.ter.fort.g) * TP.fort.upkMul);
-  return s;
-}
+function terDaily() { return 0; }
 function terUpkeep() {
   const t = S.ter, now = Date.now(), d = terDaily();
   if (!d) { t.upT = 0; return; }
@@ -358,10 +349,9 @@ function vEx() {
 /* -------------------------------------------------------------- FORTĂREAȚA ---- */
 function fortCheck() {
   const t = S.ter, f = t.fort, re = !!f.lost, fee = Math.round(TW.fortFee(S.lvl) * (re ? TP.conq.reFee : 1)), pts = Math.max(1, TP.fort.pts - terB('trav'));
-  const n = Object.keys(t.hist).filter(k => k !== 'fort').length;
   const a = [
     { ok: S.lvl >= TP.fort.lv, t: 'Nivel ' + TP.fort.lv + ' (ai ' + S.lvl + ')' },
-    { ok: n >= 1, t: 'Cel puțin un sat cucerit vreodată' },
+    { ok: t.st.raid >= 5, t: 'Cel puțin 5 sate jefuite: ' + Math.min(5, t.st.raid) + '/5' },
     { ok: S.gold >= fee, t: 'Taxă de asediu: ' + fee + ' aur' },
     { ok: S.pts >= pts + 2, t: 'Puncte: ' + (pts + 2) + ' (intrare ' + pts + ' + lupte)' },
     { ok: S.fs.some(x => x.hp > 0) && !S.d, t: 'Echipă în stare de luptă, fără coborâre activă' }
@@ -684,8 +674,8 @@ function terLegend() {
   return `<div class="st-lg"><span>🏛⛏✦🛒🗼 locuri de interes</span><span><i style="background:#d4564f"></i>tabere (cu timp limitat)</span><span><i style="background:${TCOL}"></i>teritoriile tale</span></div>`;
 }
 function terTabs() {
-  const k = S.mt === 'h' || !S.mt ? 'l' : S.mt, r = cmpReady();
-  return `<div class="tabs">${[['l', 'Lumea'], ['k', 'Campanie' + (r ? ' ●' : '')], ['t', 'Teritorii']].map(([x, n]) => `<button${x == k ? ' class="p"' : ''} onclick="mtab('${x}')">${n}</button>`).join('')}</div>`;
+  const k = S.mt === 'k' ? 'k' : 'l', r = cmpReady();
+  return `<div class="tabs">${[['l', 'Lumea'], ['k', 'Campanie' + (r ? ' ●' : '')]].map(([x, n]) => `<button${x == k ? ' class="p"' : ''} onclick="mtab('${x}')">${n}</button>`).join('')}</div>`;
 }
 function mtab(k) { S.mt = k; S.msg = ''; go(); }
 function vTer() {
@@ -700,15 +690,10 @@ function vTer() {
   return h;
 }
 function vM() {
-  if (S.mt === 'b' || S.mt === 'h' || !S.mt) S.mt = 'l';   /* o singură hartă: Lumea, cu ținutul tău (tinut.js) */
-  terTick(); const offline = typeof LUME !== 'undefined' && !LUME.st && LUME.err, k = offline && S.mt === 'l' ? 'h' : S.mt, tabs = terTabs();
-  if (k === 'k') return tabs + vCamp();
-  if (k === 'l') return tabs + (S.ex ? vEx() : '') + vLume() + (typeof wnPanel === 'function' ? wnPanel() : '') + (typeof tnPanel === 'function' ? tnPanel() : '');   /* fără server: harta veche a regiunii, mai jos */
-  if (k === 't') return tabs + vTer();
-  let h = vMmap();
-  h = h.replace('<p class="mute">Atinge un sat ca să-l vezi.</p>', terPanel());
-  const i = h.indexOf('</section>'); if (i > 0) h = h.slice(0, i) + terLegend() + h.slice(i);
-  return tabs + (S.ex ? vEx() : '') + h;
+  if (S.mt !== 'k') S.mt = 'l';
+  terTick(); const tabs = terTabs();
+  if (S.mt === 'k') return tabs + vCamp();
+  return tabs + (S.ex ? vEx() : '') + vLume() + (typeof wnPanel === 'function' ? wnPanel() : '') + (typeof tnPanel === 'function' ? tnPanel() : '');
 }
 
 /* ===================================================================================
