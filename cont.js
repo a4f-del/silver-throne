@@ -18,7 +18,7 @@ const CONT = { user: null, booted: false, mode: 'in', email: '', busy: false, ti
 /* linkul din emailul de resetare aduce „type=recovery” în adresă; îl citim înainte ca Supabase să curețe adresa */
 const CONT_RECOV = typeof location !== 'undefined' && /type=recovery/.test(location.hash);
 const CONT_GONE = typeof location !== 'undefined' && /cont-sters/.test(location.hash);
-const contHere = () => location.origin + location.pathname;
+const contHere = () => location.origin + location.pathname + (ST_SERVER === 'beta' ? '?server=beta' : '');
 const cEsc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const cRead = k => { try { const o = JSON.parse(localStorage.getItem(k)); return o && o.fs ? o : null; } catch (e) { return null; } };
 
@@ -79,8 +79,19 @@ async function contStart() {
 
 /* contul e conectat: alege salvarea și pornește jocul */
 async function contEnter(user) {
+  /* Autorizarea BETA este verificată de proiectul BETA înainte să se citească
+     salvarea sau să pornească jocul. Interfața singură nu securizează RPC/RLS! */
+  if (ST_SERVER === 'beta') {
+    const gate = await supabaseClient.rpc('is_beta_admin').catch(e => ({ error: e }));
+    if (gate.error || gate.data !== true) {
+      await supabaseClient.auth.signOut().catch(() => {});
+      CONT.user = null;
+      CONT.msg = { t: 'err', m: 'Acces BETA restricționat. Doar administratorii aprobați pot intra.' };
+      return contShow('in', true);
+    }
+  }
   CONT.user = user; contShow('load');
-  const key = KEY + ':' + user.id;
+  const key = KEY + (ST_SERVER === 'beta' ? ':beta' : '') + ':' + user.id;
   let r;
   try { r = await supabaseClient.from('game_saves').select('game_data,updated_at').eq('user_id', user.id).maybeSingle(); }
   catch (e) { r = { error: e }; }
@@ -92,7 +103,7 @@ async function contEnter(user) {
     return contBoot(key, local && +local.sv > ct ? local : cloud);
   }
   if (local) return contBoot(key, local);
-  const old = cRead(KEY);                          /* progres vechi, de dinainte de conturi */
+  const old = ST_SERVER === 'beta' ? null : cRead(KEY);   /* BETA nu importă niciodată salvarea LIVE */
   if (old) { CONT.oldSave = old; return contShow('pick'); }
   contBoot(key, null);
 }
@@ -139,13 +150,19 @@ function contShow(mode, keepMsg) {
   if (mode !== CONT.mode && !keepMsg && mode !== 'retry' && mode !== 'load') CONT.msg = CONT.msg && CONT.msg.sticky ? CONT.msg : null;
   CONT.mode = mode;
   const card = document.getElementById('gate-card'), foot = document.getElementById('gate-foot');
-  const tabs = `<div class="g-tabs" role="tablist"><button type="button" role="tab" aria-selected="${mode === 'in'}" class="${mode === 'in' ? 'on' : ''}" onclick="contShow('in')">Conectare</button><button type="button" role="tab" aria-selected="${mode === 'up'}" class="${mode === 'up' ? 'on' : ''}" onclick="contShow('up')">Cont nou</button></div>`;
+  const tabs = ST_SERVER === 'beta'
+    ? '<div class="g-tabs"><b>Acces exclusiv administratorilor</b></div>'
+    : `<div class="g-tabs" role="tablist"><button type="button" role="tab" aria-selected="${mode === 'in'}" class="${mode === 'in' ? 'on' : ''}" onclick="contShow('in')">Conectare</button><button type="button" role="tab" aria-selected="${mode === 'up'}" class="${mode === 'up' ? 'on' : ''}" onclick="contShow('up')">Cont nou</button></div>`;
+  const serverTabs = `<div class="g-server-picker" role="group" aria-label="Alege serverul">
+    <button type="button" class="${ST_SERVER === 'live' ? 'on' : ''}" onclick="stSwitchServer('live')"><b>⚔ LIVE</b><small>Jocul public</small></button>
+    <button type="button" class="${ST_SERVER === 'beta' ? 'on beta' : ''}" onclick="stSwitchServer('beta')" ${ST_BETA_READY ? '' : 'disabled title="Se configurează serverul BETA"'}><b>🧪 BETA</b><small>${ST_BETA_READY ? 'Doar administratori' : 'În pregătire'}</small></button>
+  </div>`;
   let h = '', f = '';
   if (mode === 'load') h = `<div class="g-load"><span class="g-spin" aria-hidden="true"></span><span>${CONT.user ? 'Se încarcă progresul contului…' : 'Se pregătește jocul…'}</span></div>`;
   else if (mode === 'in') {
     h = tabs + `<form onsubmit="contIn(event)" novalidate>${cField('g-email', 'Email', 'email', 'username email', CONT.email, 'inputmode="email"')}${cField('g-pass', 'Parolă', 'password', 'current-password')}${cMsg()}<button class="g-go" type="submit">Conectează-te</button></form>`
       + `<button type="button" class="g-link" onclick="contShow('reset')">Am uitat parola</button>`;
-  } else if (mode === 'up') {
+  } else if (mode === 'up' && ST_SERVER !== 'beta') {
     h = tabs + `<form onsubmit="contUp(event)" novalidate>${cField('g-email', 'Email', 'email', 'username email', CONT.email, 'inputmode="email"')}${cField('g-pass', 'Parolă (cel puțin 6 caractere)', 'password', 'new-password', '', 'minlength="6"')}${cField('g-pass2', 'Repetă parola', 'password', 'new-password', '', 'minlength="6"')}${cMsg()}<button class="g-go" type="submit">Creează contul</button></form>`;
   } else if (mode === 'reset') {
     h = `<h2 class="g-h">Resetează parola</h2><p class="g-p">Îți trimitem pe email un link. Îl deschizi pe acest dispozitiv și alegi o parolă nouă.</p><form onsubmit="contReset(event)" novalidate>${cField('g-email', 'Email', 'email', 'username email', CONT.email, 'inputmode="email"')}${cMsg()}<button class="g-go" type="submit">Trimite linkul</button></form><button type="button" class="g-link" onclick="contShow('in')">Înapoi la conectare</button>`;
@@ -165,7 +182,7 @@ function contShow(mode, keepMsg) {
     h = `${cMsg()}<div class="g-two"><button class="g-go" type="button" onclick="${CONT.user ? 'contEnter(CONT.user)' : 'location.reload()'}">Încearcă din nou</button>${CONT.user ? '<button type="button" onclick="contOut()">Deconectează-te</button>' : ''}</div>`;
   }
   if (mode === 'in' || mode === 'up' || mode === 'reset') f += '<div class="g-legal"><a href="confidentialitate.html">Confidențialitate</a> · <a href="sterge-cont.html">Ștergerea contului</a></div>';
-  card.innerHTML = h; foot.innerHTML = f;
+  card.innerHTML = (mode === 'in' || mode === 'up' || mode === 'reset' ? serverTabs : '') + h; foot.innerHTML = f;
   const first = card.querySelector('input:not([value]), input[value=""]') || card.querySelector('input');
   if (first && window.innerWidth > 700) setTimeout(() => first.focus(), 30);
 }
@@ -194,6 +211,7 @@ async function contIn(ev) {
 }
 async function contUp(ev) {
   ev.preventDefault(); if (CONT.busy) return;
+  if (ST_SERVER === 'beta') return cSay('err', 'Pe BETA conturile sunt create doar de administratori, prin invitație.');
   const email = cMail(); if (!email) return; const p1 = cVal('g-pass'), p2 = cVal('g-pass2');
   if (p1.length < 6) return cSay('err', 'Parola trebuie să aibă cel puțin 6 caractere.');
   if (p1 !== p2) return cSay('err', 'Parolele nu coincid.');
@@ -236,7 +254,7 @@ async function contNew(ev) {
 }
 function contPick(move) {
   const g = CONT.oldSave; CONT.oldSave = null;
-  contBoot(KEY + ':' + CONT.user.id, move ? g : null);
+  contBoot(KEY + (ST_SERVER === 'beta' ? ':beta' : '') + ':' + CONT.user.id, move ? g : null);
   if (move && CONT.booted) { try { localStorage.removeItem(KEY); } catch (e) { /* rămâne și local; nu e grav */ } S.msg = 'Progresul de pe acest dispozitiv a fost mutat în contul tău.'; render(); }
 }
 
@@ -254,7 +272,7 @@ async function contDel(ev) {
   const uid = CONT.user.id, r = await supabaseClient.rpc('delete_my_account').catch(e => ({ error: e }));
   if (r.error) { cBusy(false); return cSay('err', /Could not find the function|schema cache/i.test(String(r.error.message)) ? 'Ștergerea nu e încă pornită pe server (rulează supabase/03-cont.sql).' : 'Contul nu a putut fi șters: ' + contErr(r.error)); }
   CONT.booted = false; CONT.user = null;
-  try { localStorage.removeItem(KEY + ':' + uid); } catch (e) { /* ignorat */ }
+  try { localStorage.removeItem(SKEY); } catch (e) { /* ignorat */ }
   await supabaseClient.auth.signOut().catch(() => {});
   try { history.replaceState(null, '', contHere() + '#cont-sters'); } catch (e) { /* mesajul de confirmare nu mai apare; contul e șters oricum */ }
   location.reload();
@@ -293,7 +311,7 @@ function contChip() {
   t.innerHTML = '👑 Cont' + (CONT.user && CONT.err ? ' <b class="acc-dot" title="Salvarea online a eșuat">!</b>' : '');
   const st = CONT.err ? `<span class="acc-bad">Salvarea online a eșuat: ${cEsc(CONT.err)} Progresul e păstrat pe acest dispozitiv.</span> <button type="button" onclick="contPush()">Reîncearcă</button>`
     : CONT.pushing || CONT.timer ? 'Se salvează online…' : CONT.lastOk ? 'Progresul e salvat online.' : 'Se pregătește salvarea online…';
-  p.innerHTML = `<div class="acc-who">Conectat ca<b>${cEsc(CONT.user.email)}</b></div><p class="acc-st">${st}</p>${typeof nmPanel === 'function' ? nmPanel() : ''}<button type="button" id="acc-out" onclick="contOut()">Deconectează-te</button><div class="acc-legal"><a href="confidentialitate.html" target="_blank" rel="noopener">Confidențialitate</a> · <button type="button" class="acc-del" onclick="contShow('del')">Șterge contul</button></div>`;
+  p.innerHTML = `<div class="acc-env">${ST_SERVER === 'beta' ? '🧪 BETA · exclusiv administratori' : '⚔ LIVE · server public'}</div><div class="acc-who">Conectat ca<b>${cEsc(CONT.user.email)}</b></div><p class="acc-st">${st}</p>${typeof nmPanel === 'function' ? nmPanel() : ''}<button type="button" class="acc-switch" onclick="stSwitchServer('${ST_SERVER === 'beta' ? 'live' : 'beta'}')" ${ST_SERVER === 'live' && !ST_BETA_READY ? 'disabled' : ''}>${ST_SERVER === 'beta' ? 'Înapoi la LIVE' : 'Intră pe BETA'}</button><button type="button" id="acc-out" onclick="contOut()">Deconectează-te</button><div class="acc-legal"><a href="confidentialitate.html" target="_blank" rel="noopener">Confidențialitate</a> · <button type="button" class="acc-del" onclick="contShow('del')">Șterge contul</button></div>`;
 }
 /* tab ascuns (telefon blocat, altă aplicație): trimitem imediat ce aștepta */
 if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && CONT.timer) contPush(); });
@@ -358,5 +376,13 @@ html.gate-on,html.gate-on body{overflow:hidden}
 .auth-hidden{display:none!important}
 @media (max-width:420px){#gate h1{font-size:28px}.g-crest{width:92px}.g-card{padding:16px 14px 12px}}
 `;
+  document.head.appendChild(st);
+})();
+
+/* Selectorul este vizibil și pe mobil; LIVE rămâne opțiunea implicită. */
+(function () {
+  if (typeof document === 'undefined' || !document.head) return;
+  const st = document.createElement('style');
+  st.textContent = '.g-server-picker{display:flex;gap:8px;margin:0 0 18px}.g-server-picker button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;padding:11px 7px;background:#141a1e;border:1px solid #4c555a;border-radius:7px;color:#d0d8db;cursor:pointer}.g-server-picker button.on{border-color:#f0d27a;background:linear-gradient(180deg,#443823,#1c2225);color:#f0d27a}.g-server-picker button.beta{border-color:#90bbdd;background:linear-gradient(180deg,#1a3c53,#141e28);color:#b4e2ff}.g-server-picker button small{font-size:12px;color:#b8c3c7}.g-server-picker button:disabled{opacity:.46;cursor:not-allowed}.acc-env{color:#e5ca89;font-size:12px;font-weight:700;margin-bottom:8px}.acc-switch:disabled{opacity:.48}';
   document.head.appendChild(st);
 })();
