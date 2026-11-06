@@ -8,7 +8,7 @@
    ========================================================================== */
 const LWP = {
   /* treapta satului (LWA.tier: 1–9, 10–19, 20–24, 25–29, 30+) → iconița, lățimea pe hartă */
-  tier: [['harta/sat-mic', 363, 380, 104], ['harta/sat-mare', 353, 380, 112], ['lume/sat-zid', 354, 380, 118], ['harta/capitala', 379, 380, 126], ['lume/castel-mare', 379, 380, 156]],
+  tier: [['harta/sat-mic', 363, 380, 104], ['harta/sat-mare', 353, 380, 112], ['lume/sat-zid', 354, 380, 118], ['harta/capitala', 379, 380, 126], ['lume/castel-mare', 379, 380, 138]],
   deco: { padure: [353, 380], munte: [420, 344], pietre: [420, 399] },
   /* Imagini noi 3:2, salvate direct în imagini/lume/. Ruinele sunt intenționat rare. */
   forests: [
