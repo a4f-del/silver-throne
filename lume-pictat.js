@@ -40,6 +40,9 @@ LWA.defs += `
   </filter>
 `;
 
+/* Pădurile au o bază pictată în asset; estompăm baza fără a afecta vârfurile brazilor. */
+LWA.defs += `<linearGradient id="lp-forest-fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="white"/><stop offset=".66" stop-color="white"/><stop offset=".84" stop-color="white" stop-opacity=".88"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient>`;
+
 LWA.defs += `<pattern id="lw-grass" patternUnits="userSpaceOnUse" width="440" height="440"><image href="imagini/lume/iarba.jpg" width="440" height="440"/></pattern>
 <radialGradient id="lw-tg"><stop offset="0" stop-color="#9fdcff" stop-opacity=".75"/><stop offset=".45" stop-color="#5cb6ff" stop-opacity=".28"/><stop offset="1" stop-color="#5cb6ff" stop-opacity="0"/></radialGradient>
 <radialGradient id="lw-fl"><stop offset="0" stop-color="#e6f7ff" stop-opacity=".95"/><stop offset=".4" stop-color="#7cc8ff" stop-opacity=".55"/><stop offset="1" stop-color="#7cc8ff" stop-opacity="0"/></radialGradient>
@@ -118,19 +121,38 @@ low += segs.map(([a, b], i) => {
   `;
 }).join('');
 /* decorul pictat: munți sus și în colțuri, păduri pe margini, câteva pâlcuri și pietre printre sate */
-  const items = [], put = (k, x, y, w) => { const [iw, ih] = LWP.deco[k], h = w * ih / iw, flip = r() < 0.5;   /* jumătate întoarse în oglindă, ca să nu pară copiate */
-  
-items.push([
-  y,
-  lpShadow(x, y + h * 0.12, w * 0.36, w * 0.09, 0.12)
-  + (flip
-      ? `<g transform="translate(${lpF(2 * x)} 0) scale(-1 1)">`
-      : '')
-  + lpImg('lume/' + k, w, h, x - w / 2, y - h * 0.62)
-  + (flip ? '</g>' : '')
-]);
+  const items = [];
+  const put = (k, x, y, w) => {
+    const [iw, ih] = LWP.deco[k], h = w * ih / iw, flip = r() < 0.5;
+    const forest = k === 'padure';
+    const sx = x - w / 2, sy = y - h * 0.62;
+    const id = 'lp-forest-mask-' + items.length;
+    const forestGround = forest ? `
+      <g pointer-events="none">
+        <ellipse cx="${lpF(x)}" cy="${lpF(y + h * .13)}"
+          rx="${lpF(w * .54)}" ry="${lpF(w * .20)}"
+          fill="#091b18" opacity=".35" filter="url(#lp-soft-shadow)"/>
+        <ellipse cx="${lpF(x - w * .13)}" cy="${lpF(y + h * .12)}"
+          rx="${lpF(w * .30)}" ry="${lpF(w * .11)}"
+          fill="#23372a" opacity=".20" filter="url(#lp-soft-shadow)"/>
+        <ellipse cx="${lpF(x + w * .15)}" cy="${lpF(y + h * .14)}"
+          rx="${lpF(w * .28)}" ry="${lpF(w * .10)}"
+          fill="#142820" opacity=".23" filter="url(#lp-soft-shadow)"/>
+      </g>` : '';
+    /* Fade pe sfertul inferior al sprite-ului: maschează marginea insulei deja pictate.
+       Mască locală unică pentru fiecare grup; copacii și evenimentele hărții rămân intacte. */
+    const mask = forest ? `<mask id="${id}" maskUnits="userSpaceOnUse" x="${lpF(sx)}" y="${lpF(sy)}" width="${lpF(w)}" height="${lpF(h)}"><rect x="${lpF(sx)}" y="${lpF(sy)}" width="${lpF(w)}" height="${lpF(h)}" fill="url(#lp-forest-fade)"/></mask>` : '';
+    const art = (flip ? `<g transform="translate(${lpF(2 * x)} 0) scale(-1 1)">` : '')
+      + lpImg('lume/' + k, w, h, sx, sy)
+      + (flip ? '</g>' : '');
+    items.push([
+      y,
+      (forest ? forestGround : lpShadow(x, y + h * .12, w * .36, w * .09, .12))
+      + mask
+      + (forest ? `<g mask="url(#${id})">${art}</g>` : art)
+    ]);
   };
-const top = F.y + F.h * 0.32;
+  const top = F.y + F.h * 0.32;
   for (let y = F.y - 20; y < top; y += 70) for (let x = F.x - 40; x < F.x + F.w + 40; x += 120) {
     const px = x + (r() - 0.5) * 70, py = y + (r() - 0.5) * 40, edge = Math.min(px - F.x, F.x + F.w - px) / F.w;
     if (!outer(px, py) || inside(px, py, 70)) continue;
