@@ -51,19 +51,28 @@ LWA.defs += `<radialGradient id="tn-fg"><stop offset="0" stop-color="#0b1012" st
    jefuite separat de fiecare: o dată la 4 ore pe sat, fără server (S.wn = {id: momentul jafului}).
    Nivelul unui sat = media celor mai apropiați 3 jucători, deci satele cresc odată cu Lumea.
    ========================================================================== */
-const WN = { cd: 4 * 3600e3, gap: 8, names: ['Vadul Negru', 'Satul Lupilor', 'Moara Arsă', 'Crângul Sur', 'Podul Vechi', 'Dealul Ciorii', 'Fântâna Rece', 'Valea Seacă', 'Hanul Părăsit', 'Piatra Albă', 'Codrul Mut', 'Iazul Tulbure', 'Movila Rece', 'Răscruce', 'Vatra Stinsă', 'Gura Văii'] };
-const wnEff = v => Math.max(1, Math.max(S.lvl - 4, Math.min(v.lvl, S.lvl + 4)));
+const WN = { cd: 4 * 3600e3, gap: 8,
+  pre: ['Vadul', 'Moara', 'Valea', 'Dealul', 'Podul', 'Crângul', 'Piatra', 'Fântâna'],
+  suf: ['Negru', 'Arsă', 'Rece', 'Seacă', 'Vechi', 'Mut', 'Alb', 'Tulbure'] };
 const wnHash = s => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
 function wnList() {
+  if (!LUME.npcAt || Date.now() - LUME.npcAt > 60000) wnSync();
   const st = LUME.st; if (!st || !st.players || !st.players.length) return [];
   const ps = st.players, key = ps.map(p => p.id + p.x + ',' + p.y + ':' + p.level).join('|');
   if (WN.key === key) return WN.list;
-  const occ = new Set(ps.map(p => p.x + ',' + p.y)), R = Math.max(1, ...ps.map(p => Math.max(Math.abs(p.x), Math.abs(p.y)))) + 1, cand = [];
+  const occ = new Set(ps.map(p => p.x + ',' + p.y)), R = Math.max(1, ...ps.map(p => Math.max(Math.abs(p.x), Math.abs(p.y)))) + 1, out = [];
   for (let x = -R; x <= R; x++) for (let y = -R; y <= R; y++) {
     if (occ.has(x + ',' + y) || Math.max(Math.abs(x), Math.abs(y)) < 1) continue;
     let nb = 0; for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) if (occ.has((x + dx) + ',' + (y + dy))) nb++;
-    if (nb) cand.push({ x, y, h: wnHash(x + ':' + y) });
+    if (!nb) continue;
+    const h = wnHash(x + ':' + y); if (h % 3) continue;
+    const id = 'wn' + x + '_' + y, pos = lwPos({ id, x, y });
+    const near = ps.map(p => [Math.hypot(p.x - x, p.y - y), p.level]).sort((a, b) => a[0] - b[0]).slice(0, 3);
+    out.push({ id, x, y, pos, lvl: Math.max(1, Math.round(near.reduce((s, n) => s + n[1], 0) / near.length)),
+      n: WN.pre[(h >>> 3) % WN.pre.length] + ' ' + WN.suf[(h >>> 7) % WN.suf.length] });
   }
+  WN.key = key; WN.list = out; return out;
+}
   cand.sort((a, b) => a.h - b.h);
   const want = Math.max(6, Math.round(ps.length / 3)), out = [], used = new Set();
   const nm = h => { for (let i = 0; i < WN.names.length; i++) { const n = WN.names[(h + i) % WN.names.length]; if (!used.has(n)) { used.add(n); return n; } } return WN.names[h % WN.names.length] + ' ' + (used.size + 1); };
@@ -76,7 +85,15 @@ function wnList() {
   }
   WN.key = key; WN.list = out; return out;
 }
-const wnLeft = v => Math.max(0, ((S.wn || {})[v.id] || 0) + WN.cd - Date.now());
+const wnLeft = v => Math.max(0, ((S.wn || {})[v.id] || 0) + WN.cd - Date.now(), ((LUME.npc || {})[v.id] || 0) - lwNow());
+async function wnSync() {
+  if (WN.off || typeof tronRpc !== 'function' || typeof CONT === 'undefined' || !CONT.user) return;
+  LUME.npcAt = Date.now();
+  const r = await tronRpc('world_npc_get');
+  if (r.error) { if (/Could not find the function|does not exist|schema cache/i.test(r.error)) WN.off = 1; return; }
+  const was = JSON.stringify(LUME.npc || {}); LUME.npc = r.data.cd || {};
+  if (was !== JSON.stringify(LUME.npc) && typeof lwUi === 'function') lwUi();
+}
 const wnNear = (x, y) => (WN.list || []).some(v => Math.hypot(x - v.pos[0], (y - v.pos[1]) * 1.4) < 110);
 /* desenul pe hartă: sat mic sau mare după nivel; după jaf, estompat, cu timpul rămas */
 function lwWn() {
@@ -99,17 +116,29 @@ function wnPanel() {
     + `<div class="row"><span>Pradă estimată: ~${gold} aur, minereu și experiență · pentru tine: <b>${risk}</b></span>`
     + (left ? `<span class="mute">Jefuit de tine; din nou în ${sdT(left)}</span>` : `<button class="p" onclick="wnRaid('${v.id}')">Jefuiește · 1 punct</button>`) + '</div></section>';
 }
-function wnRaid(id) {
-  const v = wnList().find(x => x.id === id); if (!v) return;
+const wnErr = e => String(e || 'Eroare.').replace(/\s*CONTEXT:[\s\S]*$/, '').replace(/^ERROR:\s*/, '');
+async function wnRaid(id) {
+  const v = wnList().find(x => x.id === id); if (!v || WN.busy) return;
   if (S.d) { S.msg = 'Ești deja într-o luptă.'; return go(); }
   if (!S.fs.some(f => f.hp > 0)) { S.msg = 'Toți luptătorii sunt căzuți. Du-te la Infirmerie.'; return go(); }
   if (wnLeft(v)) { S.msg = 'L-ai jefuit de curând.'; return go(); }
   if (S.pts < 1) { S.msg = 'Îți trebuie un punct.'; return go(); }
-  const e = wnEff(v);
-  cn('r'); spend(1); (S.wn = S.wn || {})[v.id] = Date.now();
-  const k = Math.max(.6, Math.min(2.4, Math.pow(e / Math.max(1, S.lvl), 1.2)));
-  S.d = { room: 1, rooms: 2, k, rw: 1 + (k - 1) * .6, bn: 'Căpitanul gărzii', di: 0, raid: -5, wn: v.id, wl: e, rn: v.n, rf: 1, lbl: 'Jaf', loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false };
-  startF(false); terFrom(); S.tab = 'c'; S.msg = 'Ai ajuns la ' + v.n + '. Gărzile te așteaptă.'; if (S.auto !== false) { autoRun(); return; } go();
+  WN.busy = 1;
+  try {
+    if (!WN.off) {
+      const r = await tronRpc('world_npc_raid', { p_x: v.x, p_y: v.y });
+      if (r.error && /Could not find the function|does not exist|schema cache/i.test(r.error)) WN.off = 1;
+      else if (r.error) { S.msg = wnErr(r.error); await wnSync(); return go(); }
+      else (LUME.npc = LUME.npc || {})[v.id] = r.data.until;
+    }
+    if (S.d || S.pts < 1) return go();
+    const e = wnEff(v);
+    cn('r'); spend(1); (S.wn = S.wn || {})[v.id] = Date.now();
+    const k = Math.max(.6, Math.min(2.4, Math.pow(e / Math.max(1, S.lvl), 1.2)));
+    S.d = { room: 1, rooms: 2, k, rw: 1 + (k - 1) * .6, bn: 'Căpitanul gărzii', di: 0, raid: -5, wn: v.id, wl: e, rn: v.n, rf: 1, lbl: 'Jaf', loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false };
+    startF(false); terFrom(); S.tab = 'c'; S.msg = 'Ai ajuns la ' + v.n + '. Gărzile te așteaptă.';
+    if (S.auto !== false) { autoRun(); return; } go();
+  } finally { WN.busy = 0; }
 }
 function wnRl(d) {
   const vl = d.wl || S.lvl;
