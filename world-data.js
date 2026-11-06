@@ -270,7 +270,7 @@
 
   /* ------------------------------------------------------------- FORTĂREAȚA */
   W.FORT = { nm: 'Bastionul Corbilor', ic: '🏰', boss: 'Castelanul Corbilor', en: ['Gardian de poartă', 'Arbaletier', 'Cavaler al Corbilor'],
-    bonus: 'trav', bd: 'Corbii au plecat, iar steagul tău flutură pe hartă.',',
+    bonus: 'trav', bd: 'Corbii au plecat, iar steagul tău flutură pe hartă.',
     first: { g: 4, x: 3, item: [2, 2] } };
 
   /* ------------------------------------------------------------- CAMPANIA
@@ -284,8 +284,7 @@
       rw: { g: 3, o: 2, x: 2, mat: 4 }, out: 'Sigiliul Cenușii e al tău. Sub el era o hartă a ținutului: drumurile duc spre alți căpitani.' },
     { id: 2, nm: 'Drumul Lupilor', lv: 4, reg: 'Peștera Lupilor',
       tx: 'Satele din jur plătesc tribut Regelui Cenușiu și drumurile sunt păzite de haite dresate. Alfa Haitei ține al doilea sigiliu. Dacă vrei să stăpânești drumul, trebuie să ai sate care ți se supun.',
-      obj: [{ k: 'boss', di: 4, t: 'Înfrânge Alfa Haitei (Peștera Lupilor)' }, { k: 'raid', n: 5, t: 'Jefuiește 5 sate' }, { k: 'poit', n: 2, t: 'Vizitează 2 tipuri de locuri de interes' }],
-      rw: { g: 4, o: 3, x: 3, item: [1, 1] }, out: 'Prima ta prada. Drumul spre Catacombe e deschis.' },
+      obj: [{ k: 'boss', di: 4, t: 'Înfrânge Alfa Haitei (Peștera Lupilor)' }, { k: 'raid', n: 5, t: 'Jefuiește 5 sate' }, { k: 'poit', n: 2, t: 'Vizitează 2 tipuri de locuri de interes' }],rw: { g: 4, o: 3, x: 3, item: [1, 1] }, out: 'Prima ta prada. Drumul spre Catacombe e deschis.' },
     { id: 3, nm: 'Bastionul Corbilor', lv: 8, reg: 'Catacombele Uitate',
       tx: 'Corbii Regelui păzesc singurul drum către Catacombe, din fortăreața de pe marginea ținutului. Dincolo de ea, Regele Oaselor ține al treilea sigiliu.',
       obj: [{ k: 'clue', n: 3, t: 'Adună 3 indicii din ținut' }, { k: 'fort', t: 'Cucerește Bastionul Corbilor' }, { k: 'boss', di: 1, t: 'Înfrânge Regele Oaselor (Catacombele Uitate)' }],
