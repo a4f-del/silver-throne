@@ -14,9 +14,32 @@ const LWP = {
 };
 LW.IA = 172; LW.IB = 104;    /* sate mai mari → mai mult loc între ele */
 const lpF = n => Math.round(n * 10) / 10;
+
+function lpShadow(x, y, rx, ry, opacity = 0.15) {
+  return `<ellipse
+    cx="${lpF(x)}"
+    cy="${lpF(y)}"
+    rx="${lpF(rx)}"
+    ry="${lpF(ry)}"
+    fill="#172419"
+    opacity="${opacity}"
+    filter="url(#lp-soft-shadow)"
+    pointer-events="none"
+  />`;
+}
+
 const lpImg = (src, w, h, x, y, extra) => `<image href="imagini/${src}.webp" x="${lpF(x)}" y="${lpF(y)}" width="${lpF(w)}" height="${lpF(h)}"${extra || ''}/>`;
 
 /* defs în plus: iarba, strălucirea și raza Tronului */
+
+LWA.defs += `
+  <filter id="lp-soft-shadow"
+    x="-60%" y="-100%"
+    width="220%" height="300%">
+    <feGaussianBlur stdDeviation="7"/>
+  </filter>
+`;
+
 LWA.defs += `<pattern id="lw-grass" patternUnits="userSpaceOnUse" width="440" height="440"><image href="imagini/lume/iarba.jpg" width="440" height="440"/></pattern>
 <radialGradient id="lw-tg"><stop offset="0" stop-color="#9fdcff" stop-opacity=".75"/><stop offset=".45" stop-color="#5cb6ff" stop-opacity=".28"/><stop offset="1" stop-color="#5cb6ff" stop-opacity="0"/></radialGradient>
 <radialGradient id="lw-fl"><stop offset="0" stop-color="#e6f7ff" stop-opacity=".95"/><stop offset=".4" stop-color="#7cc8ff" stop-opacity=".55"/><stop offset="1" stop-color="#7cc8ff" stop-opacity="0"/></radialGradient>
@@ -66,11 +89,47 @@ lwTerrain = function (ps, F) {
   for (const q of rv) { const mx = (pr[0] + q[0]) / 2; d += `C${lpF(mx)} ${lpF(pr[1])} ${lpF(mx)} ${lpF(q[1])} ${lpF(q[0])} ${lpF(q[1])}`; pr = q; }
   d += `C${lpF(pr[0] + 60)} ${lpF(pr[1])} ${lpF(F.x + F.w)} ${lpF(F.y - 20)} ${lpF(F.x + F.w + 40)} ${lpF(F.y - 40)}`;
   low += `<path d="${d}" stroke="#24391f" stroke-width="30" fill="none" stroke-linecap="round" opacity=".55"/><path d="${d}" stroke="#3a6f86" stroke-width="21" fill="none" stroke-linecap="round"/><path d="${d}" stroke="#5c9cb8" stroke-width="13" fill="none" stroke-linecap="round"/><path d="${d}" stroke="#cdeaf5" stroke-width="2" fill="none" stroke-dasharray="12 16" opacity=".7"/>`;
-  low += segs.map(([a, b]) => { const p = `M${lpF(a[0])} ${lpF(a[1])}L${lpF(b[0])} ${lpF(b[1])}`; return `<path d="${p}" stroke="#2a1d10" stroke-opacity=".45" stroke-width="13" stroke-linecap="round" fill="none"/><path d="${p}" stroke="#a88d5c" stroke-width="9" stroke-linecap="round" fill="none"/><path d="${p}" stroke="#d6c08f" stroke-opacity=".55" stroke-width="2.4" stroke-dasharray="5 6" stroke-linecap="round" fill="none"/>`; }).join('');
-  /* decorul pictat: munți sus și în colțuri, păduri pe margini, câteva pâlcuri și pietre printre sate */
+  
+low += segs.map(([a, b], i) => {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  const len = Math.hypot(dx, dy) || 1;
+
+  const bend = Math.min(22, len * 0.09)
+    * (i % 2 === 0 ? 1 : -1);
+
+  const mx = (a[0] + b[0]) / 2 - dy / len * bend;
+  const my = (a[1] + b[1]) / 2 + dx / len * bend;
+
+  const p = `M${lpF(a[0])} ${lpF(a[1])}
+    Q${lpF(mx)} ${lpF(my)}
+    ${lpF(b[0])} ${lpF(b[1])}`;
+
+  return `
+    <path d="${p}" fill="none"
+      stroke="#26301f" stroke-width="16"
+      opacity=".23" stroke-linecap="round"/>
+    <path d="${p}" fill="none"
+      stroke="#8c7750" stroke-width="9"
+      stroke-linecap="round"/>
+    <path d="${p}" fill="none"
+      stroke="#bca77a" stroke-width="4"
+      opacity=".65" stroke-linecap="round"/>
+  `;
+}).join('');
+/* decorul pictat: munți sus și în colțuri, păduri pe margini, câteva pâlcuri și pietre printre sate */
   const items = [], put = (k, x, y, w) => { const [iw, ih] = LWP.deco[k], h = w * ih / iw, flip = r() < 0.5;   /* jumătate întoarse în oglindă, ca să nu pară copiate */
-    items.push([y, `<ellipse cx="${lpF(x)}" cy="${lpF(y + h * 0.12)}" rx="${lpF(w * 0.42)}" ry="${lpF(w * 0.13)}" fill="#000" opacity=".28"/>` + (flip ? `<g transform="translate(${lpF(2 * x)} 0) scale(-1 1)">` : '') + lpImg('lume/' + k, w, h, x - w / 2, y - h * 0.62) + (flip ? '</g>' : '')]); };
-  const top = F.y + F.h * 0.32;
+  
+items.push([
+  y,
+  lpShadow(x, y + h * 0.12, w * 0.36, w * 0.09, 0.12)
+  + (flip
+      ? `<g transform="translate(${lpF(2 * x)} 0) scale(-1 1)">`
+      : '')
+  + lpImg('lume/' + k, w, h, x - w / 2, y - h * 0.62)
+  + (flip ? '</g>' : '')
+]);
+const top = F.y + F.h * 0.32;
   for (let y = F.y - 20; y < top; y += 70) for (let x = F.x - 40; x < F.x + F.w + 40; x += 120) {
     const px = x + (r() - 0.5) * 70, py = y + (r() - 0.5) * 40, edge = Math.min(px - F.x, F.x + F.w - px) / F.w;
     if (!outer(px, py) || inside(px, py, 70)) continue;
@@ -107,7 +166,7 @@ lwVil = function (p, sel, mine, K) {
   const nm = (mine ? 'Tu · ' : '') + p.name, top = -H * 0.62, mx = lpMax(p.level);
   let h = `<g class="st-v lw-v${sel ? ' on' : ''}${mine ? ' me' : ''}" onclick="lwPick('${p.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lwPick('${p.id}')}" tabindex="0" role="button" aria-label="${tEsc(p.name)}, nivel ${p.level}${mine ? ', satul tău' : ''}" transform="translate(${lpF(cx)} ${lpF(cy)})">`;
   h += `<rect x="${lpF(-W / 2)}" y="${lpF(top)}" width="${lpF(W)}" height="${lpF(H)}" fill="transparent"/>`;
-  h += `<ellipse cx="0" cy="${lpF(H * 0.3)}" rx="${lpF(W * 0.46)}" ry="${lpF(W * 0.15)}" fill="#000" opacity=".32"/>`;
+  h += lpShadow(0, H * 0.3, W * 0.4, W * 0.11, 0.14);
   h += `<ellipse class="st-sel" cx="0" cy="${lpF(H * 0.18)}" rx="${lpF(W * 0.6)}" ry="${lpF(W * 0.26)}" fill="none" stroke="#f0d27a" stroke-opacity=".3" stroke-width="7"/>`;
   if (mine) h += `<ellipse cx="0" cy="${lpF(H * 0.2)}" rx="${lpF(W * 0.58)}" ry="${lpF(W * 0.24)}" fill="#f0d27a" fill-opacity=".1" stroke="#f0d27a" stroke-width="1.6" stroke-dasharray="6 4"/>`;
   if (mx) h += lpSmoke(W, H, top);
@@ -128,12 +187,25 @@ lwThrone = function (K) {
   g += `<ellipse class="lt-glow" cx="${lpF(dx)}" cy="${lpF(dy + 20)}" rx="${lpF(W * 0.72)}" ry="${lpF(W * 0.34)}" fill="url(#lw-tg)"/>`;
   /* cercul de rune de pe pământ, care se rotește */
   g += `<g transform="translate(${lpF(dx)} ${lpF(dy + 34)})"><ellipse class="lt-rune a" rx="${lpF(W * 0.56)}" ry="${lpF(W * 0.21)}" fill="none" stroke="#8fd6ff" stroke-width="2.4" stroke-dasharray="3 9 14 6 6 12" opacity=".8"/><ellipse class="lt-rune b" rx="${lpF(W * 0.62)}" ry="${lpF(W * 0.235)}" fill="none" stroke="#cfefff" stroke-width="1.2" stroke-dasharray="20 10 4 10" opacity=".55"/></g>`;
-  g += `<ellipse cx="0" cy="${lpF(H * 0.3)}" rx="${lpF(W * 0.44)}" ry="${lpF(W * 0.13)}" fill="#000" opacity=".35"/>`;
+  g += lpShadow(0, H * 0.3, W * 0.42, W * 0.12, 0.16);
   g += lpImg('lume/tron', W, H, x0, y0);
   /* flăcările albastre din vase și piatra prețioasă */
   g += br.map(([x, y], i) => `<circle class="lt-fl" style="animation-delay:-${i * 0.37}s" cx="${lpF(x)}" cy="${lpF(y - 6)}" r="17" fill="url(#lw-fl)"/>`).join('');
-  g += `<rect class="lt-beam" x="${lpF(gx - 15)}" y="${lpF(gy - 300)}" width="30" height="300" fill="url(#lw-beam)"/><circle class="lt-gem" cx="${lpF(gx)}" cy="${lpF(gy)}" r="22" fill="url(#lw-fl)"/>`;
-  /* scântei care urcă */
+  
+g += `<rect class="lt-beam"
+  x="${lpF(gx - 10)}"
+  y="${lpF(gy - 220)}"
+  width="20"
+  height="220"
+  opacity=".4"
+  fill="url(#lw-beam)"/>
+  <circle class="lt-gem"
+    cx="${lpF(gx)}"
+    cy="${lpF(gy)}"
+    r="16"
+    fill="url(#lw-fl)"/>`;
+
+   /* scântei care urcă */
   const rr = LWA.rng(99); for (let i = 0; i < 14; i++) { const x = dx + (rr() - 0.5) * W * 0.7, y = dy + (rr() - 0.3) * W * 0.18, s = 1.2 + rr() * 1.8; g += `<path class="lt-sp" style="animation-delay:-${lpF(rr() * 4)}s;animation-duration:${lpF(3 + rr() * 2.5)}s" d="M${lpF(x)} ${lpF(y - s * 2.6)}L${lpF(x + s * .6)} ${lpF(y - s * .6)}L${lpF(x + s * 2.6)} ${lpF(y)}L${lpF(x + s * .6)} ${lpF(y + s * .6)}L${lpF(x)} ${lpF(y + s * 2.6)}L${lpF(x - s * .6)} ${lpF(y + s * .6)}L${lpF(x - s * 2.6)} ${lpF(y)}L${lpF(x - s * .6)} ${lpF(y - s * .6)}Z" fill="#e6f7ff"/>`; }
   /* plăcuțele: numele, regele săptămânii, cine ține Tronul acum */
   const t1 = 'Tronul de Argint', t2 = K.win ? `👑 ${K.win.name} · regele săptămânii ${K.week}` : null, t3 = K.cur ? `Pe Tron acum: ${K.cur.name}` : 'Tronul e gol acum';
