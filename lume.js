@@ -215,7 +215,11 @@ function lwVil(p, sel, mine, K) {
 function lwMap() {
   const st = LUME.st, ps = st.players, meId = st.me && st.me.user_id, R = lwHull(ps);
   let x0 = -R.x - 90, x1 = R.x + 90, y0 = -R.y - 140, y1 = R.y + 110;
-  if (typeof twPos === 'function') y0 = Math.min(y0, twPos()[1] - 230);   /* Turnul, la marginea de nord */
+  if (typeof twPos === 'function') {
+    const [tx, ty] = twPos();
+    x0 = Math.min(x0, tx - 130);  /* Turnul nord-vestic încape și la zoom out */
+    y0 = Math.min(y0, ty - 200);
+  }
   let w = x1 - x0, h = y1 - y0;
   if (w < 900) { x0 -= (900 - w) / 2; w = 900; }
   if (w / h < 1.6) { const nw = h * 1.6; x0 -= (nw - w) / 2; w = nw; } else { const nh = w / 1.6; y0 -= (nh - h) / 2; h = nh; }
