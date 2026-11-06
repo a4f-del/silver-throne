@@ -187,6 +187,7 @@ main{padding:8px 24px;max-width:940px}
 </style>
 <link rel="stylesheet" href="tema.css?v=2026.10.30-3">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="servere.js?v=2026.11.07-1"></script>
 <script src="world-data.js?v=2026.11.04-4"></script>
 <script src="tron-logic.js?v=2026.11.04-4"></script>
 <script src="cladiri-art.js?v=2026.11.04-4"></script>
@@ -229,11 +230,13 @@ main{padding:8px 24px;max-width:940px}
 <main id="v"></main>
 <nav id="nv"></nav>
 <script>
-const SUPABASE_URL = 'https://qzrelarnmvnwzvfddbrv.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_8Ds3XwQm1HJWzCah-6N0Ww_VbvV-Oy4';
+const SUPABASE_URL = ST_SERVER === 'beta' ? ST_BETA_CONFIG.url : 'https://qzrelarnmvnwzvfddbrv.supabase.co';
+const SUPABASE_KEY = ST_SERVER === 'beta' ? ST_BETA_CONFIG.publishableKey : 'sb_publishable_8Ds3XwQm1HJWzCah-6N0Ww_VbvV-Oy4';
+/* Cheia de sesiune LIVE ramane neschimbata; BETA are sesiune separata. */
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
-  SUPABASE_KEY
+  SUPABASE_KEY,
+  ST_SERVER === 'beta' ? { auth: { storageKey: 'silver-throne-beta-auth' } } : undefined
 );
 const KEY='mina-cenusie-v1',PT=360000,MAXP0=30;
 const PTX=()=>typeof rtPT==='function'?rtPT():PT;
