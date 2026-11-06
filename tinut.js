@@ -26,7 +26,7 @@ function tnFog() {
   return s;
 }
 /* stratul ținutului, centrat pe satul tău (capitala e chiar satul tău din Lume) */
-const smPush = (x, y) => [x, y];
+
 
 function lwTinut(me) {
   try {
