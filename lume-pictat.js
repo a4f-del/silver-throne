@@ -15,6 +15,9 @@ const LWP = {
     ['padure-deasa', 5], ['padure-brazi', 5], ['padure-stanci', 3],
     ['padure-ceata', 3], ['padure-ruine', 1]
   ],
+  mountains: [
+    ['munte-zapada', 5], ['munte-stancos', 6], ['munte-blestemat', 2]
+  ],
   TW: 320      /* lățimea Tronului pe hartă (castelul cu tronul) */
 };
 LW.IA = 172; LW.IB = 104;    /* sate mai mari → mai mult loc între ele */
@@ -61,7 +64,7 @@ lwPos = function (p) {
 
 /* ------------------------------------------------------------------ TEREN */
 lwTerrain = function (ps, F) {
-  const key = 'p3-organic-mountains|' + ps.map(p => p.id + p.x + ',' + p.y).join('|') + '|' + Math.round(F.w);
+  const key = 'p4-mountain-sprites|' + ps.map(p => p.id + p.x + ',' + p.y).join('|') + '|' + Math.round(F.w);
   if (LUME.terr && LUME.terr.key === key) return LUME.terr;
   const cell = new Map(ps.map(p => [p.x + ',' + p.y, p])), pos = new Map(ps.map(p => [p.id, lwPos(p)])), R = lwHull(ps), r = LWA.rng(4242);
   /* drumuri: spre vecinul de pe inelul dinăuntru sau spre Tron */
@@ -77,7 +80,7 @@ lwTerrain = function (ps, F) {
   const outer = (x, y) => Math.abs(x) / R.x + Math.abs(y) / R.y > 1;
   /* decorul nu are voie să atingă satele: se verifică tot desenul (pădurea, muntele), nu doar mijlocul lui */
   const vbox = ps.map(p => { const [vx, vy] = pos.get(p.id), [, iw, ih, W] = LWP.tier[LWA.tier(p.level)], H = W * ih / iw; return [vx - W * 0.62, vy - H * 0.72, vx + W * 0.62, vy + H * 0.8]; });
-  const dbox = (k, x, y, w) => { const [iw, ih] = k === 'padure' ? [3, 2] : LWP.deco[k], h = w * ih / iw; return [x - w * .50, y - h * .78, x + w * .50, y + h * .22]; };
+  const dbox = (k, x, y, w) => { const [iw, ih] = k === 'padure' || k === 'munte' ? [3, 2] : LWP.deco[k], h = w * ih / iw; return [x - w * .50, y - h * (k === 'munte' ? .83 : .78), x + w * .50, y + h * .22]; };
   const hit = (a, b) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1];
   const busy = (x, y) => Math.hypot(x, y * 1.35) < LWP.TW * 0.7 || nearSeg(x, y, 12) || (typeof tnInside === 'function' && tnInside(x, y)) || (typeof wnNear === 'function' && wnNear(x, y)) || (typeof twNear === 'function' && twNear(x, y));
   const free = (k, x, y, w) => {
@@ -133,19 +136,30 @@ low += segs.map(([a, b], i) => {
     }
     return LWP.forests[0][0];
   };
+  const chooseMountain = () => {
+    const total = LWP.mountains.reduce((sum, item) => sum + item[1], 0);
+    let pick = r() * total;
+    for (const [name, weight] of LWP.mountains) {
+      pick -= weight;
+      if (pick < 0) return name;
+    }
+    return LWP.mountains[0][0];
+  };
   const put = (k, x, y, w) => {
-    const forest = k === 'padure';
-    const src = forest ? chooseForest() : k;
-    /* Toate pădurile noi sunt 3:2, deci nu trebuie întinse ca vechiul sprite. */
-    const [iw, ih] = forest ? [3, 2] : LWP.deco[k];
+    const forest = k === 'padure', mountain = k === 'munte';
+    const src = forest ? chooseForest() : mountain ? chooseMountain() : k;
+    /* Noile sprite-uri de pădure și munte sunt 3:2, fără platformă de pământ. */
+    const [iw, ih] = forest || mountain ? [3, 2] : LWP.deco[k];
     const h = w * ih / iw, flip = r() < .5;
-    const sx = x - w / 2, sy = y - h * (forest ? .78 : .62);
+    const sx = x - w / 2, sy = y - h * (forest ? .78 : mountain ? .83 : .62);
     const art = (flip ? `<g transform="translate(${lpF(2 * x)} 0) scale(-1 1)">` : '')
       + lpImg('lume/' + src, w, h, sx, sy)
       + (flip ? '</g>' : '');
     const shadow = forest
       ? lpShadow(x, y + h * .08, w * .34, w * .09, .08)
-      : lpShadow(x, y + h * .12, w * .36, w * .09, .12);
+      : mountain
+        ? lpShadow(x, y + h * .09, w * .38, w * .10, .08)
+        : lpShadow(x, y + h * .12, w * .36, w * .09, .12);
     items.push([y, shadow + art]);
   };
   /* Patch-uri mari de vegetație, stabile la fiecare rerender, nu o grilă uniformă. */
