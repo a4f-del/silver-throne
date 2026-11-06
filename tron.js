@@ -53,9 +53,25 @@ async function tronSync0() {
 let _tronSync = null;
 function tronSync() { if (_tronSync) return _tronSync; _tronSync = tronSync0().finally(() => { _tronSync = null; }); return _tronSync; }
 
-/* instantaneul apărării: echipa activă, cu statisticile REALE ale motorului (fără plafon; plafonul se aplică la luptă și pe server) */
-function tronUnits() {
+/* Echipa completă rămâne disponibilă în Lume. Numai Tronul folosește eroul principal. */
+function tronTeamUnits() {
   return S.fs.slice(0, TT.CFG.maxUnits).map(f => { const b = bon(f); return { n: f.n, c: f.c, hp: mhp(f), atk: Math.round(atkOf(f)), def: Math.round(b.def * (1 + b.pf / 100) + tr(f, 'def')) }; });
+}
+function tronUnits() {
+  const f = S.fs.find(u => u.h) || S.fs[0];
+  if (!f) return [];
+  const b = bon(f);
+  return [{ n: f.n, c: f.c, hp: mhp(f), atk: Math.round(atkOf(f)), def: Math.round(b.def * (1 + b.pf / 100) + tr(f, 'def')) }];
+}
+function tronDuelRestore() {
+  const t = S && S.tron;
+  if (!t || !Array.isArray(t.duelParty) || !t.duelParty.length || (S.d && S.d.tron)) return;
+  const party = t.duelParty;
+  const duelHero = S.fs.find(f => f.h) || S.fs[0];
+  const hi = party.findIndex(f => f.h);
+  if (hi >= 0 && duelHero) party[hi] = duelHero;
+  S.fs = party;
+  delete t.duelParty;
 }
 async function tronPublish(quiet) {
   if (S.lvl < TT.CFG.minLevel) { if (!quiet) { S.msg = 'Nivel minim ' + TT.CFG.minLevel + ' pentru Tron.'; go(); } return false; }
@@ -72,7 +88,7 @@ async function tronPublish(quiet) {
 async function tronProvoca() {
   if (TRON.busy) return; tronInit();
   if (S.d) { S.msg = 'Ești deja într-o luptă.'; return go(); }
-  if (!S.fs.some(f => f.hp > 0)) { S.msg = 'Toți luptătorii sunt căzuți. Du-i la infirmerie.'; return go(); }
+  if (!(S.fs.find(f => f.h) || S.fs[0])?.hp) { S.msg = 'Eroul principal este căzut. Vindecă-l înainte să provoci Tronul.'; return go(); }
   if (S.tron.cur) { S.msg = 'Ai un rezultat de trimis; așteaptă o clipă.'; return go(); }
   TRON.busy = true;
   try {
@@ -85,8 +101,11 @@ async function tronProvoca() {
 function tronFight(data) {
   if (typeof cn === 'function') cn('n');   /* misiunea zilnică „Provoacă regele Tronului” */
   const d = { room: 1, rooms: 1, k: 1, rw: 0, bn: 'Fantomă', di: 0, raid: -3, rn: 'Tronul de Argint', lbl: 'Tron', tron: 1, rf: 1, fx: 1, loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false };
-  if (data.ghost && data.ghost.units) { d.ghost = data.ghost.units.map(u => TT.ghostUnit(u)); d.bn = data.holder_name || 'Regele'; d.em = { ghost: 1 }; }
+  if (data.ghost && data.ghost.units) { d.ghost = data.ghost.units.slice(0, 1).map(u => TT.throneDuelUnit(u)); d.bn = data.holder_name || 'Regele'; d.em = { ghost: 1 }; }
   else { d.k = TW.kb(S.lvl) * TT.CFG.guardK; d.bn = 'Garda Regală'; d.em = { nm: ['Garda Regală'], hm: 1, am: 1, dm: 1 }; }
+  /* Motorul folosește S.fs în luptă: izolăm eroul și salvăm echipa pentru restaurare sigură. */
+  tronInit(); S.tron.duelParty = S.fs.slice();
+  S.fs = [S.fs.find(f => f.h) || S.fs[0]];
   S.d = d; startF(true); terFrom(); S.tab = 'c'; S.msg = 'Te lupți pentru Tronul de Argint: ' + d.bn + '.';
   if (S.auto !== false) { if (typeof fxAutoRun === 'function') fxAutoRun(); else autoRun(); return; } go();
 }
@@ -105,6 +124,7 @@ function tronWin(d) {
 }
 /* apelat din go(): după luptă (victorie, înfrângere sau fugă) raportează rezultatul; reîncearcă dacă pică conexiunea */
 function tronCheck() {
+  tronDuelRestore();
   const t = S && S.tron; if (!t || !t.cur) return;
   if (S.d && S.d.tron) { if (!S.d.done) return; S.d = null; t.cur.win = true; S.msg = 'Ai învins apărarea! Se trimite rezultatul…'; }
   if (!TRON.rep) tronReport(t.cur);
@@ -165,7 +185,7 @@ function tronPodium(rank) {
 }
 function vTron() {
   tronInit(); const st = TRON.st; if (tronNeedSync() && !TRON.loading) tronSync();
-  const rules = `Regele e cine ține Tronul cel mai mult timp într-o săptămână. Provocarea e <b>gratuită</b>: lupți cu „fantoma” (echipa salvată) a deținătorului; dacă o învingi, Tronul e al tău. Săptămâna se încheie vineri la 15:00 (ora României). Nivel minim ${TT.CFG.minLevel}.`;
+  const rules = `Regele e cine ține Tronul cel mai mult timp într-o săptămână. Provocarea e <b>gratuită</b>: eroul tău principal luptă singur împotriva eroului principal al deținătorului, fără plafon de statistici. Dacă învingi, Tronul e al tău. Săptămâna se încheie vineri la 15:00 (ora României). Nivel minim ${TT.CFG.minLevel}.`;
   if (!st) {
     return `<section class="tr-hero"><div class="th-t"><h2>♛ Tronul de Argint</h2><div class="mute">${rules}</div><p class="${TRON.err ? 'r4' : 'mute'}" style="margin:12px 0 0">${TRON.err || 'Se încarcă starea Tronului…'}</p>${TRON.err ? '<div class="row" style="margin:6px 0 0"><span class="mute">Reîncearcă după ce te conectezi sau după ce serverul e pregătit.</span><button onclick="tronSync()">Reîncearcă</button></div>' : ''}</div></section>` + vTronPrizes();
   }
@@ -183,7 +203,7 @@ function vTron() {
   h += `<section><h2>Clasamentul săptămânii</h2>${tronPodium(st.ranking)}</section>`;
   h += vTronPrizes(me.level || S.lvl);
   const u = TRON.pub;
-  h += `<section><h2>Apărarea ta (fantoma)</h2><div class="mute">Așa te văd ceilalți când te provoacă. Statisticile sunt plafonate la ce are un luptător de nivel ${TT.CFG.ghostCapLevel} cu echipament Epic complet, ca diferențele mari de nivel să nu decidă totul. Fantoma lovește doar normal (fără abilități speciale).</div>` +
+  h += `<section><h2>Apărarea ta (fantoma)</h2><div class="mute">Așa te văd ceilalți când te provoacă. Doar eroul principal te reprezintă la Tron. Statisticile lui reale nu au plafon artificial. Fantoma lovește normal, fără abilități speciale.</div>` +
     (u ? `<div class="tr-units" style="margin-top:12px">${u.map(x => `<div class="un${x.capped ? ' cap' : ''}"><b>${tEsc(x.n)}</b><span class="mute">${tEsc(x.c)}</span><br>${x.hp} viață · ${x.atk} atac · ${x.def} apărare${x.capped ? ' <span class="mute">(plafonat)</span>' : ''}</div>`).join('')}</div>` : '<p class="mute">Încă nepublicată.</p>') +
     `<div class="row"><span class="mute">${TRON.pubAt ? 'Actualizată acum ' + tronHM((Date.now() - TRON.pubAt) / 1000) : 'Se publică automat când provoci.'}</span><button onclick="tronPublish()">Actualizează apărarea</button></div></section>`;
   if (st.hall.length) h += `<section><h2>Sala Faimei</h2>` + st.hall.map(x => `<div class="row" style="align-items:flex-start"><span><b>Săptămâna ${x.week + 1}</b></span><span style="text-align:right">${x.top.map(t => `${t.rank === 1 ? '👑' : t.rank === 2 ? '🥈' : '🥉'} ${tEsc(t.name)} <span class="mute">(${tronHM(t.seconds)})</span>`).join('<br>')}</span></div>`).join('') + '</section>';
