@@ -81,14 +81,14 @@ lwTerrain = function (ps, F) {
     return true;
   };
   const place = (k, x, y, w) => { if (free(k, x, y, w)) put(k, x, y, w); };
-  let low = `<rect x="${lpF(F.x - 600)}" y="${lpF(F.y - 600)}" width="${lpF(F.w + 1200)}" height="${lpF(F.h + 1200)}" fill="url(#lw-grass)"/>`;
-  for (let i = 0; i < Math.round(F.w * F.h / 22000); i++) { const x = F.x + r() * F.w, y = F.y + r() * F.h; low += `<ellipse cx="${lpF(x)}" cy="${lpF(y)}" rx="${lpF(60 + r() * 140)}" ry="${lpF(26 + r() * 60)}" fill="${r() < 0.5 ? '#5f7a45' : '#16241a'}" opacity="${lpF(0.1 + r() * 0.14)}"/>`; }
+  let low = `<rect x="${lpF(F.x - 600)}" y="${lpF(F.y - 600)}" width="${lpF(F.w + 1200)}" height="${lpF(F.h + 1200)}" fill="url(#lw-grass)"/><rect x="${lpF(F.x - 600)}" y="${lpF(F.y - 600)}" width="${lpF(F.w + 1200)}" height="${lpF(F.h + 1200)}" fill="#071318" opacity=".48" pointer-events="none"/>`;
+  for (let i = 0; i < Math.round(F.w * F.h / 22000); i++) { const x = F.x + r() * F.w, y = F.y + r() * F.h; low += `<ellipse cx="${lpF(x)}" cy="${lpF(y)}" rx="${lpF(60 + r() * 140)}" ry="${lpF(26 + r() * 60)}" fill="${r() < 0.5 ? '#405444' : '#071b21'}" opacity="${lpF(0.08 + r() * 0.12)}"/>`; }
   /* râul, ca înainte, pe marginea de sus a zonei locuite */
   const rv = []; for (let i = 0; i <= 8; i++) { const k = i / 8, x = -R.x - 80 + k * (R.x + 80) * 1.9, base = x <= 0 ? -(R.y / R.x) * (x + R.x) : -R.y + (R.y / R.x) * x * 0.6; rv.push([x, base - 90 - Math.sin(i * 1.7) * 18]); }
   let d = `M${lpF(F.x - 40)} ${lpF(rv[0][1] + 30)}`, pr = [F.x - 40, rv[0][1] + 30];
   for (const q of rv) { const mx = (pr[0] + q[0]) / 2; d += `C${lpF(mx)} ${lpF(pr[1])} ${lpF(mx)} ${lpF(q[1])} ${lpF(q[0])} ${lpF(q[1])}`; pr = q; }
   d += `C${lpF(pr[0] + 60)} ${lpF(pr[1])} ${lpF(F.x + F.w)} ${lpF(F.y - 20)} ${lpF(F.x + F.w + 40)} ${lpF(F.y - 40)}`;
-  low += `<path d="${d}" stroke="#24391f" stroke-width="30" fill="none" stroke-linecap="round" opacity=".55"/><path d="${d}" stroke="#3a6f86" stroke-width="21" fill="none" stroke-linecap="round"/><path d="${d}" stroke="#5c9cb8" stroke-width="13" fill="none" stroke-linecap="round"/><path d="${d}" stroke="#cdeaf5" stroke-width="2" fill="none" stroke-dasharray="12 16" opacity=".7"/>`;
+  low += `<path d="${d}" stroke="#101d20" stroke-width="33" fill="none" stroke-linecap="round" opacity=".55"/><path d="${d}" stroke="#183e4c" stroke-width="23" fill="none" stroke-linecap="round"/><path d="${d}" stroke="#376879" stroke-width="14" fill="none" stroke-linecap="round"/><path d="${d}" stroke="#a0c1c9" stroke-width="1" fill="none" stroke-dasharray="12 16" opacity=".7"/>`;
   
 low += segs.map(([a, b], i) => {
   const dx = b[0] - a[0];
@@ -107,13 +107,13 @@ low += segs.map(([a, b], i) => {
 
   return `
     <path d="${p}" fill="none"
-      stroke="#26301f" stroke-width="16"
+      stroke="#070c0d" stroke-width="20"
       opacity=".23" stroke-linecap="round"/>
     <path d="${p}" fill="none"
-      stroke="#8c7750" stroke-width="9"
+      stroke="#514632" stroke-width="12"
       stroke-linecap="round"/>
     <path d="${p}" fill="none"
-      stroke="#bca77a" stroke-width="4"
+      stroke="#8c7852" stroke-width="5"
       opacity=".65" stroke-linecap="round"/>
   `;
 }).join('');
@@ -129,6 +129,7 @@ items.push([
   + lpImg('lume/' + k, w, h, x - w / 2, y - h * 0.62)
   + (flip ? '</g>' : '')
 ]);
+  };
 const top = F.y + F.h * 0.32;
   for (let y = F.y - 20; y < top; y += 70) for (let x = F.x - 40; x < F.x + F.w + 40; x += 120) {
     const px = x + (r() - 0.5) * 70, py = y + (r() - 0.5) * 40, edge = Math.min(px - F.x, F.x + F.w - px) / F.w;
@@ -141,6 +142,8 @@ const top = F.y + F.h * 0.32;
     if (outer(px, py)) { if (r() < 0.42) place('padure', px, py, 95 + r() * 120); }
     else { const k = r(); if (k < 0.09) place('padure', px, py, 80 + r() * 30); else if (k < 0.13) place('pietre', px, py, 78 + r() * 18); }
   }
+  /* Lumina rece si umbrele adauga profunzime fara a ascunde interactiunile SVG. */
+  low += `<rect x="${lpF(F.x - 600)}" y="${lpF(F.y - 600)}" width="${lpF(F.w + 1200)}" height="${lpF(F.h + 1200)}" fill="#061017" opacity=".12" pointer-events="none"/>`;
   LUME.terr = { key, low, high: items.sort((a, b) => a[0] - b[0]).map(x => x[1]).join('') };
   return LUME.terr;
 };
