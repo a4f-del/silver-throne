@@ -85,15 +85,27 @@ function twCard() {
       + `<div class="row"><span class="mute">${nx ? `Următoarea treaptă (+${5 + TWR.up.indexOf(nx) + 1}) la etajul ${nx}.` : 'Ai deblocat toate treptele Fierăriei.'}</span><button class="p" onclick="twEnter()"${twLeft() && !S.d ? '' : ' disabled'}>Intră · ${TWR.cost} puncte</button></div>`)
     + `</div></section>`;
 }
-/* pe harta Lumii: la marginea de nord, cu recordul tău; clic → pagina Turnului */
-function twPos() { const ps = (LUME.st && LUME.st.players) || []; let y = 0, x = 0; ps.forEach(p => { const q = lwPos(p); if (q[1] < y) y = q[1]; if (q[0] > x) x = q[0]; }); return [Math.round(Math.max(260, x * 0.5)), y - 120]; }   /* nord-est, deoparte de titlul hărții */
+/* pe harta Lumii: la nord-vest, cu recordul tău; clic → pagina Turnului */
+function twPos() {
+  const ps = (LUME.st && LUME.st.players) || [];
+  const R = lwHull(ps);
+  /* Nord-vest, departe de Tron, dincolo de râu și în apropierea munților.
+     Poziția rămâne deterministă pentru aceeași hartă, fără date salvate noi. */
+  let x = -Math.max(340, R.x * .68), y = -Math.max(250, R.y * .75);
+  /* Nu acoperim sate când lumea crește sau când apar jucători noi. */
+  for (let n = 0; n < 8 && ps.some(p => {
+    const [vx, vy] = lwPos(p);
+    return Math.abs(vx - x) < 180 && Math.abs(vy - y) < 225;
+  }); n++) x -= 85;
+  return [Math.round(x), Math.round(y)];
+}
 const twNear = (x, y) => { const p = twPos(); return Math.hypot(x - p[0], (y - p[1]) * 1.2) < 170; };
 function lwTwr() {
-  const [x, y] = twPos(), W = 180, H = Math.round(W * 480 / 233), b = (S.tw && S.tw.best) || 0;
+  const [x, y] = twPos(), W = 178, H = Math.round(W * 3 / 2), b = (S.tw && S.tw.best) || 0;
   return `<g class="st-v lw-v" onclick="S.tab='c';go()" tabindex="0" role="button" aria-label="Turnul${b ? ', recordul tău: etajul ' + b : ''}" transform="translate(${x} ${y})">`
     + `<ellipse cx="0" cy="${Math.round(H * 0.36)}" rx="${W * 0.55}" ry="${W * 0.16}" fill="#000" opacity=".35"/>`
-    + `<image href="imagini/lume/turn.webp" x="${-W / 2}" y="${-Math.round(H * 0.62)}" width="${W}" height="${H}"/>`
-    + `<circle cx="1" cy="${-Math.round(H * 0.47)}" r="10" fill="#9fdcff" opacity=".55" class="tw-glow"/>`
+    + `<image href="imagini/lume/turn-100.webp" x="${-W / 2}" y="${-Math.round(H * 0.62)}" width="${W}" height="${H}"/>`
+    + `<circle cx="0" cy="${-Math.round(H * 0.47)}" r="10" fill="#9fdcff" opacity=".34" class="tw-glow"/>`
     + LWA.plate(Math.round(H * 0.42) + 12, 'Turnul' + (b ? ' · record ' + b : ''), false, true, 14, null) + '</g>';
 }
 (function () {
