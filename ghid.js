@@ -213,7 +213,7 @@ function ghIdle() {
     else if (S.lvl < 5) it.push(`<div class="gh-i off"><span class="gh-ic">🔒</span><span>Lumea, cu atacuri fără puncte, se deschide la nivelul 5</span></div>`);
     const ts = typeof TRON !== 'undefined' && TRON.st;
     if (S.lvl >= 10 && ts && ts.me && ts.me.can_challenge) add('♛', 'Provoacă Tronul (gratuit)', "tab('r')");
-    const next = PT - (now - S.ptsT), full = next + (MXP() - S.pts - 1) * PT;
+    const next = PTX() - (now - S.ptsT), full = next + (MXP() - S.pts - 1) * PTX();
     return `<section class="gh-idle"><h2>Ce poți face acum</h2><div class="mute gh-pt">Nu mai ai puncte. Următorul vine peste <b data-end="${now + next}">${fmt(next)}</b>; toate ${MXP()} sunt înapoi în ${sdT(full)}.</div>`
       + (it.length ? `<div class="gh-list">${it.join('')}</div>` : '<p class="mute">Deocamdată nimic. Revino când se refac punctele.</p>') + '</section>';
   } catch (e) { return ''; }
