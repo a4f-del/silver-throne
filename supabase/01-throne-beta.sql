@@ -369,7 +369,7 @@ REVOKE ALL ON FUNCTION public.throne_week_start(integer) FROM PUBLIC, anon, auth
 REVOKE ALL ON FUNCTION public.throne_week_index(timestamp with time zone) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.throne_amount(text, integer) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.throne_ranking(timestamp with time zone, timestamp with time zone, timestamp with time zone) FROM PUBLIC, anon, authenticated;
-REVOKE ALL ON FUNCTION public.throne_reason(p_uid uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.throne_reason(uuid) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.throne_finalize(integer) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.throne_rollover() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.throne_publish(text, integer, jsonb) FROM PUBLIC, anon, authenticated;
