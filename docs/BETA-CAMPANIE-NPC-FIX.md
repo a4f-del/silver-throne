@@ -16,7 +16,7 @@ SELECT
 ```
 4. Deschide `https://a4f-del.github.io/silver-throne/?server=beta`, apasă Ctrl+Shift+R, intră în **Hartă** și verifică ambele butoane **Lumea** și **Campanie**.
 5. În Campanie trebuie să apară povestea **Tronul Cenușiu**, sigiliile și capitolele. Întoarce-te în Lumea și verifică dacă harta se încarcă. Verifică consola: nu ar mai trebui să apară `mtab is not defined`, `undefined.jpeg` sau 404 la `world_npc_get`.
-6. Pentru satul NPC, atacă numai pe BETA; cooldownul de **4 ore** trebuie să fie individual pentru fiecare utilizator și sat.
+6. Pentru satul NPC, atacă numai pe BETA; cooldownul de **1 oră** trebuie să fie individual pentru fiecare utilizator și sat.
 
 ## Siguranță
 - **LIVE este păstrat neschimbat ca bază de date**. Noua funcție `mtab` și fallbackul avatarului sunt corecții globale de interfață cu comportament identic pe ambele servere.
@@ -25,3 +25,6 @@ SELECT
 
 ## Limitări
 Validat sintactic și cu teste unitare în cod pentru `mtab` și avatar. SQL-ul trebuie executat în BETA manual; fără acces la proiectul Supabase nu putem confirma funcțiile live sau harta din browser. Dacă o altă eroare 404 rămâne, este nevoie de URL-ul complet al resursei respective.
+
+## Ajustare cooldown: 1 oră
+Modificarea cooldownului pentru BETA existent necesită executarea migrării `supabase/13-beta-world-npc-cooldown-1h.sql` în **Silver-Throne-Test**; pentru instalări noi, `supabase/10-beta-world-npc.sql` folosește tot 1 oră. Timpurile deja începute înainte de migrare expiră la data înregistrată anterior (maximum 4 ore), fără modificarea datelor istorice.
