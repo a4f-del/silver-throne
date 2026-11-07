@@ -421,7 +421,7 @@ function opt(k,v){if(!DEV())return;if(k=='slots'){S.slots=+v;while(S.forge.lengt
 function cand(){const rk=(m=>Math.random()<.5?RI(0,m):m)(Math.min(4,Math.floor(S.lvl/10)));const t=[P(TR)];if(Math.random()<.45){const x=P(TR);if(x!=t[0])t.push(x)}return spCand({rk,n:P(NMS),c:P(Object.keys(CL).filter(x=>x!='Campion'&&x!='Gardian')),t,p:Math.round((25+12*S.lvl*t.length)*(1+.6*rk))})}
 function pool(){const p=S.pool;if(Date.now()>p.t||!p.c.length){p.c=[cand(),cand(),cand()];p.t=Date.now()+18e5}return p}
 function roll(){const c=8*S.lvl;if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;S.pool.t=0;S.msg='Au venit alți candidați.'}go()}
-function hire(i){const p=S.pool,c=p.c[i];if(S.gold<rp(c))S.msg='Îți trebuie '+rp(c)+' aur.';else if(S.fs.length+S.rs.length>=8)S.msg='Barăcile sunt pline (8 luptători).';else{cn('h');S.gold-=rp(c);p.c.splice(i,1);const f=spNew(c,c.rk||0);f.hp=mhp(f);(S.fs.length<3&&!S.d?S.fs:S.rs).push(f);S.msg=c.n+' s-a alăturat'+(S.fs.includes(f)?' echipei.':' la bancă.')}go()}
+function hire(i){const p=S.pool,c=p.c[i];if(S.gold<rp(c))S.msg='Îți trebuie '+rp(c)+' aur.';else if(S.fs.length+S.rs.length>=8)S.msg='Barăcile sunt pline (8 luptători).';else{cn('h');S.gold-=rp(c);p.c.splice(i,1);const f=spNew(c,c.rk||0);f.hp=mhp(f);(S.fs.length<3&&!S.d&&!(ST_SERVER==='beta'&&S.soloDungeon)?S.fs:S.rs).push(f);S.msg=c.n+' s-a alăturat'+(S.fs.includes(f)?' echipei.':' la bancă.')}go()}
 /* BETA: eroul poate coborî singur, mercenarii rămân în rezervă,
    disponibili pentru expedițiile pasive. Nu acordă bonus de luptă sau pradă. */
 function heroSoloControl(){
@@ -440,6 +440,7 @@ function heroSolo(){
  if(!Array.isArray(S.fs)||!Array.isArray(S.rs))return;
  const hero=S.fs.find(f=>f.h);
  if(!hero){S.msg='Eroul trebuie să fie în echipa activă.';return go();}
+ S.soloDungeon=1; /* se pastreaza pana cand jucatorul alege explicit un mercenar */
  const others=S.fs.filter(f=>f!==hero);
  if(!others.length){S.msg='Eroul este deja singur. Poți intra în temniță.';return go();}
  S.fs=[hero];S.rs.push(...others);S.sel=0;
@@ -448,7 +449,7 @@ function heroSolo(){
  go();
 }
 function toBench(i){if(S.d)S.msg='Nu poți schimba echipa în timpul coborârii.';else if(S.fs[i].h)S.msg='Eroul rămâne mereu în echipă.';else if(S.fs.length<2)S.msg='Eroul rămâne în echipă, chiar și singur.';else{S.rs.push(S.fs.splice(i,1)[0]);S.msg=''}go()}
-function toParty(i){if(S.d)S.msg='Nu poți schimba echipa în timpul coborârii.';else if(S.rs[i]&&typeof mxBusy==='function'&&mxBusy(S.rs[i]))S.msg=S.rs[i].n+' e plecat în expediție.';else if(S.fs.length>=TMAX())S.msg=`Echipa are deja ${TMAX()} luptători. Mută pe cineva la bancă mai întâi.`;else{S.fs.push(S.rs.splice(i,1)[0]);S.msg=''}go()}
+function toParty(i){if(S.d)S.msg='Nu poți schimba echipa în timpul coborârii.';else if(S.rs[i]&&typeof mxBusy==='function'&&mxBusy(S.rs[i]))S.msg=S.rs[i].n+' e plecat în expediție.';else if(S.fs.length>=TMAX())S.msg=`Echipa are deja ${TMAX()} luptători. Mută pe cineva la bancă mai întâi.`;else{S.fs.push(S.rs.splice(i,1)[0]);S.soloDungeon=0;S.msg=''}go()}
 function fire(i){const k='f'+i;if(S.cf&&S.cf.k==k&&Date.now()-S.cf.t<4000){S.rs.splice(i,1);S.cf=null;S.msg='Luptătorul a fost concediat.'}else{S.cf={k,t:Date.now()};S.msg='Apasă din nou în 4 secunde ca să concediezi luptătorul.'}go()}
 function vB(){const p=pool(),tn=f=>(f.t||[]).map(x=>x.n).join(', ')||'fără trăsături';
  let h=`<section><h2>Hanul mercenarilor</h2><div class="mute">În mină: ${S.fs.length}/3. La bancă: ${S.rs.length}. Maxim 8 luptători.<br>Fiecare mercenar are nivelul lui, fix de la angajare. La Han vin mercenari din generația eroului (nivelurile 1, 5, 10, 15, 20…), deci la fiecare 5 niveluri găsești alții mai puternici. Rangul (Recrut → Legendă, +15% atac și viață pe treaptă) crește prin luptă; de la Veteran își alege o specializare.</div>`;
