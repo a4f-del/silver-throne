@@ -121,8 +121,8 @@ function jeGuideDecorate(){
  if(typeof document==='undefined'||!document.head)return;
  const style=document.createElement('style');
  style.textContent=[
- '.je-guide-hit{position:relative;outline:3px solid #f1cb73!important;outline-offset:4px;box-shadow:0 0 0 5px #e7ba5240,0 0 18px 4px #f1cb7366!important;animation:jeGuidePulse 1.7s ease-in-out infinite!important;z-index:4}',
- '.vh-lb.je-guide-hit{z-index:5}',
+ '.je-guide-hit{outline:3px solid #f1cb73!important;outline-offset:4px;box-shadow:0 0 0 5px #e7ba5240,0 0 18px 4px #f1cb7366!important;animation:jeGuidePulse 1.7s ease-in-out infinite!important;z-index:4}',
+ '.vh-lb.je-guide-hit{position:absolute;z-index:5}',
  '#je-guide-arrow{position:fixed;z-index:120;pointer-events:none;display:none;width:28px;height:32px;text-align:center;font:900 26px/32px system-ui;color:#ffda7f;text-shadow:0 2px 3px #000,0 0 9px #e6a947;animation:jeGuideBob .9s ease-in-out infinite alternate}',
  '.je-guide-toggle{margin-top:9px;padding:5px 8px;font-size:12px;opacity:.84;border:1px solid #826c4b;border-radius:6px}',
  '.je-guide-toggle:hover,.je-guide-toggle:focus-visible{opacity:1}',
