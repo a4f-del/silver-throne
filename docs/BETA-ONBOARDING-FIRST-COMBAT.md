@@ -14,6 +14,7 @@ Status: **implementat în cod, de verificat vizual cu un erou nou în BETA**.
 - Când jucătorul privește un portret trecut/viitor, panoul din dreapta oferă butonul **„Înapoi la [adversarul curent]”**. Acest buton schimbă doar selecția de previzualizare prin `trSelSet`, fără costuri de puncte sau start de combat.
 - Când este selectat adversarul disponibil, **„Luptă” / „Înfruntă căpitanul”** rămâne acțiunea principală. Textul precizează că următorul monstru se deblochează după victorie.
 - La căpitan, textul spune explicit că este **ultima luptă** și că după victorie eroul revine automat în ecranul **Coborâre**, cu prada acordată.
+- Mesajul de final BETA confirmă explicit **victoria, revenirea automată, prada** și faptul că următoarea incursiune începe de la primul monstru; mesajul LIVE rămâne neschimbat.
 - Săgeata din ghidarea noilor eroi preferă butonul de revenire când jucătorul a selectat un portret blocat, fără un al doilea tutorial.
 - Dimensiunile compacte introduse în PR #45 rămân; butonul de revenire este și el compact și responsive.
 
