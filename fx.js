@@ -14,7 +14,7 @@ const FXQ = FX.q;   /* alias folosit din index.html, ca să nu depindă de ordin
 function fxCast() {
   FX.q.length = 0;
   const d = S.d, f = d && d.f; if (!f) return;
-  const esIcon = e => { if (e.b) { const b = typeof tmnBoss === 'function' ? tmnBoss(d.bn) : null; return b ? `imagini/monstri/${b[0]}.jpg` : null; } return typeof monImg === 'function' ? monImg(e.n) : null; };
+  const esIcon = e => { if (e.b) { const b = typeof tmnBoss === 'function' ? tmnBoss(d.bn) : null; if(b)return `imagini/monstri/${b[0]}.jpg`; if(d.tw&&ST_SERVER==='beta'&&typeof twMob==='function'&&typeof monImg==='function')return monImg(twMob(d.room)); return null; } return typeof monImg === 'function' ? monImg(e.n) : null; };
   /* viața REALĂ de la începutul acestei lupte (echipa poate intra deja rănită, fără vindecare între monștri) */
   FX.cast = {
     adventure: typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&!!(d.one||d.tw),
