@@ -60,7 +60,7 @@ assert.equal(n.trTier(0),0,'Locked difficulties cannot be selected');
 const live=create('live',{lvl:27,d:null,dtr:{0:2},dts:{0:0},fs:S.fs});
 live.trPick(0,1);
 assert.equal(live.trTier(0),1,'LIVE keeps its old difficulty choice');
-const dungeonSrc=extract(cards,'function acDungeonPage(i) {','function acCombatPage(d) {');
+const dungeonSrc=extract(cards,'function acPreparationAdvice(','function acCombatPage(d) {');
 const dungeon=new Function(...Object.keys({
   DG,S,TR_T,trTier:t.trTier,trChips:t.trChips,trNames:()=>['Paznic','Sergent','Mag','Căpitan'],
   trSel:()=>0,dMk:()=>({room:0,rooms:4,k:2,dk:'0_2'}),dCostAt:()=>1,
