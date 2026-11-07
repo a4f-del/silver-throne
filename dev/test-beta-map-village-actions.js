@@ -8,7 +8,7 @@ const vm=require('node:vm');
 const code=fs.readFileSync(path.join(__dirname,'../lume-quick.js'),'utf8');
 function node(tag='div') {
  const attrs={},listeners={};let id='',textContent='';
- const e={tag,children:[],style:{},className:'',disabled:false,
+ const e={tag,children:[],style:{},className:'',classList:{add(){},remove(){}},disabled:false,
    get id(){return id},set id(v){id=v},
    get textContent(){return textContent},set textContent(v){textContent=v},
    setAttribute(k,v){attrs[k]=String(v)},getAttribute(k){return attrs[k]||null},
