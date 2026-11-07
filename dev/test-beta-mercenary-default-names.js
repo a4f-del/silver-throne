@@ -54,4 +54,45 @@ assert(story.includes('mrRecruit(c);'),'Existing recruit path is reused');
 assert(journey.includes('Paznicul s-a alăturat'),'Onboarding recognizes already-named companion');
 assert(merc.includes('const free = !f.rnf'),'First renaming remains free in Cont');
 assert(fs.readFileSync(path.join(root,'erou.js'),'utf8').includes('S.mrPresetV = 1'),'Only newly created BETA heroes opt in');
-console.log('OK: 5 preset names, no naming modal, unique names, recruit message, free rename, legacy BETA and LIVE unchanged.');
+/* Runtime: the story is short, can be expanded, cannot open over combat,
+   and replay is read-only. No browser or Supabase required. */
+const storyState={mrStoryV:1,mrPresetV:1,mrOff:['Paznic'],d:null,mrStorySeen:[]};
+const dom={last:null,count:0};
+const document={
+ head:{appendChild(){}},
+ getElementById(){return null},
+ createElement(){return {id:'',innerHTML:'',setAttribute(){},remove(){},
+   querySelector(){return {focus(){}}}}},
+ body:{appendChild(el){dom.last=el;dom.count++}}
+};
+let storyJoins=0;
+const sf=new Function('ST_SERVER','S','document','mrHas','mrPresetEnabled','mrDefaultName','tEsc','av','mrRecruit','go',
+ story+';return {mrStoryShow,mrStoryJoin,mrStoryLater};')(
+ 'beta',storyState,document,()=>false,()=>true,()=> 'Toma',x=>String(x),()=>'<img alt="">',
+ ()=>{storyJoins++},()=>{});
+sf.mrStoryShow('Paznic',false);
+assert(dom.last&&dom.last.innerHTML.includes('Toma'),'Preset name appears in story');
+assert(dom.last.innerHTML.includes('<details class="mrs-more">'),'Full text can be expanded, not forced');
+assert(dom.last.innerHTML.includes('Primește-l'),'Single recruit CTA is visible');
+sf.mrStoryJoin();
+assert.equal(storyJoins,1,'One recruit, no second naming modal');
+assert.deepEqual(storyState.mrStorySeen,['Paznic'],'Story marked seen on acceptance');
+storyState.d={f:{}};
+sf.mrStoryShow('Paznic',false);
+assert.equal(dom.count,1,'Never open a new story during combat');
+storyState.d=null;
+sf.mrStoryShow('Paznic',true);
+sf.mrStoryJoin();
+assert.equal(storyJoins,1,'Replay cannot recruit a second time');
+
+const beginArchive=merc.indexOf('function mrStoryArchive() {');
+const endArchive=merc.indexOf('function mrHan()',beginArchive);
+assert(beginArchive>=0&&endArchive>beginArchive);
+const archiveFn=new Function('S','MR','mrPresetEnabled','mrStoryPreview','stPrologPreview','mrHas','mrAll','tEsc',
+ merc.slice(beginArchive,endArchive)+';return mrStoryArchive;')(
+ {mrPrologSeen:1,mrStorySeen:['Paznic'],fs:[{n:'Eroul',h:1},{n:'Toma',c:'Paznic'}],rs:[]},
+ MR,()=>true,()=>{},()=>{},c=>c==='Paznic',()=>[{h:1,n:'Eroul'},{c:'Paznic',n:'Toma'}],String);
+const archive=archiveFn();
+assert(archive.includes('Toma · Paznic')&&archive.includes('Prologul'),'Replay archive lists seen characters');
+assert(!archive.includes('Arcaș')&&!archive.includes('Mag'),'Replay archive hides spoilers');
+console.log('OK: 5 names, onboarding story/replay, combat guard, no duplicate recruitment, free rename, legacy BETA/LIVE unchanged.');
