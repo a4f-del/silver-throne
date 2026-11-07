@@ -4,7 +4,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 const js=read('bresle-ranguri.js'),sql=read('supabase/15-beta-guild-ranks-invites.sql'),
-      guild=read('bresle.js'),css=read('bresle-ranguri.css'),index=read('index.html');
+      guild=read('bresle.js'),css=read('bresle-ranguri.css'),index=read('index.html'),lume=read('lume.js');
 for(const s of [js,guild])new Function(s);
 for(const m of index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))if(m[1].trim())new Function(m[1]);
 assert(index.includes('bresle-ranguri.js?v=')&&index.includes('bresle-ranguri.css?v='),'assets loaded');
