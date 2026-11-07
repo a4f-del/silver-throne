@@ -52,7 +52,7 @@ function trBand() { if (!trHas('Vraci')) return ''; S.fs.forEach(f => { if (f.hp
 /* dificultatea aleasă pentru temnița i (doar de la nivelul 12; Greu și Coșmar se deblochează prin căpitan) */
 function trUnl(i) { return Math.min(2, (S.dtr || {})[i] || 0); }
 function trTier(i) { const g = DG[i]; if (!g || g.ev || g.lv < TR_T.lv) return 0; return Math.min(trUnl(i), (S.dts || {})[i] || 0); }
-function trPick(i, t) { (S.dts = S.dts || {})[i] = Math.min(+t, trUnl(i)); go(); }
+function trPick(i, t) { if(ST_SERVER==='beta'&&S.adventure)return; (S.dts = S.dts || {})[i] = Math.min(+t, trUnl(i)); go(); }
 function trChips(i) {
   const g = DG[i]; if (!g || g.ev || g.lv < TR_T.lv) return '';
   const u = trUnl(i), cur = trTier(i);
@@ -190,7 +190,12 @@ function trSel(i) { const d = dMk(i), k = d.dk; const cur = (S.dsel = S.dsel || 
 function trSelSet(i, k) { const d = dMk(i); (S.dsel = S.dsel || {})[d.dk] = Math.min(k, d.rooms - 1); go(); }
 /* pagina dedicată a unei temnițe, odată intrat: titlu, înapoi, banda cu toți monștrii, panoul de detalii pentru fila aleasă */
 function trPage(i) {
-  const g = DG[i], n = trNames(i); if (!n) return '';
+  const g = DG[i], n = trNames(i);
+  if(!n&&ST_SERVER==='beta'&&S.adventure&&S.adventure.di===i){
+    const d=dMk(i),c=dCostAt(i),boss=d.room>=d.rooms-1;
+    return '<section class="dg-page"><h2>'+g.n+' · pasul '+(d.room+1)+'/'+d.rooms+'</h2><p>Ai plecat din Sat. Poți continua sau te poți retrage.</p><div class="row"><button class="p" onclick="startD('+i+')">'+(boss?'Înfruntă căpitanul':'Continuă')+' · '+(c?c+' p':'gratuit')+'</button><button onclick="adventureExit()">Retrage-te</button></div></section>';
+  }
+  if (!n) return '';
   const d = dMk(i), p = d.room, lastIdx = n.length - 1, bossNow = p >= lastIdx, D = trDef(g.n), B = tmnBoss(g.bn);
   const sel = trSel(i), selBoss = sel === lastIdx, selName = n[sel];
   const tabIco = (x, boss) => { const m = boss && B ? `imagini/monstri/${B[0]}.jpg` : monImg(x); return m ? `<img src="${m}" alt="" loading="lazy" onerror="this.remove()">` : ''; };
@@ -205,8 +210,8 @@ function trPage(i) {
   det += `<div class="tr-det-row"><b>Echipament recomandat</b><span>${recGear(d.k)}</span></div>`;
   if (sel === p) { const c = dCostAt(i); det += `<button class="p tr-fight${selBoss ? ' boss' : ''}" onclick="startD(${i})">${selBoss ? 'Înfruntă căpitanul' : 'Luptă'} · ${c ? c + ' p' : 'gratuit'}</button>`; }
   det += '</div>';
-  return `<section class="dg-page"><div class="dg-page-top"><button class="tr-back" onclick="dToggle(${i})">‹ Înapoi</button><h2>${g.n}</h2>${typeof trChips === 'function' ? trChips(i) : ''}</div>`
-    + (typeof heroSoloControl==='function'?heroSoloControl():'') + `<div class="tr-tabs">${tabs}</div>${det}`
+  return `<section class="dg-page"><div class="dg-page-top"><button class="tr-back" onclick="${ST_SERVER==='beta'&&S.adventure?'adventureExit()':'dToggle('+i+')'}">${ST_SERVER==='beta'&&S.adventure?'‹ Retrage-te':'‹ Înapoi'}</button><h2>${g.n}</h2>${typeof trChips === 'function' && !(ST_SERVER==='beta'&&S.adventure) ? trChips(i) : ''}</div>`
+    + (ST_SERVER==='beta'&&S.adventure?'':typeof heroSoloControl==='function'?heroSoloControl():'') + `<div class="tr-tabs">${tabs}</div>${det}`
     + '</section>';
 }
 const trOddsTag = v => v == null ? '' : `<span class="tr-odds ${v >= 75 ? 'ok' : v >= 45 ? 'mid' : 'bad'}">Șanse: ${v}%</span>`;
