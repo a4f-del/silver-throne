@@ -19,7 +19,7 @@ const create=(server='beta',rights=true)=>{
  const dependencies={
  ST_SERVER:server,CONT,ADM,S,FX,CL:{Campion:{hp:45},Războinic:{hp:40},Arcaș:{hp:35},Paznic:{hp:55},Mag:{hp:28},Vraci:{hp:30}},
  mhp:f=>f.h?160:100,tEsc:s=>String(s),acSafe:s=>String(s),document:DOC,
- admDraw:()=>{draw++},fxPlay:(frames,done,first,offset)=>{playCount++;assert.equal(first,true);assert.equal(offset,0);castRecords.push({frames,cast:FX.cast});assert(classes.has('sim-pvp-playing'));done()},
+ admDraw:()=>{draw++},acFxMarkup:()=>'',fxPlay:(frames,done,first,offset)=>{playCount++;assert.equal(first,true);assert.equal(offset,0);castRecords.push({frames,cast:FX.cast});assert(classes.has('sim-pvp-playing'));done()},
  adventureActive:()=>false
  };
  const names=Object.keys(dependencies),args=Object.values(dependencies);
