@@ -252,7 +252,7 @@ function ghIdle() {
     document.body.appendChild(ar);
     /* ținta: întâi drumul prin meniu, apoi butonul pasului */
     function targets() {
-      if (typeof S === 'undefined' || !S || S.tu == null) return [];
+      if (typeof S === 'undefined' || !S || S.tu == null || (typeof jeFocusActive==='function'&&jeFocusActive())) return [];
       if (document.getElementById('gate') && !document.getElementById('gate').classList.contains('g-out')) return [];
       if (S.tu >= 0 && S.tuRest > Date.now()) return ghQ('#v .gh.rest button.p');   /* în pauză, săgeata arată doar „Continuă” */
       let step = null, k = null;
