@@ -17,8 +17,9 @@ function fxCast() {
   const esIcon = e => { if (e.b) { const b = typeof tmnBoss === 'function' ? tmnBoss(d.bn) : null; if(b)return `imagini/monstri/${b[0]}.jpg`; if(d.tw&&ST_SERVER==='beta'&&typeof twMob==='function'&&typeof monImg==='function')return monImg(twMob(d.room)); return null; } return typeof monImg === 'function' ? monImg(e.n) : null; };
   /* viața REALĂ de la începutul acestei lupte (echipa poate intra deja rănită, fără vindecare între monștri) */
   FX.cast = {
-    adventure: typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&!!(d.one||d.tw),
-    adventureTitle: d.tw?'Turnul · Etajul '+Math.max(1,d.room):(DG[d.di||0]||{}).n||'Temniță',
+    adventure: typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&!!(d.one||d.tw||d.lume||d.tron),
+    pvp: typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&!!(d.lume||d.tron),
+    adventureTitle: d.lume?'Atac în Lume · '+(d.bn||'Satul adversarului'):d.tron?'Duel pentru Tron · '+(d.bn||'Apărarea Tronului'):d.tw?'Turnul · Etajul '+Math.max(1,d.room):(DG[d.di||0]||{}).n||'Temniță',
     fs: S.fs.map(x => ({ n: x.n, c: x.c, ic: x.ic, h: x.h, mh: mhp(x), hp: Math.max(0, x.hp) })),
     es: f.es.map(e => ({ n: e.n, c: e.c, ic: e.ic, b: e.b, mh: e.mh, hp: Math.max(0, e.hp), img: esIcon(e) })),
   };
@@ -32,7 +33,10 @@ function fxPush(pre, txt, actor) {
   const dEs = f.es.map((e, i) => e.hp - (pre.es[i] || 0)).map((v, i) => v ? { i, v, mh: f.es[i].mh } : null).filter(Boolean);
   if (!dFs.length && !dEs.length && !(txt && txt.trim())) return;
   if (FX.cast && f.es.length > FX.cast.es.length) for (let i = FX.cast.es.length; i < f.es.length; i++) FX.cast.es.push({ n: f.es[i].n, mh: f.es[i].mh, hp: f.es[i].mh, img: null });   /* ajutoare chemate în luptă, apărute după începutul redării */
-  FX.q.push({ fs: dFs, es: dEs, txt: txt || '', actor: actor ? (actor.h || !S.fs.includes(actor) ? { side: actor.h !== undefined && S.fs.includes(actor) ? 'fs' : (f.es.includes(actor) ? 'es' : null), i: S.fs.includes(actor) ? S.fs.indexOf(actor) : f.es.indexOf(actor) } : null) : null });
+  /* Același identificator de actor pentru erou, mercenari și fantome PvP.
+     În vechea expresie mercenarii fără actor.h pierdeau animația de atac. */
+  const fi=actor?S.fs.indexOf(actor):-1,ei=actor?f.es.indexOf(actor):-1;
+  FX.q.push({ fs:dFs, es:dEs, txt:txt||'', actor:fi>=0?{side:'fs',i:fi}:ei>=0?{side:'es',i:ei}:null });
 }
 /* pentru modul manual: marchează unde începe lovitura curentă, ca să redăm doar cadrele noi */
 let FX_MARK = 0, FX_FIRST = false;
