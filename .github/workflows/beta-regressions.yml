@@ -1,0 +1,38 @@
+name: BETA — regresii JavaScript
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  node-regressions:
+    name: Teste Node.js fără acces la date reale
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificare sintaxă scripturi și teste
+        shell: bash
+        run: |
+          set -euo pipefail
+          for script in ./*.js dev/test-*.js; do
+            node --check "$script"
+          done
+      - name: Suita de regresii BETA
+        shell: bash
+        run: |
+          set -euo pipefail
+          for test in dev/test-*.js; do
+            echo "::group::$test"
+            node "$test"
+            echo "::endgroup::"
+          done
