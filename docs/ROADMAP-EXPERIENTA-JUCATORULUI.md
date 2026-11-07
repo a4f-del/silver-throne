@@ -18,6 +18,7 @@ Expedițiile mercenarilor sunt activități pasive, nu o a patra buclă obligato
 ## ETAPA A — PRIMELE 10–15 MINUTE (prioritatea maximă)
 
 - [ ] **01. Parcurs QA de jucător nou.** Test BETA cu erou nou autorizat: cont → creare erou → prolog → primul mercenar → prima Temniță → primul căpitan → pradă → echipare → următor obiectiv. Documentăm blocajele, clickurile inutile și erorile. Nu resetăm personajele existente.
+  - **În lucru (audit de cod):** am corectat contradicția primului jurământ: retragerea înainte de căpitan nu îl finalizează, iar obiectivul cere acum explicit Căpitanul Cenușii. Test logic adăugat; **pasul 01 rămâne nebifat** până la verificarea în browser a parcursului complet, conform `docs/BETA-NEW-PLAYER-QA-STEP01.md`.
 - [ ] **02. Un singur obiectiv vizibil.** Drumul Eroului este CTA principal; nu concurează cu ghidul vechi, misiuni, popup-uri, bannerul de ritm sau explicații care acoperă ecranul. Testăm pe desktop și mobil.
 - [ ] **03. Prima luptă și primul căpitan.** Prima experiență de Temniță trebuie să se înțeleagă intuitiv: cum alegi inamicul, cum ataci, când apare căpitanul, cum revii după victorie. Fără apăsări inutile de «Părăsește».
 - [ ] **04. Prima recompensă și prima armă.** Jucătorul vede ce a câștigat, o comparație simplă cu echipamentul actual și un buton clar «Echipează». Nu forțăm să învețe toate statisticile.
