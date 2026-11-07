@@ -41,10 +41,13 @@ Expedițiile mercenarilor sunt activități pasive, nu o a patra buclă obligato
 ## ETAPA B — PROGRESIA NIVEL 8–30
 
 - [ ] **10. Repere de progres 5/8/15/20/30.** Fiecare deblocare importantă are un mesaj scurt: ce s-a deschis, unde, de ce contează; fără popup-uri în cascadă.
+  - **În lucru (BETA):** un singur card contextual, după tutorial și Campanie, cu locul deblocării; pragurile depășite se marchează pentru a evita notificările în cascadă. Ghid QA: `docs/BETA-PROGRESSION-MILESTONES-CAPTAINS.md`.
 - [ ] **11. «Pregătește-te pentru următorul căpitan».** Un card contextual arată ținta, șansa estimată și 1–2 acțiuni reale care ar putea ajuta (echipament, compoziție, vindecare). Nu promitem creșteri exacte de șanse fără simulare.
+  - **În lucru (BETA):** pe cardul mare al Temniței, lângă șansa reală, maximum un sfat concret din viața echipei, șansa calculată sau contraclasă. Nu schimbă calculul de luptă.
 - [ ] **12. Comparație de obiecte după clasă.** Etichetă sugestivă pentru erou/mercenar + comparație față de ce are echipat; statisticile detaliate rămân disponibile.
 - [ ] **13. Echipe salvate simplu.** Preseturi erou singur, erou +1/+2/+3 mercenari; respectăm limita de luptători și mercenarii plecați în expediții.
 - [ ] **14. Informații tactice pentru căpitani.** Arătăm abilitatea specială, clasa care îl contracarează și dacă este în echipă/rezervă direct pe ecranul mare al Temniței.
+  - **În lucru (BETA):** abilitatea căpitanului și contraclasa apar pe cardul mare, cu indicarea prezenței doar dacă mercenarul este activ și în viață; nu oferă informații false despre luptătorii în rezervă. Test: `dev/test-beta-progression-milestones-captains.js`.
 - [ ] **15. Inventar și revendicări rapide.** Echipare directă, «Ridică toate» unde este sigur, sortare/filtrare și dezmembrare/vânzare în lot cu protecție pentru obiectele legendare și blocate.
 
 **Criteriu de ieșire etapa B:** un jucător de nivel 20 înțelege ce temniță să joace, cum să-și pregătească echipa și cum să folosească obiectele obținute, fără să navigheze inutil prin Sat.

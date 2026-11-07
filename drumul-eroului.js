@@ -134,10 +134,42 @@ function jeGoNextAdventure(){
  if(!jeFocus()||S.d||jeCurrent())return;
  S.jeNextHintVisited=1;S.tab='c';S.msg='';go();
 }
+/* Repere BETA după introducere: câte unul, fără popup în cascadă. */
+const JE_MILESTONES=[
+ {lv:5,title:'Lumea s-a deschis',where:'Hartă → Lumea',
+  why:'Poți descoperi alți jucători și satele din Lume. Nu este necesar să ataci pentru a continua.'},
+ {lv:8,title:'Catacombele Uitate',where:'Coborâre → Catacombele Uitate',
+  why:'Ai deblocat o nouă temniță, cu un căpitan și pradă de nivel mai mare.'},
+ {lv:15,title:'Bazarul',where:'Sat → Piață → Bazar',
+  why:'Poți tranzacționa obiecte eligibile cu alți jucători. Echipamentul legendar rămâne legat de cont.'},
+ {lv:20,title:'Turnul',where:'Coborâre → Turn',
+  why:'Se deschide provocarea de endgame cu etaje și străjeri. Nu înlocuiește progresul din Temnițe.'},
+ {lv:30,title:'Al patrulea loc în echipă',where:'Echipă',
+  why:'Poți folosi încă un luptător în Temnițe; la Tron și în fantoma Lumii se păstrează limita proprie.'}
+];
+function jeMilestoneDue(){
+ if(!jeFocus()||!S.jeCampaignOpened||S.d||!['a','c','e'].includes(S.tab)||jeCurrent())return null;
+ const seen=Array.isArray(S.jeMilestoneSeen)?S.jeMilestoneSeen:[];
+ return JE_MILESTONES.filter(m=>m.lv<=S.lvl&&!seen.includes(m.lv)).at(-1)||null;
+}
+function jeMilestonePanel(){
+ const m=jeMilestoneDue();if(!m)return '';
+ return '<section class="je-card je-milestone" aria-label="Deblocare de nivel">'
+  +'<div class="je-caption">✦ NOU LA NIVELUL '+m.lv+'</div>'
+  +'<div class="je-title"><span>✦</span><h2>'+m.title+'</h2></div>'
+  +'<p class="je-next-note"><b>Unde:</b> '+m.where+'</p>'
+  +'<p class="je-next-note">'+m.why+'</p>'
+  +'<button class="p" onclick="jeMilestoneDismiss()">Am înțeles</button></section>';
+}
+function jeMilestoneDismiss(){
+ const m=jeMilestoneDue();if(!m)return;
+ S.jeMilestoneSeen=JE_MILESTONES.filter(x=>x.lv<=m.lv).map(x=>x.lv);
+ go();
+}
 function jePanel(){
  if(!jeReady() || S.d)return '';
  const s=jeCurrent();
- if(!s)return S.jeCampaignOpened?jeNextAdventurePanel():'<section class="je-card je-done"><div class="je-caption">✦ DRUMUL EROULUI</div><b>Primele jurăminte sunt împlinite.</b><p>Acum povestea continuă în Campanie.</p><button class="p" onclick="cmpOpenChecklist(\'journey\')">Deschide Campania și obiectivele</button></section>';
+ if(!s)return S.jeCampaignOpened?(jeMilestonePanel()||jeNextAdventurePanel()):'<section class="je-card je-done"><div class="je-caption">✦ DRUMUL EROULUI</div><b>Primele jurăminte sunt împlinite.</b><p>Acum povestea continuă în Campanie.</p><button class="p" onclick="cmpOpenChecklist(\'journey\')">Deschide Campania și obiectivele</button></section>';
  const p=jeStatus(s),done=JE_STEPS.filter(x=>(S.je&&S.je.done||[]).includes(x.id)).length;
  const parts=s.parts.map(([label,cb])=>'<span class="'+(cb()?'je-ok':'')+'">'+(cb()?'✓ ':'○ ')+label+'</span>').join('');
  const reward=[s.reward.g?s.reward.g+' aur':'',s.reward.o?s.reward.o+' minereu':''].filter(Boolean).join(' + ');
@@ -201,6 +233,7 @@ function jePreview(){
 .je-help{margin-top:9px;color:var(--mute);font-size:12px}.je-help summary{cursor:pointer;display:inline-block;text-decoration:underline;text-underline-offset:3px}.je-help p{font-size:13px;line-height:1.55}
 .je-say{font-style:italic;color:var(--gold2)}
 .je-after .je-next-note{margin:7px 0;font-size:13px;color:var(--mute);line-height:1.45}.je-after .je-next-note b{color:var(--gold2)}.je-after button{margin-top:6px}
+.je-milestone .je-next-note{margin:7px 0;font-size:13px;line-height:1.5;color:var(--mute)}.je-milestone .je-next-note b{color:var(--gold2)}.je-milestone button{margin-top:7px}
 .je-target{outline:2px solid #e1b969!important;outline-offset:3px;animation:je-halo 2.6s ease-in-out infinite}
 #je-preview{position:fixed;inset:0;z-index:25040;padding:16px;display:flex;justify-content:center;align-items:center;background:#05070aee}
 .jep-card{width:min(510px,100%);max-height:calc(100vh - 32px);overflow-y:auto;border:1px solid #bf9b60;border-radius:12px;background:#131b1e;padding:18px;text-align:center}

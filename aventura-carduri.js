@@ -28,6 +28,19 @@ function acParty() {
         '<small>' + hp + ' / ' + max + ' viață</small></div></div>';
     }).join('') + '</div></div>';
 }
+/* Un singur sfat concret, din starea reală a echipei; șansele rămân
+   estimarea motorului de luptă și nu promitem procente pentru o schimbare. */
+function acPreparationAdvice(boss,odds,counter){
+ const party=S.fs||[];
+ if(party.some(f=>f.hp<=0))return 'Ridică luptătorii căzuți la Infirmerie înainte de o nouă încercare.';
+ if(party.some(f=>f.hp>0&&typeof mhp==='function'&&f.hp<mhp(f)*0.55))
+  return 'Vindecă răniții la Infirmerie înainte de căpitan.';
+ if(odds!=null&&odds<55)
+  return 'Șansele estimate sunt reduse. Antrenamentul și echipamentul pot ajuta; verifică din nou după pregătire.';
+ if(boss&&counter&&!party.some(f=>f.c===counter&&f.hp>0))
+  return 'Poți folosi un '+counter+' viu în echipă pentru a slăbi abilitatea căpitanului.';
+ return '';
+}
 function acDungeonPage(i) {
   const g=DG[i], names=typeof trNames==='function' ? trNames(i) : null;
   if (!g || !names || !names.length) return '';
@@ -46,8 +59,15 @@ function acDungeonPage(i) {
   const cost=dCostAt(i),odds=canFight&&typeof dOddsAt==='function'?dOddsAt(i):null;
   let detail='<div class="ac-facts">';
   if(stats)detail+='<span>❤ '+stats.hp+' viață estimată</span><span>⚔ '+stats.atk+' atac estimat</span>';
-  if(boss&&data&&typeof TR_A!=='undefined'&&TR_A[data.a])
-    detail+='<div class="ac-ability"><b>♛ Abilitatea căpitanului</b><span>'+acSafe(TR_A[data.a])+'</span></div>';
+  const counter=boss&&data&&typeof TR_C!=='undefined'&&TR_C[data.a]?TR_C[data.a]:null;
+  const hasCounter=counter&&(S.fs||[]).some(f=>f.c===counter&&f.hp>0);
+  if(boss&&data&&typeof TR_A!=='undefined'&&TR_A[data.a]) {
+    detail+='<div class="ac-ability"><b>♛ Abilitatea căpitanului</b><span>'+acSafe(TR_A[data.a])+'</span>';
+    if(counter)detail+='<small class="ac-counter">'+(hasCounter?'✓ Contracarat de ':'Contracarat de: ')+
+      acSafe(counter)+(hasCounter?' · este în echipa ta':' · nu este în echipă')+'</small>';
+    detail+='</div>';
+  }
+  const prep=canFight?acPreparationAdvice(boss,odds,counter):'';
   detail+='</div>';
   return '<section class="ac-scene ac-dungeon"><div class="ac-scene-head"><div><small>Temniță · Eroul este plecat din Sat</small><h2>'+acSafe(g.n)+'</h2></div>' +
     '<button class="ac-retreat" onclick="adventureExit()">‹ Retrage-te</button></div>' +
@@ -69,6 +89,7 @@ function acDungeonPage(i) {
       (sel<p?'Acest monstru a fost deja învins.':'Acest adversar nu poate fi atacat încă.')+
         ' Selectează adversarul curent pentru a continua.')+'</p>' +
     '<p class="ac-hint">Echipament recomandat: <b>'+acSafe(typeof recGear==='function'?recGear(d.k):'echipament potrivit nivelului')+'</b></p>' +
+    (prep?'<p class="ac-hint ac-prep">Pregătire: '+acSafe(prep)+'</p>':'')+
     '</div></div>'+acParty()+'</section>';
 }
 function acCombatPage(d) {
