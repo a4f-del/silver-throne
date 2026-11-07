@@ -33,18 +33,22 @@ function mrRecruit(c) {
     mrStoryShow(c, false); return;
   }
   S.mrOff.splice(i, 1); const f=mrNew(c);
-  if(typeof jeFocus==='function'&&jeFocus()&&!f.nn)
+  if(mrPresetEnabled()&&!f.nn)
     S.msg=`${f.n} (${f.c}) s-a alăturat ${S.fs.includes(f)?'echipei':'rezervei'}. Îi poți schimba numele din Cont → Nume.`;
   go();
 }
 /* Nume stabilite pentru noii eroi BETA; evităm numele deja folosite în echipă.
    Numele existente și dreptul la o redenumire gratuită rămân nemodificate. */
+function mrPresetEnabled() {
+  return typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&S.mrPresetV===1
+    &&typeof jeFocus==='function'&&jeFocus();
+}
 function mrDefaultName(c) {
   const taken=new Set(mrAll().map(f=>String(f.n||'').toLocaleLowerCase('ro-RO')));
   return (MR.sug[c]||[]).find(n=>!taken.has(n.toLocaleLowerCase('ro-RO'))) || (MR.sug[c]||[])[0] || c;
 }
 function mrNew(c) {
-  const named=typeof jeFocus==='function'&&jeFocus();
+  const named=mrPresetEnabled();
   const f = { n: named?mrDefaultName(c):c, c, hp: 0, sc: 0, t: [], rk: 0, fm: 0, eq: { w: null, a: null } };
   if(!named)f.nn=1; /* LIVE și salvările vechi păstrează fereastra de numire */
   f.hp = mhp(f); f.t = [P(TR)]; (S.fs.length < TMAX() && !S.d && !(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&S.soloDungeon) ? S.fs : S.rs).push(f); return f;
