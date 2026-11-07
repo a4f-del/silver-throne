@@ -8,7 +8,7 @@ function gsrReset(){
  GSR.last=0;GSR.error='';GSR.notice='';GSR.query='';
 }
 const gsrInboxCount=()=>GSR.state&&Array.isArray(GSR.state.invitations)?GSR.state.invitations.length:0;
-function gsrCanInvite(){return !!(GSR.state&&['leader','officer'].includes(GSR.state.role)&&GUILD.state?.guild);}
+function gsrCanInvite(){return guildEnabled()&&!!(GSR.state&&['leader','officer'].includes(GSR.state.role)&&GUILD.state?.guild);}
 async function gsrSync(force){
  if(!guildEnabled()||GSR.loading||GSR.busy||(!force&&Date.now()-GSR.last<25000))return;
  const uid=CONT.user.id;
