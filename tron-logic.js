@@ -22,6 +22,7 @@
     protectMin: 30,             /* minute de protecție pentru un rege proaspăt încoronat */
     cooldownS: 120,             /* pauză între două provocări ale aceluiași jucător (secunde) */
     dailyCap: 10,               /* provocări pe zi (zi = ora României); provocarea e GRATUITĂ, fără puncte */
+    duelHitCapPct: 0.38,         /* BETA PvP: nicio lovitura individuala nu depaseste 38% din viata maxima a tintei */
     ghostAtkMult: 1.62,         /* fantoma lovește doar normal, fără abilități și critice; multiplicatorii compensează (calibrat în dev/calibrate-ghost.js) */
     ghostHpMult: 1,
     guardK: 2.75,               /* dificultatea Gărzii Regale (Tron gol): multiplicator peste k(nivel). Calibrat în dev/calibrate-guard.js: la nivelul minim un jucător slab câștigă ~85–90%, unul bine echipat ~100% */
@@ -98,6 +99,21 @@
     const atk = Math.max(1, Math.round(fin(u.atk, 1) * cfg.ghostAtkMult));
     const def = Math.max(0, Math.round(fin(u.def, 0)));
     return { n: String(u.n || 'Erou').slice(0, 20), c: u.c, hp, atk, def };
+  };
+  /* Duel BETA intre eroi: opreste one-shot-urile cauzate de multiplicatori,
+     abilitati si lovituri critice. Folosit simetric pentru atacator si rege.
+     Nu se aplica Gărzii Regale, Lumii sau LIVE. */
+  T.duelDamageCap = function (damage, maxHp, cfg) {
+    cfg = cfg || T.CFG;
+    const raw = Math.max(0, Math.round(fin(damage, 0)));
+    const mh = Math.max(1, Math.round(fin(maxHp, 1)));
+    const pct = Math.max(0.01, Math.min(0.99, fin(cfg.duelHitCapPct, 0.38)));
+    return Math.min(raw, Math.max(1, Math.ceil(mh * pct)));
+  };
+  /* Cine deschide duelul este ales aleator, ca la stats identice
+     prima lovitura sa nu fie mereu a provocatorului. */
+  T.duelKingStarts = function (rng) {
+    return (rng || Math.random)() < 0.5;
   };
   /* validare pe server/client a unui instantaneu: 1..3 unități, clase cunoscute, valori finite */
   T.validGhost = function (g) {
