@@ -362,6 +362,7 @@ const dOpen=i=>!!(S.deo&&S.deo[i]);
 function dToggle(i){
  if(ST_SERVER==='beta'){
   if(!DG[i]||S.lvl<DG[i].lv||S.d)return;
+  if(!S.fs.some(f=>f.hp>0)){S.msg='Eroul și echipa sunt căzuți. Ridică-i la Infirmerie înainte să intri.';return go()}
   if(S.adventure){if(S.adventure.di===i)return adventureExit();S.msg='Ești deja într-o altă temniță.';return go()}
   S.adventure={di:i};(S.deo=S.deo||{})[i]=true;S.tab='c';S.msg='Ai intrat în '+DG[i].n+'.';return go();
  }
