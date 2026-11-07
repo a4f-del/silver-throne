@@ -53,6 +53,7 @@ function trBand() { if (!trHas('Vraci')) return ''; S.fs.forEach(f => { if (f.hp
 function trUnl(i) { return Math.min(2, (S.dtr || {})[i] || 0); }
 function trTier(i) { const g = DG[i]; if (!g || g.ev || g.lv < TR_T.lv) return 0; return Math.min(trUnl(i), (S.dts || {})[i] || 0); }
 function trPick(i, t) {
+  if(ST_SERVER!=='beta'){(S.dts=S.dts||{})[i]=Math.min(+t,trUnl(i));return go();}
   // BETA: dificultatea se alege in ecranul mare, inainte de prima lupta.
   // Dupa prima lupta se pastreaza pana la retragere (progres separat per dificultate).
   if(ST_SERVER==='beta' && (S.d || (S.adventure && S.adventure.tierLocked))) return;
