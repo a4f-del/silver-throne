@@ -33,7 +33,7 @@ for(const kind of ['lume','tron']){
  const live=setup('live',kind);
  assert.equal(live.api.FX.cast.adventure,false,'LIVE nu schimbă efectele');
 }
-const api=new Function('tEsc','av',card+';return {acFxMarkup,acFxAnimate};')(s=>String(s),()=>'<img src="erou.png" alt="">');
+const api=new Function('tEsc','av','setTimeout',card+';return {acFxMarkup,acFxAnimate};')(s=>String(s),()=>'<img src="erou.png" alt="">',()=>{});
 const c={pvp:true,adventureTitle:'Duel pentru Tron',fs:[{n:'Eroul',c:'Campion',mh:200,hp:100}],es:[{n:'Regele',c:'Campion',mh:200,hp:180,img:null}]};
 const html=api.acFxMarkup(c,{fs:[100],es:[180]});
 assert(html.includes('Duel pentru Tron'),'fereastra folosește numele confruntării');
@@ -42,15 +42,13 @@ const face=(x,y)=>({style:{values:{},setProperty(k,v){this.values[k]=v}},classLi
 const a=face(20,180),e=face(300,20);
 const aBox={querySelector:()=>a},eBox={querySelector:()=>e};
 const modal={classList:{contains:x=>x==='ac-fx-mode'},querySelector:x=>x.includes('data-s="fs"')?aBox:x.includes('data-s="es"')?eBox:null};
-const oldSetTimeout=global.setTimeout;global.setTimeout=()=>{};
-try{
  api.acFxAnimate(modal,{actor:{side:'fs',i:0},fs:[],es:[{i:0,v:-40}]});
  assert(a.classList.list.includes('ac-dash'),'atacatorul se proiectează către card');
  assert(e.classList.list.includes('ac-impact'),'ținta este lovită vizual');
  api.acFxAnimate(modal,{actor:{side:'es',i:0},fs:[{i:0,v:-12}],es:[]});
  assert(e.classList.list.includes('ac-dash'),'animația funcționează și la ripostă');
  assert(a.classList.list.includes('ac-impact'),'atacul adversarului atinge eroul');
-}finally{global.setTimeout=oldSetTimeout}
+
 assert(css.includes('@keyframes acSlash'),'efectul slash există și pentru PvP');
 assert(css.includes('prefers-reduced-motion'),'animațiile respectă accesibilitatea');
 assert(fx.includes('const cardMode=!!cast.adventure'),'fereastra folosește motorul FX, nu alte daune');
