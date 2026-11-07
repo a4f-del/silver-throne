@@ -4,7 +4,7 @@
 const JE_STEPS = [
  {id:'poarta',title:'Cenușa de la poartă',icon:'🛡️',
   say:'„Nu lăsăm satul singur. Hai să aflăm ce se ascunde sub deal.” — Paznicul',
-  help:'Primește-l pe Paznic, care vine deja cu un nume, apoi intră în Mina Cenușie din Coborâre. Îi poți schimba numele mai târziu din Cont. Învinge pe rând cei trei monștri și Căpitanul Cenușii. După victorie revii automat și primești prada. Dacă te retragi mai devreme, progresul în mină se păstrează, dar jurământul se încheie după căpitan.',
+  help:'Primește-l pe Paznic, apoi intră în Mina Cenușie din Coborâre. Numele lui poate fi schimbat ulterior din Cont. Învinge pe rând cei trei monștri și Căpitanul Cenușii. După victorie revii automat și primești prada. Dacă te retragi mai devreme, progresul în mină se păstrează, dar jurământul se încheie după căpitan.',
   reward:{g:50,o:15},parts:[['Paznicul s-a alăturat',()=>jeHas('Paznic')],['Ai învins primul căpitan',()=>jeCount('bs')>=1]],
   action:()=>!jeHas('Paznic')?['Han','a','h']:['Mina Cenușie','c','']},
  {id:'urme',title:'Urmele din cenușă',icon:'🏹',
@@ -21,7 +21,7 @@ const JE_STEPS = [
   action:()=>jeHasWeapon()?['Echipă','e','']:['Topitorie','a','a']},
  {id:'han',title:'Jurământul veteranului',icon:'⚔️',
   say:'„Am luptat pentru regi. Aș vrea să lupt pentru oameni.” — Războinicul',
-  help:'Antrenează o dată eroul în Sat → Antrenament. Apoi mergi la Han, ascultă povestea Războinicului și primește-l în echipă. Va veni cu un nume pe care îl poți schimba ulterior.',
+  help:'Antrenează o dată eroul în Sat → Antrenament. Apoi mergi la Han, ascultă povestea Războinicului și primește-l în echipă. Îi poți schimba numele ulterior din Cont.',
   reward:{g:135,o:5},parts:[['Ai antrenat eroul',()=>jeCount('t')>=1],['Războinicul are un nume',()=>jeHas('Războinic')]],
   action:()=>jeCount('t')<1?['Antrenament','a','t']:['Han','a','h']},
  {id:'vesti',title:'Vești din sat',icon:'📜',
