@@ -17,6 +17,8 @@ function fxCast() {
   const esIcon = e => { if (e.b) { const b = typeof tmnBoss === 'function' ? tmnBoss(d.bn) : null; return b ? `imagini/monstri/${b[0]}.jpg` : null; } return typeof monImg === 'function' ? monImg(e.n) : null; };
   /* viața REALĂ de la începutul acestei lupte (echipa poate intra deja rănită, fără vindecare între monștri) */
   FX.cast = {
+    adventure: typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&!!(d.one||d.tw),
+    adventureTitle: d.tw?'Turnul · Etajul '+Math.max(1,d.room):(DG[d.di||0]||{}).n||'Temniță',
     fs: S.fs.map(x => ({ n: x.n, c: x.c, ic: x.ic, h: x.h, mh: mhp(x), hp: Math.max(0, x.hp) })),
     es: f.es.map(e => ({ n: e.n, c: e.c, ic: e.ic, b: e.b, mh: e.mh, hp: Math.max(0, e.hp), img: esIcon(e) })),
   };
@@ -64,7 +66,9 @@ function fxPlay(frames, cb, first) {
     const w = i === list.length - 1 ? FZ : Math.round(FZ * (1 - FX_OV));   /* coloana ultimului portret e întreagă, celelalte arată doar partea vizibilă */
     return `<div class="fx-r" data-s="${side}" data-i="${i}" style="width:${w}px;z-index:${20 - i}"><span class="fx-nm">${tEsc(x.n)}</span><span class="fx-av">${x.img ? `<img src="${x.img}" alt="">` : av({ n: x.n, c: x.c, ic: x.ic, h: x.h }, FZ)}</span><i class="fx-hp"><i style="width:${Math.round(hp[side][i] / x.mh * 100)}%"></i></i><small class="fx-t">${hp[side][i]}/${x.mh}</small></div>`;
   }).join('')}</div>`;
-  m.innerHTML = `<div class="fx-c"><div class="fx-row">${stack('fs', cast.fs)}<div class="fx-vs">VS</div>${stack('es', cast.es)}</div><div class="fx-log" id="fx-log"></div><button class="fx-skip" onclick="fxSkip()">Sari peste ›</button></div>`;
+  const cardMode=!!cast.adventure&&typeof acFxMarkup==='function';
+  if(cardMode)m.classList.add('ac-fx-mode');
+  m.innerHTML=cardMode?acFxMarkup(cast,hp):`<div class="fx-c"><div class="fx-row">${stack('fs', cast.fs)}<div class="fx-vs">VS</div>${stack('es', cast.es)}</div><div class="fx-log" id="fx-log"></div><button class="fx-skip" onclick="fxSkip()">Sari peste ›</button></div>`;
   document.body.appendChild(m);
   let n = 0, frontT = null;
   const finish = () => { FX.playing = false; clearTimeout(frontT); m.remove(); window.__fxSkip = null; cb(); };
@@ -78,6 +82,7 @@ function fxPlay(frames, cb, first) {
     let crit = /critic/i.test(fr.txt), ability = /sângerea|ameți|îngheață|arde|otrăv|cheamă|urlă|renaște|scut|vindec|leagă rănile|fulger/i.test(fr.txt);
     const act = fr.actor && fr.actor.side ? [[fr.actor.side, fr.actor.i]] : [];
     front([...act, ...['fs', 'es'].flatMap(sd => fr[sd].map(d => [sd, d.i]))], Math.max(350, FX.delay - 80));
+    if(cardMode&&typeof acFxAnimate==='function')acFxAnimate(m,fr);
     for (const side of ['fs', 'es']) for (const d of fr[side]) {
       hp[side][d.i] = Math.max(0, Math.min(cast[side][d.i].mh, hp[side][d.i] + d.v));
       const r = m.querySelector(`.fx-r[data-s="${side}"][data-i="${d.i}"]`); if (!r) continue;
