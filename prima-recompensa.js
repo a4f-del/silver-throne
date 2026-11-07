@@ -81,7 +81,8 @@ function jeStarterForgeHint(){
  const step=jeCurrent();if(!step||!['urme','otel'].includes(step.id))return '';
  if(step.id==='otel'&&jeStarterWeaponList().some(x=>x.good))
   return '<div class="je-first-forge"><b>⚔ Ai deja o armă în rucsac.</b> <button class="p" onclick="S.tab=\'e\';go()">Mergi la Echipă și pune-o</button></div>';
- const picked=S.ui&&S.ui.t==='w'&&typeof WF!=='undefined'&&WF[S.ui.wf||'sab']?.c==='Campion';
+ const weapon=S.ui&&(typeof wfUi==='function'?wfUi():(S.ui.wf||'sab'));
+ const picked=S.ui&&S.ui.t==='w'&&typeof WF!=='undefined'&&WF[weapon]?.c==='Campion';
  return '<div class="je-first-forge"><b>⚔ Prima armă a eroului</b><p>La început alege <b>Armă → Sabie</b>, potrivită clasei Campion. Forjarea folosește regulile și materialele obișnuite.</p>'+
  (picked?'<small>Sabia este selectată. Apasă „Forjează” mai jos, apoi ridică obiectul când este gata.</small>':
  '<button class="p je-first-prepare" onclick="jePrepareStarterForge()">Selectează sabia eroului</button>')+'</div>';
