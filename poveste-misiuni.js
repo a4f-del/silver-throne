@@ -118,9 +118,12 @@ function sqDecorate() {
   if (typeof document==='undefined' || !document.documentElement) return;
   const active=sqEnabled();
   document.documentElement.classList.toggle('sq-active',!!active);
-  const current=active?sqCurrent():null;
-  const dest=current?(current.id==='cenusa'?'c':current.id==='han'&&
-    (typeof C==='function'?C('t'):0)<1?'t':'h'):'';
+  const current=active && !S.sqHelp?sqCurrent():null;
+  const has = c => ((S.fs||[]).concat(S.rs||[])).some(f=>!f.h&&f.c===c&&!f.nn);
+  const dest=!current ? '' :
+    current.id==='juramant' ? (!has('Paznic')?'h':'c') :
+    current.id==='cenusa' ? (!has('Arcaș')?'h':'a') :
+    current.id==='han' ? ((typeof C==='function'?C('t'):0)<1?'t':'h') : '';
   document.querySelectorAll('.sq-target').forEach(el=>el.classList.remove('sq-target'));
   if (!dest) return;
   if (dest==='c') {
