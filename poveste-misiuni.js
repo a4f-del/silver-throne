@@ -102,10 +102,9 @@ function sqPanel() {
     <div class="sq-eyebrow">✦ POVESTEA SATULUI · MISIUNEA ${completed+1}/${SQ_ACT.length}</div>
     <div class="sq-heading"><span class="sq-seal" aria-hidden="true">${q.icon}</span><div>
       <h2>${q.title}</h2><small>${q.at}</small></div></div>
-    <p class="sq-dialog">${q.line}</p>
-    <p class="sq-descr">${q.desc}</p>
     <div class="sq-objective"><span>${q.task}</span><b>${p.n}/${p.total}</b></div>
     <div class="sq-track"><i style="width:${Math.round(p.n/p.total*100)}%"></i></div>
+    <details class="sq-details"><summary>📜 Citește povestea</summary><p class="sq-dialog">${q.line}</p><p class="sq-descr">${q.desc}</p></details>
     <div class="sq-bottom"><small>Recompensă: ${reward}</small>
       ${p.ok
         ? `<button class="p sq-claim" onclick="sqClaim('${q.id}')">✦ Revendică recompensa</button>`
@@ -168,7 +167,7 @@ function sqPreview() {
 .sq-heading h2{margin:0;font:700 20px Cinzel,Georgia,serif;color:#f0d27a}
 .sq-heading small{font-size:12px;color:var(--mute)}
 .sq-seal{width:45px;height:45px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid #c5a86a;border-radius:50%;background:#373122;box-shadow:0 0 15px #e1af5b30;font-size:22px}
-.sq-dialog{margin:7px 0;font-size:14px;color:var(--gold2);font-style:italic;line-height:1.5}
+.sq-details{text-align:left;margin-top:10px;font-size:12px;color:var(--mute)}.sq-details summary{cursor:pointer;display:inline-block;text-decoration:underline;text-underline-offset:3px}.sq-details[open]{border-top:1px solid #ffffff17;padding-top:9px}.sq-dialog{margin:7px 0;font-size:14px;color:var(--gold2);font-style:italic;line-height:1.5}
 .sq-descr{line-height:1.55;margin:8px 0;font-size:14px}
 .sq-objective{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:13px 0 6px;font-size:13px}
 .sq-objective b{white-space:nowrap;color:#f0d27a}
