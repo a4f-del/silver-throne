@@ -31,7 +31,7 @@ function make(server='beta') {
 }
 (async()=>{
  const x=make();
- assert(x.ctx.wmAuth());assert.equal(x.ctx.wmEsc('<b>'),'&lt;b&gt;');
+ assert(vm.runInContext('wmAuth()',x.ctx));assert.equal(vm.runInContext('wmEsc("<b>")',x.ctx),'&lt;b&gt;');
  await vm.runInContext('wmSync(true)',x.ctx);
  assert.equal(vm.runInContext('WM.unread',x.ctx),1);
  assert.equal(x.replies[0][0],'world_mail_inbox');

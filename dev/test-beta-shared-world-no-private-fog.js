@@ -31,6 +31,6 @@ assert(old.includes('fill-opacity=".28"') && old.includes('private-marks'),
   'LIVE old territory presentation is preserved');
 const npc=source.slice(source.indexOf('const WN ='));
 assert(npc.includes('world_npc_get') && npc.includes('world_npc_raid'),
- 'Shared NPC functions and 4-hour cooldown should remain untouched');
-assert(npc.includes('4 * 3600e3'),'4-hour cooldown preserved');
+ 'Shared NPC functions and 1-hour BETA cooldown should remain untouched');
+assert(npc.includes('cd: 1 * 3600e3'),'1-hour cooldown preserved');
 console.log('OK: BETA shared World without private fog, no save changes, LIVE layout and shared NPC raids preserved.');

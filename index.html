@@ -381,6 +381,8 @@ function dMk(i){const g=DG[i||0],ti=g.ev||typeof trTier!=='function'?0:trTier(i)
  return{one:1,dk:dKey(i,ti),tier:ti,room:p,rooms:g.rooms,k:kk,rw:(1+(pk-1)*.6)*[1,1.25,1.5][ti],bn:g.bn,di:i||0,ev:g.ev?1:0,loot:{gold:0,ore:0,xp:0,m:{}},f:null,done:false,doors:[]}}
 const dCostAt=i=>{const g=DG[i||0],d=dMk(i);return g.ev?0:d.room>=d.rooms-1?2:1};
 function startD(i){const g=DG[i||0];if(ST_SERVER==='beta'&&S.adventure&&S.adventure.di!==(i||0)){S.msg='Mai întâi retrage-te din temnița curentă.';return go()}if(S.lvl<g.lv){S.msg='Cerință: nivel '+g.lv+'.';return go()}if(S.d){S.msg='Termină întâi lupta în care ești.';return go()}if(!S.fs.some(f=>f.hp>0)){S.msg='Toți luptătorii sunt căzuți. Du-te la infirmerie.';return go()}
+ /* BETA, erou nou: aplică rezerva existentă înainte de cost, fără puncte gratuite. */
+ if(ST_SERVER==='beta'&&typeof jeFocus==='function'&&jeFocus()&&S.bp>0&&S.pts<MXP())sync();
  const d=dMk(i),boss=d.room>=d.rooms-1,c=dCostAt(i);
  if(g.ev){if(d.room===0){const e=evs();if(e.k<=0){S.msg='Nu mai ai chei pentru evenimentul acestei săptămâni.';return go()}e.k--}}else if(S.pts<c){S.msg=`${boss?'Căpitanul costă':'Fiecare monstru costă'} ${c} ${c>1?'puncte':'punct'}. Se regenerează câte unul la 6 minute.`;return go()}else spend(c);
  if(ST_SERVER==='beta'){if(!S.adventure)S.adventure={di:i||0};S.adventure.tierLocked=true;}S.d=d;S.fl=null;S.msg='';if(d.room===0)cn('d');S.tab='c';startF(boss);go();   /* cardul VS apare o clipă înainte ca lupta să se rezolve */
