@@ -147,6 +147,7 @@ function hcDone() {
   /* Doar eroii NOI pe BETA primesc introducerile narative. Nu schimbam salvările existente. */
   if (first && HC.mode === 'new' && typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta') {
     S.mrStoryV = 1;
+    S.journeyV = 1; /* exclusiv eroi NOI: Drumul Eroului, fara dublare ghid/misiuni */
     S.mrPrologPending = 1; /* prologul se afiseaza doar la eroi nou creati */
     S.mrPrologSeen = 0;
   }
