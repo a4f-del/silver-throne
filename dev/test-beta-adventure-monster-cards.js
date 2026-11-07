@@ -28,7 +28,7 @@ const api=new Function(...Object.keys(ctx),ac+';return {acDungeonPage,acCombatPa
 const page=api.acDungeonPage(0);
 assert(page.includes('ac-main-card') && page.includes('ac-main-portrait'), 'portret mare la selecție');
 assert(page.includes('ac-rail') && page.includes('Progres 2 / 3'), 'progresul temniței');
-assert((page.match(/class="ac-step/g)||[]).length===3, 'toți monștrii au carduri în progres');
+assert((page.match(/<button class="ac-step(?:\s|")/g)||[]).length===3, 'toți monștrii au carduri în progres');
 assert(page.includes('71%') && page.includes('Șanse de câștig'), 'șanse calculate de joc');
 assert(page.includes('ac-party'), 'echipa și viața sunt vizibile');
 assert(page.includes('adventureExit()')&&page.includes('startD(0)'), 'ieșirea și lupta rămân funcționale');
