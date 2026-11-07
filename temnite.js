@@ -39,7 +39,7 @@ function vDung() {
       + `${!lock ? `<button class="p dg-enter" onclick="dToggle(${i})">Intră</button>` : ''}</div></div>`;
   };
   const shown = list.filter(([g]) => S.lvl + 10 >= g.lv);   /* ca înainte: temnițele mult peste nivel rămân ascunse */
-  return tmnEvent() + `<section class="dg-sec"><h2>Temnițe</h2><div class="dg-grid">${shown.map(card).join('')}</div></section>`;
+  return tmnEvent() + (typeof heroSoloControl==='function'?heroSoloControl():'') + `<section class="dg-sec"><h2>Temnițe</h2><div class="dg-grid">${shown.map(card).join('')}</div></section>`;
 }
 /* pe card: ce clasă contracarează căpitanul (trepte.js: TR_C) și dacă o ai în echipă */
 function tmnCtr(g) {

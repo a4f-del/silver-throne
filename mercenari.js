@@ -36,7 +36,7 @@ function mrRecruit(c) {
 }
 function mrNew(c) {
   const f = { n: c, c, hp: 0, sc: 0, t: [], rk: 0, fm: 0, nn: 1, eq: { w: null, a: null } };
-  f.hp = mhp(f); f.t = [P(TR)]; (S.fs.length < TMAX() && !S.d ? S.fs : S.rs).push(f); return f;
+  f.hp = mhp(f); f.t = [P(TR)]; (S.fs.length < TMAX() && !S.d && !(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&S.soloDungeon) ? S.fs : S.rs).push(f); return f;
 }
 /* la fiecare desenare: se alătură cine a ajuns la pasul lui */
 function mrTick() {
@@ -223,7 +223,7 @@ function mrHan() {
       + `<div class="mr-hx">${i >= 0 ? (f.h ? '' : `<button onclick="toBench(${i})">La rezervă</button>`) : (mxBusy(f) ? '<button disabled>Plecat</button>' : teamCtl(f))}</div></div>`;
   }).join('');
   const bb = BL().b || 0;
-  return `<section><h2>Hanul: mercenarii tăi</h2><div class="mute">Cinci tovarăși, câte unul din fiecare clasă, care rămân cu tine pentru totdeauna. Trei intră în luptă alături de erou; ceilalți așteaptă în rezervă. Puterea lor vine din erou: un Recrut are cam 85% din forța de bază a eroului în specialitatea lui, o Legendă cam 98%, dar nimeni nu trece de 95% din viața, atacul sau apărarea eroului. Faima: +1 la fiecare luptă câștigată, +3 la căpitani și raiduri${bb ? `, plus ${bb * 5}% de la Han` : ''}. Cei din rezervă pot pleca în <b>expediții</b> de 1, 4 sau 8 ore, din care se întorc cu aur, materiale și faimă.</div><div class="mr-list">${cards}</div></section>`
+  return `<section><h2>Hanul: mercenarii tăi</h2><div class="mute">Cinci tovarăși, câte unul din fiecare clasă, care rămân cu tine pentru totdeauna. ${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'Poți lupta cu eroul singur sau cu tovarăși; mercenarii din rezervă pot pleca în expediții.':'Trei intră în luptă alături de erou; ceilalți așteaptă în rezervă.'} Puterea lor vine din erou: un Recrut are cam 85% din forța de bază a eroului în specialitatea lui, o Legendă cam 98%, dar nimeni nu trece de 95% din viața, atacul sau apărarea eroului. Faima: +1 la fiecare luptă câștigată, +3 la căpitani și raiduri${bb ? `, plus ${bb * 5}% de la Han` : ''}. Cei din rezervă pot pleca în <b>expediții</b> de 1, 4 sau 8 ore, din care se întorc cu aur, materiale și faimă.</div>${typeof heroSoloControl==='function'?heroSoloControl():''}<div class="mr-list">${cards}</div></section>`
     + (typeof mrStoryIsBeta === 'function' && mrStoryIsBeta()
       ? `<section><h2>🎬 BETA · Scenele tovarășilor</h2><div class="mute">Previzualizează întâlnirile fără să schimbi echipa sau progresul. Apar automat numai la eroii noi.</div><div class="row" style="flex-wrap:wrap;justify-content:flex-start"><button class="p" onclick="stPrologPreview()">Prolog · Ultima scânteie</button><button class="p" onclick="jePreview()">📜 Drumul Eroului (nou)</button><button onclick="sqPreview()">Misiunile anterioare</button>${MR.order.map(([c]) => `<button onclick="mrStoryPreview('${c}')">${c}</button>`).join('')}</div></section>`
       : '') + mrBld('b');
