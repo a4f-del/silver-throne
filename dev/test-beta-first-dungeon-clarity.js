@@ -65,6 +65,25 @@ assert(html.includes('aventura-carduri.css?v=2026.11.07-4')&&
  'updated UI assets are loaded without stale caching');
 assert(guide.includes("document.querySelector('.ac-return-current')"),
  'new hero guidance points at return button rather than a future boss');
+// Victoria reală a căpitanului este deja automată. Testăm mesajul de după loot
+// separat, ca informația pentru jucător să nu fie ambiguă și LIVE să fie intact.
+const start=html.indexOf('function dOneDone(d,b)'),end=html.indexOf('/* o singură cameră',start);
+assert(start>=0&&end>start,'Dungeon completion function exists');
+const finishCode=html.slice(start,end);
+function finish(server){
+ const state={msg:'Victorie',dp:{},adventure:{di:0}},d={one:1,di:0,dk:'0_0',room:3};
+ let closed=0,rerenders=0;
+ const ctx={ST_SERVER:server,S:state,DG:base.DG,trBand:()=>'',adventureClear:()=>closed++,
+   leave:()=>{state.msg='Pradă: 42 aur.'},go:()=>rerenders++};
+ new Function(...Object.keys(ctx),finishCode+';dOneDone({one:1,di:0,dk:"0_0",room:3},true);')(...Object.values(ctx));
+ return {state,closed,rerenders};
+}
+const betaFinish=finish('beta'),liveFinish=finish('live');
+assert.equal(betaFinish.closed,1,'boss closes the dungeon adventure');
+assert.equal(betaFinish.state.dp['0_0'],0,'next run starts from first monster');
+assert(betaFinish.state.msg.includes('Ai revenit automat în Coborâre')&&
+ betaFinish.state.msg.includes('Pradă: 42 aur'),'after-boss message and loot visible');
+assert(liveFinish.state.msg.includes('lista o ia de la capăt'),'LIVE victory message unchanged');
 assert(css.includes('.ac-dungeon .ac-progress-top{'),'new step status stays compact');
 assert(css.includes('.ac-dungeon .ac-return-current{'),'return button is visible in small screens');
 assert(css.includes('@media(max-width:700px)'),'mobile styling remains');
