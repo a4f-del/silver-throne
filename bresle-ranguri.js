@@ -92,6 +92,7 @@ async function gsrAction(action,data){
   const r=await tronRpc('guild_social_api',{p_action:action,p_data:data||{}});
   if(r.error){GSR.notice=String(r.error).slice(0,180);return null;}
   GSR.state=r.data;GSR.error='';GSR.last=Date.now();
+  if(action==='invite')GSR.query='';
   GSR.notice=({invite:'Invitație trimisă.',accept:'Ai intrat în breaslă.',
     decline:'Invitație refuzată.',cancel:'Invitație anulată.',rank:'Rang actualizat.',
     transfer:'Conducerea a fost predată.',kick:'Membrul a fost eliminat.'})[action]||'Actualizat.';
