@@ -36,7 +36,7 @@ function mrRecruit(c) {
 }
 function mrNew(c) {
   const f = { n: c, c, hp: 0, sc: 0, t: [], rk: 0, fm: 0, nn: 1, eq: { w: null, a: null } };
-  f.hp = mhp(f); f.t = [P(TR)]; (S.fs.length < TMAX() && !S.d ? S.fs : S.rs).push(f); return f;
+  f.hp = mhp(f); f.t = [P(TR)]; (S.fs.length < TMAX() && !S.d && !(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&S.soloDungeon) ? S.fs : S.rs).push(f); return f;
 }
 /* la fiecare desenare: se alătură cine a ajuns la pasul lui */
 function mrTick() {
