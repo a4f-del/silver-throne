@@ -11,7 +11,9 @@ const JE_STEPS = [
   say:'„Nu ne putem apăra doar cu săgeți. Aprindeți forja!” — Arcașul',
   help:'La întoarcerea din mină, vizitează pagina principală a Satului pentru întâlnirea cu Arcașul. După ce îi alegi numele, intră în Topitorie și fă prima forjare.',
   reward:{g:30,o:25},parts:[['Arcașul s-a alăturat',()=>jeHas('Arcaș')],['Ai făcut prima forjare',()=>jeCount('f')>=1]],
-  action:()=>!jeHas('Arcaș')?['Sat','a','']:['Topitorie','a','a']},
+  action:()=>!jeHas('Arcaș')
+   ? ((S.mrStorySeen||[]).includes('Arcaș') ? ['Han','a','h'] : ['Sat','a',''])
+   : ['Topitorie','a','a']},
  {id:'otel',title:'Oțel pentru cei rămași',icon:'⚒️',
   say:'„O armă uitată în rucsac nu apără pe nimeni.” — Paznicul',
   help:'Ridică obiectul forjat din Topitorie dacă nu a fost ridicat, apoi mergi în Echipă și echipează o armă. Dacă forjarea a eșuat, încearcă din nou.',
