@@ -74,6 +74,10 @@ BEGIN
    RAISE EXCEPTION 'Alege un jucator din Lume.';
   END IF;
   SELECT * INTO v_g FROM public.guilds WHERE id=v_me.guild_id FOR UPDATE;
+  SELECT * INTO v_me FROM public.guild_members WHERE user_id=v_uid FOR UPDATE;
+  IF v_me.guild_id IS DISTINCT FROM v_g.id OR v_me.role NOT IN('leader','officer') THEN
+   RAISE EXCEPTION 'Nu mai ai dreptul de a invita.';
+  END IF;
   SELECT count(*) INTO v_count FROM public.guild_members WHERE guild_id=v_me.guild_id;
   IF v_count>=20 THEN RAISE EXCEPTION 'Breasla are deja 20 de membri.'; END IF;
   IF EXISTS(SELECT 1 FROM public.guild_members WHERE user_id=v_target_id) THEN
@@ -95,17 +99,25 @@ BEGIN
 
  ELSIF v_action IN ('accept','decline') THEN
   v_inv_id:=nullif(p_data->>'invite_id','')::bigint;
+  -- Pasul 1: gasim breasla invitatiei fara lock, apoi blocam mai intai
+  -- breasla. Aceeasi ordine e folosita la invitare/anulare/ranguri.
   SELECT * INTO v_inv FROM public.guild_invitations
-   WHERE id=v_inv_id AND invitee=v_uid AND status='pending' FOR UPDATE;
+   WHERE id=v_inv_id AND invitee=v_uid AND status='pending';
+  IF NOT FOUND OR v_inv.expires_at<=now() THEN
+   RAISE EXCEPTION 'Invitatia nu mai este valabila.';
+  END IF;
+  SELECT * INTO v_g FROM public.guilds WHERE id=v_inv.guild_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Breasla nu mai exista.'; END IF;
+  SELECT * INTO v_inv FROM public.guild_invitations
+   WHERE id=v_inv_id AND invitee=v_uid AND guild_id=v_g.id AND status='pending' FOR UPDATE;
   IF NOT FOUND OR v_inv.expires_at<=now() THEN
    RAISE EXCEPTION 'Invitatia nu mai este valabila.';
   END IF;
   IF v_action='accept' THEN
-   IF v_me.user_id IS NOT NULL THEN
+   SELECT * INTO v_me FROM public.guild_members WHERE user_id=v_uid FOR UPDATE;
+   IF FOUND THEN
     RAISE EXCEPTION 'Paraseste breasla actuala pentru a accepta o invitatie.';
    END IF;
-   SELECT * INTO v_g FROM public.guilds WHERE id=v_inv.guild_id FOR UPDATE;
-   IF NOT FOUND THEN RAISE EXCEPTION 'Breasla nu mai exista.'; END IF;
    SELECT count(*) INTO v_count FROM public.guild_members WHERE guild_id=v_inv.guild_id;
    IF v_count>=20 THEN RAISE EXCEPTION 'Breasla a atins limita de 20 de membri.'; END IF;
    INSERT INTO public.guild_members(user_id,guild_id,role)
@@ -123,6 +135,11 @@ BEGIN
   IF v_me.user_id IS NULL OR v_me.role NOT IN('leader','officer') THEN
    RAISE EXCEPTION 'Nu poti anula invitatii.';
   END IF;
+  SELECT * INTO v_g FROM public.guilds WHERE id=v_me.guild_id FOR UPDATE;
+  SELECT * INTO v_me FROM public.guild_members WHERE user_id=v_uid FOR UPDATE;
+  IF v_me.guild_id IS DISTINCT FROM v_g.id OR v_me.role NOT IN('leader','officer') THEN
+   RAISE EXCEPTION 'Nu mai poti anula invitatii.';
+  END IF;
   v_inv_id:=nullif(p_data->>'invite_id','')::bigint;
   SELECT * INTO v_inv FROM public.guild_invitations
    WHERE id=v_inv_id AND guild_id=v_me.guild_id AND status='pending' FOR UPDATE;
@@ -136,6 +153,10 @@ BEGIN
  ELSIF v_action IN ('rank','transfer','kick') THEN
   IF v_me.user_id IS NULL THEN RAISE EXCEPTION 'Nu esti intr-o breasla.'; END IF;
   SELECT * INTO v_g FROM public.guilds WHERE id=v_me.guild_id FOR UPDATE;
+  SELECT * INTO v_me FROM public.guild_members WHERE user_id=v_uid FOR UPDATE;
+  IF NOT FOUND OR v_me.guild_id IS DISTINCT FROM v_g.id THEN
+   RAISE EXCEPTION 'Nu mai esti membru al acestei bresle.';
+  END IF;
   v_target_id:=nullif(p_data->>'user_id','')::uuid;
   SELECT * INTO v_target FROM public.guild_members
    WHERE user_id=v_target_id AND guild_id=v_me.guild_id FOR UPDATE;
