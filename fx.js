@@ -41,7 +41,7 @@ function fxPush(pre, txt, actor) {
 /* pentru modul manual: marchează unde începe lovitura curentă, ca să redăm doar cadrele noi */
 let FX_MARK = 0, FX_FIRST = false;
 function fxBeforeStep() { FX_MARK = FX.q.length; FX_FIRST = typeof C === 'function' && C('w') === 0; }
-function fxPlayNew(cb) { const frames = FX.q.slice(FX_MARK); fxPlay(frames, cb, FX_FIRST); }
+function fxPlayNew(cb) { const frames = FX.q.slice(FX_MARK); fxPlay(frames, cb, FX_FIRST, FX_MARK); }
 /* folosit de startD (clic pe un monstru din listă): rulează lupta exact ca autoRun(), apoi o redă */
 function fxAutoRun() {
   if (!S.d || !S.d.f) return;
@@ -49,7 +49,7 @@ function fxAutoRun() {
   const q0 = FX.q.length, lg = S.d.f.log;
   for (let g = 0; g < 300 && S.d && S.d.f; g++) step(auto1());
   S.fl = lg.slice(-6);
-  fxPlay(FX.q.slice(q0), go, first);
+  fxPlay(FX.q.slice(q0), go, first, q0);
 }
 const fxWantPlay = first => first || !S.fxInstant;
 
@@ -57,9 +57,21 @@ const fxWantPlay = first => first || !S.fxInstant;
 /* Portrete mari, unul în spatele celuilalt (primul din față); bara de viață stă sub fiecare portret.
    Cel care atacă sau e lovit „vine în față” (se mărește și urcă deasupra celorlalți) pe durata loviturii. */
 const FX_OV = 0.38;   /* cât din portret acoperă vecinul din spate */
-function fxPlay(frames, cb, first) {
+function fxStartHp(cast, offset) {
+  const hp={fs:cast.fs.map(x=>x.hp),es:cast.es.map(x=>x.hp)};
+  /* Redări succesive în BETA: reconstruim HP din cadrele deja executate,
+     ca manual → automat să nu afișeze viața de la începutul luptei. */
+  if(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&cast.adventure&&offset>0){
+    for(const fr of FX.q.slice(0,offset)) for(const side of ['fs','es']) for(const d of fr[side]||[]){
+      if(hp[side][d.i]==null||!cast[side][d.i])continue;
+      hp[side][d.i]=Math.max(0,Math.min(cast[side][d.i].mh,hp[side][d.i]+d.v));
+    }
+  }
+  return hp;
+}
+function fxPlay(frames, cb, first, offset) {
   if (!frames || !frames.length || !fxWantPlay(first) || !FX.cast) { cb(); return; }
-  const cast = FX.cast, hp = { fs: cast.fs.map(x => x.hp), es: cast.es.map(x => x.hp) };   /* viața reală de la începutul luptei, salvată în fxCast() */
+  const cast = FX.cast, hp = fxStartHp(cast, offset || 0);
   FX.playing = true;
   const m = document.createElement('div'); m.id = 'fx-m'; m.setAttribute('role', 'status'); m.setAttribute('aria-live', 'polite');
   /* mărimea portretelor: cât încape pe lățime (ambele grămezi + „VS”), cu plafon pe înălțime */
