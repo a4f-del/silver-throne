@@ -381,15 +381,44 @@ function secClaim(id) {
   S.camp.sec[id] = 1; S.msg = 'Obiectiv „' + s.nm + '” îndeplinit. Recompensă: ' + terGrant(s.rw, S.lvl) + '.'; go();
 }
 const cmpReady = () => { const c = chCur(); return (c && chReady(c) ? 1 : 0) + cmpSides().filter(s => !S.camp.sec[s.id] && objDone(s)).length; };
+
+/* BETA: din notificarea „Deschide Campania” mergem la următoarea
+   sarcină concretă, nu la introducerea lungă de deasupra listei.
+   Nu pornim automat lupta și nu schimbăm progresul campaniei. */
+function cmpOpenChecklist(source) {
+  if (!cmpBeta() || typeof S === 'undefined' || !S || S.d) return;
+  S.tab = 'm'; S.mt = 'k'; S.msg = '';
+  if (source === 'journey') S.jeCampaignOpened = 1;
+  if (source === 'story') S.sqCampaignOpened = 1;
+  go(); /* salvează alegerea și afișează întâi Campania */
+  if (typeof document === 'undefined') return;
+  const target = document.querySelector('#cmp-to-do .cmp-task:not(.done)')
+    || document.querySelector('.cmp-claim-ready')
+    || document.querySelector('.cmp-secondary .cmp-task:not(.done)')
+    || document.querySelector('.cmp-next')
+    || document.querySelector('.cmp-secondary');
+  if (!target) return;
+  target.classList.add('cmp-spotlight');
+  target.setAttribute('tabindex','-1');
+  if (typeof target.focus === 'function') {
+    try { target.focus({preventScroll:true}); } catch(e) { /* suport browsere vechi */ }
+  }
+  if (typeof target.scrollIntoView === 'function')
+    target.scrollIntoView({block:'center',
+      behavior:typeof window !== 'undefined' && window.matchMedia
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+  if (typeof setTimeout === 'function')
+    setTimeout(() => target.classList.remove('cmp-spotlight'), 2600);
+}
 function vCamp() {
   const chapters=cmpChapters(), sides=cmpSides(),cur=chCur(),n=chapters.filter(c=>S.camp.rw[c.id]).length;
   let h = `<section><h2>Campania: Tronul Cenușiu</h2><div class="mute">Regele Cenușiu a stins Vatra Regală și stă pe Tronul de Argint. Șase sigilii țin Cenușa vie, fiecare păzit de un căpitan. ${cmpBeta()?'Progresul campaniei este permanent: învinge căpitanii din temnițe. Nu sunt necesare cuceriri sau raiduri repetate.':'Progresul campaniei e permanent: nu se pierde dacă pierzi un sat sau o fortăreață.'}</div><div class="row" style="justify-content:center;gap:10px;margin-top:8px">${chapters.map(c => `<span title="Sigiliul ${c.id}: ${c.nm}" style="display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;border:2px solid ${S.camp.rw[c.id] ? 'var(--gold2)' : 'var(--line)'};background:${S.camp.rw[c.id] ? 'radial-gradient(#f0d27a,#8a6a1e)' : '#0b0e10'};color:${S.camp.rw[c.id] ? '#1a1306' : 'var(--mute)'};font:700 14px Cinzel,serif">${c.id}</span>`).join('')}</div><div class="mute" style="text-align:center">${n}/${chapters.length} sigilii arse</div></section>`;
   if (cur) {
     const ok = chReady(cur);
-    h += `<section style="border-left-color:var(--ember)"><h2>Capitolul ${cur.id}: ${cur.nm}</h2><div class="mute">${cur.reg} · recomandat nivel ${cur.lv}${S.lvl < cur.lv ? ' <b class="r4">(ai ' + S.lvl + ')</b>' : ''}</div><p>${cur.tx}</p>` + cur.obj.map(o => `<div class="${objDone(o) ? 'r2' : ''}">${objDone(o) ? '✔' : '○'} ${o.t}${o.n ? ' <span class="mute">(' + objProg(o) + ')</span>' : ''}</div>`).join('') +
-      `<div class="row"><span class="mute">Recompensă unică: ${Object.entries(TW.chRw(cur.rw, Math.max(S.lvl, cur.lv))).filter(([, v]) => v).map(([k, v]) => v + ' ' + ({ g: 'aur', o: 'minereu', x: 'exp' })[k]).join(', ')}${cur.rw.item ? ', un obiect' : ''}${cur.rw.relic ? ', o relicvă' : ''}${cur.rw.mat ? ', materiale' : ''}${cur.rw.cr ? ', cristale' : ''}${cur.rw.legend ? ', Sabia Runelor' : ''}</span><button class="p" onclick="cmpClaim(${cur.id})"${ok ? '' : ' disabled'}>Încheie capitolul</button></div></section>`;
+    h += `<section class="${cmpBeta()?'cmp-next':''}" style="border-left-color:var(--ember)"><h2>Capitolul ${cur.id}: ${cur.nm}</h2><div class="mute">${cur.reg} · recomandat nivel ${cur.lv}${S.lvl < cur.lv ? ' <b class="r4">(ai ' + S.lvl + ')</b>' : ''}</div><p>${cur.tx}</p>` + (cmpBeta()?'<div id="cmp-to-do" class="cmp-todo" aria-label="Lucruri de făcut în Campanie"><b class="cmp-todo-title">Ce ai de făcut acum</b>':'') + cur.obj.map(o => cmpBeta()?`<div class="cmp-task${objDone(o)?' done':''}"><span aria-hidden="true">${objDone(o)?'✔':'○'}</span><span>${o.t}${o.n ? ' <span class="mute">(' + objProg(o) + ')</span>' : ''}</span></div>`:`<div class="${objDone(o) ? 'r2' : ''}">${objDone(o) ? '✔' : '○'} ${o.t}${o.n ? ' <span class="mute">(' + objProg(o) + ')</span>' : ''}</div>`).join('') + (cmpBeta()?'</div>':'') +
+      `<div class="row"><span class="mute">Recompensă unică: ${Object.entries(TW.chRw(cur.rw, Math.max(S.lvl, cur.lv))).filter(([, v]) => v).map(([k, v]) => v + ' ' + ({ g: 'aur', o: 'minereu', x: 'exp' })[k]).join(', ')}${cur.rw.item ? ', un obiect' : ''}${cur.rw.relic ? ', o relicvă' : ''}${cur.rw.mat ? ', materiale' : ''}${cur.rw.cr ? ', cristale' : ''}${cur.rw.legend ? ', Sabia Runelor' : ''}</span><button class="p${cmpBeta()&&ok?' cmp-claim-ready':''}" onclick="cmpClaim(${cur.id})"${ok ? '' : ' disabled'}>Încheie capitolul</button></div></section>`;
   } else h += `<section><h2>Tronul de Argint e al tău</h2><p>Toate cele șase sigilii au ars. Ținutul e liber, iar Tronul Cenușiu își așteaptă regele. ${cmpBeta()?'Temnițele, Turnul și Lumea te așteaptă.':'Explorarea, taberele și satele rămân deschise.'}</p></section>`;
-  h += `<section><h2>Obiective secundare</h2><div class="mute">Recompense unice. Se revendică o singură dată.</div>` + sides.map(s => { const d = objDone(s), cl = S.camp.sec[s.id]; return `<div class="row"><span>${cl ? '✔' : d ? '★' : '○'} <b>${s.nm}</b>: ${s.t} <span class="mute">${s.n ? '(' + objProg(s) + ')' : ''}</span></span>${cl ? '<span class="mute">Revendicat</span>' : `<button class="p" onclick="secClaim('${s.id}')"${d ? '' : ' disabled'}>Revendică</button>`}</div>`; }).join('') + '</section>';
+  h += `<section class="${cmpBeta()?'cmp-secondary':''}"><h2>Obiective secundare</h2><div class="mute">Recompense unice. Se revendică o singură dată.</div>` + sides.map(s => { const d = objDone(s), cl = S.camp.sec[s.id]; return `<div class="row${cmpBeta()?' cmp-task'+(cl?' done':''):''}"><span>${cl ? '✔' : d ? '★' : '○'} <b>${s.nm}</b>: ${s.t} <span class="mute">${s.n ? '(' + objProg(s) + ')' : ''}</span></span>${cl ? '<span class="mute">Revendicat</span>' : `<button class="p" onclick="secClaim('${s.id}')"${d ? '' : ' disabled'}>Revendică</button>`}</div>`; }).join('') + '</section>';
   const cls = Object.keys(S.ter.cl);
   if(!cmpBeta()||cls.length)h += `<section><h2>${cmpBeta()?'Arhivă de indicii':'Jurnal de indicii'} (${cls.length}/${Object.keys(TW.CLUES).length})</h2>` + (cls.length ? cls.map(k => `<div style="margin:4px 0">• ${TW.CLUES[k]}</div>`).join('') : '<p class="mute">Vizitează ruine, peșteri, sanctuare și turnuri ca să afli ce se întâmplă în ținut.</p>') + '</section>';
   const done = chapters.filter(c => S.camp.rw[c.id]); if (done.length) h += `<section><h2>Capitole încheiate</h2>` + done.map(c => `<div style="margin:6px 0"><b>${c.id}. ${c.nm}</b><br><span class="mute">${c.out}</span></div>`).join('') + '</section>';
