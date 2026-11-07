@@ -36,6 +36,7 @@ api.mrTeamPresetUse(2);
 assert.deepEqual(S.fs,[hero,arc,guard],'Saved roster restored by class');
 assert.deepEqual(S.rs,[mage,fighter],'Reserve not duplicated');
 assert.equal(S.soloDungeon,0);
+api.mrTeamPresetUse(0); /* reaplicăm din bancă, fără preferință pentru mercenarii încă activi */
 api.mrTeamPresetUse(1);
 assert.deepEqual(S.fs,[hero,mage],'Initial +1 formation chooses an available mercenary');
 api.mrTeamPresetSave();
