@@ -80,8 +80,10 @@ function sdTasks() {
   else push('👑', 'Campanie încheiată', '✔', "sdGo('m','mt','k')");
   if (typeof tronRow === 'function') { const x = tronRow(); if (x) rest.push(x); }
   if (typeof lumeRow === 'function') { const x = lumeRow(); if (x) rest.push(x); }
-  const own = terOwnedV().length, debt = S.ter && S.ter.debt > 0;
-  push(debt ? '⚠' : '🚩', `Teritorii: ${own}/${S.map.vs.length}`, debt ? 'datorie' : '', "sdGo('m','mt','t')", debt);
+  if (typeof ST_SERVER==='undefined' || ST_SERVER!=='beta') {
+    const own = terOwnedV().length, debt = S.ter && S.ter.debt > 0;
+    push(debt ? '⚠' : '🚩', `Teritorii: ${own}/${S.map.vs.length}`, debt ? 'datorie' : '', "sdGo('m','mt','t')", debt);
+  }
   const CAP = 5, cut = Math.max(0, CAP - hot.length), open = !!S.sdMore;
   const shown = open ? rest : rest.slice(0, cut), more = open ? [] : rest.slice(cut);
   const toggle = more.length ? `<button class="sd-more" onclick="S.sdMore=1;go()">+${more.length} mai multe</button>` : '';

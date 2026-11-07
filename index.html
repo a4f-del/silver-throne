@@ -191,9 +191,9 @@ main{padding:8px 24px;max-width:940px}
 <script src="world-data.js?v=2026.11.04-4"></script>
 <script src="tron-logic.js?v=2026.11.07-5"></script>
 <script src="cladiri-art.js?v=2026.11.04-4"></script>
-<script src="teritorii.js?v=2026.11.07-8"></script>
+<script src="teritorii.js?v=2026.11.07-17"></script>
 <script src="inventar.js?v=2026.11.04-4"></script>
-<script src="panou.js?v=2026.11.07-13"></script>
+<script src="panou.js?v=2026.11.07-17"></script>
 <script src="ghid.js?v=2026.11.07-13"></script>
 <script src="mercenari.js?v=2026.11.07-13"></script>
 <script src="mercenari-poveste.js?v=2026.11.07-9"></script>
@@ -203,15 +203,15 @@ main{padding:8px 24px;max-width:940px}
 <script src="specializari.js?v=2026.11.07-5"></script>
 <script src="tron.js?v=2026.11.07-5"></script>
 <script src="lume-art.js?v=2026.11.04-4"></script>
-<script src="sat.js?v=2026.11.07-13"></script>
+<script src="sat.js?v=2026.11.07-17"></script>
 <script src="lupta-vs.js?v=2026.11.04-4"></script>
 <script src="fx.js?v=2026.11.04-4"></script>
 <script src="temnite.js?v=2026.11.04-4"></script>
-<script src="echipament-balance.js?v=2026.11.07-1"></script>
+<script src="echipament-balance.js?v=2026.11.07-16"></script>
 <script src="trepte.js?v=2026.11.04-4"></script>
 <script src="turn.js?v=2026.11.04-4"></script>
 <script src="harta.js?v=2026.11.04-4"></script>
-<script src="lume.js?v=2026.11.07-12"></script>
+<script src="lume.js?v=2026.11.07-17"></script>
 <script src="lume-pictat.js?v=2026.11.04-4"></script>
 <script src="tinut.js?v=2026.11.07-11"></script>
 <script src="tema.js?v=2026.11.04-4"></script>
@@ -296,7 +296,11 @@ const wfPick=()=>{const own=[...S.fs,...S.rs].map(f=>WFC[f.c]).filter(Boolean);r
 function mkItem(t,l,r,pi,si,q,wf){const m=RAR[r].m*(1+.1*(q||0)),s={dmg:0,def:0,hp:0,bleed:0,crit:0,loot:0,heal:0,vd:0,pd:0,ph:0,pf:0};
  if(t=='w'){wf=WF[wf]?wf:wfPick();const F=WF[wf],x=typeof F.x=='function'?F.x(l):F.x;s.dmg=Math.round((2+l*1.4)*m*F.m);for(const k in x)s[k]+=['def','hp','heal'].includes(k)?Math.round(x[k]*m):x[k]}else if(t=='j')s.hp=Math.round(2*l*m);else if(t=='h'){s.def=Math.round((1+l*.4)*m);s.hp=Math.round(2*l*m)}else if(t=='b'){s.hp=Math.round(2.5*l*m);s.def=Math.round((.5+l*.25)*m)}else{s.def=Math.round((1+l*.7)*m);s.hp=Math.round(3*l*m)}
  const PL=t=='w'?PW:t=='j'?PJ:PA,pf=pi!=null?PL[pi]:P(PL.filter(x=>(x.lv||1)<=l)),sf=si!=null?SF[si]:P(SF.filter(x=>(x.lv||1)<=l));let name=t=='w'?WF[wf].n:P(t=='j'?BJ:t=='h'?BH:t=='b'?BB:BA);
- const add=a=>{for(const k in a)if(k!='n'&&k!='m'&&k!='lv')s[k]+=['dmg','def','hp'].includes(k)?Math.round(a[k]*(1+l*.15)):a[k]};
+ const add=a=>{for(const k in a)if(k!='n'&&k!='m'&&k!='lv'){
+   const key=ST_SERVER==='beta'&&k==='vd'?'def':k;
+   const raw=ST_SERVER==='beta'&&k==='vd'?Math.max(1,Math.round(a[k]/4)):a[k];
+   s[key]+=['dmg','def','hp'].includes(key)?Math.round(raw*(1+l*.15)):raw;
+ }};
  if(RAR[r].aff>=1){add(pf);name=pf.n+' '+name}
  if(RAR[r].aff>=2){add(sf);name+=' '+sf.n}
  const it={t,l,r,q:q||0,name,s,m:[RAR[r].aff>=1?pf.m:null,RAR[r].aff>=2?sf.m:null].filter(Boolean)};if(t=='w')it.wf=wf;return it}
@@ -312,10 +316,10 @@ function mkItem(t,l,r,pi,si,q,wf){const m=RAR[r].m*(1+.1*(q||0)),s={dmg:0,def:0,
   🩸 Sângerare: ${b.bleed}<br>
   💰 Bonus aur: ${b.loot}<br>
   ✨ Vindecare: ${b.heal}<br>
-  🏰 Apărarea satului: ${b.vd}
+${ST_SERVER==='beta'?'':`  🏰 Apărarea satului: ${b.vd}`}
   </div>`;
 }
-function desc(it){const L={dmg:'atac',def:'apărare',hp:'viață',bleed:'% sângerare',crit:'% critic',loot:'% aur',heal:'% vindecare',vd:'% apărarea satului',pd:'% atac',ph:'% viață',pf:'% apărare'},o=[];const stats=stGearStats(it,ST_SERVER);for(const k in stats)if(stats[k])o.push('+'+stats[k]+(k[0]=='d'||k=='hp'?' ':' ')+L[k]);return o.join(', ')}
+function desc(it){const L={dmg:'atac',def:'apărare',hp:'viață',bleed:'% sângerare',crit:'% critic',loot:'% aur',heal:'% vindecare',vd:'% apărarea satului',pd:'% atac',ph:'% viață',pf:'% apărare'},o=[];const stats=stGearStats(it,ST_SERVER);for(const k in stats)if(stats[k] && !(ST_SERVER==='beta'&&k==='vd'))o.push('+'+stats[k]+(k[0]=='d'||k=='hp'?' ':' ')+L[k]);return o.join(', ')}
 const iname=it=>`${iic(it)}<span class="${it.lg?'rl':'r'+(it.r+1)}">${it.name}</span> <span class="mute">(niv. ${it.l}, ${it.lg?'Legendar':RAR[it.r].n}${it.q?', '+QN[it.q]:''})</span>`;
 function chance(l,r,q){const d=l-S.lvl;let b=d>0?Math.max(10,40-5*(d-1)):d==0?55:70;const sk=25*(1-Math.pow(.97,ST().p)),cap=[75,70,65,55][r];return Math.max(5,Math.min(95,Math.min(cap,b-RAR[r].pen+sk)-(r?q||0:0)*6+S.pity*5))}
 const cost=(l,r)=>Math.round(RAR[r].cost*(1+l*.3));
@@ -434,8 +438,8 @@ function train(k){const s=ST(),c=stc(s[k]);if(s[k]>=smax())S.msg='Rangul maxim l
 function vT(){const s=ST();return vScene()+`<section><h2>Antrenament</h2><div class="mute">Aurul antrenează eroul tău. Pricepere și Negoț ajută întreaga echipă. Rang maxim la nivelul ${S.lvl}: ${smax()}.</div>${STS.map(([k,n,d])=>`<div class="row"><span><b>${n}</b>, rang ${s[k]}<br><span class="mute">${d}</span></span><button class="p" onclick="train('${k}')"${s[k]>=smax()?' disabled':''}>${stc(s[k])} aur</button></div>`).join('')}</section>${vK2()}`}
 const BN=[['f','Topitorie','timere de forjare -4% pe nivel'],['i','Infirmerie','vindecare și ridicare -4% cost pe nivel'],['b','Hanul mercenarilor','+5% faimă pentru mercenari pe nivel'],['d','Depozit','+50 capacitate pe material pe nivel'],['z','Zid','+8% apărarea satului pe nivel, cu randament descrescător']];
 const bc=n=>Math.round(80*Math.pow(1.25,n)),bmax=()=>2+S.lvl;
-function build(k){const b=BL(),c=bcc(b[k]);if(b[k]>=bmax())S.msg='Nivelul maxim al clădirii la nivelul tău e '+bmax()+'.';else if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;b[k]++;cn('b');S.msg=bUpMsg(k,b[k])}go()}
-function vK(){const b=BL();return`<section><h2>Clădiri</h2><div class="mute">Nivel maxim al clădirilor la nivelul tău: ${bmax()}.</div>${BN.map(([k,n,d])=>`<div class="row"><span class="bl">${bth(k)}<span><b>${n}</b>, nivel ${b[k]}<br><span class="mute">${d}</span></span></span><button class="p" onclick="build('${k}')"${b[k]>=bmax()?' disabled':''}>${bcc(b[k])} aur</button></div>`).join('')}</section>`}
+function build(k){if(ST_SERVER==='beta'&&k==='z'){S.msg='Zidul defensiv nu mai poate fi îmbunătățit în BETA. Nivelul vechi rămâne păstrat.';return go()}const b=BL(),c=bcc(b[k]);if(b[k]>=bmax())S.msg='Nivelul maxim al clădirii la nivelul tău e '+bmax()+'.';else if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;b[k]++;cn('b');S.msg=bUpMsg(k,b[k])}go()}
+function vK(){const b=BL();return`<section><h2>Clădiri</h2><div class="mute">Nivel maxim al clădirilor la nivelul tău: ${bmax()}.</div>${BN.filter(([k])=>ST_SERVER!=='beta'||k!=='z').map(([k,n,d])=>`<div class="row"><span class="bl">${bth(k)}<span><b>${n}</b>, nivel ${b[k]}<br><span class="mute">${d}</span></span></span><button class="p" onclick="build('${k}')"${b[k]>=bmax()?' disabled':''}>${bcc(b[k])} aur</button></div>`).join('')}</section>`}
 function rn(v){const f=S.fs.find(x=>x.h)||S.fs[0];f.n=v.replace(/[<>"&]/g,'').trim().slice(0,14)||f.n;go()}
 const AG={'Campion':'M10 32L10 16 18 24 24 12 30 24 38 16 38 32z','Războinic':'M22 8h4v24h-4zM15 30h18v4H15zM22 34h4v7h-4z','Arcaș':'M15 8Q37 24 15 40Q25 24 15 8zM11 22h28v4H11z','Paznic':'M12 10h24v14c0 8-12 14-12 14S12 32 12 24z','Mag':'M24 8l4.7 10.6 11.3 1-8.6 7.5 2.6 11.1L24 32l-10 6.2 2.6-11.1L8 19.6l11.3-1z','Vraci':'M20 8h8v12h12v8H28v12h-8V28H8v-8h12z'};
 /* Imagini avatar: AV['Campion']={s:'data:image/webp;base64,...' (static),a:'data:image/webp;base64,...' (animat, doar premium)} */
@@ -661,9 +665,9 @@ function mReset(){SMC.x=0;SMC.y=0;SMC.w=SMW;SMC.h=SMH;smApply()}
  document.addEventListener('wheel',e=>{const s=el();if(!s||!s.contains(e.target))return;if(SMC.w>=SMW-.5&&e.deltaY>0)return;e.preventDefault();const r=s.getBoundingClientRect();smZoom(e.deltaY<0?1.2:1/1.2,(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height)},{passive:false});
 })();
 function dpw(){const gd=S.gd||[],wl=60*(1-Math.pow(.92,BL().z)),vd=gd.reduce((s,g)=>s+bon(g).vd,0),b=gd.reduce((s,g)=>s+atkOf(g)*3+mhp(g)*.4+bon(g).def*10,0)+20+4*S.lvl+wl*(30+14*S.lvl)/100*TP.wallFlat;return Math.round(b*Math.min(2.2,1+(wl+vd)/100))}
-function atkCheck(){const n=Date.now();if(!S.na)S.na=n+36e5;let c=0;while(S.na<=n&&c<3){c++;const v=wv(),vl=Math.max(1,S.lvl+v.dl),A=(30+14*vl)*R(.8,1.2)*(v.st=='agr'?1.15:1)*(1+Math.min(.5,(v.gd||0)*.1)),D=dpw(),p=Math.min(.9,Math.max(.1,D/(D+A)));let m;if(Math.random()<p){const g=10+8*vl;S.gold+=g;m=`${v.b} din ${v.n} a atacat satul${(v.gd||0)>=2?' din răzbunare':''} și a fost respins. Tribut: +${g} aur.`}else{const g=Math.round(Math.min(S.gold*.1,60+30*vl)),o=Math.floor(S.ore*.05);S.gold-=g;S.ore-=o;m=`${v.b} din ${v.n} a spart apărarea${(v.gd||0)>=2?' (răzbunare)':''} și a luat ${g} aur și ${o} minereu.`}(S.al||(S.al=[])).unshift(m);S.al.length=Math.min(5,S.al.length);S.msg=m;S.na+=(40+RI(0,30))*6e4}if(S.na<=n)S.na=n+36e5}
-function hireG(){const c=100+60*S.lvl,g=S.gd||(S.gd=[]);if(g.length>=2)S.msg='Ai deja 2 străjeri.';else if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;const f={n:P(NMS),c:'Gardian',hp:0,sc:0,t:[P(TR)]};f.hp=mhp(f);g.push(f);S.msg=f.n+' păzește acum satul.'}go()}
-function vZ(){const gd=S.gd||[],wl=Math.round(60*(1-Math.pow(.92,BL().z))),c=100+60*S.lvl;return`<section><h2>Apărarea satului</h2><div class="mute">Putere: <b>${dpw()}</b> · Zid: +${wl}% · Următorul atac peste ${fmt((S.na||Date.now())-Date.now())}. Un atac nu e niciodată sigur, nici imposibil: șansa ta de a-l respinge e între 10% și 90%.</div></section><section><h2>Străjeri (${gd.length}/2)</h2>${gd.map(g=>`<div class="row"><span><b>${g.n}</b> <span class="mute">${(g.t||[]).map(x=>x.n).join(', ')}</span></span><span class="mute">Echipează-l din fila Echipă</span></div>`).join('')}${gd.length<2?`<div class="row"><span class="mute">Străjerii nu luptă în mină, doar apară satul. Pune pe ei iteme cu „apărarea satului”.</span><button class="p" onclick="hireG()">${c} aur</button></div>`:''}</section><section><h2>Atacuri recente</h2>${(S.al||[]).map(x=>`<div class="mute">${x}</div>`).join('')||'<p class="mute">Niciun atac încă.</p>'}</section>`}
+function atkCheck(){if(ST_SERVER==='beta')return; /* fara atacuri automate NPC asupra satului comun */const n=Date.now();if(!S.na)S.na=n+36e5;let c=0;while(S.na<=n&&c<3){c++;const v=wv(),vl=Math.max(1,S.lvl+v.dl),A=(30+14*vl)*R(.8,1.2)*(v.st=='agr'?1.15:1)*(1+Math.min(.5,(v.gd||0)*.1)),D=dpw(),p=Math.min(.9,Math.max(.1,D/(D+A)));let m;if(Math.random()<p){const g=10+8*vl;S.gold+=g;m=`${v.b} din ${v.n} a atacat satul${(v.gd||0)>=2?' din răzbunare':''} și a fost respins. Tribut: +${g} aur.`}else{const g=Math.round(Math.min(S.gold*.1,60+30*vl)),o=Math.floor(S.ore*.05);S.gold-=g;S.ore-=o;m=`${v.b} din ${v.n} a spart apărarea${(v.gd||0)>=2?' (răzbunare)':''} și a luat ${g} aur și ${o} minereu.`}(S.al||(S.al=[])).unshift(m);S.al.length=Math.min(5,S.al.length);S.msg=m;S.na+=(40+RI(0,30))*6e4}if(S.na<=n)S.na=n+36e5}
+function hireG(){if(ST_SERVER==='beta'){S.msg='Garnizoanele vechi au fost retrase în BETA. Păstrăm străjerii existenți.';return go()}const c=100+60*S.lvl,g=S.gd||(S.gd=[]);if(g.length>=2)S.msg='Ai deja 2 străjeri.';else if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;const f={n:P(NMS),c:'Gardian',hp:0,sc:0,t:[P(TR)]};f.hp=mhp(f);g.push(f);S.msg=f.n+' păzește acum satul.'}go()}
+function vZ(){if(ST_SERVER==='beta')return '<section><h2>Satul tău este în siguranță</h2><p>Atacurile automate și garnizoanele au fost retrase. Străjerii vechi rămân în salvare, iar steagurile și renovările sunt cosmetice.</p></section>';const gd=S.gd||[],wl=Math.round(60*(1-Math.pow(.92,BL().z))),c=100+60*S.lvl;return`<section><h2>Apărarea satului</h2><div class="mute">Putere: <b>${dpw()}</b> · Zid: +${wl}% · Următorul atac peste ${fmt((S.na||Date.now())-Date.now())}. Un atac nu e niciodată sigur, nici imposibil: șansa ta de a-l respinge e între 10% și 90%.</div></section><section><h2>Străjeri (${gd.length}/2)</h2>${gd.map(g=>`<div class="row"><span><b>${g.n}</b> <span class="mute">${(g.t||[]).map(x=>x.n).join(', ')}</span></span><span class="mute">Echipează-l din fila Echipă</span></div>`).join('')}${gd.length<2?`<div class="row"><span class="mute">Străjerii nu luptă în mină, doar apară satul. Pune pe ei iteme cu „apărarea satului”.</span><button class="p" onclick="hireG()">${c} aur</button></div>`:''}</section><section><h2>Atacuri recente</h2>${(S.al||[]).map(x=>`<div class="mute">${x}</div>`).join('')||'<p class="mute">Niciun atac încă.</p>'}</section>`}
 const SL=['w','a','h','b','j','r'],SLN={w:'Armă',a:'Armură',h:'Coif',b:'Cizme',j:'Bijuterie',r:'Relicvă'},RK=['Recrut','Veteran','Elită','Maestru','Legendă'];
 function relic(ev){const g=ev?{lv:Math.max(8,S.lvl),w:[0,70,20,8,2]}:DG[S.d.di||0];if(g.lv<8)return;let x=Math.random()*100,q=0;for(;q<g.w.length-1&&x>=g.w[q];q++)x-=g.w[q];const ks=['pd','ph','heal','pf'].sort(()=>Math.random()-.5).slice(0,2),s={},v=Math.round((3+g.lv*.18)*(1+.1*q));ks.forEach(k=>s[k]=v);(S.d.loot.it||(S.d.loot.it=[])).push({t:'r',l:g.lv,r:3,q,name:P(['Ochiul Cenușii','Colții Haitei','Inima Mlaștinii','Cenușa Veche','Pecetea Regelui','Lacrima Izvorului']),s,m:[]})}
 function auto1(){const f=S.d.f,a=S.fs[f.i],al=f.es.map((e,i)=>[e,i]).filter(([e])=>e.hp>0),r=S.rule||'weak';al.sort(r=='strong'?(x,y)=>y[0].hp-x[0].hp:r=='first'?(x,y)=>x[1]-y[1]:(x,y)=>x[0].hp-y[0].hp);f.t=al[0][1];let k='n';if(!(a.cd>0)){if(a.c=='Vraci'){if(S.fs.some(x=>x.hp>0&&x.hp<mhp(x)*.6))k='s'}else if(a.c!='Paznic'||al.length>1)k='s'}return k}
@@ -674,7 +678,7 @@ const hpp=()=>{const t=S.fs.reduce((a,f)=>a+mhp(f),0);return S.fs.reduce((a,f)=>
 function bl(m){(S.bg||(S.bg=[])).unshift(m);S.bg.length=Math.min(6,S.bg.length)}
 function btog(k){const b=BT();b[k]=b[k]?0:1;go()}
 function bval(k,v){BT()[k]=k=='ft'?v:+v;go()}
-function bsc(it,f){const s=stGearStats(it,ST_SERVER),w={dmg:3,def:3,hp:1,heal:1,crit:2,bleed:1,pd:6,ph:6,pf:6,loot:.5,vd:0};if(f.c=='Vraci'){w.heal=6;w.dmg=2}if(f.c=='Paznic'){w.def=6;w.hp=2;w.pf=10;w.ph=8;w.dmg=1;w.pd=2}if(f.c=='Gardian')w.vd=4;let t=0;for(const k in w)t+=(s[k]||0)*w[k];return t}
+function bsc(it,f){const s=stGearStats(it,ST_SERVER),w={dmg:3,def:3,hp:1,heal:1,crit:2,bleed:1,pd:6,ph:6,pf:6,loot:.5,vd:0};if(f.c=='Vraci'){w.heal=6;w.dmg=2}if(f.c=='Paznic'){w.def=6;w.hp=2;w.pf=10;w.ph=8;w.dmg=1;w.pd=2}if(f.c=='Gardian')w.vd=ST_SERVER==='beta'?0:4;let t=0;for(const k in w)t+=(s[k]||0)*w[k];return t}
 function bequip(){for(const f of[...S.fs,...(S.gd||[])])for(let i=0;i<S.inv.length;i++){const it=S.inv[i],c=E(f)[it.t];if(!c||bsc(it,f)>bsc(c,f)*1.02){const e=E(f);S.inv.splice(i,1);if(c)S.inv.push(c);e[it.t]=it;bl('Echipat '+it.name+' pe '+f.n);go();return 1}}return 0}
 function bheal(){const a=S.fs,d=a.findIndex(f=>f.hp<=0),rc=Math.round(15*S.lvl*Math.pow(.96,BL().i)),hc=Math.round(6*S.lvl*Math.pow(.96,BL().i));if(d>=0&&S.gold>=rc){revive(d);bl('Ridicat: '+a[d].n);return 1}if(a.some(f=>f.hp>0&&f.hp<mhp(f)*.9)&&S.gold>=hc){heal();bl('Vindecare echipă');return 1}return 0}
 function bcraft(){const b=BT();if(S.forge.findIndex(x=>!x)<0)return 0;const ts=b.ft=='all'?['w','a','h','b']:[b.ft],t=ts[(S.bn2=(S.bn2||0)+1)%ts.length],PL=t=='w'?PW:PA;let p=0,s=0;PL.forEach((x,i)=>{if(x.lv<=S.lvl&&have(x.m)>have(PL[p].m))p=i});SF.forEach((x,i)=>{if(x.lv<=S.lvl&&have(x.m)>have(SF[s].m))s=i});
@@ -692,7 +696,8 @@ function cn(k){const c=S.cn||(S.cn={});c[k]=(c[k]||0)+1;if(!S.ib)dm().list.forEa
 const C=k=>(S.cn&&S.cn[k])||0,TU=GHID;   /* pașii ghidului sunt în ghid.js */
 /* ghidul (tuChk, tuGo, tuNext, tuSkip, tuH) și „Ce poți face acum” (ghIdle) sunt în ghid.js */
 const MLV={osn:5,fie:6,ven:12,cen:20},pm=()=>{const L=S.d.raid!=null?S.lvl:DG[S.d.di||0].lv;return P(AFM.filter(k=>(MLV[k]||0)<=L))},nxt=u=>{const x=[...pls(u),...SF].filter(y=>(y.lv||1)>u.l).sort((a,b)=>a.lv-b.lv)[0];return x?' Următorul: '+x.n+' (obiect de nivel '+x.lv+').':''};
-const AL={dmg:'atac',def:'apărare',hp:'viață',bleed:'% sângerare',crit:'% critic',loot:'% aur',heal:'% vindecare',vd:'% apărare sat',pd:'% atac',ph:'% viață',pf:'% apărare'},ad=x=>Object.keys(x).filter(k=>AL[k]&&x[k]).map(k=>'+'+x[k]+' '+AL[k]).join(', ');
+const AL={dmg:'atac',def:'apărare',hp:'viață',bleed:'% sângerare',crit:'% critic',loot:'% aur',heal:'% vindecare',vd:'% apărare sat',pd:'% atac',ph:'% viață',pf:'% apărare'},
+ ad=x=>Object.keys(x).filter(k=>AL[k]&&x[k]&&!(ST_SERVER==='beta'&&k==='vd')).map(k=>'+'+x[k]+' '+AL[k]).join(', ');
 function botTick(){S.ib=1;try{botTick0()}finally{S.ib=0}}
 const dk=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()},MQ=[['w',4,8],['d',1,2],['l',1,2],['f',2,3],['r',1,1]],
 /* misiunile fără puncte: [cheie, minim, maxim, puncte primite, nivel minim, condiție] — după ce le faci, ai din nou puncte */

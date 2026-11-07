@@ -248,7 +248,7 @@ function lwSelPanel() {
   const mine = st.me && p.id === st.me.user_id, can = mine ? null : lwCan(p), myP = Math.round(TT.power(tronUnits()));
   const cmp = mine ? '' : p.power > myP * 1.25 ? '<span class="r4">mai puternic decât tine</span>' : p.power < myP * 0.8 ? '<span class="lw-ok">mai slab decât tine</span>' : 'cam cât tine';
   return `<section class="lw-sel"><div class="lw-sel-h">${av({ n: p.hero && p.hero.n || p.name, c: (p.hero && p.hero.c) || 'Campion', ic: p.hero && p.hero.ic }, 56)}<div><h2>${tEsc(p.name)}${mine ? ' <span class="mute">(tu)</span>' : ''}</h2><div class="mute">${p.title ? '♛ ' + tEsc(p.title) + ' · ' : ''}${tEsc(p.stage_name)} · văzut ${lwAgo(p.seen)}</div></div></div>`
-    + `<div class="lw-stats"><div><b>${p.level}</b><span>Nivel</span></div><div><b>${lwNum(p.power)}</b><span>Putere</span></div><div><b>${p.territories}</b><span>Teritorii</span></div></div>`
+    + `<div class="lw-stats"><div><b>${p.level}</b><span>Nivel</span></div><div><b>${lwNum(p.power)}</b><span>Putere</span></div>${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'':'<div><b>'+p.territories+'</b><span>Teritorii</span></div>'}</div>`
     + (mine ? '' : `<div class="mute">Puterea echipei lui: ${cmp} (a ta: ${lwNum(myP)}).</div>`)
     + `<div class="row lw-act"><span class="mute">${mine ? 'Satul tău, așa cum îl văd ceilalți.' : can.ok ? 'Dacă învingi, iei prada și experiența. El nu pierde nimic.' : can.why}</span><span>${mine ? '' : `<button class="p" onclick="lwAttack('${p.id}')"${can.ok && !LUME.busy ? '' : ' disabled'}>Atacă · 1 ⚔</button> `}<button onclick="lwProfile('${p.id}')">Vezi profilul</button></span></div></section>`;
 }
@@ -265,7 +265,10 @@ function vLume() {
   if (!LUME.loading && (!LUME.st || Date.now() - LUME.at > 45000 || (Date.now() - LUME.at > 8000 && JSON.stringify(lwSnap()) !== LUME.pubSig))) lwSync();
   if (!LUME.st) return `<section><h2>Lumea</h2><p class="mute">${LUME.err ? tEsc(LUME.err) : 'Se încarcă harta lumii…'}</p>${LUME.err ? '<button onclick="lwSync(true)">Încearcă din nou</button>' : ''}</section>`;
   const n = LUME.st.players.length, c = lwCfg();
-  let h = `<section><h2>Harta</h2><div class="mute">Satele tuturor jucătorilor, în jurul Tronului de Argint. În jurul satului tău, în chenarul auriu, e <b>ținutul tău</b>: satele de jefuit și de cucerit, taberele, și locurile de interes, pe care doar tu le vezi. Acum: <b>${n}</b> ${n === 1 ? 'sat' : 'sate'} de jucători.</div>${LUME.err ? `<p class="r4">${tEsc(LUME.err)}</p>` : ''}${LUME.repErr ? `<p class="r4">Rezultatul ultimului atac nu a ajuns la server (${tEsc(LUME.repErr)}). Se retrimite automat.</p>` : ''}${lwEnBar()}${lwMap()}`;
+  let h = `<section><h2>Harta</h2><div class="mute">${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?
+  'Lumea este comună: satele NPC sunt vizibile tuturor, iar satele jucătorilor pot fi atacate sau vizitate prin profil. Nu există cucerire, garnizoane private sau taxe de întreținere.' :
+  'Satele tuturor jucătorilor, în jurul Tronului de Argint. În jurul satului tău, în chenarul auriu, e <b>ținutul tău</b>: satele de jefuit și de cucerit, taberele, și locurile de interes, pe care doar tu le vezi.'}
+  Acum: <b>${n}</b> ${n === 1 ? 'sat' : 'sate'} de jucători.</div>${LUME.err ? `<p class="r4">${tEsc(LUME.err)}</p>` : ''}${LUME.repErr ? `<p class="r4">Rezultatul ultimului atac nu a ajuns la server (${tEsc(LUME.repErr)}). Se retrimite automat.</p>` : ''}${lwEnBar()}${lwMap()}`;
   h += `<div class="st-lg"><span><i style="background:#f0d27a"></i>Satul tău</span><span><i style="background:#c0504a"></i>Poate fi atacat</span><span><i style="background:#7b7f82"></i>Începător (sub nivelul ${c.min_level}) sau atacat recent de tine</span><span>👑 auriu: regele săptămânii · argintiu: pe Tron acum</span><span>Satul crește cu nivelul jucătorului: palisadă la 10, zid și turn la 20, fortificații la 25, castel de la 30</span></div></section>`;
   return h + lwSelPanel() + lwLog() + `<section><h2>Reguli</h2><div class="mute">• Bara are ${c.en_max} atacuri și se reface câte unul la ${c.en_regen_min} de minute, adică ${Math.round(24 * 60 / c.en_regen_min)} pe zi.<br>• Același jucător îl poți ataca o dată la ${c.same_h} ore. Începătorii (sub nivelul ${c.min_level}) nu pot fi atacați și nu pot ataca.<br>• Lupți cu fantoma echipei lui, cu aceleași plafoane ca la Tron. Dacă învingi, iei prada calculată de joc și experiență în plus. Apărătorul nu pierde niciodată nimic, doar află din jurnal.<br>• Satele din Lume nu se pot cuceri; teritoriile rămân în regiunea ta.</div></section>`;
 }
@@ -294,7 +297,7 @@ const lwMaxAv = (lv, html, big) => lv >= (typeof LMAX !== 'undefined' ? LMAX : 5
 function vBoard() {
   const k = LUME.bk, b = LUME.board[k], me = LUME.st && LUME.st.me && LUME.st.me.user_id;
   if (!LUME.bLoad[k] && (!b || Date.now() - (LUME.bAt[k] || 0) > 60000)) lwBoard(k);
-  const tabs = `<div class="tabs lw-bt">${LW.BOARD.map(([x, n]) => `<button${x === k ? ' class="p"' : ''} onclick="lwBk('${x}')">${n}</button>`).join('')}</div>`;
+  const tabs = `<div class="tabs lw-bt">${LW.BOARD.filter(([x])=>typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||x!=='terr').map(([x, n]) => `<button${x === k ? ' class="p"' : ''} onclick="lwBk('${x}')">${n}</button>`).join('')}</div>`;
   let h = `<section><h2>Clasament</h2>${tabs}`;
   if (!b) return h + `<p class="mute">${LUME.bErr ? tEsc(LUME.bErr) : 'Se încarcă…'}</p></section>`;
   if (!b.rows.length) return h + `<p class="mute">${k === 'tron' ? 'Nu sunt încă date despre domnii la Tron.' : 'Nimeni în clasament încă.'}</p></section>`;
@@ -315,7 +318,7 @@ async function lwProfile(id) {
   const units = (p.units || []).map(u => `<div class="lwp-u"><b>${tEsc(u.n)}</b><span class="mute">${tEsc(u.c)}</span><span>${lwNum(u.hp)} viață · ${lwNum(u.atk)} atac · ${lwNum(u.def)} apărare</span></div>`).join('');
   const rec = (p.recent || []).map(x => `<div class="row"><span>${x.att ? (x.win ? '⚔ A învins satul lui ' : '⚔ A pierdut la satul lui ') : (x.win ? '🛡 A fost învins de ' : '🛡 L-a respins pe ')}${tEsc(x.other)}</span><span class="mute">${lwAgo(x.t)}</span></div>`).join('');
   mdl(`<div class="lwp"><div class="lwp-hd">${lwMaxAv(p.level, av({ n: p.hero.n || p.name, c: p.hero.c || 'Campion', ic: p.hero.ic }, 76), 1)}<div><h3>${tEsc(p.name)}${p.me ? ' <span class="mute">(tu)</span>' : ''}</h3><div class="lwp-t">${p.title ? '♛ ' + tEsc(p.title) : '<span class="mute">Fără titlu</span>'}</div><div class="mute">${tEsc(p.stage_name)} · joacă din ${lwDate(p.joined)}</div></div></div>`
-    + `<div class="lw-stats"><div><b>${p.level}</b><span>Nivel</span></div><div><b>${lwNum(p.power)}</b><span>Putere</span></div><div><b>${p.territories}</b><span>Teritorii</span></div></div>`
+    + `<div class="lw-stats"><div><b>${p.level}</b><span>Nivel</span></div><div><b>${lwNum(p.power)}</b><span>Putere</span></div>${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'':'<div><b>'+p.territories+'</b><span>Teritorii</span></div>'}</div>`
     + `<div class="lwp-rk mute">Locul <b>${rk.level}</b> la nivel și <b>${rk.power}</b> la putere, din ${rk.total} jucători.</div>`
     + `<h4>Echipa</h4>${units || '<p class="mute">Nepublicată.</p>'}`
     + `<h4>Lupte</h4><div class="lwp-g"><div><b>${p.raids_won}</b><span>atacuri câștigate</span></div><div><b>${p.raids_lost}</b><span>atacuri pierdute</span></div><div><b>${p.def_won}</b><span>atacuri respinse</span></div><div><b>${p.def_lost}</b><span>ori învins acasă</span></div></div>`

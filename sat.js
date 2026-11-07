@@ -31,6 +31,7 @@ function satNeedsInfirmary(){
  catch(e){return false;}
 }
 function satVisible(k){
+ if(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&k==='z')return false;
  if(!satFocusOn()||S.satShowAll)return true;
  if(['a','h','t','x'].includes(k))return true;
  if(k==='i')return satStage()>=1||satNeedsInfirmary();
@@ -147,7 +148,10 @@ function satStatus(k) {
     if (k === 'p') { const s = shop(), n = SH.reduce((a, [x]) => a + ((s[x] || []).length), 0); return [`${n} ${n === 1 ? 'obiect' : 'obiecte'} de vânzare`, 0]; }
     if (k === 'l') return [S.lvl < 6 ? 'se deschide la nivelul 6' : 'obiecte de calitate', 0];
     if (k === 'd') return [`minereu ${S.ore} · capacitate ${cap()}`, 0];
-    if (k === 'z') { const t = (S.na || now) - now; return [`putere ${dpw()} · atac în ${sdT(t)}`, !!(S.al && S.al.length)]; }
+    if (k === 'z') {
+      if(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta')return ['doar aspect vizual',0];
+      const t = (S.na || now) - now; return [`putere ${dpw()} · atac în ${sdT(t)}`, !!(S.al && S.al.length)];
+    }
     if (k === 'q') return [S.prem ? (S.bt && S.bt.on ? 'pornit' : 'oprit') : 'premium', 0];
     if (k === 'i') { const d = deadAll().length, h = mrAll().filter(f => f.hp > 0 && f.hp < mhp(f)).length; return [d ? `${d} ${d === 1 ? 'căzut' : 'căzuți'} de ridicat` : h ? `${h} ${h === 1 ? 'rănit' : 'răniți'}` : 'toți sănătoși', d > 0]; }
     if (k === 'g') return ['culoarea satului', 0];
@@ -173,7 +177,7 @@ function vHub() {
 function satHov(k, on) { const z = document.querySelector(`.vh-z[data-z="${k}"]`); if (z) z.classList.toggle('on', !!on); }
 /* banda din interiorul unei clădiri: înapoi la Sat + celelalte clădiri */
 function vBar(k) {
-  return `${satDefs()}<div class="vb"><button class="vb-back" onclick="vil('')" aria-label="Înapoi la Sat">‹ Sat</button><div class="vb-ch">${SAT_B.filter(([x])=>satVisible(x)||x===k).map(([x, n]) => { const hot = satStatus(x)[1]; return `<button class="vb-c${x === k ? ' on' : ''}${hot ? ' hot' : ''}" data-v="${x}" onclick="vil('${x}')" aria-current="${x === k}"><span class="vb-i">${satIcon(x)}</span><span>${n}</span></button>`; }).join('')}</div>${satExploreButton()}</div>`;
+  return `${satDefs()}<div class="vb"><button class="vb-back" onclick="vil('')" aria-label="Înapoi la Sat">‹ Sat</button><div class="vb-ch">${SAT_B.filter(([x])=>satVisible(x)||(x===k&&!(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&x==='z'))).map(([x, n]) => { const hot = satStatus(x)[1]; return `<button class="vb-c${x === k ? ' on' : ''}${hot ? ' hot' : ''}" data-v="${x}" onclick="vil('${x}')" aria-current="${x === k}"><span class="vb-i">${satIcon(x)}</span><span>${n}</span></button>`; }).join('')}</div>${satExploreButton()}</div>`;
 }
 
 /* ------------------------------------------------------------------ FEREASTRA CU BONUSURI */

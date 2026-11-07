@@ -5,13 +5,14 @@ const fs=require('node:fs'),path=require('node:path');
 const root=path.join(__dirname,'..');
 const sat=fs.readFileSync(path.join(root,'sat.js'),'utf8');
 const source=sat.slice(0,sat.indexOf('/* zonele din imaginile satului'));
-const fn=new Function('S','jeFocusActive','mrAll','mhp',source+';return {satFocusOn,satVisible,satStage};');
-function town({focus=true,done=[],injured=false,showAll=false}={}){
+const fn=new Function('S','ST_SERVER','jeFocusActive','mrAll','mhp',source+';return {satFocusOn,satVisible,satStage};');
+function town({focus=true,done=[],injured=false,showAll=false,server='beta'}={}){
  const S={je:{done},fs:[{hp:injured?70:100}],satShowAll:showAll};
- return fn(S,()=>focus,()=>S.fs,()=>100);
+ return fn(S,server,()=>focus,()=>S.fs,()=>100);
 }
 const core=['a','h','t','x'];
 const extras=['p','l','i','d','z','g','q'];
+const activeExtras=extras.filter(k=>k!=='z');
 const start=town();
 assert(core.every(k=>start.satVisible(k))&&extras.every(k=>!start.satVisible(k)),
  'Only four core buildings visible initially');
@@ -21,10 +22,12 @@ assert(mine.satVisible('i')&&!mine.satVisible('p'),'Infirmary after mine');
 const forge=town({done:['poarta','urme']});
 assert(forge.satVisible('p')&&forge.satVisible('d')&&!forge.satVisible('q'),
  'Market and storage after forge');
-assert(extras.every(k=>town({showAll:true}).satVisible(k)),'Manual show-all overrides stages');
-assert(extras.every(k=>town({done:['poarta','urme','otel','han']}).satVisible(k)),
+assert(activeExtras.every(k=>town({showAll:true}).satVisible(k)),'Manual show-all overrides stages except retired Defense');
+assert(!town({showAll:true}).satVisible('z'),'BETA defense is retired even with Show All');
+assert(activeExtras.every(k=>town({done:['poarta','urme','otel','han']}).satVisible(k)),
  'Veteran unlocks all');
-assert(extras.every(k=>town({focus:false}).satVisible(k)),'Existing heroes unchanged');
+assert(activeExtras.every(k=>town({focus:false}).satVisible(k)),'Existing BETA heroes retain nondefense buildings');
+assert(extras.every(k=>town({focus:false,server:'live'}).satVisible(k)),'LIVE defense remains visible');
 const code=Object.fromEntries(['index.html','erou.js','panou.js','mercenari.js','ghid.js','drumul-eroului.js'].map(n=>
  [n,fs.readFileSync(path.join(root,n),'utf8')]));
 assert(code['erou.js'].includes('S.journeyUxV = 2'),'New BETA hero opt-in');
