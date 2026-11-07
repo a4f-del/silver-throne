@@ -48,7 +48,7 @@ function acDungeonPage(i) {
   if(boss&&data&&typeof TR_A!=='undefined'&&TR_A[data.a])
     detail+='<div class="ac-ability"><b>♛ Abilitatea căpitanului</b><span>'+acSafe(TR_A[data.a])+'</span></div>';
   detail+='</div>';
-  return '<section class="ac-scene"><div class="ac-scene-head"><div><small>Temniță · Eroul este plecat din Sat</small><h2>'+acSafe(g.n)+'</h2></div>' +
+  return '<section class="ac-scene ac-dungeon"><div class="ac-scene-head"><div><small>Temniță · Eroul este plecat din Sat</small><h2>'+acSafe(g.n)+'</h2></div>' +
     '<button class="ac-retreat" onclick="adventureExit()">‹ Retrage-te</button></div>' +
     (typeof trChips==='function'&&trChips(i)?'<div class="ac-difficulty"><div class="ac-difficulty-head"><b>Dificultate: '+acSafe(TR_T.n[trTier(i)])+'</b>' +
     (S.adventure&&S.adventure.tierLocked?'<small>Fixată pentru această incursiune. Retrage-te pentru a schimba.</small>':'<small>Alege dificultatea înainte de prima luptă.</small>')+'</div>'+
@@ -59,9 +59,9 @@ function acDungeonPage(i) {
     '<div class="ac-main-info"><h3>'+acSafe(selected)+'</h3>'+detail+'</div></div>' +
     '<div class="ac-side"><h3>'+ (canFight?'Pregătirea luptei':'Informații despre adversar') +'</h3>' +
     (canFight&&odds!=null?'<div class="ac-odds">Șanse de câștig <strong>'+odds+'%</strong></div>':'') +
+    (canFight?'<button class="p ac-primary" onclick="startD('+i+')">'+(boss?'⚔ Înfruntă căpitanul':'⚔ Luptă')+' · '+(cost?cost+' puncte':'gratuit')+'</button>':'') +
     '<p class="ac-hint">'+(canFight?'Poți porni lupta cu echipa actuală.':sel<p?'Ai învins acest adversar.':'Adversarul va deveni disponibil după luptele anterioare.')+'</p>' +
     '<p class="ac-hint">Echipament recomandat: <b>'+acSafe(typeof recGear==='function'?recGear(d.k):'echipament potrivit nivelului')+'</b></p>' +
-    (canFight?'<button class="p ac-primary" onclick="startD('+i+')">'+(boss?'⚔ Înfruntă căpitanul':'⚔ Luptă')+' · '+(cost?cost+' puncte':'gratuit')+'</button>':'') +
     '</div></div>'+acParty()+'</section>';
 }
 function acCombatPage(d) {

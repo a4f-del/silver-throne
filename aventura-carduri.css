@@ -149,3 +149,96 @@ body.st-adventure .ac-scene{
 .ac-difficulty .tr-ch button.p{border-color:#f0d27a;box-shadow:0 0 0 1px #e4bb6d,0 0 12px #efc76544}
 .ac-difficulty .tr-ch button:disabled{opacity:.52;cursor:not-allowed}
 @media(max-width:440px){.ac-difficulty{padding:9px}.ac-difficulty .tr-ch button{flex:1;padding:7px 5px}}
+
+
+/* BETA — Temnița încapă într-un ecran: portret, progres, acțiune și echipă.
+ * Se aplică DOAR ecranului de pregătire (.ac-dungeon), nu luptelor animate,
+ * Turnului sau LIVE. Nu ascundem butonul principal și nu tăiem conținutul. */
+body.st-adventure .ac-scene.ac-dungeon{
+  padding:clamp(9px,1.35dvh,15px);
+  margin-bottom:0;
+}
+.ac-dungeon .ac-scene-head{margin-bottom:8px;gap:8px}
+.ac-dungeon .ac-scene-head h2{font-size:clamp(19px,2.45vw,26px);line-height:1.1}
+.ac-dungeon .ac-scene-head small{font-size:10px}
+.ac-dungeon .ac-retreat{padding:6px 11px;font-size:14px}
+.ac-dungeon .ac-progress{margin-bottom:8px}
+.ac-dungeon .ac-progress>b{margin-bottom:4px;font-size:12px}
+.ac-dungeon .ac-rail{gap:6px;padding:2px 2px 4px}
+.ac-dungeon .ac-step{flex-basis:clamp(68px,10vw,96px);gap:2px;padding:4px}
+.ac-dungeon .ac-step-art{width:min(100%,65px);height:49px}
+.ac-dungeon .ac-step-text{font-size:10px;line-height:1.16;min-height:23px}
+.ac-dungeon .ac-step small{font-size:10px}
+.ac-dungeon .ac-layout{
+  grid-template-columns:minmax(0,1.04fr) minmax(235px,.96fr);
+  gap:10px;
+  align-items:stretch;
+}
+.ac-dungeon .ac-main-card{border-radius:10px}
+.ac-dungeon .ac-main-portrait{height:clamp(142px,26dvh,235px)}
+.ac-dungeon .ac-main-info{padding:7px 10px 9px}
+.ac-dungeon .ac-main-info h3{font-size:clamp(15px,1.9vw,20px);margin-bottom:5px}
+.ac-dungeon .ac-status{bottom:8px;left:8px;font-size:11px;padding:3px 7px}
+.ac-dungeon .ac-facts{gap:4px;font-size:12px}
+.ac-dungeon .ac-facts>span{padding:3px 6px}
+.ac-dungeon .ac-ability{gap:2px;padding:5px 7px;font-size:12px}
+.ac-dungeon .ac-side{padding:10px 12px;gap:8px;border-radius:10px}
+.ac-dungeon .ac-side h3{font-size:15px}
+.ac-dungeon .ac-odds{padding:7px 10px}
+.ac-dungeon .ac-odds strong{font-size:25px}
+.ac-dungeon .ac-hint{font-size:12px;line-height:1.25}
+.ac-dungeon .ac-primary{
+  margin:2px 0 2px;
+  min-height:43px;
+  padding:8px 7px;
+  font-size:clamp(13px,1.8vw,17px);
+}
+.ac-dungeon .ac-party{margin-top:8px;padding-top:7px}
+.ac-dungeon .ac-small-title{font-size:12px;margin-bottom:5px}
+.ac-dungeon .ac-party-list{grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:5px}
+.ac-dungeon .ac-ally{padding:4px 6px;gap:6px}
+.ac-dungeon .ac-ally-face{width:35px;flex-basis:35px;height:41px}
+.ac-dungeon .ac-ally-info{gap:1px}
+.ac-dungeon .ac-ally-info b{font-size:12px}
+.ac-dungeon .ac-ally-info small{font-size:10px}
+.ac-dungeon .ac-hp{height:6px}
+
+/* Tabletă/telefon: portretul și acțiunea stau ALĂTURI, nu unul sub altul.
+ * Astfel butonul Luptă rămâne vizibil chiar fără scroll până jos. */
+@media(max-width:700px){
+ body.st-adventure .ac-scene.ac-dungeon{padding:9px}
+ .ac-dungeon .ac-layout{grid-template-columns:minmax(0,43%) minmax(0,57%);gap:6px}
+ .ac-dungeon .ac-main-portrait{height:clamp(130px,23dvh,190px)}
+ .ac-dungeon .ac-main-info{padding:5px 6px}
+ .ac-dungeon .ac-main-info h3{font-size:14px}
+ .ac-dungeon .ac-facts{font-size:10px;gap:3px}
+ .ac-dungeon .ac-facts>span{padding:2px 4px}
+ .ac-dungeon .ac-ability{font-size:10px;padding:4px;line-height:1.15}
+ .ac-dungeon .ac-side{padding:7px;gap:6px}
+ .ac-dungeon .ac-side h3{font-size:13px}
+ .ac-dungeon .ac-odds{padding:5px 6px;font-size:12px}
+ .ac-dungeon .ac-odds strong{font-size:19px}
+ .ac-dungeon .ac-primary{min-height:38px;font-size:12px;padding:5px 3px;margin:1px 0}
+ .ac-dungeon .ac-hint{font-size:11px;line-height:1.22}
+ .ac-dungeon .ac-step{flex-basis:75px}
+ .ac-dungeon .ac-step-art{width:57px;height:43px}
+ .ac-dungeon .ac-party-list{display:flex;gap:4px}
+ .ac-dungeon .ac-ally{flex:1 1 0;min-width:0;padding:3px 4px}
+ .ac-dungeon .ac-ally-face{display:none}
+ .ac-dungeon .ac-ally-info b{font-size:11px}
+ .ac-dungeon .ac-ally-info small{font-size:9.5px}
+}
+/* Spațiul vizibil este mai important decât ornamentul pe ecrane scunde. */
+@media(max-height:720px){
+ body.st-adventure .ac-scene.ac-dungeon{padding:8px}
+ .ac-dungeon .ac-scene-head{margin-bottom:5px}
+ .ac-dungeon .ac-progress{margin-bottom:5px}
+ .ac-dungeon .ac-rail{padding-bottom:2px}
+ .ac-dungeon .ac-step-art{height:35px}
+ .ac-dungeon .ac-main-portrait{height:clamp(100px,21dvh,170px)}
+ .ac-dungeon .ac-side{gap:5px}
+ .ac-dungeon .ac-party{margin-top:5px;padding-top:4px}
+}
+@media(prefers-reduced-motion:reduce){
+ .ac-dungeon .ac-step{transition:none}
+}
