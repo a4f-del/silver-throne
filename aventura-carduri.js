@@ -82,9 +82,12 @@ function acCombatPage(d) {
   } else if(d.done) actions='<p>Ai învins căpitanul.</p>';
   else actions=dNext(d);
   const loot=d.loot||{gold:0,ore:0,xp:0,m:{}};
+  const materials=Object.values(loot.m||{}).reduce((n,x)=>n+(Number(x)||0),0);
+  const items=(loot.it||[]).map(it=>acSafe(it.name)).join(', ');
   return '<section class="ac-scene ac-combat"><div class="ac-scene-head"><div><small>'+(d.tw?'Urcare în Turn':'Temniță în desfășurare')+'</small><h2>'+acSafe(title)+'</h2></div>' +
-    '<span class="ac-earn">Pradă: '+(loot.gold||0)+' aur · '+(loot.ore||0)+' minereu · '+(loot.xp||0)+' XP</span></div>' +
+    '<span class="ac-earn">Pradă: '+(loot.gold||0)+' aur · '+(loot.ore||0)+' minereu · '+materials+' materiale · '+(loot.xp||0)+' XP'+(items?' · '+items:'')+'</span></div>' +
     (f?'<div class="ac-fight-top"><span>Alege ținta · portrete mari</span><div class="ac-enemy-list">'+enemies+'</div></div>':'') +
+    (f&&f.log&&f.log.length?'<div class="ac-battle-log">'+f.log.slice(-3).map(x=>'<div>'+acSafe(x)+'</div>').join('')+'</div>':'') +
     '<div class="ac-battle-options"><label><input type="checkbox" '+(S.auto!==false?'checked':'')+' onchange="tg(\'auto\')"> Redare automată</label>' +
     '<label>Țintire <select onchange="tg(\'rule\',this.value)">'+[['weak','Cel mai slab'],['strong','Cel mai puternic'],['first','Primul']].map(a=>'<option value="'+a[0]+'"'+((S.rule||'weak')===a[0]?' selected':'')+'>'+a[1]+'</option>').join('')+'</select></label></div>' +
     (S.fl&&!f?'<div class="log">'+S.fl.slice(-4).map(x=>'<div>'+acSafe(x)+'</div>').join('')+'</div>':'') +
