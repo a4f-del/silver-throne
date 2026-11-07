@@ -410,6 +410,26 @@ function cmpOpenChecklist(source) {
   if (typeof setTimeout === 'function')
     setTimeout(() => target.classList.remove('cmp-spotlight'), 2600);
 }
+/* BETA: checklist vizibil și highlight fin al următoarei sarcini.
+   Nu apar animatii continue si nu există overlay deasupra hărții. */
+(function(){
+  if(typeof document==='undefined'||!document.head)return;
+  const el=document.createElement('style');
+  el.textContent=[
+    '.cmp-todo{border:1px solid #c5a46255;border-radius:9px;background:#c5a46208;padding:9px 11px;margin:11px 0}',
+    '.cmp-todo-title{display:block;color:var(--gold2);font:700 15px Cinzel,Georgia,serif;margin-bottom:5px}',
+    '.cmp-task{display:flex;align-items:flex-start;gap:9px;border-radius:6px;padding:6px 8px;margin:3px 0;line-height:1.4;scroll-margin-block:135px}',
+    '.cmp-task>span:first-child{color:#dbbd78;flex:none;font-weight:700}',
+    '.cmp-task.done{color:var(--mute);opacity:.8}',
+    '.cmp-next .cmp-task:not(.done){color:var(--ink)}',
+    '.cmp-spotlight{outline:2px solid #d9bd7688;outline-offset:2px;background:#ccac5420!important;animation:cmpSoftGlow 1.2s ease-out 2}',
+    '.cmp-claim-ready.cmp-spotlight{box-shadow:0 0 12px #d0aa5555}',
+    '@keyframes cmpSoftGlow{0%,100%{box-shadow:0 0 0 0 transparent}45%{box-shadow:0 0 0 4px #d4b06244}}',
+    '@media(max-width:600px){.cmp-todo{padding:7px}.cmp-task{padding:7px 5px;font-size:14px;scroll-margin-block:100px}}',
+    '@media(prefers-reduced-motion:reduce){.cmp-spotlight{animation:none}}'
+  ].join('\n');
+  document.head.appendChild(el);
+})();
 function vCamp() {
   const chapters=cmpChapters(), sides=cmpSides(),cur=chCur(),n=chapters.filter(c=>S.camp.rw[c.id]).length;
   let h = `<section><h2>Campania: Tronul Cenușiu</h2><div class="mute">Regele Cenușiu a stins Vatra Regală și stă pe Tronul de Argint. Șase sigilii țin Cenușa vie, fiecare păzit de un căpitan. ${cmpBeta()?'Progresul campaniei este permanent: învinge căpitanii din temnițe. Nu sunt necesare cuceriri sau raiduri repetate.':'Progresul campaniei e permanent: nu se pierde dacă pierzi un sat sau o fortăreață.'}</div><div class="row" style="justify-content:center;gap:10px;margin-top:8px">${chapters.map(c => `<span title="Sigiliul ${c.id}: ${c.nm}" style="display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;border:2px solid ${S.camp.rw[c.id] ? 'var(--gold2)' : 'var(--line)'};background:${S.camp.rw[c.id] ? 'radial-gradient(#f0d27a,#8a6a1e)' : '#0b0e10'};color:${S.camp.rw[c.id] ? '#1a1306' : 'var(--mute)'};font:700 14px Cinzel,serif">${c.id}</span>`).join('')}</div><div class="mute" style="text-align:center">${n}/${chapters.length} sigilii arse</div></section>`;
