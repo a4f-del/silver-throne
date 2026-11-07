@@ -29,9 +29,7 @@
     const b = button(icon, action, false, disabled, title);
     b.className = 'lwqa-icon';
     b.title = explanation || title;
-    const hint = document.createElement('span');
-    hint.className = 'lwqa-text'; hint.textContent = title;
-    b.appendChild(hint);
+    // Doar pictograma; aria-label și title sunt păstrate pentru accesibilitate.
     return b;
   }
   function place(panel, target) {
@@ -39,7 +37,14 @@
     if(!host||!target||!target.getBoundingClientRect)return;
     const H=host.getBoundingClientRect(),R=target.getBoundingClientRect();
     const padding=8,gap=8;
-    const width=Math.min(228,Math.max(120,H.width-2*padding));
+    const maxWidth=Math.max(80,Math.min(244,H.width-2*padding));
+    const count=panel.querySelectorAll('.lwqa-icon').length;
+    const minWidth=Math.min(maxWidth,Math.max(54,count*39+Math.max(0,count-1)*5+16));
+    panel.style.maxWidth=maxWidth+'px';
+    panel.style.minWidth=minWidth+'px';
+    panel.style.width='max-content';
+    const measured=panel.getBoundingClientRect().width||panel.offsetWidth||minWidth;
+    const width=Math.max(minWidth,Math.min(maxWidth,measured));
     panel.style.width=width+'px';
     // După inserare putem măsura înălțimea REALĂ a meniului, nu o valoare fixă.
     // Pe mobil aceasta variază în funcție de text și de numărul acțiunilor.
@@ -83,13 +88,14 @@
       const p = LUME.st.players.find(p => String(p.id) === String(id));
       if (!p) return;
       const mine = !!(LUME.st.me && p.id === LUME.st.me.user_id);
-      title = (mine ? 'Satul tău · ' : '') + p.name;
-      detail = 'Nivel ' + p.level;
+      const tag=typeof guildTagFor==='function'?guildTagFor(p.id):'';
+      title = (tag?'['+tag+'] ':'') + p.name;
+      detail = '';
       if (!mine) {
         const can = lwCan(p);
         actions.push(iconButton('⚔', 'Atacă', () => lwAttack(p.id), !can.ok || !!LUME.busy,
           can.ok ? 'Atacă satul · 1 atac' : can.why.replace(/<[^>]*>/g, '')));
-        if (!can.ok) detail += ' · Atac indisponibil';
+        // Motivul atacului blocat rămâne în tooltip-ul pictogramei.
       }
       actions.push(iconButton('👤', 'Profil', () => lwProfile(p.id), false));
       if (!mine) actions.push(iconButton('✉', 'Mesaj', () => wmCompose(p.id,p.name), false,
@@ -97,7 +103,7 @@
     } else if (kind === 'npc') {
       const v = typeof wnList === 'function' && wnList().find(v => String(v.id) === String(id));
       if (!v) return;
-      title = v.n + ' · NPC'; detail = 'Sat comun · nivel ' + v.lvl;
+      title = v.n; detail = '';
       const left = wnLeft(v);
       const why = left ? 'Disponibil peste ' + sdT(left) :
         S.d ? 'Termină mai întâi lupta' :
@@ -105,7 +111,7 @@
         !(S.fs || []).some(f => f.hp > 0) ? 'Echipa este căzută' : '';
       actions.push(iconButton('⚔', 'Jefuiește', () => wnRaid(v.id), !!why || !!WN.busy,
         why || 'Jefuiește · 1 punct'));
-      if (left) detail += ' · ' + sdT(left);
+      // Cooldown-ul rămâne în tooltip-ul pictogramei.
     } else {
       // Tronul și Turnul păstrează acțiunile cunoscute.
       return showLegacy(kind, id);
@@ -117,12 +123,11 @@
     panel.setAttribute('aria-label', 'Acțiuni: ' + title);
     const head = document.createElement('div'); head.className = 'lwqa-head';
     const name = document.createElement('strong'); name.textContent = title;
-    const dismiss = button('×', close, false, false, 'Închide meniul');
-    dismiss.className = 'lw-quick-close'; head.append(name, dismiss);
-    const info = document.createElement('small'); info.textContent = detail;
+    head.appendChild(name);
     const buttons = document.createElement('div'); buttons.className = 'lw-quick-buttons';
     actions.forEach(b => buttons.appendChild(b));
-    panel.append(head, info, buttons);
+    // Doar [TAG] Nume și pictograme. Tap în afară sau Esc închid meniul.
+    panel.append(head, buttons);
     host.appendChild(panel);
     current = key; currentAnchor = target;
     place(panel, target);
@@ -226,16 +231,16 @@
   if (typeof document !== 'undefined' && document.head) {
     const style = document.createElement('style');
     style.textContent = `
-.lwqa-map{position:absolute;z-index:9;transform:translate(-50%,-100%);width:min(228px,calc(100% - 16px));box-sizing:border-box;line-height:1.25;padding:6px 8px;border:1px solid #c9a24b;border-radius:10px;background:#151c1fee;box-shadow:0 7px 24px #000b;backdrop-filter:blur(6px);animation:lwqa-in .18s ease-out}
+.lwqa-map{position:absolute;z-index:9;transform:translate(-50%,-100%);width:max-content;max-width:calc(100% - 16px);box-sizing:border-box;line-height:1.2;padding:6px 7px;border:1px solid #c9a24b;border-radius:10px;background:#151c1fee;box-shadow:0 7px 24px #000b;backdrop-filter:blur(6px);animation:lwqa-in .18s ease-out}
 .lwqa-map.lwqa-below{transform:translateX(-50%)}
-.lwqa-head{display:flex;justify-content:space-between;align-items:center;gap:7px}
-.lwqa-head strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;color:var(--gold2)}
+.lwqa-head{display:flex;justify-content:center;align-items:center;min-width:0;text-align:center;margin-bottom:5px}
+.lwqa-head strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;color:var(--gold2);max-width:100%}
 .lwqa-map>small{display:block;color:var(--mute);font-size:9.5px;margin:1px 0 5px}
-.lwqa-map .lw-quick-buttons{display:flex;justify-content:center;gap:7px}
-.lwqa-map .lwqa-icon{min-width:50px;min-height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:3px 6px;border-radius:8px;font-size:18px;color:#f0d27a;border:1px solid #75603d;background:#253034;box-shadow:0 2px 7px #0006}
+.lwqa-map .lw-quick-buttons{display:flex;justify-content:center;gap:5px}
+.lwqa-map .lwqa-icon{min-width:39px;min-height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:3px 5px;border-radius:7px;font-size:19px;color:#f0d27a;border:1px solid #75603d;background:#253034;box-shadow:0 2px 7px #0006}
 .lwqa-map .lwqa-icon:hover:not(:disabled){background:#354347;transform:translateY(-2px)}
 .lwqa-map .lwqa-icon:disabled{opacity:.45;cursor:not-allowed}
-.lwqa-map .lwqa-text{display:block;font-size:9.5px;white-space:nowrap}
+.lwqa-map .lwqa-text{display:none}
 .lwqa-map .lw-quick-close{border:0;background:transparent;box-shadow:none;font-size:23px;color:#d8c7a1;min-height:30px;padding:0 4px}
 @keyframes lwqa-in{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.lwqa-map{animation:none}.lwqa-map .lwqa-icon{transition:none}}

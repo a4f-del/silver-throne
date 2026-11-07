@@ -82,7 +82,7 @@ const positioning=extract(quick,'  function place(panel, target) {','  function 
 function placeFor(H,R,innerHeight=800,menuHeight=118){
  let below=false;const style={};
  const classes={add:x=>{if(x==='lwqa-below')below=true},remove:x=>{if(x==='lwqa-below')below=false}};
- const panel={style,classList:classes,getBoundingClientRect:()=>({height:menuHeight}),offsetHeight:menuHeight};
+ const panel={style,classList:classes,querySelectorAll:()=>[1,2,3],getBoundingClientRect:()=>({height:menuHeight,width:148}),offsetHeight:menuHeight};
  const host={getBoundingClientRect:()=>H};
  const fn=new Function('map','window',positioning+';return place;')(()=>host,{innerHeight});
  fn(panel,{getBoundingClientRect:()=>R});

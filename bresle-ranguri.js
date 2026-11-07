@@ -3,12 +3,19 @@
 const GSR={uid:null,state:null,busy:false,loading:false,last:0,error:'',notice:'',query:''};
 const GSR_RANKS={leader:'♛ Conducător',officer:'⚔ Ofițer',veteran:'✦ Veteran',member:'Membru'};
 const gsrRankName=role=>GSR_RANKS[role]||'Membru';
+/* ID-urile introduse cu JSON.stringify direct în onclick="..." stricau
+   atributul HTML. Codificăm ghilimelele ca entități HTML. */
+const gsrJsArg=id=>guildEsc(JSON.stringify(String(id)));
 function gsrReset(){
  GSR.uid=null;GSR.state=null;GSR.busy=false;GSR.loading=false;
  GSR.last=0;GSR.error='';GSR.notice='';GSR.query='';
 }
 const gsrInboxCount=()=>GSR.state&&Array.isArray(GSR.state.invitations)?GSR.state.invitations.length:0;
-function gsrCanInvite(){return guildEnabled()&&!!(GSR.state&&['leader','officer'].includes(GSR.state.role)&&GUILD.state?.guild);}
+function gsrCanInvite(){
+  // guild_api confirmă rangul pe server; invitațiile pot încă să se încarce.
+  const g=GUILD.state?.guild;
+  return guildEnabled()&&!!g&&['leader','officer'].includes(g.role);
+}
 async function gsrSync(force){
  if(!guildEnabled()||GSR.loading||GSR.busy||(!force&&Date.now()-GSR.last<25000))return;
  const uid=CONT.user.id;
@@ -49,7 +56,7 @@ function gsrManagementHtml(g){
    const leader=GSR.state.role==='leader';
    const officer=GSR.state.role==='officer';
    let manage='';
-   const id=JSON.stringify(String(m.user_id));
+   const id=gsrJsArg(m.user_id);
    if(!mine&&m.role!=='leader'){
     if(leader){
      manage='<label class="guild-rank-select">Rang <select aria-label="Rang pentru '+guildEsc(m.name)+'" onchange="gsrChangeRole('+id+',this.value)">'+
@@ -71,7 +78,7 @@ function gsrManagementHtml(g){
    '<button class="p" onclick="gsrSearch()">Caută</button></div>'+
    '<div class="guild-search-results">'+(GSR.state.results||[]).map(u=>
     '<div><span><b>'+guildEsc(u.name)+'</b><small>Nivel '+Number(u.level||1)+'</small></span>'+
-    '<button onclick="gsrInvite('+JSON.stringify(String(u.user_id))+')"'+(u.invited?' disabled':'')+'>'+
+    '<button onclick="gsrInvite('+gsrJsArg(u.user_id)+')"'+(u.invited?' disabled':'')+'>'+
     (u.invited?'Invitație trimisă':'Invită')+'</button></div>'
    ).join('')+(GSR.query&&!(GSR.state.results||[]).length?'<p class="mute">Niciun jucător disponibil pentru acest nume.</p>':'')+'</div>';
   const outgoing=GSR.state.outgoing||[];
@@ -120,13 +127,26 @@ async function gsrSearch(){
 async function gsrInvite(user_id){if(gsrCanInvite())await gsrAction('invite',{user_id});}
 function gsrProfileInviteButton(id){
  if(!gsrCanInvite()||!id||String(id)===String(CONT.user.id))return '';
- return '<button onclick="gsrInviteFromProfile('+JSON.stringify(String(id))+')">⚔ Invită în breaslă</button>';
+ return '<span class="gsr-profile-invite"><button type="button" onclick="gsrInviteFromProfile('+gsrJsArg(id)+')">⚔ Invită în breaslă</button>'+
+  '<small id="gsr-profile-status" role="status" aria-live="polite"></small></span>';
 }
 async function gsrInviteFromProfile(id){
- if(!gsrCanInvite())return;
- await gsrAction('invite',{user_id:String(id)});
- if(typeof lgClose==='function')lgClose();
- if(typeof guildOpen==='function')guildOpen();
+ if(!gsrCanInvite())return false;
+ const status=document.getElementById('gsr-profile-status');
+ if(status)status.textContent='Se trimite invitația…';
+ try{
+  const result=await gsrAction('invite',{user_id:String(id)});
+  if(!result){
+   if(status)status.textContent=GSR.notice||GSR.error||'Invitația nu a putut fi trimisă.';
+   return false;
+  }
+  if(typeof lgClose==='function')lgClose();
+  if(typeof guildOpen==='function')guildOpen();
+  return true;
+ }catch(error){
+  if(status)status.textContent='Invitația nu a putut fi trimisă: '+String(error?.message||error);
+  return false;
+ }
 }
 
 async function gsrRespond(invite_id,accept){await gsrAction(accept?'accept':'decline',{invite_id});}

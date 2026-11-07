@@ -1,7 +1,38 @@
 /* Silver Throne — Bresle BETA. Profiluri si contributii comune in Supabase.
  * Evenimentele Temnite/Turn sunt raportate din client, deduplicate si plafonate. */
-const GUILD={uid:null,state:null,loading:false,busy:false,sending:false,last:0,error:'',notice:'',timer:null};
+const GUILD={uid:null,state:null,loading:false,busy:false,sending:false,last:0,error:'',notice:'',timer:null,tags:{},tagsAt:0,tagsBusy:false,tagsUnavailable:false};
 const guildEsc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* Numele breslei este informație publică din Lume. Mapăm doar UUID -> TAG.
+   Dacă migrarea SQL16 lipsește, afișăm în continuare numele jucătorului. */
+function guildTagFor(id){
+ if(!guildEnabled()||!id)return '';
+ const tag=GUILD.tags[String(id)];
+ if(tag)return tag;
+ const own=GUILD.state?.guild;
+ if(own&&String(id)===String(CONT.user.id))return own.tag;
+ if(own&&typeof GSR!=='undefined'&&GSR.state?.guild_id===own.id
+    &&(GSR.state.members||[]).some(m=>String(m.user_id)===String(id)))return own.tag;
+ return '';
+}
+async function guildMapTagsSync(force){
+ if(!guildEnabled()||GUILD.tagsBusy||GUILD.tagsUnavailable||
+   (!force&&Date.now()-GUILD.tagsAt<60000))return;
+ const uid=CONT.user.id;
+ GUILD.tagsBusy=true;
+ try{
+  const result=await tronRpc('guild_map_tags',{});
+  if(!guildEnabled()||CONT.user.id!==uid)return;
+  if(result.error){
+   // Endpoint nou: o migrare neaplicată nu trebuie să blocheze breslele.
+   if(/could not find|does not exist|schema cache/i.test(String(result.error)))
+     GUILD.tagsUnavailable=true;
+  }else if(result.data&&typeof result.data==='object'&&!Array.isArray(result.data)){
+   GUILD.tags=result.data;GUILD.tagsAt=Date.now();
+  }
+ }catch(_error){/* Meniul jucătorilor rămâne funcțional fără TAG. */}
+ finally{GUILD.tagsBusy=false;}
+}
+
 const guildEnabled=()=>typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'
  &&typeof CONT!=='undefined'&&CONT.booted&&CONT.user&&!!CONT.user.id;
 function guildHeader(){
@@ -11,7 +42,7 @@ function guildHeader(){
  return '<button id="guild-open" class="guild-head" onclick="guildOpen()" aria-label="Deschide breslele'+(unread?' · '+unread+' invitații':'')+'">⚔ <span>'+guildEsc(g?'['+g.tag+']':'Bresle')+'</span>'+
    (unread?'<b class="guild-invite-count">'+unread+'</b>':'')+'</button>';
 }
-function guildReset(){GUILD.uid=null;GUILD.state=null;GUILD.loading=false;GUILD.sending=false;GUILD.last=0;GUILD.error='';if(typeof gsrReset==='function')gsrReset();}
+function guildReset(){GUILD.uid=null;GUILD.state=null;GUILD.loading=false;GUILD.sending=false;GUILD.last=0;GUILD.error='';GUILD.tags={};GUILD.tagsAt=0;GUILD.tagsBusy=false;GUILD.tagsUnavailable=false;if(typeof gsrReset==='function')gsrReset();}
 async function guildSync(force){
  if(!guildEnabled()||GUILD.loading||GUILD.busy||(!force&&Date.now()-GUILD.last<25000))return;
  const uid=CONT.user.id;
@@ -27,6 +58,7 @@ async function guildSync(force){
  }finally{GUILD.loading=false;}
  if(!GUILD.error)guildFlush();
  if(typeof gsrSync==='function')await gsrSync(force);
+ await guildMapTagsSync(force);
 }
 function guildStart(){
  if(!guildEnabled())return;
