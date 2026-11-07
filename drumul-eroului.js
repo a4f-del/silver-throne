@@ -4,12 +4,12 @@
 const JE_STEPS = [
  {id:'poarta',title:'Cenușa de la poartă',icon:'🛡️',
   say:'„Nu lăsăm satul singur. Hai să aflăm ce se ascunde sub deal.” — Paznicul',
-  help:'Primește-l și numește-l pe Paznic, apoi intră în Mina Cenușie din Coborâre. Învinge pe rând cei trei monștri și Căpitanul Cenușii. După victorie revii automat și primești prada. Dacă te retragi mai devreme, progresul în mină se păstrează, dar jurământul se încheie după căpitan.',
-  reward:{g:50,o:15},parts:[['Paznicul a primit un nume',()=>jeHas('Paznic')],['Ai învins primul căpitan',()=>jeCount('bs')>=1]],
+  help:'Primește-l pe Paznic, care vine deja cu un nume, apoi intră în Mina Cenușie din Coborâre. Îi poți schimba numele mai târziu din Cont. Învinge pe rând cei trei monștri și Căpitanul Cenușii. După victorie revii automat și primești prada. Dacă te retragi mai devreme, progresul în mină se păstrează, dar jurământul se încheie după căpitan.',
+  reward:{g:50,o:15},parts:[['Paznicul s-a alăturat',()=>jeHas('Paznic')],['Ai învins primul căpitan',()=>jeCount('bs')>=1]],
   action:()=>!jeHas('Paznic')?['Han','a','h']:['Mina Cenușie','c','']},
  {id:'urme',title:'Urmele din cenușă',icon:'🏹',
   say:'„Nu ne putem apăra doar cu săgeți. Aprindeți forja!” — Arcașul',
-  help:'La întoarcerea din mină, vizitează Satul pentru întâlnirea cu Arcașul. După ce îi alegi numele, mergi la Topitorie: pentru următorul jurământ, forjează o armă (Tip: Armă, Sabie pentru Campion).',
+  help:'La întoarcerea din mină, vizitează Satul pentru întâlnirea cu Arcașul. După ce se alătură, mergi la Topitorie: pentru următorul jurământ, forjează o armă (Tip: Armă, Sabie pentru Campion).',
   reward:{g:30,o:25},parts:[['Arcașul s-a alăturat',()=>jeHas('Arcaș')],['Ai făcut prima forjare',()=>jeCount('f')>=1]],
   action:()=>!jeHas('Arcaș')
    ? ((S.mrStorySeen||[]).includes('Arcaș') ? ['Han','a','h'] : ['Sat','a',''])
@@ -21,7 +21,7 @@ const JE_STEPS = [
   action:()=>jeHasWeapon()?['Echipă','e','']:['Topitorie','a','a']},
  {id:'han',title:'Jurământul veteranului',icon:'⚔️',
   say:'„Am luptat pentru regi. Aș vrea să lupt pentru oameni.” — Războinicul',
-  help:'Antrenează o dată eroul în Sat → Antrenament. Apoi mergi la Han, ascultă povestea Războinicului și primește-l în echipă.',
+  help:'Antrenează o dată eroul în Sat → Antrenament. Apoi mergi la Han, ascultă povestea Războinicului și primește-l în echipă. Va veni cu un nume pe care îl poți schimba ulterior.',
   reward:{g:135,o:5},parts:[['Ai antrenat eroul',()=>jeCount('t')>=1],['Războinicul are un nume',()=>jeHas('Războinic')]],
   action:()=>jeCount('t')<1?['Antrenament','a','t']:['Han','a','h']},
  {id:'vesti',title:'Vești din sat',icon:'📜',
