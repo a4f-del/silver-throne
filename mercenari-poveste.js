@@ -112,13 +112,18 @@ function mrStoryPost() {
   /* Crearea eroului ramane in DOM ~320 ms dupa inchidere.
      Nu considera .hc-ul ascuns o fereastra activa si nu bloca prologul. */
   if (document.getElementById('mr-scene') || document.getElementById('mr-m')
-    || document.getElementById('lgm')) return;
+    || document.getElementById('lgm') || document.getElementById('st-prolog')) return;
   const gate = document.getElementById('gate');
   if (gate && !gate.classList.contains('g-out')) {
     if (!MR.storyWait) {
       MR.storyWait = 1;
       setTimeout(() => { MR.storyWait = 0; mrPost(); }, 550);
     }
+    return;
+  }
+  /* Prologul noului erou vine intotdeauna INAINTEA scenei Paznicului. */
+  if (typeof stPrologDue === 'function' && stPrologDue()) {
+    stPrologShow(false);
     return;
   }
   const c = MR.order.map(x => x[0]).find(c =>
