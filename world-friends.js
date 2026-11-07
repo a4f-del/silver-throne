@@ -101,8 +101,11 @@ function wfRender(){
 }
 function wfFeedback(msg){
  const el=document.getElementById('wf-feedback');
- if(el)el.textContent=msg;
- else if(typeof S!=='undefined'){S.msg=msg;if(typeof render==='function')render();}
+ if(el){el.textContent=msg;return;}
+ /* Do not put external errors into the game's HTML message slot. */
+ let note=document.getElementById('wf-toast');
+ if(!note){note=document.createElement('div');note.id='wf-toast';note.setAttribute('role','status');document.body.appendChild(note);}
+ note.textContent=msg;
 }
 async function wfRequest(uid){
  if(!wfEnabled()||WF.busy||!uid||String(uid)===String(CONT.user.id))return;
@@ -111,6 +114,8 @@ async function wfRequest(uid){
   const r=await tronRpc('world_friends_request',{p_target:String(uid)});
   if(r.error){wfFeedback('Cererea nu a fost trimisă: '+String(r.error));return;}
   await wfSync(true);
+  const requestButton=document.getElementById('wf-request-'+String(uid));
+  if(requestButton){requestButton.textContent='⏳ Cerere trimisă';requestButton.disabled=true;}
   wfFeedback('Cererea de prietenie a fost trimisă.');
   if(document.getElementById('lgm')&&typeof lwProfile==='function') {
     /* Profilul se poate închide sau actualiza separat; evităm deschiderea unui al doilea modal. */
@@ -155,7 +160,7 @@ function wfProfile(id){
 function wfProfileButton(id){
  if(!wfEnabled()||String(id)===String(CONT.user.id))return '';
  const rel=wfRelationship(id);
- if(!rel)return '<button onclick="wfRequest(\''+id+'\')">🤝 Adaugă prieten</button>';
+ if(!rel)return '<button id="wf-request-'+id+'" onclick="wfRequest(\''+id+'\')">🤝 Adaugă prieten</button>';
  if(rel.status==='accepted')return '<button onclick="lgClose();wfOpen()">🤝 Prieteni ✓</button>';
  if(rel.direction==='outgoing')return '<button disabled title="Cerere de prietenie în așteptare">⏳ Cerere trimisă</button>';
  return '<button onclick="lgClose();wfOpen()">🤝 Răspunde cererii</button>';
@@ -173,6 +178,7 @@ function wfProfileButton(id){
 .wf-entry{border:1px solid #5c543f;border-radius:9px;padding:10px;margin-bottom:8px;background:#141b1e;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .wf-entry b{display:block;font-size:15px}.wf-entry small{color:var(--mute);display:block;font-size:12px}
 .wf-actions{display:flex;flex-wrap:wrap;gap:6px}.wf-actions button{padding:6px 9px;font-size:13px}.wf-remove{color:#e5b4a9}
+#wf-toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%);z-index:27060;max-width:90vw;padding:11px 16px;border:1px solid var(--gold);background:#172022;color:#f0d27a;border-radius:8px;box-shadow:0 7px 25px #000a;font-size:14px}
 .wf-bottom{margin-top:12px}.wf-bottom button{font-size:12px}
 @media(max-width:650px){.wf-word{display:none}.wf-open{font-size:18px;padding:6px}.wf-dialog{padding:13px}.wf-actions button{min-height:38px}}
 @media(prefers-reduced-motion:reduce){#wf-overlay *{animation:none!important}}
