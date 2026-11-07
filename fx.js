@@ -36,7 +36,10 @@ function fxPush(pre, txt, actor) {
   /* Același identificator de actor pentru erou, mercenari și fantome PvP.
      În vechea expresie mercenarii fără actor.h pierdeau animația de atac. */
   const fi=actor?S.fs.indexOf(actor):-1,ei=actor?f.es.indexOf(actor):-1;
-  FX.q.push({ fs:dFs, es:dEs, txt:txt||'', actor:fi>=0?{side:'fs',i:fi}:ei>=0?{side:'es',i:ei}:null });
+  const tagged=typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'
+    ? (fi>=0?{side:'fs',i:fi}:ei>=0?{side:'es',i:ei}:null)
+    : (actor ? (actor.h || !S.fs.includes(actor) ? { side: actor.h !== undefined && S.fs.includes(actor) ? 'fs' : (f.es.includes(actor) ? 'es' : null), i: S.fs.includes(actor) ? S.fs.indexOf(actor) : f.es.indexOf(actor) } : null) : null);
+  FX.q.push({ fs:dFs, es:dEs, txt:txt||'', actor:tagged });
 }
 /* pentru modul manual: marchează unde începe lovitura curentă, ca să redăm doar cadrele noi */
 let FX_MARK = 0, FX_FIRST = false;
