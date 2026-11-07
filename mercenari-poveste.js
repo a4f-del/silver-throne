@@ -109,8 +109,10 @@ function mrStoryPreview(c) {
 }
 function mrStoryPost() {
   if (!mrStoryEnabled() || S.d || mrAll().some(f => f.nn)) return;
+  /* Crearea eroului ramane in DOM ~320 ms dupa inchidere.
+     Nu considera .hc-ul ascuns o fereastra activa si nu bloca prologul. */
   if (document.getElementById('mr-scene') || document.getElementById('mr-m')
-    || document.getElementById('lgm') || document.querySelector('.hc')) return;
+    || document.getElementById('lgm')) return;
   const gate = document.getElementById('gate');
   if (gate && !gate.classList.contains('g-out')) {
     if (!MR.storyWait) {
