@@ -30,8 +30,11 @@ Expedițiile mercenarilor sunt activități pasive, nu o a patra buclă obligato
 - [ ] **06. Poveste bine dozată.** Prologul și scenele mercenarilor au continuare clară, pot fi revăzute sau sărite, nu întrerup lupta și nu impun citirea mai multor ferestre.
   - **În lucru (BETA):** nume prestabilite pentru cei cinci tovarăși, recrutare directă fără dialog de numire, povești scurte cu text extins opțional și arhivă de recitire în Han fără spoilere. Scenele nu se deschid în luptă; LIVE și salvările BETA vechi rămân neschimbate. Test: `dev/test-beta-mercenary-default-names.js`; ghid: `docs/BETA-MERCENARY-DEFAULT-NAMES.md`. QA vizual necesar înainte de bifare.
 - [ ] **07. Sat progresiv și navigare simplă.** Pentru noii eroi, arătăm doar clădirile utile atunci; restul se dezvăluie natural. «Vezi toate clădirile» rămâne disponibil. Vindecarea se vede când ai un rănit.
+  - **Implementat anterior în BETA, în verificare:** patru clădiri de bază, deblocare progresivă, acces la toate la cerere, Infirmerie la rănire. Regresie: `dev/test-beta-onboarding-focus.js`; QA mobil/desktop rămâne necesar.
 - [ ] **08. Următorul obiectiv după tutorial.** După primul căpitan și prima armă, un singur card indică următoarea temniță, pragul de nivel și ce îmbunătățire te-ar ajuta.
+  - **În lucru (BETA):** după cele șase jurăminte și deschiderea Campaniei apare un card unic pentru următoarea temniță, cu nivel cerut, nivel actual și sfat de pregătire; dispare după apăsare. Nu concurează cu obiectivul activ. Detalii: `docs/BETA-ONBOARDING-STEPS07-09.md`.
 - [ ] **09. Zilnice fără presiune.** Evidențiem trei obiective uzuale; celelalte rămân opționale. Nu condiționăm progresul de completarea unei liste administrative lungi.
+  - **În lucru (BETA):** primele trei misiuni sunt vizibile, celelalte trei sunt opționale și extinse la cerere. Recompensele, progresul și bonusul zilnic rămân neschimbate. Test: `dev/test-beta-onboarding-next-and-dailies.js`.
 
 **Criteriu de ieșire etapa A:** un tester care nu cunoaște jocul poate descrie, fără explicații externe, ce trebuie să facă și de ce; finalizează o primă experiență de Temniță, primește/equipează o recompensă și cunoaște următorul obiectiv. Verificăm desktop + mobil.
 
