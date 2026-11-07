@@ -26,7 +26,14 @@ function mrDue(step) {
 }
 /* statisticile aproximative ale unui mercenar neîncă recrutat, pentru cartea de ofertă */
 function mrPreview(c) { const cand = { c, rk: 0, eq: {}, t: [] }; return { hp: Math.round(mhp(cand)), atk: Math.round(atkOf(cand)) }; }
-function mrRecruit(c) { const i = (S.mrOff || []).indexOf(c); if (i < 0) return go(); S.mrOff.splice(i, 1); mrNew(c); go(); }
+function mrRecruit(c) {
+  const i = (S.mrOff || []).indexOf(c);
+  if (i < 0 || mrHas(c)) return go();
+  if (typeof mrStoryEnabled === 'function' && mrStoryEnabled() && !mrStorySeen(c)) {
+    mrStoryShow(c, false); return;
+  }
+  S.mrOff.splice(i, 1); mrNew(c); go();
+}
 function mrNew(c) {
   const f = { n: c, c, hp: 0, sc: 0, t: [], rk: 0, fm: 0, nn: 1, eq: { w: null, a: null } };
   f.hp = mhp(f); f.t = [P(TR)]; (S.fs.length < TMAX() && !S.d ? S.fs : S.rs).push(f); return f;
@@ -34,11 +41,21 @@ function mrNew(c) {
 /* la fiecare desenare: se alătură cine a ajuns la pasul lui */
 function mrTick() {
   if (!S || S.mrv !== 2) return;
+  /* Eroul BETA nou isi alege mai intai numele. Fara aceasta verificare,
+     Paznicul si Arcasul ar fi creati inaintea prologului. */
+  if (typeof mrStoryIsBeta === 'function' && mrStoryIsBeta()
+    && !S.hc && !S.mrStoryV && S.lvl === 1 && !S.xp && !C('d')) return;
+  const story = typeof mrStoryEnabled === 'function' && mrStoryEnabled();
   for (const [c, st] of MR.order) {
-    if (mrHas(c) || (S.mrOff || []).includes(c) || !mrDue(st)) continue;
-    if (st == null) { mrNew(c); continue; }   /* Paznic/Arcaș: se alătură direct, ca parte din prezentarea inițială */
-    (S.mrOff = S.mrOff || []).push(c);          /* Războinic/Vraci/Mag: ofertă discretă la Han, nu o fereastră forțată */
-    if (!(S.mrSeen = S.mrSeen || []).includes(c)) { S.mrSeen.push(c); S.msg = (S.msg ? S.msg + ' ' : '') + `Un nou mercenar e disponibil la Han: ${c}.`; }
+    if (mrHas(c) || (S.mrOff || []).includes(c) || !(story ? mrStoryDue(c) : mrDue(st))) continue;
+    if (st == null && !story) { mrNew(c); continue; } /* LIVE si salvari vechi: neschimbate */
+    (S.mrOff = S.mrOff || []).push(c);
+    if (!(S.mrSeen = S.mrSeen || []).includes(c)) {
+      S.mrSeen.push(c);
+      S.msg = (S.msg ? S.msg + ' ' : '') + (story
+        ? `O nouă întâlnire te așteaptă: ${c}. Dacă o amâni, oferta rămâne la Han.`
+        : `Un nou mercenar e disponibil la Han: ${c}.`);
+    }
   }
   mrAll().forEach(f => { if (!f.h && !(f.t && f.t.length)) f.t = [P(TR)]; });   /* trăsătura fiecărui mercenar (și pentru cei existenți) */
   if (S.lvl >= 30 && !S.t4) { S.t4 = 1; S.msg = (S.msg ? S.msg + ' ' : '') + 'Al 4-lea loc în echipă s-a deschis: alege încă un luptător din Han.'; }
@@ -79,7 +96,12 @@ function mrPost() {
     mrTick();
     const fs = mrAll().filter(x => x.nn), old = document.getElementById('mr-m');
     const gate = document.getElementById('gate'), busy = (gate && !gate.classList.contains('g-out')) || document.querySelector('.hc');
-    if (!fs.length || busy) { if (old && !fs.length) old.remove(); if (fs.length && busy && !MR.wait) { MR.wait = 1; setTimeout(() => { MR.wait = 0; mrPost(); }, 500); } return; }   /* ecranul eroului e încă deschis: încearcă din nou */
+    if (!fs.length) {
+      if (old) old.remove();
+      if (typeof mrStoryPost === 'function') mrStoryPost();
+      return;
+    }
+    if (busy) { if (!MR.wait) { MR.wait = 1; setTimeout(() => { MR.wait = 0; mrPost(); }, 500); } return; }
     const key = fs.map(f => f.c).join(',') + (S.giftL ? '+g' : '');
     if (old && old.dataset.c === key) return;
     if (old) old.remove();
