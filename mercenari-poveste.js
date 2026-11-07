@@ -75,7 +75,7 @@ function mrStoryShow(c, preview) {
   if (!preview && (!mrStoryEnabled() || !(S.mrOff || []).includes(c) || mrHas(c))) return;
   mrStoryClose();
   const story = MR_STORY[c], m = document.createElement('div');
-  const named = !preview && typeof jeFocus==='function' && jeFocus() && typeof mrDefaultName==='function';
+  const named = !preview && typeof mrPresetEnabled==='function' && mrPresetEnabled() && typeof mrDefaultName==='function';
   MR_SCENE = { c, preview: !!preview };
   m.id = 'mr-scene'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
   m.setAttribute('aria-labelledby', 'mr-scene-title');
