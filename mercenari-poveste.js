@@ -46,12 +46,16 @@ function mrStoryDue(c) {
     case 'Paznic': return true;
     case 'Arcaș': return C('l') >= 1;
     case 'Războinic': return C('l') >= 1 && C('t') >= 1;
-    case 'Vraci': return C('bs') >= 1;
+    case 'Vraci': return C('bs') >= 1 && mrHas('Arcaș') && mrHas('Războinic');
     case 'Mag': return S.lvl >= 5;
     default: return false;
   }
 }
 function mrStoryPlaceReady(c) {
+  /* Scenele se deschid doar intr-un loc potrivit, nu in finalul unei lupte.
+     Arcasul te asteapta in sat; Vraciul in Infirmerie, dupa ce ai format echipa. */
+  if (c === 'Arcaș') return S.tab === 'a' && !S.vil;
+  if (c === 'Vraci') return S.tab === 'a' && S.vil === 'i';
   if (c === 'Războinic') return S.tab === 'a' && S.vil === 'h';
   if (c === 'Mag') return S.tab === 'm' && S.mt === 'l';
   return true;
