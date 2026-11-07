@@ -23,7 +23,7 @@ const env={
  monStatsAt:()=>({hp:115,atk:14}),
  trChips:()=>'',trTier:()=>0,TR_T:{n:['Normal','Greu','Coșmar']},
  TR_A:{call:'Cheamă ajutoare'},
- dCostAt:()=>2,dOddsAt:()=>100,
+ dCostAt:()=>2,dOddsAt:()=>100,dNext:()=>'<button>Înainte</button>',
  recGear:()=> 'orice, chiar și Comun',acParty:null,
  mhp:()=>45,av:()=>'<img alt="" src="face.jpg">',
  tEsc:x=>x
