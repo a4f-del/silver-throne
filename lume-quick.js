@@ -71,8 +71,8 @@
         if (!can.ok) detail += ' · Atac indisponibil';
       }
       actions.push(iconButton('👤', 'Profil', () => lwProfile(p.id), false));
-      if (!mine) actions.push(iconButton('✉', 'Mesaj', () => {}, true,
-        'Mesageria nu este încă implementată. Nu se trimite niciun mesaj.'));
+      if (!mine) actions.push(iconButton('✉', 'Mesaj', () => wmCompose(p.id,p.name), false,
+        'Trimite mesaj privat'));
     } else if (kind === 'npc') {
       const v = typeof wnList === 'function' && wnList().find(v => String(v.id) === String(id));
       if (!v) return;
