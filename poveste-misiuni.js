@@ -19,7 +19,8 @@ const SQ_ACT = [
 function sqEnabled() {
   return typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta'
     && typeof S !== 'undefined' && !!S && S.mrStoryV === 1
-    && S.mrPrologSeen === 1 && !S.mrPrologPending;
+    && S.mrPrologSeen === 1 && !S.mrPrologPending
+    && S.journeyV !== 1; /* noul Drumul Eroului inlocuieste acest panou si recompensele */
 }
 /* In primele capitole, povestea este singura indrumare implicita.
    Ghidul vechi ramane disponibil la cerere, fara sa acopere povestea. */
