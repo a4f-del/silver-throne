@@ -30,7 +30,7 @@ Din **Coborâre/Temnițe**, din pagina detaliată a unei temnițe sau din **Han*
 - Este disponibil și pentru **eroii existenți BETA**; nu necesită creare de cont nou. **LIVE nu primește această interfață și păstrează comportamentul anterior**.
 
 ## Ce NU se modifică în acest PR
-Satele NPC, taberele și locurile de interes încă sunt vizibile și utilizabile în BETA. Eliminarea definitivă a buclelor respective este pasul următor (PR 2), **după verificarea că actuala campanie nu mai depinde de ele**. PvP, Tron, Turnul, steagurile, renovările și salvările sunt neschimbate.
+În următorul PR BETA, **raidurile satelor-bot din regiunea privată și taberele de bandiți sunt retrase**. Satele NPC **comune** din Lume rămân jefuibile prin `wnRaid` / `world_npc_raid`, iar misiunea zilnică „Jefuiește un sat” poate fi completată prin aceste sate. Datele deja salvate despre tabere nu sunt șterse; LIVE, PvP, Tron, Turnul, mercenarii și expedițiile pasive rămân neschimbate. Locurile de interes ale regiunii sunt lăsate momentan în cod pentru compatibilitate, dar BETA nu mai desenează ținutul privat.
 
 ## Testare manuală pe BETA
 1. Integrează PR → hard refresh `https://a4f-del.github.io/silver-throne/?server=beta` (fără SQL).
