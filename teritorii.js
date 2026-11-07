@@ -320,10 +320,34 @@ function terLeave(d) {
 function terDevPanel() { return DEV(); }
 
 /* ---------------------------------------------------------------- CAMPANIE ---- */
+/* BETA: obiective concentrate pe căpitanii temnițelor; ID-urile și premiile
+   deja revendicate rămân intacte. Datele TW.CH/TW.SEC din LIVE nu se modifică. */
+const cmpBeta=()=>typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta';
+function cmpChapters(){
+ if(!cmpBeta())return TW.CH;
+ const bosses={1:[0],2:[4],3:[1],4:[5,9],5:[2,6],6:[3,7,8]};
+ const lore={
+  2:{tx:'Alfa Haitei păzește al doilea sigiliu în Peștera Lupilor. Înfrânge-l ca să deschizi drumul spre Catacombe.',out:'Al doilea sigiliu s-a stins. Drumul spre Catacombe e deschis.'},
+  3:{tx:'În umbra Bastionului Corbilor, Regele Oaselor ascunde al treilea sigiliu în Catacombele Uitate. Cucerirea fortăreței nu mai este necesară.',out:'Ai trecut de Bastion și ai stins al treilea sigiliu.'},
+  5:{tx:'Căpitanul Înecat și Hidra Mlaștinii păzesc sigiliul apelor. Înfrânge-i în temnițe; nu ai nevoie de tabere sau raiduri suplimentare.',out:'Căpitanii apelor au căzut. Mai rămâne doar Tronul Cenușiu.'}
+ };
+ return TW.CH.map(c=>({...c,...(lore[c.id]||{}),
+  obj:c.obj.filter(o=>o.k==='boss'&&bosses[c.id].includes(o.di))}));
+}
+function cmpSides(){
+ if(!cmpBeta())return TW.SEC;
+ return TW.SEC.map(s=>s.id==='pust'
+  ?{...s,nm:'Cronica căpitanilor',t:'Înfrânge 3 căpitani diferiți în temnițe',k:'bosses',n:3}
+  :s.id==='vana'
+  ?{...s,nm:'Războinicul celor șapte',t:'Înfrânge 7 căpitani diferiți în temnițe',k:'bosses',n:7}
+  :s);
+}
+function cmpBossCount(){return Object.values((S.camp&&S.camp.bk)||{}).filter(Boolean).length;}
 function objDone(o) {
   const t = S.ter, c = S.camp;
   switch (o.k) {
     case 'boss': return !!c.bk[o.di];
+    case 'bosses': return cmpBossCount() >= o.n;
     case 'raid': return t.st.raid >= o.n;
     case 'conq': return Object.keys(t.hist).filter(k => k !== 'fort').length >= o.n;
     case 'poi': return Object.keys(t.dsc).filter(k => k !== 'fort').length >= o.n;
@@ -339,34 +363,34 @@ function objDone(o) {
 }
 function objProg(o) {
   const t = S.ter, c = S.camp;
-  const f = { raid: t.st.raid, conq: Object.keys(t.hist).filter(k => k !== 'fort').length, poi: Object.keys(t.dsc).filter(k => k !== 'fort').length, poit: Object.keys(t.poiT).length, clue: Object.keys(t.cl).length, camp: t.st.camp, fog: t.fog.length, own: terOwnedV().length, recon: t.st.recon };
+  const f = { bosses: cmpBossCount(),raid: t.st.raid, conq: Object.keys(t.hist).filter(k => k !== 'fort').length, poi: Object.keys(t.dsc).filter(k => k !== 'fort').length, poit: Object.keys(t.poiT).length, clue: Object.keys(t.cl).length, camp: t.st.camp, fog: t.fog.length, own: terOwnedV().length, recon: t.st.recon };
   return o.n ? Math.min(o.n, f[o.k] || 0) + '/' + o.n : '';
 }
-const chCur = () => TW.CH.find(c => !S.camp.rw[c.id]);
+const chCur = () => cmpChapters().find(c => !S.camp.rw[c.id]);
 const chReady = c => c && c.obj.every(objDone);
 function cmpClaim(id) {
-  terInit(); const c = TW.CH.find(x => x.id === id), cur = chCur();
+  terInit(); const c = cmpChapters().find(x => x.id === id), cur = chCur();
   if (!c || !cur || cur.id !== id || S.camp.rw[id] || !chReady(c)) { S.msg = 'Capitolul nu poate fi revendicat acum.'; return go(); }
   S.camp.rw[id] = 1; S.camp.ch = id; S.msg = 'Capitolul „' + c.nm + '” încheiat. ' + c.out + ' Recompensă: ' + terGrant(c.rw, Math.max(S.lvl, c.lv)) + '.'; go();
 }
 function secClaim(id) {
-  terInit(); const s = TW.SEC.find(x => x.id === id);
+  terInit(); const s = cmpSides().find(x => x.id === id);
   if (!s || S.camp.sec[id] || !objDone(s)) { S.msg = 'Obiectivul nu poate fi revendicat acum.'; return go(); }
   S.camp.sec[id] = 1; S.msg = 'Obiectiv „' + s.nm + '” îndeplinit. Recompensă: ' + terGrant(s.rw, S.lvl) + '.'; go();
 }
-const cmpReady = () => { const c = chCur(); return (c && chReady(c) ? 1 : 0) + TW.SEC.filter(s => !S.camp.sec[s.id] && objDone(s)).length; };
+const cmpReady = () => { const c = chCur(); return (c && chReady(c) ? 1 : 0) + cmpSides().filter(s => !S.camp.sec[s.id] && objDone(s)).length; };
 function vCamp() {
-  const cur = chCur(), n = TW.CH.filter(c => S.camp.rw[c.id]).length;
-  let h = `<section><h2>Campania: Tronul Cenușiu</h2><div class="mute">Regele Cenușiu a stins Vatra Regală și stă pe Tronul de Argint. Șase sigilii țin Cenușa vie, fiecare păzit de un căpitan. Progresul campaniei e permanent: nu se pierde dacă pierzi un sat sau o fortăreață.</div><div class="row" style="justify-content:center;gap:10px;margin-top:8px">${TW.CH.map(c => `<span title="Sigiliul ${c.id}: ${c.nm}" style="display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;border:2px solid ${S.camp.rw[c.id] ? 'var(--gold2)' : 'var(--line)'};background:${S.camp.rw[c.id] ? 'radial-gradient(#f0d27a,#8a6a1e)' : '#0b0e10'};color:${S.camp.rw[c.id] ? '#1a1306' : 'var(--mute)'};font:700 14px Cinzel,serif">${c.id}</span>`).join('')}</div><div class="mute" style="text-align:center">${n}/${TW.CH.length} sigilii arse</div></section>`;
+  const chapters=cmpChapters(), sides=cmpSides(),cur=chCur(),n=chapters.filter(c=>S.camp.rw[c.id]).length;
+  let h = `<section><h2>Campania: Tronul Cenușiu</h2><div class="mute">Regele Cenușiu a stins Vatra Regală și stă pe Tronul de Argint. Șase sigilii țin Cenușa vie, fiecare păzit de un căpitan. ${cmpBeta()?'Progresul campaniei este permanent: învinge căpitanii din temnițe. Nu sunt necesare cuceriri sau raiduri repetate.':'Progresul campaniei e permanent: nu se pierde dacă pierzi un sat sau o fortăreață.'}</div><div class="row" style="justify-content:center;gap:10px;margin-top:8px">${chapters.map(c => `<span title="Sigiliul ${c.id}: ${c.nm}" style="display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;border:2px solid ${S.camp.rw[c.id] ? 'var(--gold2)' : 'var(--line)'};background:${S.camp.rw[c.id] ? 'radial-gradient(#f0d27a,#8a6a1e)' : '#0b0e10'};color:${S.camp.rw[c.id] ? '#1a1306' : 'var(--mute)'};font:700 14px Cinzel,serif">${c.id}</span>`).join('')}</div><div class="mute" style="text-align:center">${n}/${chapters.length} sigilii arse</div></section>`;
   if (cur) {
     const ok = chReady(cur);
     h += `<section style="border-left-color:var(--ember)"><h2>Capitolul ${cur.id}: ${cur.nm}</h2><div class="mute">${cur.reg} · recomandat nivel ${cur.lv}${S.lvl < cur.lv ? ' <b class="r4">(ai ' + S.lvl + ')</b>' : ''}</div><p>${cur.tx}</p>` + cur.obj.map(o => `<div class="${objDone(o) ? 'r2' : ''}">${objDone(o) ? '✔' : '○'} ${o.t}${o.n ? ' <span class="mute">(' + objProg(o) + ')</span>' : ''}</div>`).join('') +
       `<div class="row"><span class="mute">Recompensă unică: ${Object.entries(TW.chRw(cur.rw, Math.max(S.lvl, cur.lv))).filter(([, v]) => v).map(([k, v]) => v + ' ' + ({ g: 'aur', o: 'minereu', x: 'exp' })[k]).join(', ')}${cur.rw.item ? ', un obiect' : ''}${cur.rw.relic ? ', o relicvă' : ''}${cur.rw.mat ? ', materiale' : ''}${cur.rw.cr ? ', cristale' : ''}${cur.rw.legend ? ', Sabia Runelor' : ''}</span><button class="p" onclick="cmpClaim(${cur.id})"${ok ? '' : ' disabled'}>Încheie capitolul</button></div></section>`;
-  } else h += `<section><h2>Tronul de Argint e al tău</h2><p>Toate cele șase sigilii au ars. Ținutul e liber, iar Tronul Cenușiu își așteaptă regele. Explorarea, taberele și satele rămân deschise.</p></section>`;
-  h += `<section><h2>Obiective secundare</h2><div class="mute">Recompense unice. Se revendică o singură dată.</div>` + TW.SEC.map(s => { const d = objDone(s), cl = S.camp.sec[s.id]; return `<div class="row"><span>${cl ? '✔' : d ? '★' : '○'} <b>${s.nm}</b>: ${s.t} <span class="mute">${s.n ? '(' + objProg(s) + ')' : ''}</span></span>${cl ? '<span class="mute">Revendicat</span>' : `<button class="p" onclick="secClaim('${s.id}')"${d ? '' : ' disabled'}>Revendică</button>`}</div>`; }).join('') + '</section>';
+  } else h += `<section><h2>Tronul de Argint e al tău</h2><p>Toate cele șase sigilii au ars. Ținutul e liber, iar Tronul Cenușiu își așteaptă regele. ${cmpBeta()?'Temnițele, Turnul și Lumea te așteaptă.':'Explorarea, taberele și satele rămân deschise.'}</p></section>`;
+  h += `<section><h2>Obiective secundare</h2><div class="mute">Recompense unice. Se revendică o singură dată.</div>` + sides.map(s => { const d = objDone(s), cl = S.camp.sec[s.id]; return `<div class="row"><span>${cl ? '✔' : d ? '★' : '○'} <b>${s.nm}</b>: ${s.t} <span class="mute">${s.n ? '(' + objProg(s) + ')' : ''}</span></span>${cl ? '<span class="mute">Revendicat</span>' : `<button class="p" onclick="secClaim('${s.id}')"${d ? '' : ' disabled'}>Revendică</button>`}</div>`; }).join('') + '</section>';
   const cls = Object.keys(S.ter.cl);
-  h += `<section><h2>Jurnal de indicii (${cls.length}/${Object.keys(TW.CLUES).length})</h2>` + (cls.length ? cls.map(k => `<div style="margin:4px 0">• ${TW.CLUES[k]}</div>`).join('') : '<p class="mute">Vizitează ruine, peșteri, sanctuare și turnuri ca să afli ce se întâmplă în ținut.</p>') + '</section>';
-  const done = TW.CH.filter(c => S.camp.rw[c.id]); if (done.length) h += `<section><h2>Capitole încheiate</h2>` + done.map(c => `<div style="margin:6px 0"><b>${c.id}. ${c.nm}</b><br><span class="mute">${c.out}</span></div>`).join('') + '</section>';
+  if(!cmpBeta()||cls.length)h += `<section><h2>${cmpBeta()?'Arhivă de indicii':'Jurnal de indicii'} (${cls.length}/${Object.keys(TW.CLUES).length})</h2>` + (cls.length ? cls.map(k => `<div style="margin:4px 0">• ${TW.CLUES[k]}</div>`).join('') : '<p class="mute">Vizitează ruine, peșteri, sanctuare și turnuri ca să afli ce se întâmplă în ținut.</p>') + '</section>';
+  const done = chapters.filter(c => S.camp.rw[c.id]); if (done.length) h += `<section><h2>Capitole încheiate</h2>` + done.map(c => `<div style="margin:6px 0"><b>${c.id}. ${c.nm}</b><br><span class="mute">${c.out}</span></div>`).join('') + '</section>';
   return h;
 }
 
