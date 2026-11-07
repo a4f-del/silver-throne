@@ -59,6 +59,8 @@ function sdRow(ic, txt, right, onclick, hot) {
 
 /* fiecare rând e urgent (hot) sau nu; rândurile urgente apar mereu, restul sunt plafonate la 5, cu un buton „+N mai multe” */
 function sdTasks() {
+  /* Un singur următor pas în Drumul Eroului: nu dubla obiectivul în sidebar. */
+  if(typeof jeFocusActive==='function'&&jeFocusActive())return '';
   const hot = [], rest = [], now = Date.now();
   const push = (ic, txt, right, onclick, h) => (h ? hot : rest).push(sdRow(ic, txt, right, onclick, h));
   if (S.d) push('⛏', 'În coborâre', '', "sdGo('c')", true);

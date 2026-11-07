@@ -15,6 +15,35 @@ const SAT_B = [
   ['i', 'Infirmerie', 'vindecă și ridică'], ['t', 'Antrenament', 'Forță, Rezistență…'], ['x', 'Misiuni', 'sarcini zilnice'], ['d', 'Depozit', 'materiale'],
   ['z', 'Apărare', 'străjeri și zid'], ['g', 'Steag', 'culoarea satului'], ['q', 'Bot', 'joacă singur (premium)']
 ];
+/* Progressive village discovery: only new heroes on BETA.
+   Players can always expose all buildings; the infirmary is revealed on injury. */
+function satFocusOn(){return typeof jeFocusActive==='function' && jeFocusActive();}
+function satStage(){
+ if(!satFocusOn())return 99;
+ const done=S.je&&Array.isArray(S.je.done)?S.je.done:[];
+ if(done.includes('han')||done.includes('vesti'))return 3;
+ if(done.includes('urme'))return 2;
+ if(done.includes('poarta'))return 1;
+ return 0;
+}
+function satNeedsInfirmary(){
+ try{return typeof mrAll==='function'&&mrAll().some(f=>f.hp<=0||f.hp<mhp(f));}
+ catch(e){return false;}
+}
+function satVisible(k){
+ if(!satFocusOn()||S.satShowAll)return true;
+ if(['a','h','t','x'].includes(k))return true;
+ if(k==='i')return satStage()>=1||satNeedsInfirmary();
+ if(k==='p'||k==='d')return satStage()>=2;
+ return satStage()>=3;
+}
+function satToggleAll(){if(!satFocusOn())return;S.satShowAll=!S.satShowAll;go();}
+function satExploreButton(){
+ if(!satFocusOn())return '';
+ return '<button class="vh-explore" onclick="satToggleAll()" aria-expanded="'+!!S.satShowAll+'">'+
+ (S.satShowAll?'Ascunde clădirile avansate':'Vezi toate clădirile')+'</button>';
+}
+
 /* zonele din imaginile satului (imagini/sat/sat-1…3.jpg, 1152×928, aceeași așezare pe toate stadiile): poligonul pe care apeși și locul etichetei */
 const SAT_W = 1152, SAT_H = 928;
 const SAT_Z = {
@@ -132,18 +161,19 @@ function vHub() {
   const N = Object.fromEntries(SAT_B.map(([k, n]) => [k, n]));
   let zones = '', labels = '';
   for (const k in SAT_Z) {
+    if (!satVisible(k)) continue;
     const [pts, [lx, ly]] = SAT_Z[k], [st, hot] = satStatus(k), lv = satLvl(k);
     zones += `<polygon class="vh-z${hot ? ' hot' : ''}" data-z="${k}" points="${pts.join(' ')}" onclick="vil('${k}')"/>`;
     labels += `<button class="vh-lb${hot ? ' hot' : ''}" data-v="${k}" style="left:${(lx / SAT_W * 100).toFixed(2)}%;top:${(ly / SAT_H * 100).toFixed(2)}%" onclick="vil('${k}')" onmouseenter="satHov('${k}',1)" onmouseleave="satHov('${k}',0)" aria-label="${N[k]}${lv != null ? ', nivel ' + lv : ''}: ${st.replace(/<[^>]+>/g, '')}"><b>${N[k]}${lv != null ? ` <small>${lv}</small>` : ''}</b><span>${st}</span></button>`;
   }
   const [bs] = satStatus('q');
   return `<section class="vh vh-sat"><h2>${typeof terStage === 'function' ? 'Satul tău · ' + terStage() : 'Satul tău'}</h2><div class="vh-map"><img src="imagini/sat/sat-${satImgN()}.jpg" alt="Satul tău, cu clădirile pe care le poți deschide" width="1152" height="928"><svg viewBox="0 0 1152 928" preserveAspectRatio="none" aria-hidden="true">${zones}</svg>${labels}</div>`
-    + `<div class="vh-more"><button class="vb-c" data-v="q" onclick="vil('q')"><span class="vb-i">${satIcon('q')}</span><span>Bot · ${bs}</span></button><span class="mute">Atinge o clădire ca s-o deschizi.</span></div></section>${typeof drumPanel === 'function' ? drumPanel() : ''}${typeof tronBanner === 'function' ? tronBanner() : ''}`;
+    + `<div class="vh-more">${satVisible('q') ? `<button class="vb-c" data-v="q" onclick="vil('q')"><span class="vb-i">${satIcon('q')}</span><span>Bot · ${bs}</span></button>` : ''}${satExploreButton()}<span class="mute">${satFocusOn()&&!S.satShowAll?'Descoperi clădirile pe măsură ce înaintezi.':'Atinge o clădire ca s-o deschizi.'}</span></div></section>${!satFocusOn() && typeof drumPanel === 'function' ? drumPanel() : ''}${typeof tronBanner === 'function' ? tronBanner() : ''}`;
 }
 function satHov(k, on) { const z = document.querySelector(`.vh-z[data-z="${k}"]`); if (z) z.classList.toggle('on', !!on); }
 /* banda din interiorul unei clădiri: înapoi la Sat + celelalte clădiri */
 function vBar(k) {
-  return `${satDefs()}<div class="vb"><button class="vb-back" onclick="vil('')" aria-label="Înapoi la Sat">‹ Sat</button><div class="vb-ch">${SAT_B.map(([x, n]) => { const hot = satStatus(x)[1]; return `<button class="vb-c${x === k ? ' on' : ''}${hot ? ' hot' : ''}" data-v="${x}" onclick="vil('${x}')" aria-current="${x === k}"><span class="vb-i">${satIcon(x)}</span><span>${n}</span></button>`; }).join('')}</div></div>`;
+  return `${satDefs()}<div class="vb"><button class="vb-back" onclick="vil('')" aria-label="Înapoi la Sat">‹ Sat</button><div class="vb-ch">${SAT_B.filter(([x])=>satVisible(x)||x===k).map(([x, n]) => { const hot = satStatus(x)[1]; return `<button class="vb-c${x === k ? ' on' : ''}${hot ? ' hot' : ''}" data-v="${x}" onclick="vil('${x}')" aria-current="${x === k}"><span class="vb-i">${satIcon(x)}</span><span>${n}</span></button>`; }).join('')}</div>${satExploreButton()}</div>`;
 }
 
 /* ------------------------------------------------------------------ FEREASTRA CU BONUSURI */

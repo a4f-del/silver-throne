@@ -40,6 +40,9 @@ function jeEnabled(){
    &&!!S&&S.journeyV===1;
 }
 function jeReady(){return jeEnabled() && S.mrPrologSeen===1 && !S.mrPrologPending;}
+/* Opt-in exclusiv eroi NOI dupa acest experiment; vechile conturi BETA/LIVE sunt neschimbate. */
+function jeFocus(){return jeEnabled() && S.journeyUxV===2;}
+function jeFocusActive(){return jeFocus() && !!jeCurrent();}
 function jeCount(k){return typeof C==='function'?C(k):(S.cn||{})[k]||0;}
 function jeHas(c){
  const a=typeof mrAll==='function'?mrAll():(S.fs||[]).concat(S.rs||[]);
