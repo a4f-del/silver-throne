@@ -157,7 +157,7 @@ function guildEventId(){
  });
 }
 function guildTrackWin(d,b){
- if(!guildEnabled()||!d||!GUILD.state?.guild||typeof S==='undefined')return;
+ if(!guildEnabled()||!d||GUILD.preview||!GUILD.state?.guild||typeof S==='undefined')return;
  const g=GUILD.state.guild,week=String(g.week);
  const q=S.guildEvents||(S.guildEvents=[]);
  const add=kind=>{q.push({id:guildEventId(),kind,week,gid:g.id});};
