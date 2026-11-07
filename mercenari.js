@@ -8,7 +8,7 @@
    ========================================================================== */
 const MR = {
   /* ordinea și la ce se deblochează fiecare: null = de la început; text = pasul din ghid; funcție = condiție proprie.
-     Paznic și Arcaș se alătură automat (fac parte din prezentarea inițială); Războinic, Vraci și Mag devin mai întâi
+     Pe LIVE si salvari BETA vechi, Paznic/Arcas vin automat; eroii noi BETA primesc scene. Războinic, Vraci și Mag devin mai întâi
      o OFERTĂ discretă la Han (toast + indicator pe clădire), cu portret și statistici, recrutabilă oricând, gratuit. */
   order: [['Paznic', null], ['Arcaș', null], ['Războinic', 'Hanul'], ['Vraci', () => C('bs') >= 1], ['Mag', () => S.lvl >= 5]],
   hint: { 'Războinic': 'Se alătură la pasul „Hanul” din ghid.', 'Vraci': 'Se alătură după ce termini prima temniță cu căpitan.', 'Mag': 'Se alătură la nivelul 5, când se deschide Lumea.' },
