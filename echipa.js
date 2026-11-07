@@ -165,7 +165,7 @@ function vEquipTop(inv, pre) {
   const tabs = [['eq', 'Echipament'], ...(wide ? [] : [['inv', `Rucsac${n ? ' · ' + n : ''}`]]), ['co', 'Compoziție și presetări']];
   const bar = `<div class="tm-tabs" role="tablist">${tabs.map(([k, t]) => `<button role="tab" aria-selected="${tmTab === k}" class="${tmTab === k ? 'on' : ''}" onclick="tmTabSet('${k}')">${t}</button>`).join('')}</div>`;
   let body;
-  if (tmTab === 'co') body = tmSynergy() + (pre || '');
+  if (tmTab === 'co') body = tmSynergy() + (typeof mrTeamPresetPanel==='function'?mrTeamPresetPanel():'') + (pre || '');
   else if (tmTab === 'inv') body = `<div class="tm-for mute">Echipezi pe <b>${tEsc(f.n)}</b> · alege altul din cardurile de sus.</div><div class="tm-right">${inv || ''}</div>`;
   else body = tmChar(wide ? inv : '');
   return tmStrip() + bar + body;

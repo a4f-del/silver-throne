@@ -239,6 +239,68 @@ function mrStoryArchive() {
     +buttons+'</div><p class="mute">Poți reciti scenele fără să schimbi echipa sau progresul.</p>'
     +'</details></section>';
 }
+/* BETA: patru configurații simple (erou singur și +1/+2/+3), cu
+   clase memorate în salvare. Nu atinge expedițiile sau progresul LIVE. */
+function mrTeamPresetLabel(n){return n===0?'Erou singur':'Erou +'+n;}
+function mrTeamPresetReady(){
+ return typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&!!S&&
+   Array.isArray(S.fs)&&Array.isArray(S.rs);
+}
+function mrTeamPresetPanel(){
+ if(!mrTeamPresetReady())return '';
+ const max=Math.min(3,Math.max(0,TMAX()-1)),current=S.fs.filter(f=>!f.h).length;
+ const saved=S.mrTeamPresets||{},locked=!!S.d||!!S.adventure;
+ const rows=[0,1,2,3].map(n=>{
+  const classes=Array.isArray(saved[n])?saved[n]:null;
+  const display=classes?'Salvată: '+classes.join(', '):'Din luptătorii disponibili';
+  const disabled=locked||n>max;
+  return '<div class="mr-preset-row"><span><b>'+mrTeamPresetLabel(n)+'</b>'+
+   '<small>'+((n>max)?'Se deschide la nivelul 30':display)+'</small></span>'+
+   '<button type="button" onclick="mrTeamPresetUse('+n+')"'+(disabled?' disabled':'')+
+   '>'+(classes?'Activează':'Formează')+'</button></div>';
+ }).join('');
+ return '<section class="mr-team-presets"><h2>Formații rapide</h2>'+
+  '<p class="mute">Formează sau activează o echipă fără să muți fiecare tovarăș. '+
+  'Mercenarii plecați în expediții nu sunt chemați înapoi.</p>'+rows+
+  '<button type="button" onclick="mrTeamPresetSave()"'+(locked?' disabled':'')+
+  '>Memorează echipa curentă ('+mrTeamPresetLabel(current)+')</button></section>';
+}
+function mrTeamPresetUse(n){
+ if(!mrTeamPresetReady())return;
+ n=Number(n);
+ if(!Number.isInteger(n)||n<0||n>3)return;
+ if(S.d||S.adventure){S.msg='Încheie întâi aventura înainte să schimbi formația.';return go();}
+ if(n>=TMAX()){S.msg='Eroul +3 mercenari se deschide la nivelul 30.';return go();}
+ const hero=S.fs.find(f=>f.h);
+ if(!hero||hero.hp<=0){S.msg='Ridică eroul la Infirmerie înainte să schimbi formația.';return go();}
+ const busy=f=>typeof mxBusy==='function'&&mxBusy(f);
+ const active=S.fs.filter(f=>!f.h);
+ const available=active.concat(S.rs.filter(f=>!f.h&&!busy(f)));
+ const saved=(S.mrTeamPresets||{})[n];
+ let chosen;
+ if(Array.isArray(saved)){
+  if(saved.length!==n||new Set(saved).size!==n){S.msg='Formația salvată nu mai este validă.';return go();}
+  chosen=saved.map(c=>available.find(f=>f.c===c));
+  if(chosen.some(f=>!f)){S.msg='Un mercenar din formația salvată este plecat sau indisponibil.';return go();}
+ }else{
+  chosen=available.slice(0,n);
+  if(chosen.length<n){S.msg='Nu ai încă '+n+' mercenari disponibili. Recrutează sau așteaptă expedițiile.';return go();}
+ }
+ const rest=S.rs.filter(f=>!chosen.includes(f)).concat(active.filter(f=>!chosen.includes(f)));
+ S.fs=[hero,...chosen];
+ S.rs=rest;S.sel=0;S.soloDungeon=n===0?1:0;
+ S.msg=n?'Formația '+mrTeamPresetLabel(n)+' este pregătită.':'Eroul intră singur, iar mercenarii au trecut în rezervă.';
+ go();
+}
+function mrTeamPresetSave(){
+ if(!mrTeamPresetReady())return;
+ if(S.d||S.adventure){S.msg='Încheie mai întâi aventura.';return go();}
+ const party=S.fs.filter(f=>!f.h),n=party.length;
+ if(n<0||n>3||n>=TMAX()){S.msg='Formația actuală nu poate fi memorată.';return go();}
+ if(new Set(party.map(f=>f.c)).size!==n){S.msg='Formația are clase duplicate.';return go();}
+ (S.mrTeamPresets=S.mrTeamPresets||{})[n]=party.map(f=>f.c);
+ S.msg='Ai memorat formația '+mrTeamPresetLabel(n)+'.';go();
+}
 function mrHan() {
   const fm = f => Math.floor(f.fm || 0), nx = f => (f.rk || 0) < 4 ? SP.RKF[(f.rk || 0) + 1] : null;
   const cards = MR.order.map(([c, st]) => {
@@ -267,6 +329,13 @@ function mrRes() { return `<section><h2>La ce folosește fiecare resursă</h2><d
   if (typeof document === 'undefined' || !document.head) return;
   const st = document.createElement('style');
   st.textContent = `
+.mr-team-presets{margin:8px 0}
+.mr-preset-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.mr-preset-row span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.mr-preset-row small{font-size:12px;color:var(--mute)}
+.mr-preset-row button{flex:none}
+.mr-team-presets>button{margin-top:12px}
+@media(max-width:520px){.mr-preset-row{gap:6px}.mr-preset-row button{padding:7px 9px}}
 .mr-story-archive{margin-top:10px}
 .mr-story-archive summary{cursor:pointer;color:var(--gold2);font-weight:700;padding:4px 0}
 .mr-story-links{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
