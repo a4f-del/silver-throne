@@ -36,7 +36,7 @@ function jeStarterWeaponList(){
  return (S.inv||[]).map((it,i)=>({it,i})).filter(x=>x.it&&x.it.t==='w')
   .map(x=>{
    const style=typeof wfOf==='function'&&typeof WF!=='undefined'?WF[wfOf(x.it)]:null;
-   const good=!style||!style.ex||style.c===hero.c;
+   const good=!style||style.c===hero.c; /* recomandăm clasa eroului; alte arme rămân în inventar */
    const score=typeof bsc==='function'?bsc(x.it,hero):typeof invScore==='function'?invScore(x.it):0;
    return {...x,good,score};
   }).sort((a,b)=>Number(b.good)-Number(a.good)||b.score-a.score||a.i-b.i);
