@@ -86,7 +86,7 @@ assert.equal(noGuild.api.gsrInboxCount(),1);
  await noGuild.api.gsrRespond(13,true);
  assert(noGuild.events.some(x=>Array.isArray(x)&&x[1].p_action==='accept'));
  const live=environment('live');
- assert.equal(live.api.gsrCanInvite(),true,'permission is based on membership; live actions are guarded by guildEnabled');
+ assert.equal(live.api.gsrCanInvite(),false,'LIVE cannot invite players');
  assert.equal(await live.api.gsrAction('invite',{user_id:ids[3]}),null,'LIVE never sends an invite');
  console.log('OK: asynchronous invite, rank, transfer, kick, acceptance and LIVE isolation.');
 })().catch(e=>{console.error(e);process.exitCode=1});
