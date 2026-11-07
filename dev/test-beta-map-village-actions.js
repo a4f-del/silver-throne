@@ -17,7 +17,13 @@ function node(tag='div') {
    addEventListener(k,cb){listeners[k]=cb},click(){listeners.click&&listeners.click({stopPropagation(){}})},
    remove(){if(this.parentNode)this.parentNode.children.splice(this.parentNode.children.indexOf(this),1)},
    getBoundingClientRect(){return {left:400,top:230,bottom:310,width:80,height:80}},
-   closest(){return null},querySelector(){return null}};
+   closest(){return null},querySelector(){return null},
+   querySelectorAll(selector){
+     if(selector!=='.lwqa-icon')return [];
+     return this.children.flatMap(child=>[
+       ...(child.className==='lwqa-icon'?[child]:[]),...child.querySelectorAll(selector)
+     ]);
+   }};
  return e;
 }
 function setup(server){
@@ -29,10 +35,11 @@ function setup(server){
   addEventListener(type,cb){events[type]=cb}};
  const S={pts:10,fs:[{hp:100}],lvl:5};
  const village={id:'p2',name:'Mara',level:8,power:200},npc={id:'wn1',n:'Moara Rece',lvl:4};
- let attacked=0,profiled=0,raided=0;
+ let attacked=0,profiled=0,raided=0,messaged=0;
  const ctx={document,ST_SERVER:server,S,
   LUME:{st:{players:[village],me:{user_id:'p1'}},busy:false},
   lwCan:()=>({ok:true,why:''}),lwAttack:()=>attacked++,lwProfile:()=>profiled++,
+  wmCompose:()=>messaged++,guildTagFor:id=>id==='p2'?'ORD':'',
   wnList:()=>[npc],wnLeft:()=>0,wnRaid:()=>raided++,WN:{busy:false},
   sdT:()=>'',go(){},tab(){},window:{addEventListener(){}},console};
  vm.createContext(ctx);vm.runInContext(code,ctx);
@@ -51,23 +58,26 @@ function setup(server){
    events.click(ev);
    return document.getElementById('lw-quick-actions');
  }
- return {fire,get:()=>({attacked,profiled,raided}),events,host};
+ return {fire,get:()=>({attacked,profiled,raided,messaged}),events,host};
 }
 const beta=setup('beta');
 const menu=beta.fire('village','p2');
 assert(menu,'click should show a popup');
 assert(menu.className.includes('lwqa-map'),'BETA should use anchored icon popup');
-const buttons=menu.children[2].children;
+assert.equal(menu.children.length,2,'BETA popup has title and one icon row only');
+assert.equal(menu.children[0].children[0].textContent,'[ORD] Mara','Guild abbreviation appears before player name');
+const buttons=menu.children[1].children;
 assert.equal(buttons.length,3,'Attack, profile, message icons');
 assert.equal(buttons[0].getAttribute('aria-label'),'Atacă');
 assert.equal(buttons[1].getAttribute('aria-label'),'Profil');
 assert.equal(buttons[2].getAttribute('aria-label'),'Mesaj');
-assert(buttons[2].disabled,'Message must not pretend to send without backend');
+assert.equal(buttons[2].textContent,'✉','Message is a single icon without extra text');
+assert(!buttons[2].disabled,'Message uses the existing mail feature');
 buttons[0].click();
 assert.equal(beta.get().attacked,1);
 const npc=beta.fire('npc','wn1');
-assert(npc&&npc.children[2].children.length===1,'NPC has one direct attack action');
-npc.children[2].children[0].click();
+assert(npc&&npc.children.length===2&&npc.children[1].children.length===1,'NPC has only title and raid icon');
+npc.children[1].children[0].click();
 assert.equal(beta.get().raided,1);
 const live=setup('live');
 const liveMenu=live.fire('village','p2');
@@ -75,4 +85,4 @@ assert(liveMenu&&!liveMenu.className.includes('lwqa-map'),'LIVE old menu unchang
 const before=live.host.children.length;
 live.fire('npc','wn1');
 assert.equal(live.host.children.length,before,'NPC new action only on BETA');
-console.log('OK: BETA player icons, NPC raid, disabled unsent messages and LIVE isolation.');
+console.log('OK: BETA [TAG] Name and 3 compact icons, NPC raid, existing messaging, LIVE isolation.');
