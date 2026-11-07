@@ -96,7 +96,7 @@ function acCombatPage(d) {
 function acFxMarkup(cast,hp) {
   const make=(side,x,i)=>{
     const max=Math.max(1,x.mh),alive=Math.max(0,hp[side][i]),enemy=side==='es';
-    const art=enemy?acArt(x.img):av({n:x.n,c:x.c,ic:x.ic,h:x.h},80);
+    const art=enemy?(x.img?acArt(x.img):cast.pvp&&x.c?av({n:x.n,c:x.c,ic:x.ic,h:x.h},110):acArt(null)):av({n:x.n,c:x.c,ic:x.ic,h:x.h},80);
     return '<div class="fx-r ac-fx-card'+(enemy?' ac-fx-enemy':' ac-fx-ally')+'" data-s="'+side+'" data-i="'+i+'">' +
       '<div class="fx-av ac-fx-art">'+art+'</div><b class="ac-fx-name">'+acSafe(x.n)+'</b>' +
       '<i class="fx-hp"><i style="width:'+Math.max(0,Math.min(100,Math.round(alive/max*100)))+'%"></i></i>' +
@@ -109,19 +109,19 @@ function acFxMarkup(cast,hp) {
 }
 function acFxAnimate(modal,frame) {
   if(!modal||!modal.classList.contains('ac-fx-mode'))return;
-  const actor=frame.actor && frame.actor.side ? modal.querySelector('.fx-r[data-s="'+frame.actor.side+'"][data-i="'+frame.actor.i+'"]') : null;
-  const damage=frame.actor&&frame.actor.side==='es'?frame.fs:frame.es;
-  const side=frame.actor&&frame.actor.side==='es'?'fs':'es';
-  const hit=damage.find(d=>d.v<0);
-  const target=hit&&modal.querySelector('.fx-r[data-s="'+side+'"][data-i="'+hit.i+'"]');
-  if(!target)return;
-  const targetFace=target.querySelector('.fx-av');
-  if(targetFace){
-    targetFace.classList.remove('ac-impact');void targetFace.offsetWidth;targetFace.classList.add('ac-impact');
-    setTimeout(()=>targetFace.classList.remove('ac-impact'),420);
+  const actor=frame.actor&&frame.actor.side?modal.querySelector('.fx-r[data-s="'+frame.actor.side+'"][data-i="'+frame.actor.i+'"]'):null;
+  const side=frame.actor&&frame.actor.side==='es'?'fs':frame.actor&&frame.actor.side==='fs'?'es':
+    (frame.fs.some(d=>d.v<0)?'fs':'es');
+  const targets=frame[side].filter(d=>d.v<0).map(d=>modal.querySelector('.fx-r[data-s="'+side+'"][data-i="'+d.i+'"]')).filter(Boolean);
+  if(!targets.length)return;
+  for(const target of targets) {
+    const face=target.querySelector('.fx-av');if(!face)continue;
+    face.classList.remove('ac-impact');void face.offsetWidth;face.classList.add('ac-impact');
+    setTimeout(()=>face.classList.remove('ac-impact'),420);
   }
-  if(!actor||actor===target)return;
-  const face=actor.querySelector('.fx-av'),tr=targetFace&&targetFace.getBoundingClientRect(),ar=face&&face.getBoundingClientRect();
+  if(!actor||targets.includes(actor))return;
+  const targetFace=targets[0].querySelector('.fx-av'),face=actor.querySelector('.fx-av');
+  const tr=targetFace&&targetFace.getBoundingClientRect(),ar=face&&face.getBoundingClientRect();
   if(!face||!tr||!ar)return;
   face.style.setProperty('--ac-dx',Math.round((tr.left+tr.width/2-ar.left-ar.width/2)*0.88)+'px');
   face.style.setProperty('--ac-dy',Math.round((tr.top+tr.height/2-ar.top-ar.height/2)*0.88)+'px');
