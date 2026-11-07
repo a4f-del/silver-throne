@@ -71,7 +71,7 @@ function mrStoryClose() {
   MR_SCENE = null;
 }
 function mrStoryShow(c, preview) {
-  if (!mrStoryIsBeta() || !MR_STORY[c] || typeof S === 'undefined' || !S) return;
+  if (!mrStoryIsBeta() || !MR_STORY[c] || typeof S === 'undefined' || !S || S.d) return;
   if (!preview && (!mrStoryEnabled() || !(S.mrOff || []).includes(c) || mrHas(c))) return;
   mrStoryClose();
   const story = MR_STORY[c], m = document.createElement('div');
