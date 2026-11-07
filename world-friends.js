@@ -106,6 +106,7 @@ function wfFeedback(msg){
  let note=document.getElementById('wf-toast');
  if(!note){note=document.createElement('div');note.id='wf-toast';note.setAttribute('role','status');document.body.appendChild(note);}
  note.textContent=msg;
+ if(typeof setTimeout==='function')setTimeout(()=>{if(note.isConnected)note.remove();},4200);
 }
 async function wfRequest(uid){
  if(!wfEnabled()||WF.busy||!uid||String(uid)===String(CONT.user.id))return;
