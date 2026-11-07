@@ -36,6 +36,12 @@
     const host=map();
     if(!host||!target||!target.getBoundingClientRect)return;
     const H=host.getBoundingClientRect(),R=target.getBoundingClientRect();
+    // tema.css fixează bottom:12px pe meniul vechi. Împreună cu top-ul
+    // calculat mai jos, browserul întindea popupul pe înălțimea hărții.
+    // În BETA îl dimensionăm strict după titlu + pictograme.
+    panel.style.bottom='auto';
+    panel.style.height='auto';
+    panel.style.minHeight='0';
     const padding=8,gap=8;
     const maxWidth=Math.max(80,Math.min(244,H.width-2*padding));
     const count=panel.querySelectorAll('.lwqa-icon').length;
@@ -231,12 +237,12 @@
   if (typeof document !== 'undefined' && document.head) {
     const style = document.createElement('style');
     style.textContent = `
-.lwqa-map{position:absolute;z-index:9;transform:translate(-50%,-100%);width:max-content;max-width:calc(100% - 16px);box-sizing:border-box;line-height:1.2;padding:6px 7px;border:1px solid #c9a24b;border-radius:10px;background:#151c1fee;box-shadow:0 7px 24px #000b;backdrop-filter:blur(6px);animation:lwqa-in .18s ease-out}
-.lwqa-map.lwqa-below{transform:translateX(-50%)}
-.lwqa-head{display:flex;justify-content:center;align-items:center;min-width:0;text-align:center;margin-bottom:5px}
+.lw-quick-actions-panel.lwqa-map{position:absolute;bottom:auto;height:auto;min-height:0;z-index:9;transform:translate(-50%,-100%);width:max-content;max-width:calc(100% - 16px);box-sizing:border-box;line-height:1.2;padding:6px 7px;border:1px solid #c9a24b;border-radius:10px;background:#151c1fee;box-shadow:0 7px 24px #000b;backdrop-filter:blur(6px);animation:lwqa-in .18s ease-out}
+.lw-quick-actions-panel.lwqa-map.lwqa-below{transform:translateX(-50%)}
+.lwqa-head{display:flex;justify-content:center;align-items:center;min-width:0;text-align:center;margin:0 0 5px}
 .lwqa-head strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;color:var(--gold2);max-width:100%}
 .lwqa-map>small{display:block;color:var(--mute);font-size:9.5px;margin:1px 0 5px}
-.lwqa-map .lw-quick-buttons{display:flex;justify-content:center;gap:5px}
+.lwqa-map .lw-quick-buttons{display:flex;justify-content:center;flex-wrap:nowrap;gap:5px;margin-top:0}
 .lwqa-map .lwqa-icon{min-width:39px;min-height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:3px 5px;border-radius:7px;font-size:19px;color:#f0d27a;border:1px solid #75603d;background:#253034;box-shadow:0 2px 7px #0006}
 .lwqa-map .lwqa-icon:hover:not(:disabled){background:#354347;transform:translateY(-2px)}
 .lwqa-map .lwqa-icon:disabled{opacity:.45;cursor:not-allowed}
