@@ -38,6 +38,7 @@ function wmStart(){
  if(WM.timer)return;
  wmSync(true);
  WM.timer=setInterval(()=>{if(wmAuth())wmSync(false);else{clearInterval(WM.timer);WM.timer=null;}},60000);
+ if(typeof hdr==='function')hdr();
 }
 function wmClose(){document.getElementById('wm-overlay')?.remove();}
 function wmOverlay(title,content){
@@ -74,11 +75,15 @@ async function wmView(id){
  const m=WM.messages.find(m=>Number(m.id)===Number(id));if(!m)return;
  wmOverlay('Mesaj de la '+m.from,
  '<div class="wm-body">'+wmEsc(m.body)+'</div><div class="wm-actions">'+
- '<button onclick="wmOpen()">← Inbox</button><button class="p" onclick="wmCompose('+JSON.stringify(String(m.from_id))+','+JSON.stringify(String(m.from)).replace(/"/g,'&quot;')+')">Răspunde</button></div>');
+ '<button onclick="wmOpen()">← Inbox</button><button class="p" onclick="wmReply('+Number(m.id)+')">Răspunde</button></div>');
  if(!m.read){
   const r=await tronRpc('world_mail_read',{p_id:Number(m.id)});
   if(!r.error){m.read=true;WM.unread=Math.max(0,WM.unread-1);wmBadge();}
  }
+}
+function wmReply(id){
+ const m=WM.messages.find(x=>Number(x.id)===Number(id));
+ if(m)wmCompose(m.from_id,m.from);
 }
 function wmCompose(id,name){
  if(!wmAuth()||!id||String(id)===String(CONT.user.id))return;
