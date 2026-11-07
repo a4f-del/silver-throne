@@ -72,5 +72,7 @@ assert.equal(beta.get().raided,1);
 const live=setup('live');
 const liveMenu=live.fire('village','p2');
 assert(liveMenu&&!liveMenu.className.includes('lwqa-map'),'LIVE old menu unchanged');
-assert(!live.fire('npc','wn1'),'NPC new action only on BETA');
+const before=live.host.children.length;
+live.fire('npc','wn1');
+assert.equal(live.host.children.length,before,'NPC new action only on BETA');
 console.log('OK: BETA player icons, NPC raid, disabled unsent messages and LIVE isolation.');
