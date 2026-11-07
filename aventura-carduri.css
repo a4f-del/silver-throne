@@ -43,6 +43,8 @@ body.st-adventure .ac-scene{
 .ac-odds strong{font:700 30px Cinzel,Georgia,serif;color:#a5e1a4}
 .ac-hint{margin:0;line-height:1.5;font-size:14px;color:#cdd0cc}
 .ac-hint b{color:#ead8ad}
+.ac-counter{display:block;margin-top:3px;color:#e9cc93;font-size:11px;line-height:1.3}
+.ac-prep{color:#f0dfbc;border-left:2px solid #ad8c58;padding-left:8px}
 .ac-primary{width:100%;margin-top:auto;min-height:56px;font:700 18px Cinzel,Georgia,serif;border-radius:10px}
 .ac-no-art{display:grid;place-items:center;width:100%;height:100%;font-size:72px;color:#d0aa61;background:radial-gradient(circle at 50% 25%,#473626,#171a20 74%);text-shadow:0 0 30px #b1804c}
 .ac-party{margin-top:18px;padding-top:12px;border-top:1px solid #6c553b}
