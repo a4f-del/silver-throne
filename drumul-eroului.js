@@ -4,8 +4,8 @@
 const JE_STEPS = [
  {id:'poarta',title:'Cenușa de la poartă',icon:'🛡️',
   say:'„Nu lăsăm satul singur. Hai să aflăm ce se ascunde sub deal.” — Paznicul',
-  help:'Primește-l și numește-l pe Paznic, apoi deschide Coborâre, intră în Mina Cenușie și revino cu prada. Poți ieși înainte de căpitan.',
-  reward:{g:50,o:15},parts:[['Paznicul a primit un nume',()=>jeHas('Paznic')],['Te-ai întors din mină',()=>jeCount('l')>=1]],
+  help:'Primește-l și numește-l pe Paznic, apoi intră în Mina Cenușie din Coborâre. Învinge pe rând cei trei monștri și Căpitanul Cenușii. După victorie revii automat și primești prada. Dacă te retragi mai devreme, progresul în mină se păstrează, dar jurământul se încheie după căpitan.',
+  reward:{g:50,o:15},parts:[['Paznicul a primit un nume',()=>jeHas('Paznic')],['Ai învins primul căpitan',()=>jeCount('bs')>=1]],
   action:()=>!jeHas('Paznic')?['Han','a','h']:['Mina Cenușie','c','']},
  {id:'urme',title:'Urmele din cenușă',icon:'🏹',
   say:'„Nu ne putem apăra doar cu săgeți. Aprindeți forja!” — Arcașul',
