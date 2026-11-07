@@ -771,7 +771,7 @@ function deschidePortret(i){
 function hdr(){const h=S.fs.find(f=>f.h)||S.fs[0];
  q('#hs').innerHTML=temaHdr();
  q('#nv').innerHTML=temaNav()+sideHtml()}
-function render(){sync();q('#v').innerHTML=''+''+(S.msg?`<p class="msg">${S.msg}</p>`:'')+tuH()+(typeof rtBanner==='function'?rtBanner():'')+ghIdle()+(typeof sqPanel==='function' && S.tab==='a' && !S.vil ? sqPanel() : '')+(S.tab=='a'?vV():S.tab=='c'?vC():S.tab=='m'?vM():S.tab=='r'?vTron():S.tab=='k'?vBoard():vE());   /* k = clasamentul, deschis din bara de sus */hdr();fxScan();temaPost();satPost();if(typeof vsPost==='function')vsPost();if(typeof mrPost==='function')mrPost()}
+function render(){sync();q('#v').innerHTML=''+''+(S.msg?`<p class="msg">${S.msg}</p>`:'')+tuH()+(typeof rtBanner==='function'?rtBanner():'')+ghIdle()+(typeof sqPanel==='function' && S.tab==='a' && !S.vil ? sqPanel() : '')+(S.tab=='a'?vV():S.tab=='c'?vC():S.tab=='m'?vM():S.tab=='r'?vTron():S.tab=='k'?vBoard():vE());   /* k = clasamentul, deschis din bara de sus */hdr();fxScan();temaPost();satPost();if(typeof sqDecorate==='function')sqDecorate();if(typeof vsPost==='function')vsPost();if(typeof mrPost==='function')mrPost()}
 function go(){pool();shop();MPV();terTick();atkCheck();tuChk();botLife();loginChk();tronCheck();lumeCheck();terBack();if(typeof mrTick==='function')mrTick();save();render()}
 /* pornirea jocului o face cont.js, după conectare: boot(salvare) */
 function boot(src){load(src);if(typeof tronDuelRestore==='function')tronDuelRestore();terNorm();spNorm();if(S.d&&S.d.f&&!S.d.f.es.some(e=>e.hp>0))win();pool();shop();MPV();terTick();atkCheck();botLife();loginChk();save();render()}
