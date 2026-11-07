@@ -111,10 +111,11 @@ function jeNextAdventurePanel(){
  if(!jeFocus()||!S.jeCampaignOpened||S.jeNextHintVisited||S.d||!['a','c'].includes(S.tab))return '';
  const next=jeNextDungeonTarget();if(!next)return '';
  const {target,current,ready}=next;
- const helper=!(S.fs||[]).some(f=>f.eq&&f.eq.w)
-  ? 'Echipează o armă potrivită eroului.'
-  : (S.fs||[]).some(f=>f.hp<=0)
+ const hero=(S.fs||[]).find(f=>f.h)||(S.fs||[])[0];
+ const helper=(S.fs||[]).some(f=>f.hp<=0)
   ? 'Ridică luptătorii căzuți la Infirmerie.'
+  : !(hero&&hero.eq&&hero.eq.w)
+  ? 'Echipează o armă potrivită eroului.'
   : 'Întărește echipamentul și vindecă echipa înainte de căpitan.';
  const message=ready
   ? 'Temnița este disponibilă. Încearc-o când echipa este pregătită.'
