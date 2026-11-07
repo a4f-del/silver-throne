@@ -147,6 +147,7 @@ function hcDone() {
   /* Doar eroii NOI pe BETA primesc introducerile narative. Nu schimbam salvările existente. */
   if (first && HC.mode === 'new' && typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta') {
     S.mrStoryV = 1;
+    S.mrPresetV = 1; /* nume prestabilite: doar la crearea unui erou BETA nou */
     S.journeyV = 1;
     S.journeyUxV = 2; /* acces progresiv la cladirile Satului, doar pentru eroi nou creati pe BETA */ /* exclusiv eroi NOI: Drumul Eroului, fara dublare ghid/misiuni */
     S.mrPrologPending = 1; /* prologul se afiseaza doar la eroi nou creati */
