@@ -94,7 +94,10 @@ DECLARE v_week date := date_trunc('week', now() AT TIME ZONE 'Europe/Bucharest')
 BEGIN
  PERFORM 1 FROM public.guilds WHERE id=p_gid FOR UPDATE;
  IF NOT FOUND THEN RAISE EXCEPTION 'Breasla nu exista.'; END IF;
- SELECT count(*) INTO v_members FROM public.guild_members WHERE guild_id=p_gid;
+ SELECT count(*) INTO v_members FROM public.guild_members m
+ LEFT JOIN public.world_players w ON w.user_id=m.user_id
+ WHERE m.guild_id=p_gid AND (w.seen_at>=now()-interval '7 days'
+   OR m.joined_at>=now()-interval '7 days');
  v_new := 24000 + 12000 * greatest(1,v_members);
  INSERT INTO public.guild_weeks(guild_id,week_start,boss_max,boss_hp)
  VALUES(p_gid,v_week,v_new,v_new)
