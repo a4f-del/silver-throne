@@ -1,55 +1,55 @@
 /* Silver Throne · Lista de prieteni (BETA only).
    Cereri, acceptare, anulare si mesaje; fara salvare in joc si fara modificari LIVE. */
-const WF={uid:null,items:[],requests:0,ready:false,loading:false,busy:false,last:0,error:'',timer:null};
+const WFR={uid:null,items:[],requests:0,ready:false,loading:false,busy:false,last:0,error:'',timer:null};
 const wfEnabled=()=>typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&
   typeof CONT!=='undefined'&&CONT.booted&&CONT.user&&!!CONT.user.id;
 const wfEscape=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function wfHeader(){
  if(!wfEnabled())return '';
  return '<button id="wf-open" class="wf-open" onclick="wfOpen()" aria-label="Prieteni'+
-  (WF.requests?' · '+WF.requests+' cereri noi':'')+'">🤝 <span class="wf-word">Prieteni</span>'+
-  '<span id="wf-badge" class="wf-badge"'+(WF.requests?'':' hidden')+'>'+
-  (WF.requests>99?'99+':WF.requests)+'</span></button>';
+  (WFR.requests?' · '+WFR.requests+' cereri noi':'')+'">🤝 <span class="wf-word">Prieteni</span>'+
+  '<span id="wf-badge" class="wf-badge"'+(WFR.requests?'':' hidden')+'>'+
+  (WFR.requests>99?'99+':WFR.requests)+'</span></button>';
 }
 function wfUpdateBadge(){
  const b=document.getElementById('wf-badge');
- if(b){b.hidden=!WF.requests;b.textContent=WF.requests>99?'99+':String(WF.requests);}
+ if(b){b.hidden=!WFR.requests;b.textContent=WFR.requests>99?'99+':String(WFR.requests);}
  const open=document.getElementById('wf-open');
- if(open)open.setAttribute('aria-label','Prieteni'+(WF.requests?' · '+WF.requests+' cereri noi':''));
+ if(open)open.setAttribute('aria-label','Prieteni'+(WFR.requests?' · '+WFR.requests+' cereri noi':''));
 }
 function wfRelationship(uid){
  if(!wfEnabled()||!uid)return null;
- return WF.items.find(x=>String(x.user_id)===String(uid))||null;
+ return WFR.items.find(x=>String(x.user_id)===String(uid))||null;
 }
 async function wfSync(force){
- if(!wfEnabled()||WF.loading||(!force&&Date.now()-WF.last<20000))return;
+ if(!wfEnabled()||WFR.loading||(!force&&Date.now()-WFR.last<20000))return;
  const uid=CONT.user.id;
- if(WF.uid!==uid){WF.uid=uid;WF.items=[];WF.requests=0;WF.ready=false;}
- WF.loading=true;
+ if(WFR.uid!==uid){WFR.uid=uid;WFR.items=[];WFR.requests=0;WFR.ready=false;}
+ WFR.loading=true;
  try{
   const r=await tronRpc('world_friends_list');
   if(!wfEnabled()||CONT.user.id!==uid)return;
-  if(r.error){WF.error=String(r.error).slice(0,220);WF.ready=false;}
+  if(r.error){WFR.error=String(r.error).slice(0,220);WFR.ready=false;}
   else{
-   WF.items=Array.isArray(r.data?.items)?r.data.items:[];
-   WF.requests=Math.max(0,Number(r.data?.requests)||0);
-   WF.ready=true;WF.error='';
+   WFR.items=Array.isArray(r.data?.items)?r.data.items:[];
+   WFR.requests=Math.max(0,Number(r.data?.requests)||0);
+   WFR.ready=true;WFR.error='';
   }
-  WF.last=Date.now();
+  WFR.last=Date.now();
   wfUpdateBadge();
   if(document.getElementById('wf-list'))wfRender();
- }finally{WF.loading=false;}
+ }finally{WFR.loading=false;}
 }
 function wfStart(){
  if(!wfEnabled())return;
- if(WF.uid!==CONT.user.id){
-  WF.uid=CONT.user.id;WF.items=[];WF.requests=0;WF.last=0;WF.ready=false;
+ if(WFR.uid!==CONT.user.id){
+  WFR.uid=CONT.user.id;WFR.items=[];WFR.requests=0;WFR.last=0;WFR.ready=false;
  }
- if(WF.timer)return;
+ if(WFR.timer)return;
  wfSync(true);
- WF.timer=setInterval(()=>{
+ WFR.timer=setInterval(()=>{
   if(wfEnabled())wfSync(false);
-  else{clearInterval(WF.timer);WF.timer=null;WF.uid=null;WF.items=[];WF.requests=0;}
+  else{clearInterval(WFR.timer);WFR.timer=null;WFR.uid=null;WFR.items=[];WFR.requests=0;}
  },60000);
  if(typeof hdr==='function')hdr();
 }
@@ -69,14 +69,14 @@ function wfOpen(){
 }
 function wfRender(){
  const el=document.getElementById('wf-list');if(!el)return;
- if(!WF.ready){
-  el.innerHTML='<p class="mute">'+(WF.error?'Nu pot încărca prietenii: '+wfEscape(WF.error)+
+ if(!WFR.ready){
+  el.innerHTML='<p class="mute">'+(WFR.error?'Nu pot încărca prietenii: '+wfEscape(WFR.error)+
    '. Verifică instalarea SQL BETA.':'Se încarcă lista…')+
    '</p><button onclick="wfSync(true)">Reîncearcă</button>';return;
  }
- const incoming=WF.items.filter(x=>x.status==='pending'&&x.direction==='incoming');
- const accepted=WF.items.filter(x=>x.status==='accepted');
- const outgoing=WF.items.filter(x=>x.status==='pending'&&x.direction==='outgoing');
+ const incoming=WFR.items.filter(x=>x.status==='pending'&&x.direction==='incoming');
+ const accepted=WFR.items.filter(x=>x.status==='accepted');
+ const outgoing=WFR.items.filter(x=>x.status==='pending'&&x.direction==='outgoing');
  const validId=id=>Number.isSafeInteger(Number(id))&&Number(id)>0?Number(id):0;
  const entry=(r,kind)=>{
   const name=wfEscape(r.name),id=validId(r.id);
@@ -109,8 +109,8 @@ function wfFeedback(msg){
  if(typeof setTimeout==='function')setTimeout(()=>{if(note.isConnected)note.remove();},4200);
 }
 async function wfRequest(uid){
- if(!wfEnabled()||WF.busy||!uid||String(uid)===String(CONT.user.id))return;
- WF.busy=true;
+ if(!wfEnabled()||WFR.busy||!uid||String(uid)===String(CONT.user.id))return;
+ WFR.busy=true;
  try{
   const r=await tronRpc('world_friends_request',{p_target:String(uid)});
   if(r.error){wfFeedback('Cererea nu a fost trimisă: '+String(r.error));return;}
@@ -121,40 +121,40 @@ async function wfRequest(uid){
   if(document.getElementById('lgm')&&typeof lwProfile==='function') {
     /* Profilul se poate închide sau actualiza separat; evităm deschiderea unui al doilea modal. */
   }
- }finally{WF.busy=false;}
+ }finally{WFR.busy=false;}
 }
 async function wfRespond(id,accept){
- if(!wfEnabled()||WF.busy)return;
- const item=WF.items.find(x=>Number(x.id)===Number(id));
+ if(!wfEnabled()||WFR.busy)return;
+ const item=WFR.items.find(x=>Number(x.id)===Number(id));
  if(!item||item.status!=='pending'||item.direction!=='incoming')return;
- WF.busy=true;
+ WFR.busy=true;
  try{
   const r=await tronRpc('world_friends_respond',{p_id:Number(id),p_accept:!!accept});
   if(r.error){wfFeedback(String(r.error));return;}
   await wfSync(true);
   wfFeedback(accept?'Cererea a fost acceptată.':'Cererea a fost refuzată.');
- }finally{WF.busy=false;}
+ }finally{WFR.busy=false;}
 }
 async function wfRemove(id){
- if(!wfEnabled()||WF.busy)return;
- const item=WF.items.find(x=>Number(x.id)===Number(id));
+ if(!wfEnabled()||WFR.busy)return;
+ const item=WFR.items.find(x=>Number(x.id)===Number(id));
  if(!item||!(item.status==='accepted'||item.status==='pending'&&item.direction==='outgoing'))return;
- WF.busy=true;
+ WFR.busy=true;
  try{
   const r=await tronRpc('world_friends_remove',{p_id:Number(id)});
   if(r.error){wfFeedback(String(r.error));return;}
   await wfSync(true);wfFeedback('Lista a fost actualizată.');
- }finally{WF.busy=false;}
+ }finally{WFR.busy=false;}
 }
 function wfMessage(id){
  if(!wfEnabled())return;
- const p=WF.items.find(x=>Number(x.id)===Number(id)&&x.status==='accepted');
+ const p=WFR.items.find(x=>Number(x.id)===Number(id)&&x.status==='accepted');
  if(!p)return;
  wfClose();if(typeof wmCompose==='function')wmCompose(p.user_id,p.name);
 }
 function wfProfile(id){
  if(!wfEnabled())return;
- const p=WF.items.find(x=>Number(x.id)===Number(id)&&x.status==='accepted');
+ const p=WFR.items.find(x=>Number(x.id)===Number(id)&&x.status==='accepted');
  if(!p)return;
  wfClose();if(typeof lwProfile==='function')lwProfile(p.user_id);
 }
