@@ -8,6 +8,9 @@ const js=read('bresle-ranguri.js'),sql=read('supabase/15-beta-guild-ranks-invite
 for(const s of [js,guild])new Function(s);
 for(const m of index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))if(m[1].trim())new Function(m[1]);
 assert(index.includes('bresle-ranguri.js?v=')&&index.includes('bresle-ranguri.css?v='),'assets loaded');
+assert(index.includes('lume.js?v=2026.11.07-18'),'profilul din Lume este actualizat');
+assert(lume.includes("typeof gsrProfileInviteButton==='function'"),'profilul jucatorilor ofera invitatie');
+assert(js.includes('async function gsrInviteFromProfile('),'invitarea din profil trimite un RPC validat');
 assert(guild.includes('gsrSync(force)'),'social data refreshed alongside guild');
 assert(guild.includes('gsrManagementHtml(g)'),'management shown to members');
 assert(guild.includes('gsrInvitationHtml()'),'invitation inbox shown to nonmembers');
