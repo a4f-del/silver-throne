@@ -21,7 +21,7 @@ page.on('console',m=>{if(m.type()==='error'&&/ReferenceError|SyntaxError|TypeErr
 try {
   await page.goto('https://a4f-del.github.io/silver-throne/?server=beta',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>typeof CONT!=='undefined'&&CONT.booted&&typeof S!=='undefined'&&S&&S.fs&&document.querySelector('#v'),
-    {timeout:25000});
+    undefined,{timeout:25000});
   const screens=[
     ['Sat / clădiri','a',''],
     ['Topitorie','a','a'],['Piață','a','p'],['Negustor','a','l'],
