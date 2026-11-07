@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS public.guilds (
  name text NOT NULL,
  tag text NOT NULL,
  code text NOT NULL UNIQUE,
- founder uuid NOT NULL REFERENCES auth.users(id),
+ founder uuid NOT NULL,
  created_at timestamptz NOT NULL DEFAULT now(),
  CONSTRAINT guild_name_size CHECK (char_length(name) BETWEEN 3 AND 32),
  CONSTRAINT guild_tag_size CHECK (char_length(tag) BETWEEN 2 AND 5)
@@ -81,7 +81,8 @@ ALTER TABLE public.guild_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.guild_boss_hits ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE public.guilds, public.guild_members, public.guild_weeks,
  public.guild_participation, public.guild_events, public.guild_boss_hits FROM PUBLIC, anon, authenticated;
-REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM PUBLIC, anon, authenticated;
+-- Secventele altor sisteme (Tron/Lume etc.) trebuie lasate neatinse.
+REVOKE ALL ON SEQUENCE public.guilds_id_seq, public.guild_boss_hits_id_seq FROM PUBLIC, anon, authenticated;
 
 -- Lunea la ora 00:00 Europe/Bucharest. Bossul se scaleaza dupa membrii
 -- actuali; progresul loviturilor nu se reseteaza cand se alatura cineva.
@@ -180,6 +181,9 @@ BEGIN
   SELECT * INTO v_w FROM public.guild_weeks WHERE guild_id=v_gid AND week_start=v_week FOR UPDATE;
 
   IF v_action='report' THEN
+   IF p_data->>'week' IS DISTINCT FROM v_week::text THEN
+    RAISE EXCEPTION 'Evenimentul apartine altei saptamani.';
+   END IF;
    v_kind:=coalesce(p_data->>'kind','');
    IF v_kind NOT IN('dungeon','hard_boss','tower') THEN RAISE EXCEPTION 'Eveniment necunoscut.'; END IF;
    v_event := nullif(p_data->>'id','')::uuid;
