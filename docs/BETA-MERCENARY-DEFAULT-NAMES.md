@@ -21,6 +21,13 @@ Sunt primele nume din sugestiile deja existente în `MR.sug`. Dacă un nume este
 4. Prima schimbare de nume rămâne gratuită pentru fiecare mercenar (`f.rnf` este neschimbat).
 5. Scenele, condițiile de deblocare, progresul, forța, echipamentul, darurile și costurile nu sunt afectate.
 
+## Poveste fără întreruperi suplimentare
+- Scena noului mercenar afișează **numele**, un dialog scurt și butonul de recrutare. Explicația lungă poate fi deschisă la „Citește povestea completă”, fără a fi obligatorie.
+- „Mai târziu” rămâne disponibil; oferta nu dispare și poate fi acceptată ulterior din Han.
+- În Han, eroii BETA noi văd un mic detaliu „Revede poveștile tovarășilor” cu prologul și scenele deja descoperite. Nu mai apare panoul BETA de previzualizare cu toate spoilerele.
+- Eroii noi nu pot deschide sau previzualiza o scenă peste luptă.
+- Conturile BETA vechi păstrează instrumentele QA de previzualizare, iar LIVE rămâne neschimbat.
+
 ## Siguranță
 - Eroii deja creați în BETA (fără `mrPresetV`) și eroii LIVE păstrează fereastra de numire și propriile nume.
 - Nu rescriem în masă salvările existente și nu atingem datele de pe server.
