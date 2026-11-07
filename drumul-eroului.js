@@ -1,0 +1,179 @@
+/* Silver Throne · Drumul Eroului V1: un singur fir poveste + indrumare (BETA).
+   Activ EXCLUSIV pentru eroii creati dupa lansarea sa (S.journeyV===1).
+   Reutilizeaza contorii si actiunile din joc; nu intervine in progresul existent. */
+const JE_STEPS = [
+ {id:'poarta',title:'Cenușa de la poartă',icon:'🛡️',
+  say:'„Nu lăsăm satul singur. Hai să aflăm ce se ascunde sub deal.” — Paznicul',
+  help:'Primește-l și numește-l pe Paznic, apoi deschide Coborâre, intră în Mina Cenușie și revino cu prada. Poți ieși înainte de căpitan.',
+  reward:{g:50,o:15},parts:[['Paznicul a primit un nume',()=>jeHas('Paznic')],['Te-ai întors din mină',()=>jeCount('l')>=1]],
+  action:()=>!jeHas('Paznic')?['Han','a','h']:['Mina Cenușie','c','']},
+ {id:'urme',title:'Urmele din cenușă',icon:'🏹',
+  say:'„Nu ne putem apăra doar cu săgeți. Aprindeți forja!” — Arcașul',
+  help:'La întoarcerea din mină, vizitează pagina principală a Satului pentru întâlnirea cu Arcașul. După ce îi alegi numele, intră în Topitorie și fă prima forjare.',
+  reward:{g:30,o:25},parts:[['Arcașul s-a alăturat',()=>jeHas('Arcaș')],['Ai făcut prima forjare',()=>jeCount('f')>=1]],
+  action:()=>!jeHas('Arcaș')
+   ? ((S.mrStorySeen||[]).includes('Arcaș') ? ['Han','a','h'] : ['Sat','a',''])
+   : ['Topitorie','a','a']},
+ {id:'otel',title:'Oțel pentru cei rămași',icon:'⚒️',
+  say:'„O armă uitată în rucsac nu apără pe nimeni.” — Paznicul',
+  help:'Ridică obiectul forjat din Topitorie dacă nu a fost ridicat, apoi mergi în Echipă și echipează o armă. Dacă forjarea a eșuat, încearcă din nou.',
+  reward:{g:30,o:5},parts:[['Ai echipat prima armă',()=>jeCount('e')>=1]],
+  action:()=>jeHasWeapon()?['Echipă','e','']:['Topitorie','a','a']},
+ {id:'han',title:'Jurământul veteranului',icon:'⚔️',
+  say:'„Am luptat pentru regi. Aș vrea să lupt pentru oameni.” — Războinicul',
+  help:'Antrenează o dată eroul în Sat → Antrenament. Apoi mergi la Han, ascultă povestea Războinicului și primește-l în echipă.',
+  reward:{g:135,o:5},parts:[['Ai antrenat eroul',()=>jeCount('t')>=1],['Războinicul are un nume',()=>jeHas('Războinic')]],
+  action:()=>jeCount('t')<1?['Antrenament','a','t']:['Han','a','h']},
+ {id:'vesti',title:'Vești din sat',icon:'📜',
+  say:'„Dincolo de ziduri e război. Înăuntru, satul trebuie să învețe să trăiască.”',
+  help:'Vizitează clădirea Misiuni și descoperă sarcinile zilnice. Nu e nevoie să le termini pe toate acum.',
+  reward:{g:30,o:0},parts:[['Ai vizitat Misiunile',()=>S.tab==='a'&&S.vil==='x'||!!S.jeVisitedMissions]],
+  action:()=>['Misiuni','a','x']},
+ {id:'hotar',title:'Dincolo de palisadă',icon:'🧭',
+  say:'„Regatul nu se reconstruiește doar din ce găsim sub pământ.”',
+  help:'Deschide Hartă → Lumea și încearcă primul raid când te simți pregătit. Dacă nu poți încă, poți continua să crești în nivel.',
+  reward:{g:80,o:20},parts:[['Ai jefuit primul sat',()=>jeCount('r')>=1]],
+  action:()=>['Hartă','m','l']}
+];
+function jeEnabled(){
+ return typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&typeof S!=='undefined'
+   &&!!S&&S.journeyV===1;
+}
+function jeReady(){return jeEnabled() && S.mrPrologSeen===1 && !S.mrPrologPending;}
+function jeCount(k){return typeof C==='function'?C(k):(S.cn||{})[k]||0;}
+function jeHas(c){
+ const a=typeof mrAll==='function'?mrAll():(S.fs||[]).concat(S.rs||[]);
+ return a.some(f=>!f.h&&f.c===c&&!f.nn);
+}
+function jeHasWeapon(){
+ return (S.inv||[]).some(x=>x.t==='w') ||
+  (S.fs||[]).concat(S.rs||[]).some(f=>f.eq&&f.eq.w);
+}
+function jeState(){
+ if(!S.je || !Array.isArray(S.je.done)) S.je={done:[]};
+ return S.je;
+}
+function jeCurrent(){
+ if(!jeReady())return null;
+ const done=S.je&&Array.isArray(S.je.done)?S.je.done:[];
+ return JE_STEPS.find(x=>!done.includes(x.id))||null;
+}
+function jeStatus(step){
+ if(!step)return {n:0,total:0,ok:false};
+ const n=step.parts.reduce((a,p)=>a+(p[1]()?1:0),0);
+ return {n,total:step.parts.length,ok:n===step.parts.length};
+}
+function jeNavigate(){
+ const s=jeCurrent();if(!s||S.d)return;
+ const [,t,v]=s.action();S.tab=t;
+ if(t==='a')S.vil=v;
+ if(t==='m')S.mt=v;
+ S.msg='';go();
+}
+function jeClaim(id){
+ if(!jeReady()||S.d)return;
+ const s=jeCurrent();
+ if(!s||s.id!==id||!jeStatus(s).ok)return;
+ const st=jeState();
+ if(st.done.includes(id))return;
+ st.done.push(id); /* marcam inainte de acordarea resurselor: idempotent */
+ S.gold=(S.gold||0)+s.reward.g; S.ore=(S.ore||0)+s.reward.o;
+ S.msg='';
+ go();
+ jeReward(s);
+}
+function jeReward(step){
+ if(typeof document==='undefined'||!document.body)return;
+ document.getElementById('je-toast')?.remove();
+ const el=document.createElement('div');el.id='je-toast';
+ el.setAttribute('role','status');
+ el.innerHTML='<span aria-hidden="true">✦</span><div><b>'+step.title+'</b><small>+'
+  +step.reward.g+' aur'+(step.reward.o?' · +'+step.reward.o+' minereu':'')
+  +'</small></div>';
+ document.body.appendChild(el);
+ if(typeof setTimeout==='function')setTimeout(()=>el.remove(),3200);
+}
+function jePanel(){
+ if(!jeReady() || S.d)return '';
+ const s=jeCurrent();
+ if(!s)return '<section class="je-card je-done"><div class="je-caption">✦ DRUMUL EROULUI</div><b>Primele jurăminte sunt împlinite.</b><p>Acum povestea continuă în Campanie.</p><button onclick="S.tab=\'m\';S.mt=\'k\';go()">Deschide Campania</button></section>';
+ const p=jeStatus(s),done=JE_STEPS.filter(x=>(S.je&&S.je.done||[]).includes(x.id)).length;
+ const parts=s.parts.map(([label,cb])=>'<span class="'+(cb()?'je-ok':'')+'">'+(cb()?'✓ ':'○ ')+label+'</span>').join('');
+ const reward=[s.reward.g?s.reward.g+' aur':'',s.reward.o?s.reward.o+' minereu':''].filter(Boolean).join(' + ');
+ return `<section class="je-card" aria-label="Drumul Eroului, obiectiv curent">
+   <div class="je-caption">✦ DRUMUL EROULUI · ${done+1}/${JE_STEPS.length}</div>
+   <div class="je-title"><span>${s.icon}</span><h2>${s.title}</h2></div>
+   <div class="je-tasks">${parts}</div>
+   <div class="je-progress"><i style="width:${Math.round(100*p.n/p.total)}%"></i></div>
+   <div class="je-bottom"><span class="je-reward">Recompensă: ${reward}</span>
+   ${p.ok?'<button class="p" onclick="jeClaim(\''+s.id+'\')">✦ Primește recompensa</button>':
+     '<button class="p" onclick="jeNavigate()">Continuă: '+s.action()[0]+'</button>'}</div>
+   <details class="je-help"><summary>📜 Poveste și ajutor</summary>
+     <p class="je-say">${s.say}</p><p>${s.help}</p></details>
+ </section>`;
+}
+function jeVisit(){
+ if(jeReady()&&S.tab==='a'&&S.vil==='x'&&!S.jeVisitedMissions){
+  S.jeVisitedMissions=1; /* un singur marker, fara reward implicit */
+  if(typeof save==='function')save();
+ }
+}
+function jeDecorate(){
+ if(typeof document==='undefined'||!document.querySelectorAll)return;
+ document.querySelectorAll('.je-target').forEach(e=>e.classList.remove('je-target'));
+ if(!jeReady()||S.d)return;
+ const s=jeCurrent();if(!s)return;
+ const [,,v]=s.action();
+ if(S.tab!=='a'||!v)return;
+ document.querySelectorAll('.vh-lb[data-v],.vb-c[data-v]').forEach(el=>{
+  if(el.getAttribute('data-v')===v)el.classList.add('je-target');
+ });
+}
+/* Previzualizare de pe contul BETA existent, fara resetare si fara modificare salvare. */
+function jePreviewClose(){document.getElementById('je-preview')?.remove();}
+function jePreview(){
+ if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||typeof S==='undefined'||!S||S.d
+  ||typeof document==='undefined'||document.getElementById('je-preview')
+  ||document.getElementById('mr-scene')||document.getElementById('mr-m')
+  ||document.getElementById('lgm'))return;
+ const el=document.createElement('div');el.id='je-preview';
+ el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');
+ el.setAttribute('aria-label','Drumul Eroului · Previzualizare');
+ el.innerHTML='<div class="jep-card"><div class="je-caption">✦ BETA · PREVIZUALIZARE</div>'
+  +'<h2>Drumul Eroului</h2><p>Un singur fir pentru poveste, ghid și recompense.</p>'
+  +JE_STEPS.map((x,i)=>'<div class="jep-item"><b>'+x.icon+' '+(i+1)+'. '+x.title+'</b>'
+   +'<p>'+x.say+'</p><small>'+x.parts.map(p=>p[0]).join(' · ')+'</small></div>').join('')
+  +'<button class="p" onclick="jePreviewClose()">Închide</button>'
+  +'<p class="jep-hint">Nu modifică personajele, progresul sau resursele.</p></div>';
+ document.body.appendChild(el);
+ el.querySelector('button')?.focus();
+}
+(function(){
+ if(typeof document==='undefined'||!document.head)return;
+ const el=document.createElement('style');
+ el.textContent=`
+.je-card{position:relative;border:1px solid #9d8155!important;border-radius:12px;background:linear-gradient(130deg,#30281f,#151b1d 68%);box-shadow:0 7px 28px #0006;overflow:hidden;animation:je-arrive .35s ease-out;padding:16px 18px;margin:0 0 12px}
+.je-caption{font:700 10px Cinzel,serif;letter-spacing:.14em;color:var(--gold2)}
+.je-title{display:flex;align-items:center;gap:9px;margin:9px 0}.je-title>span{font-size:23px}.je-title h2{font:700 18px Cinzel,Georgia,serif;color:var(--gold2);margin:0}
+.je-tasks{display:flex;gap:9px;flex-wrap:wrap;font-size:13px;color:var(--mute)}.je-tasks .je-ok{color:#ded2a9}
+.je-progress{height:4px;background:#4c463b;margin:11px 0;border-radius:6px;overflow:hidden}.je-progress i{display:block;height:100%;background:linear-gradient(90deg,#926e3d,#f0d27a);transition:width .35s ease}
+.je-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.je-reward{font-size:12px;color:var(--mute)}
+.je-help{margin-top:9px;color:var(--mute);font-size:12px}.je-help summary{cursor:pointer;display:inline-block;text-decoration:underline;text-underline-offset:3px}.je-help p{font-size:13px;line-height:1.55}
+.je-say{font-style:italic;color:var(--gold2)}
+.je-target{outline:2px solid #e1b969!important;outline-offset:3px;animation:je-halo 2.6s ease-in-out infinite}
+#je-preview{position:fixed;inset:0;z-index:25040;padding:16px;display:flex;justify-content:center;align-items:center;background:#05070aee}
+.jep-card{width:min(510px,100%);max-height:calc(100vh - 32px);overflow-y:auto;border:1px solid #bf9b60;border-radius:12px;background:#131b1e;padding:18px;text-align:center}
+.jep-card h2{color:var(--gold2);margin:9px 0}.jep-card>p{font-size:13px}
+.jep-item{text-align:left;border-top:1px solid #ffffff21;padding:11px 2px}.jep-item p{font-size:13px;color:var(--gold2);font-style:italic;margin:6px 0}
+.jep-item small,.jep-hint{color:var(--mute);font-size:12px}
+#je-toast{position:fixed;z-index:27010;bottom:25px;left:50%;transform:translateX(-50%);max-width:calc(100vw - 24px);min-width:min(300px,calc(100vw - 24px));display:flex;align-items:center;gap:12px;border:1px solid #bf9b60;border-radius:11px;background:#182024fa;padding:13px;box-shadow:0 12px 35px #000b;animation:je-toast-in .45s ease-out}
+#je-toast>span{font-size:29px;color:var(--gold2)}#je-toast b,#je-toast small{display:block}#je-toast b{color:#f0d27a}#je-toast small{font-size:12px;color:var(--mute)}
+@keyframes je-arrive{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+@keyframes je-halo{50%{box-shadow:0 0 13px #e1b96955}}
+@keyframes je-toast-in{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+@media(max-width:460px){.je-card{padding:13px}.je-bottom{align-items:stretch;flex-direction:column}.je-bottom button{width:100%}}
+@media(prefers-reduced-motion:reduce){.je-card,.je-target,#je-toast{animation:none!important}.je-progress i{transition:none!important}}
+`;
+ document.head.appendChild(el);
+})();
+if(typeof module!=='undefined'&&module.exports)module.exports={JE_STEPS,jeEnabled,jeReady,jeCurrent,jeStatus};
