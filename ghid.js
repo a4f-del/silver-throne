@@ -139,6 +139,8 @@ function ghMigH() {
   S.ghv = 2;
 }
 function tuChk() {
+  /* Noua poveste are propria recompensa si propriul parcurs; nu rula recompensele tutorialului. */
+  if (typeof jeEnabled === 'function' && jeEnabled()) return;
   if (S.tu == null) S.tu = 0;
   if (S.tuv !== 3) ghMig();
   if (S.ghv !== 2) ghMigH();
