@@ -48,13 +48,13 @@ function mrTick() {
   const story = typeof mrStoryEnabled === 'function' && mrStoryEnabled();
   for (const [c, st] of MR.order) {
     if (mrHas(c) || (S.mrOff || []).includes(c) || !(story ? mrStoryDue(c) : mrDue(st))) continue;
+    /* Nu apar oferte sau vesti despre mercenari cat timp se desfasoara o lupta. */
+    if (story && S.d) continue;
     if (st == null && !story) { mrNew(c); continue; } /* LIVE si salvari vechi: neschimbate */
     (S.mrOff = S.mrOff || []).push(c);
     if (!(S.mrSeen = S.mrSeen || []).includes(c)) {
       S.mrSeen.push(c);
-      S.msg = (S.msg ? S.msg + ' ' : '') + (story
-        ? `O nouă întâlnire te așteaptă: ${c}. Dacă o amâni, oferta rămâne la Han.`
-        : `Un nou mercenar e disponibil la Han: ${c}.`);
+      if (!story) S.msg = (S.msg ? S.msg + ' ' : '') + `Un nou mercenar e disponibil la Han: ${c}.`;
     }
   }
   mrAll().forEach(f => { if (!f.h && !(f.t && f.t.length)) f.t = [P(TR)]; });   /* trăsătura fiecărui mercenar (și pentru cei existenți) */
