@@ -80,14 +80,14 @@ const beg=merc.indexOf('function mrNew(c) {');
 const stop=merc.indexOf('/* la fiecare desenare',beg);
 const spawn=merc.slice(beg,stop);
 const soloS={fs:[hero],rs:[],soloDungeon:1,d:null};
-const mrNew=new Function('S','ST_SERVER','mhp','P','TR','TMAX',spawn+';return mrNew')(
- soloS,'beta',()=>25,a=>a[0],[{n:'Trăsătură'}],()=>3);
+const mrNew=new Function('S','ST_SERVER','mrPresetEnabled','mhp','P','TR','TMAX',spawn+';return mrNew')(
+ soloS,'beta',()=>false,()=>25,a=>a[0],[{n:'Trăsătură'}],()=>3);
 mrNew('Arcaș');
 assert.equal(soloS.fs.length,1,'Recruited mercs do not silently rejoin solo squad');
 assert.equal(soloS.rs.length,1);
 const ordinaryS={fs:[hero],rs:[],d:null};
-new Function('S','ST_SERVER','mhp','P','TR','TMAX',spawn+';return mrNew')(
- ordinaryS,'live',()=>25,a=>a[0],[{n:'Trăsătură'}],()=>3)('Arcaș');
+new Function('S','ST_SERVER','mrPresetEnabled','mhp','P','TR','TMAX',spawn+';return mrNew')(
+ ordinaryS,'live',()=>false,()=>25,a=>a[0],[{n:'Trăsătură'}],()=>3)('Arcaș');
 assert.equal(ordinaryS.fs.length,2,'LIVE recruitment unchanged');
 assert(dungeon.includes('heroSoloControl()'),'Dungeon list has solo selector');
 assert(steps.includes('heroSoloControl()'),'Dungeon detail has solo selector');
