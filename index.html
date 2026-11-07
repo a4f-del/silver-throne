@@ -385,7 +385,7 @@ function startD(i){const g=DG[i||0];if(ST_SERVER==='beta'&&S.adventure&&S.advent
  if(ST_SERVER==='beta'){if(!S.adventure)S.adventure={di:i||0};S.adventure.tierLocked=true;}S.d=d;S.fl=null;S.msg='';if(d.room===0)cn('d');S.tab='c';startF(boss);go();   /* cardul VS apare o clipă înainte ca lupta să se rezolve */
  if(S.auto!==false)setTimeout(()=>{if(S.d===d&&S.d.f){if(typeof fxAutoRun==='function')fxAutoRun();else autoRun()}},650)}
 /* după fiecare monstru învins: prada se încasează, lista avansează (după căpitan o ia de la capăt) */
-function dOneDone(d,b){const band=typeof trBand==='function'?trBand():'',m=S.msg+band;(S.dp=S.dp||{})[d.dk]=b?0:d.room+1;if(b)adventureClear(d);leave();S.msg=(b?(d.cm?d.cm+' ':'')+`Căpitanul a căzut! ${DG[d.di].n} e terminată; lista o ia de la capăt. `:`${m} `)+S.msg;go()}
+function dOneDone(d,b){const band=typeof trBand==='function'?trBand():'',m=S.msg+band;(S.dp=S.dp||{})[d.dk]=b?0:d.room+1;if(b)adventureClear(d);leave();S.msg=(b?(d.cm?d.cm+' ':'')+(ST_SERVER==='beta'?`Ai învins căpitanul! ${DG[d.di].n} este încheiată. Ai revenit automat în Coborâre, cu prada câștigată. Următoarea incursiune începe de la primul monstru. `:`Căpitanul a căzut! ${DG[d.di].n} e terminată; lista o ia de la capăt. `):`${m} `)+S.msg;go()}
 /* o singură cameră înainte (luptă, comoară sau foc de tabără); ultima e căpitanul */
 function doors(){const d=S.d;if(d.tw)return[{t:(d.room+1)%10===0?'b':'l'}];return d.room==d.rooms-1?[{t:'b'}]:[{t:'l'}]}   /* pașii: doar lupte, fără comori sau foc de tabără (trepte.js) */
 /* costul unei camere: 1 punct, căpitanul 2 (la raiduri 1); evenimentul cu chei e gratuit */
