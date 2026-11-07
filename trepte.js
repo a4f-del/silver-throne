@@ -105,12 +105,13 @@ function dOdds(boss, N) {
   const key = [S.d.di, S.d.tier, S.d.room, boss ? 1 : 0, S.fs.map(f => f.hp).join(',')].join('|');
   if (S.d.oddk === key) return S.d.odds;
   const snap = JSON.stringify(S), keep = { go: window.go, render: window.render, vs: window.vsFlash, bp: window.bhPush, ba: window.bhAdd };
+  if(typeof GUILD!=='undefined')GUILD.preview=true;
   window.go = window.render = window.vsFlash = window.bhPush = window.bhAdd = () => {};
   let w = 0;
   try {
     for (let i = 0; i < N; i++) { S = JSON.parse(snap); S.d.room++; if (S.d.tw) twFloor(S.d); startF(boss);   /* ca în door(): lupta e la pasul următor */ let g = 0; while (S.d && S.d.f && g++ < 400) autoRun(); if (S.d && !S.d.f) w++; }
   } catch (e) { w = -1; }
-  finally { S = JSON.parse(snap); Object.assign(window, { go: keep.go, render: keep.render, vsFlash: keep.vs, bhPush: keep.bp, bhAdd: keep.ba }); }
+  finally { S = JSON.parse(snap); Object.assign(window, { go: keep.go, render: keep.render, vsFlash: keep.vs, bhPush: keep.bp, bhAdd: keep.ba }); if(typeof GUILD!=='undefined')GUILD.preview=false; }
   const v = w < 0 ? null : Math.round(w / N * 100); S.d.oddk = key; S.d.odds = v; return v;
 }
 /* textul pasului și al căpitanului, pe ecranul dintre pași */
@@ -132,11 +133,12 @@ function dOddsAt(i, N) {
   const d0 = dMk(i), key = [i, d0.tier, d0.room, S.lvl, S.fs.map(f => f.hp + '/' + mhp(f)).join(',')].join('|');
   if (TR_OC[i] && TR_OC[i].k === key) return TR_OC[i].v;
   const snap = JSON.stringify(S), keep = { go: window.go, render: window.render, vs: window.vsFlash, bp: window.bhPush, ba: window.bhAdd };
+  if(typeof GUILD!=='undefined')GUILD.preview=true;
   window.go = window.render = window.vsFlash = window.bhPush = window.bhAdd = () => {};
   let w = 0;
   try { for (let j = 0; j < N; j++) { S = JSON.parse(snap); const d = dMk(i); d.one = 0; S.d = d; startF(d.room >= d.rooms - 1); let g = 0; while (S.d && S.d.f && g++ < 400) autoRun(); if (S.d && !S.d.f) w++; } }
   catch (e) { w = -1; }
-  finally { S = JSON.parse(snap); Object.assign(window, { go: keep.go, render: keep.render, vsFlash: keep.vs, bhPush: keep.bp, bhAdd: keep.ba }); }
+  finally { S = JSON.parse(snap); Object.assign(window, { go: keep.go, render: keep.render, vsFlash: keep.vs, bhPush: keep.bp, bhAdd: keep.ba }); if(typeof GUILD!=='undefined')GUILD.preview=false; }
   const v = w < 0 ? null : Math.round(w / N * 100); TR_OC[i] = { k: key, v }; return v;
 }
 /* „Toți până la căpitan” (butonul a fost scos, noiembrie 2026; funcția rămâne nefolosită): ia monștrii pe rând, cât timp ai puncte și șansele sunt de cel puțin 50%; se oprește la căpitan */
