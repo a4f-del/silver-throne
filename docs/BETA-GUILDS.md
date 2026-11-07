@@ -87,3 +87,12 @@ Dupa instalarea sistemului existent de bresle din `14-beta-guilds.sql`, aplica *
 **Securitate:** `guild_social_api` este un RPC separat care verifica `auth.uid()`, `is_beta_admin()`, apartenenta reala la breasla, rolul si drepturile pentru fiecare actiune. `guild_invitations` are RLS si nu este accesibila direct conturilor autentificate. Actualizarea nu schimba regulile bossului sau ale contractului si nu necesita restartarea breslelor.
 
 **Teste:** `node dev/test-beta-guild-ranks-invites.js`; dupa executarea SQL verifica manual cu minim doua conturi BETA invitare → acceptare/refuz, promovare, limitari ofiter, predare conducere, eliminare si invitare din profilul Lumii.
+
+
+## Hotfix: invitații din profil și TAG public pe hartă
+
+În profilul jucătorului, butonul **„Invită în breaslă”** execută acum corect acțiunea (ID-ul UUID este codificat sigur în atributul HTML). La eșec, motivul serverului apare sub buton, iar profilul rămâne deschis; la succes se deschide secțiunea Bresle. Același defect al ghilimelelor a fost remediat pentru promovare, eliminare și invitații din căutare. Rolul de conducător/ofițer este citit din `guild_api` fără a aștepta răspunsul suplimentar de la `guild_social_api`, dar permisiunile sunt validate din nou pe server.
+
+Pentru **`[TAG] Nume`** în meniul compact al satelor din Lume, se instalează **`supabase/16-beta-guild-map-tags.sql`** în Supabase **Silver-Throne-Test**, după scripturile SQL14 și SQL15. Această migrare creează doar un RPC de citire, fără modificarea breslelor, contractelor, rangurilor, invitațiilor sau salvărilor. Nu rula scriptul în LIVE. Tag-urile altor bresle pot lipsi până când scriptul este executat și pagina BETA este reîncărcată.
+
+Test: `node dev/test-beta-map-guild-invite-fix.js`.
