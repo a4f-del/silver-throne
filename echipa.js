@@ -172,7 +172,7 @@ function vEquipTop(inv, pre) {
 }
 
 /* ----------------------------------------------------------------- bara de sus */
-function hdrSel(i) { S.sel = i; S.tab = 'e'; S.msg = ''; go(); }
+function hdrSel(i) { if(typeof adventureActive==='function'&&adventureActive())return; S.sel = i; S.tab = 'e'; S.msg = ''; go(); }
 function temaHdr() {
   const h = S.fs.find(f => f.h) || S.fs[0], nd = need(S.lvl), xp = Math.max(0, Math.min(1, S.xp / Math.max(1, nd))), R = 25, C = 2 * Math.PI * R;
   const team = S.fs.map((f, i) => { const c = tmHp(f), dead = c.hp <= 0; return `<button class="hm${f === cur() && S.tab === 'e' ? ' on' : ''}${dead ? ' dead' : ''}" onclick="hdrSel(${S.fs.indexOf(f)})" title="${tEsc(f.n)} · ${Math.round(c.hp)}/${c.max} viață${f.h ? ' (erou)' : ''}"><span class="hm-av">${av(f, 36)}${dead ? '<b>☠</b>' : ''}</span><i class="hm-hp${c.p < 40 ? ' low' : ''}"><i style="width:${c.p}%"></i></i></button>`; }).join('');

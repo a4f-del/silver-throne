@@ -32,7 +32,7 @@ const twAb = n => TWR.ab[(Math.floor(n / 10) - 1) % TWR.ab.length];
 function twEnter() {
   const t = twSt();
   if (S.lvl < TWR.lv) { S.msg = `Turnul se deschide la nivelul ${TWR.lv}.`; return go(); }
-  if (S.d) { S.msg = 'Termină întâi coborârea în care ești.'; return go(); }
+  if (S.d || (typeof adventureActive==='function' && adventureActive())) { S.msg = 'Termină întâi aventura în care ești.'; return go(); }
   if (!S.fs.some(f => f.hp > 0)) { S.msg = 'Toți luptătorii sunt căzuți. Du-i la Infirmerie.'; return go(); }
   if (t.n >= TWR.day) { S.msg = 'Ai folosit toate cele 3 urcări de azi. Revino mâine.'; return go(); }
   if (S.pts < TWR.cost) { S.msg = `Intrarea în Turn costă ${TWR.cost} puncte.`; return go(); }
