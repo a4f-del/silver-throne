@@ -88,7 +88,7 @@ function guildPaint(){
    '<h3>♛ Căpitanul de breaslă</h3>'+
    '<div class="guild-boss"><div class="guild-boss-head"><b>Străjerul Cenușii</b><span>'+Math.max(0,2-(boss.hits_today||0))+' / 2 atacuri azi</span></div>'+
    guildBar('Viața comună',boss.hp,boss.max||1)+
-   '<p>Clasa care îl contracarează: <b>'+guildEsc(boss.counter||'Vraci')+'</b>. Daunele sunt calculate pe server din profilul publicat în Lume. Viața se adaptează numărului de membri.</p>'+
+   '<p>Abilitate: <b>'+guildEsc(({poison:'Otravă',storm:'Furtună',wave:'Val de forță'})[boss.ability]||'Val de forță')+'</b>. Clasa care îl contracarează: <b>'+guildEsc(boss.counter||'Vraci')+'</b>. Daunele sunt calculate pe server din profilul publicat în Lume. Viața se adaptează numărului de membri.</p>'+
    '<p>Ai provocat '+Number(boss.personal_damage||0).toLocaleString('ro-RO')+' daune săptămâna aceasta.</p>'+
    '<div class="guild-boss-actions"><button class="p" onclick="guildBoss()"'+((boss.hits_today||0)>=2||boss.hp<=0?' disabled':'')+'>⚔ Atacă · gratuit</button>'+
    '<button onclick="guildClaim(\'boss\')"'+(boss.hp>0||!self.boss_hits||claimed.boss||contributed<3?' disabled':'')+'>'+
@@ -121,7 +121,34 @@ async function guildLeave(){
  await guildAction('leave',{});
 }
 async function guildClaim(tier){await guildAction('claim',{tier});}
-async function guildBoss(){await guildAction('boss',{});}
+async function guildBoss(){
+ if(!guildEnabled()||!GUILD.state?.guild||S.d||(typeof FX!=='undefined'&&FX.playing))return;
+ const previous=GUILD.state.boss||{},before=Number(previous.personal_damage)||0;
+ const state=await guildAction('boss',{});
+ if(state?.boss&&typeof guildBossReplay==='function'){
+  const damage=Math.max(0,(Number(state.boss.personal_damage)||0)-before);
+  if(damage>0)guildBossReplay(previous,state.boss,damage);
+ }
+}
+function guildBossReplay(before,after,damage){
+ /* Un atac înregistrat pe server, o singură animație fără mutarea echipei reale.
+    Contraloviturile și HP jucătorului nu sunt simulate ca daune reale. */
+ if(typeof FX==='undefined'||FX.playing||typeof fxPlay!=='function'||
+   typeof acFxMarkup!=='function'||!S?.fs?.length)return;
+ const h=S.fs.find(f=>f.h)||S.fs[0];if(!h)return;
+ const portrait=typeof tmnBoss==='function'&&typeof DG!=='undefined'&&DG[0]?tmnBoss(DG[0].bn):null;
+ const max=Math.max(1,Number(after.max)||1),hp=Math.max(0,Number(before.hp)||max);
+ const cast={adventure:true,pvp:false,adventureTitle:'Căpitanul breslei · atac gratuit',
+  fs:[{n:h.n,c:h.c,h:true,ic:h.ic||'',hp:Math.max(1,h.hp),mh:Math.max(1,typeof mhp==='function'?mhp(h):h.hp)}],
+  es:[{n:'Străjerul Cenușii',b:1,hp,mh:max,img:portrait?'imagini/monstri/'+portrait[0]+'.jpg':null}]};
+ const frame={fs:[],es:[{i:0,v:-damage,mh:max}],
+   txt:h.n+' lovește Străjerul Cenușii (-'+damage+' viață comună).',
+   actor:{side:'fs',i:0}};
+ const old=FX.cast,queue=FX.q.slice();FX.q.length=0;FX.cast=cast;
+ const finish=()=>{FX.cast=old;FX.q.splice(0,FX.q.length,...queue);};
+ try{fxPlay([frame],finish,true,0);}
+ catch(e){finish();}
+}
 function guildEventId(){
  if(typeof crypto!=='undefined'&&typeof crypto.randomUUID==='function')return crypto.randomUUID();
  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
