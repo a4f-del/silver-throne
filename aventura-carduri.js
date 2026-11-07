@@ -50,6 +50,9 @@ function acDungeonPage(i) {
   detail+='</div>';
   return '<section class="ac-scene"><div class="ac-scene-head"><div><small>Temniță · Eroul este plecat din Sat</small><h2>'+acSafe(g.n)+'</h2></div>' +
     '<button class="ac-retreat" onclick="adventureExit()">‹ Retrage-te</button></div>' +
+    (typeof trChips==='function'&&trChips(i)?'<div class="ac-difficulty"><div class="ac-difficulty-head"><b>Dificultate: '+acSafe(TR_T.n[trTier(i)])+'</b>' +
+    (S.adventure&&S.adventure.tierLocked?'<small>Fixată pentru această incursiune. Retrage-te pentru a schimba.</small>':'<small>Alege dificultatea înainte de prima luptă.</small>')+'</div>'+
+    trChips(i)+'</div>':'') +
     '<div class="ac-progress"><b>Progres '+(p+1)+' / '+names.length+'</b><div class="ac-rail">'+rail+'</div></div>' +
     '<div class="ac-layout"><div class="ac-main-card'+(boss?' ac-main-boss':'')+'"><div class="ac-main-portrait">'+acArt(art) +
     '<span class="ac-status">'+(boss?'♛ Căpitan':canFight?'⚔ Următorul adversar':sel<p?'✓ Învins':'🔒 Urmează')+'</span></div>' +
