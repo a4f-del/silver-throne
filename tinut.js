@@ -77,12 +77,23 @@ const wnLeft = v => Math.max(0, ((S.wn || {})[v.id] || 0) + WN.cd - Date.now(), 
 /* nivelul efectiv al satului pentru tine: nivelul lui, dar nu cu mai mult de WN.gap față de al tău */
 const wnEff = v => Math.max(1, Math.max(S.lvl - WN.gap, Math.min(S.lvl + WN.gap, v.lvl)));
 async function wnSync() {
-  if (WN.off || typeof tronRpc !== 'function' || typeof CONT === 'undefined' || !CONT.user) return;
+  if (WN.off || WN.syncing || typeof tronRpc !== 'function'
+    || typeof CONT === 'undefined' || !CONT.user) return;
+  WN.syncing = true;
   LUME.npcAt = Date.now();
-  const r = await tronRpc('world_npc_get');
-  if (r.error) { if (/Could not find the function|does not exist|schema cache/i.test(r.error)) WN.off = 1; return; }
-  const was = JSON.stringify(LUME.npc || {}); LUME.npc = r.data.cd || {};
-  if (was !== JSON.stringify(LUME.npc) && typeof lwUi === 'function') lwUi();
+  try {
+    const r = await tronRpc('world_npc_get');
+    if (r.error) {
+      if (/Could not find the function|does not exist|schema cache/i.test(r.error))
+        WN.off = 1; /* evită interogări 404 repetate până la reîncărcare */
+      return;
+    }
+    const was = JSON.stringify(LUME.npc || {});
+    LUME.npc = r.data && r.data.cd ? r.data.cd : {};
+    if (was !== JSON.stringify(LUME.npc) && typeof lwUi === 'function') lwUi();
+  } finally {
+    WN.syncing = false;
+  }
 }
 const wnNear = (x, y) => (WN.list || []).some(v => Math.hypot(x - v.pos[0], (y - v.pos[1]) * 1.4) < 110);
 /* desenul pe hartă: sat mic sau mare după nivel; după jaf, estompat, cu timpul rămas */
