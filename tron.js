@@ -111,7 +111,17 @@ function tronFight(data) {
     tronInit(); S.tron.duelParty = S.fs.slice();
     S.fs = [S.fs.find(f => f.h) || S.fs[0]];
   }
-  S.d = d; startF(true); terFrom(); S.tab = 'c'; S.msg = 'Te lupți pentru Tronul de Argint: ' + d.bn + '.';
+  S.d = d; startF(true);
+  if (tronIsBetaDuel() && d.ghost && d.f) {
+    /* Initiativa se decide o singura data la inceputul luptei si este salvata in S.d.
+       Regele poate contraataca primul, deci duelul nu este decis automat de provocator. */
+    d.duelKingFirst = TT.duelKingStarts();
+    d.f.log.push(d.duelKingFirst
+      ? 'Inițiativa duelului: regele atacă primul!'
+      : 'Inițiativa duelului: provocatorul atacă primul!');
+    if (d.duelKingFirst) enemy();
+  }
+  terFrom(); S.tab = 'c'; S.msg = 'Te lupți pentru Tronul de Argint: ' + d.bn + '.';
   if (S.auto !== false) { if (typeof fxAutoRun === 'function') fxAutoRun(); else autoRun(); return; } go();
 }
 /* Doar pe serverul BETA: scurtează protecția regelui actual pentru teste PvP.
