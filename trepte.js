@@ -190,6 +190,7 @@ function trSel(i) { const d = dMk(i), k = d.dk; const cur = (S.dsel = S.dsel || 
 function trSelSet(i, k) { const d = dMk(i); (S.dsel = S.dsel || {})[d.dk] = Math.min(k, d.rooms - 1); go(); }
 /* pagina dedicată a unei temnițe, odată intrat: titlu, înapoi, banda cu toți monștrii, panoul de detalii pentru fila aleasă */
 function trPage(i) {
+  if(ST_SERVER==='beta'&&S.adventure&&typeof acDungeonPage==='function'){const h=acDungeonPage(i);if(h)return h;}
   const g = DG[i], n = trNames(i);
   if(!n&&ST_SERVER==='beta'&&S.adventure&&S.adventure.di===i){
     const d=dMk(i),c=dCostAt(i),boss=d.room>=d.rooms-1;
