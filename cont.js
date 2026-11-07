@@ -79,18 +79,23 @@ async function contStart() {
 
 /* contul e conectat: alege salvarea și pornește jocul */
 async function contEnter(user) {
+  /* Aratam progresul inaintea apelului RPC; altfel butonul parea sa nu faca nimic. */
+  CONT.user = user; contShow('load');
   /* Autorizarea BETA este verificată de proiectul BETA înainte să se citească
      salvarea sau să pornească jocul. Interfața singură nu securizează RPC/RLS! */
   if (ST_SERVER === 'beta') {
-    const gate = await supabaseClient.rpc('is_beta_admin').catch(e => ({ error: e }));
+    const gate = await Promise.race([
+      supabaseClient.rpc('is_beta_admin'),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Verificarea accesului BETA a durat prea mult. Reîncarcă pagina și încearcă din nou.')), 15000))
+    ]).catch(e => ({ error: e }));
     if (gate.error || gate.data !== true) {
+      const m = gate.error ? 'Nu am putut verifica accesul BETA: ' + contErr(gate.error) : 'Acces BETA restricționat. Doar administratorii aprobați pot intra.';
       await supabaseClient.auth.signOut().catch(() => {});
       CONT.user = null;
-      CONT.msg = { t: 'err', m: 'Acces BETA restricționat. Doar administratorii aprobați pot intra.' };
+      CONT.msg = { t: 'err', m };
       return contShow('in', true);
     }
   }
-  CONT.user = user; contShow('load');
   const key = KEY + (ST_SERVER === 'beta' ? ':beta' : '') + ':' + user.id;
   let r;
   try { r = await supabaseClient.from('game_saves').select('game_data,updated_at').eq('user_id', user.id).maybeSingle(); }
@@ -201,13 +206,23 @@ async function contIn(ev) {
   const email = cMail(); if (!email) return; const password = cVal('g-pass');
   if (!password) return cSay('err', 'Scrie parola.');
   cBusy(true, 'Se conectează…');
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password }).catch(e => ({ error: e }));
-  cBusy(false);
-  if (error) {
-    const m = contErr(error);
-    return cSay('err', /nu e confirmat/.test(m) ? m + ` <button type="button" class="g-link in" onclick="contResend()">Retrimite emailul</button>` : m);
+  try {
+    const { data, error } = await Promise.race([
+      supabaseClient.auth.signInWithPassword({ email, password }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Serverul nu a răspuns în 20 de secunde. Verifică conexiunea și încearcă din nou.')), 20000))
+    ]);
+    if (error) {
+      const m = contErr(error);
+      return cSay('err', /nu e confirmat/.test(m) ? m + ` <button type="button" class="g-link in" onclick="contResend()">Retrimite emailul</button>` : m);
+    }
+    if (!data || !data.user) return cSay('err', 'Serverul nu a returnat contul. Reîncarcă pagina.');
+    await contEnter(data.user);
+  } catch (e) {
+    console.error('Eroare la autentificare:', e);
+    cSay('err', contErr(e));
+  } finally {
+    cBusy(false);
   }
-  contEnter(data.user);
 }
 async function contUp(ev) {
   ev.preventDefault(); if (CONT.busy) return;
