@@ -202,7 +202,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="mercenari-poveste.js?v=2026.11.08-1"></script>
 <script src="prolog.js?v=2026.11.07-1"></script>
 <script src="poveste-misiuni.js?v=2026.11.07-11"></script>
-<script src="drumul-eroului.js?v=2026.11.08-1"></script>
+<script src="drumul-eroului.js?v=2026.11.08-2"></script>
 <script src="prima-recompensa.js?v=2026.11.07-1"></script>
 <script src="ghidare-erou.js?v=2026.11.07-2"></script>
 <script src="specializari.js?v=2026.11.07-5"></script>
@@ -770,7 +770,30 @@ const dmReady=()=>{const m=dm();return m.list.filter(x=>!x.c&&x.g>=x.n).length+(
 function rw(big){const L=S.lvl,g=(30+8*L)*(big?2:1),o=Math.round((4+L*.5)*(big?2:1));S.gold+=g;S.ore+=o;let m=`+${g} aur, +${o} minereu`;if(big||Math.random()<.35){const k=P(AFM.filter(k=>(MLV[k]||0)<=L)),n=RI(2,3);give(k,n);m+=`, ${n} × ${MA[k]}`}if(Math.random()<(big?.3:.1)){const it=mkItem(P(['w','a','h','b']),L,big?2:1);S.inv.push(it);m+=`, obiect: ${it.name}`}return m}
 function claim(i){const x=dm().list[i];if(x.g>=x.n&&!x.c){x.c=1;if(x.p){S.pts+=x.p;const g=10+3*S.lvl;S.gold+=g;S.msg=`Misiune îndeplinită: +${x.p} puncte, +${g} aur.`}else S.msg='Misiune îndeplinită: '+rw(false)}go()}
 function claimB(){const m=dm();if(m.list.every(x=>x.c)&&!m.bonus){m.bonus=1;S.pts+=5;S.msg='Bonus zilnic: +5 puncte, '+rw(true)}go()}
-function vMis(){const m=dm();return(typeof dcView==='function'?dcView():'')+`<section><h2>Misiuni zilnice</h2><div class="mute">6 misiuni noi în fiecare zi. Cele marcate cu <b>⚡</b> se fac fără puncte și îți dau puncte, ca să ai cu ce continua. Celelalte dau aur, minereu, uneori materiale sau un obiect. Botul nu le avansează.</div>${m.list.map((x,i)=>`<div class="row"><span>${x.p?'⚡ ':''}${x.t}<br><span class="mute">${Math.min(x.g,x.n)}/${x.n}${x.p?` · +${x.p} puncte`:''}</span></span>${x.c?'<span class="mute">Revendicat</span>':x.g>=x.n?`<button class="p" onclick="claim(${i})">Revendică</button>`:''}</div>${bar(Math.min(x.g,x.n),x.n)}`).join('')}${m.list.every(x=>x.c)?(m.bonus?'<div class="mute">Bonus revendicat. Revino mâine.</div>':'<div class="row"><span>Toate 6 făcute: bonus (+5 puncte și o recompensă mare)</span><button class="p" onclick="claimB()">Revendică bonusul</button></div>'):''}</section>`}
+/* BETA noi: trei misiuni lizibile, celelalte rămân disponibile, dar opționale.
+   Nu modificăm sarcinile generate, progresul sau recompensele. */
+function vMisFocus(m){
+ const row=(x,i)=>'<div class="row"><span>'+(x.p?'⚡ ':'')+x.t+
+  '<br><span class="mute">'+Math.min(x.g,x.n)+'/'+x.n+
+  (x.p?' · +'+x.p+' puncte':'')+'</span></span>'+
+  (x.c?'<span class="mute">Revendicat</span>':
+   x.g>=x.n?'<button class="p" onclick="claim('+i+')">Revendică</button>':'')+
+  '</div>'+bar(Math.min(x.g,x.n),x.n);
+ const featured=m.list.slice(0,3).map((x,i)=>row(x,i)).join('');
+ const rest=m.list.slice(3),ready=rest.filter(x=>!x.c&&x.g>=x.n).length;
+ const more=rest.length?'<details class="mis-more"><summary>Alte '+rest.length+
+  ' misiuni opționale'+(ready?' · '+ready+' gata de revendicat':'')+
+  '</summary>'+rest.map((x,i)=>row(x,i+3)).join('')+'</details>':'';
+ const bonus=m.list.every(x=>x.c)?
+   (m.bonus?'<div class="mute">Bonusul opțional a fost revendicat.</div>':
+   '<div class="row"><span>Bonus opțional pentru toate 6: +5 puncte și recompense</span>'+
+   '<button class="p" onclick="claimB()">Revendică bonusul</button></div>'):'';
+ return (typeof dcView==='function'?dcView():'')+
+  '<section class="mis-focus"><h2>Misiuni zilnice</h2>'+
+  '<p class="mute">Începe cu aceste 3 activități. Restul sunt opționale; nu trebuie să le termini pe toate ca să avansezi.</p>'+
+  featured+more+bonus+'</section>';
+}
+function vMis(){const m=dm();if(ST_SERVER==='beta'&&typeof jeFocus==='function'&&jeFocus())return vMisFocus(m);return(typeof dcView==='function'?dcView():'')+`<section><h2>Misiuni zilnice</h2><div class="mute">6 misiuni noi în fiecare zi. Cele marcate cu <b>⚡</b> se fac fără puncte și îți dau puncte, ca să ai cu ce continua. Celelalte dau aur, minereu, uneori materiale sau un obiect. Botul nu le avansează.</div>${m.list.map((x,i)=>`<div class="row"><span>${x.p?'⚡ ':''}${x.t}<br><span class="mute">${Math.min(x.g,x.n)}/${x.n}${x.p?` · +${x.p} puncte`:''}</span></span>${x.c?'<span class="mute">Revendicat</span>':x.g>=x.n?`<button class="p" onclick="claim(${i})">Revendică</button>`:''}</div>${bar(Math.min(x.g,x.n),x.n)}`).join('')}${m.list.every(x=>x.c)?(m.bonus?'<div class="mute">Bonus revendicat. Revino mâine.</div>':'<div class="row"><span>Toate 6 făcute: bonus (+5 puncte și o recompensă mare)</span><button class="p" onclick="claimB()">Revendică bonusul</button></div>'):''}</section>`}
 DG.push({n:'Cripta Furtunii',lv:8,k:1,rooms:5,w:[60,30,10],rm:2,bn:'Străjerul Furtunii',ev:1});
 const wkk=()=>{const d=new Date(),o=(d.getDay()+6)%7,m=new Date(d.getFullYear(),d.getMonth(),d.getDate()-o);return m.getFullYear()+'-'+(m.getMonth()+1)+'-'+m.getDate()},evLeft=()=>7-(new Date().getDay()+6)%7;
 function evs(){const k=wkk();if(!S.ev||S.ev.w!=k)S.ev={w:k,k:3};return S.ev}
@@ -871,6 +894,11 @@ body.st-adventure{padding-left:0!important;padding-bottom:24px!important}
 body.st-adventure main#v{max-width:940px;width:100%;margin-inline:auto}
 body.st-adventure .hs .hm{cursor:default}
 @media(min-width:960px){body.st-adventure header{padding-right:18px!important}}
+/* Doar ecranul nou BETA cu 3 zilnice recomandate. */
+.mis-focus .mis-more{margin:10px 0;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#ffffff06}
+.mis-focus .mis-more summary{cursor:pointer;font-weight:700;color:var(--gold2);padding:4px 0}
+.mis-focus .mis-more .row{margin-top:9px}
+@media(max-width:520px){.mis-focus .mis-more{padding:7px}}
 </style>
 <!-- săgeata ghidului e în ghid.js -->
 </body>

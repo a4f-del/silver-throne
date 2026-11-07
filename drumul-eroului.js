@@ -96,10 +96,48 @@ function jeReward(step){
  document.body.appendChild(el);
  if(typeof setTimeout==='function')setTimeout(()=>el.remove(),3200);
 }
+/* După jurăminte: un singur reper pentru următoarea temniță.
+   Fără obiective/monede noi; nu concurează cu cardul activ sau cu Campania. */
+function jeNextDungeonTarget(){
+ if(typeof DG==='undefined'||!Array.isArray(DG))return null;
+ const all=DG.map((g,i)=>({g,i})).filter(x=>x.g&&!x.g.ev);
+ if(!all.length)return null;
+ const unlocked=all.filter(x=>S.lvl>=x.g.lv);
+ const current=unlocked.length?unlocked[unlocked.length-1]:all[0];
+ const target=current.i===all[0].i&&all.length>1?all[1]:current;
+ return {target,current,ready:S.lvl>=target.g.lv};
+}
+function jeNextAdventurePanel(){
+ if(!jeFocus()||!S.jeCampaignOpened||S.jeNextHintVisited||S.d||!['a','c'].includes(S.tab))return '';
+ const next=jeNextDungeonTarget();if(!next)return '';
+ const {target,current,ready}=next;
+ const hero=(S.fs||[]).find(f=>f.h)||(S.fs||[])[0];
+ const helper=(S.fs||[]).some(f=>f.hp<=0)
+  ? 'Ridică luptătorii căzuți la Infirmerie.'
+  : !(hero&&hero.eq&&hero.eq.w)
+  ? 'Echipează o armă potrivită eroului.'
+  : 'Întărește echipamentul și vindecă echipa înainte de căpitan.';
+ const message=ready
+  ? 'Temnița este disponibilă. Încearc-o când echipa este pregătită.'
+  : 'Ai nevoie de încă '+Math.max(1,target.g.lv-S.lvl)+' '+(target.g.lv-S.lvl===1?'nivel':'niveluri')+
+    '. Poți continua în '+current.g.n+' pentru experiență și pradă.';
+ return '<section class="je-card je-after" aria-label="Următoarea aventură">'
+  +'<div class="je-caption">✦ URMĂTOAREA AVENTURĂ</div>'
+  +'<div class="je-title"><span>🗝️</span><h2>'+target.g.n+'</h2></div>'
+  +'<p class="je-next-note"><b>Nivel necesar: '+target.g.lv+'</b> · Nivelul tău: '+S.lvl+'</p>'
+  +'<p class="je-next-note">'+message+'</p>'
+  +'<p class="je-next-note">'+helper+'</p>'
+  +'<button class="p" onclick="jeGoNextAdventure()">'+
+    (ready?'Deschide Coborâre':'Continuă în Coborâre')+'</button></section>';
+}
+function jeGoNextAdventure(){
+ if(!jeFocus()||S.d||jeCurrent())return;
+ S.jeNextHintVisited=1;S.tab='c';S.msg='';go();
+}
 function jePanel(){
  if(!jeReady() || S.d)return '';
  const s=jeCurrent();
- if(!s)return S.jeCampaignOpened?'':'<section class="je-card je-done"><div class="je-caption">✦ DRUMUL EROULUI</div><b>Primele jurăminte sunt împlinite.</b><p>Acum povestea continuă în Campanie.</p><button class="p" onclick="cmpOpenChecklist(\'journey\')">Deschide Campania și obiectivele</button></section>';
+ if(!s)return S.jeCampaignOpened?jeNextAdventurePanel():'<section class="je-card je-done"><div class="je-caption">✦ DRUMUL EROULUI</div><b>Primele jurăminte sunt împlinite.</b><p>Acum povestea continuă în Campanie.</p><button class="p" onclick="cmpOpenChecklist(\'journey\')">Deschide Campania și obiectivele</button></section>';
  const p=jeStatus(s),done=JE_STEPS.filter(x=>(S.je&&S.je.done||[]).includes(x.id)).length;
  const parts=s.parts.map(([label,cb])=>'<span class="'+(cb()?'je-ok':'')+'">'+(cb()?'✓ ':'○ ')+label+'</span>').join('');
  const reward=[s.reward.g?s.reward.g+' aur':'',s.reward.o?s.reward.o+' minereu':''].filter(Boolean).join(' + ');
@@ -162,6 +200,7 @@ function jePreview(){
 .je-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.je-reward{font-size:12px;color:var(--mute)}
 .je-help{margin-top:9px;color:var(--mute);font-size:12px}.je-help summary{cursor:pointer;display:inline-block;text-decoration:underline;text-underline-offset:3px}.je-help p{font-size:13px;line-height:1.55}
 .je-say{font-style:italic;color:var(--gold2)}
+.je-after .je-next-note{margin:7px 0;font-size:13px;color:var(--mute);line-height:1.45}.je-after .je-next-note b{color:var(--gold2)}.je-after button{margin-top:6px}
 .je-target{outline:2px solid #e1b969!important;outline-offset:3px;animation:je-halo 2.6s ease-in-out infinite}
 #je-preview{position:fixed;inset:0;z-index:25040;padding:16px;display:flex;justify-content:center;align-items:center;background:#05070aee}
 .jep-card{width:min(510px,100%);max-height:calc(100vh - 32px);overflow-y:auto;border:1px solid #bf9b60;border-radius:12px;background:#131b1e;padding:18px;text-align:center}
