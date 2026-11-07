@@ -43,7 +43,7 @@ function mrTick() {
   if (!S || S.mrv !== 2) return;
   /* Eroul BETA nou isi alege mai intai numele. Fara aceasta verificare,
      Paznicul si Arcasul ar fi creati inaintea prologului. */
-  if (typeof mrStoryIsBeta === 'function' && mrStoryIsBeta()
+  if (typeof mrStoryIsBeta === 'function' && mrStoryIsBeta() && !(typeof jeFocusActive === 'function' && jeFocusActive())
     && !S.hc && !S.mrStoryV && S.lvl === 1 && !S.xp && !C('d')) return;
   const story = typeof mrStoryEnabled === 'function' && mrStoryEnabled();
   for (const [c, st] of MR.order) {
