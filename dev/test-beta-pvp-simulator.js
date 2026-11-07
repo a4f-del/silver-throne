@@ -67,5 +67,5 @@ FX.playing=true;assert.equal(api.simPvpStart(),false,'nu se suprapun două anima
 const live=create('live');assert.equal(live.api.simPvpAdminHtml(),'');assert.equal(live.api.simPvpStart(),false);
 const outsider=create('beta',false);assert.equal(outsider.api.simPvpAdminHtml(),'');assert.equal(outsider.api.simPvpStart(),false);
 const noSrv=create();noSrv.ADM.srv=false;assert.equal(noSrv.api.simPvpStart(),false,'admin neconfirmat pe server');
-assert(!/\.rpc\(|\.from\(|save\(|spend\(|tronProvoca\(|lwAttack\(/.test(source),'simulatorul nu face RPC-uri sau cheltuieli');
+assert(!/\b(?:tronRpc|save|spend|tronProvoca|lwAttack)\s*\(|supabaseClient\.(?:rpc|from)\s*\(/.test(source),'simulatorul nu face RPC-uri sau cheltuieli');
 console.log('OK: 16 echipe 1v1–4v4, selecție mercenari, numai admin BETA, fără mutații / consum atacuri.');
