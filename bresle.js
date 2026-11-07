@@ -131,6 +131,7 @@ async function guildBoss(){
  }
 }
 function guildBossReplay(before,after,damage){
+ if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta')return;
  /* Un atac înregistrat pe server, o singură animație fără mutarea echipei reale.
     Contraloviturile și HP jucătorului nu sunt simulate ca daune reale. */
  if(typeof FX==='undefined'||FX.playing||typeof fxPlay!=='function'||
