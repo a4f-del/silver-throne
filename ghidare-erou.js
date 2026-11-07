@@ -24,7 +24,7 @@ function jeGuidePlan(){
  }
  const action=step.action(),tab=action[1],v=action[2];
  if(S.tab!==tab)return {selector:'#nv button[onclick="tab(\''+tab+'\')"]',name:'Deschide '+action[0],nav:true};
- if(tab==='a'&&S.vil!==v){
+ if(tab==='a'&&(S.vil||'')!==v){
   if(!v)return {selector:'.vb-back',name:'Înapoi în Sat'};
   return {selector:'.vh-lb[data-v="'+v+'"], .vb-c[data-v="'+v+'"]',name:'Intră în '+action[0]};
  }
@@ -95,7 +95,11 @@ function jeGuideDecorate(){
  const arrow=document.getElementById('je-guide-arrow');if(arrow)arrow.style.display='none';
  if(!jeGuideEnabled()||jeGuideBlocked())return;
  const plan=jeGuidePlan();if(!plan)return;
- const target=[...document.querySelectorAll(plan.selector)].find(el=>!el.disabled);
+ let target=[...document.querySelectorAll(plan.selector)].find(el=>!el.disabled);
+ if(!target&&plan.selector==='.ac-side .ac-primary'){
+  // Dacă jucătorul a inspectat alt card, indicăm monstrul care urmează.
+  target=document.querySelector('.ac-step.ac-current');
+ }
  if(!target)return;
  JE_GUIDE.target=target;JE_GUIDE.arrow=jeGuideArrow();
  target.classList.add('je-guide-hit');target.setAttribute('data-je-tip',plan.name);
