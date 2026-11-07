@@ -437,7 +437,7 @@ function bfx(k, l) {
     case 'i': return 'cost vindecare/ridicare −' + Math.round((1 - Math.pow(.96, l)) * 100) + '%';
     case 'b': return 'faimă pentru mercenari +' + 5 * l + '%';
     case 'd': return 'capacitate ' + (100 + 50 * l) + ' / material';
-    case 'z': return 'apărarea satului +' + Math.round(60 * (1 - Math.pow(.92, l))) + '%';
+    case 'z': return typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'doar aspect vizual (bonus defensiv retras)':'apărarea satului +' + Math.round(60 * (1 - Math.pow(.92, l))) + '%';
   }
   return '';
 }
@@ -537,20 +537,20 @@ function vScene() {
   s += `<path d="M225 200L246 168M295 200L278 168" stroke="#6b5a3a" stroke-width="5" opacity=".6"/>`;
   if (S.ter.fort.o === 'p') s += `<g transform="translate(498 150)"><rect x="-10" y="-34" width="20" height="34" fill="#4d555b" stroke="#1a1d20"/><path d="M-13 -34l13 -11 13 11z" fill="#3a4147"/><path class="st-fl" d="M0 -45v-10l9 3-9 3" fill="${flagCol()}"/></g>`;
   const own = terOwnedV().length; for (let i = 0; i < Math.min(own, 5); i++) s += `<g transform="translate(${22 + i * 13} 194)"><path d="M0 0v-14" stroke="#2a1d10"/><path class="st-fl" d="M0 -14l8 3-8 3z" fill="${flagCol()}"/></g>`;
-  s += bSvg('z', b.z, 260, pal, b.z < mx && S.gold >= bcc(b.z), bcc(b.z));
+  s += bSvg('z', b.z, 260, pal, typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'?b.z < mx && S.gold >= bcc(b.z):false, bcc(b.z));
   ['f', 'i', 'b', 'd'].forEach(k => { const can = b[k] < mx && S.gold >= bcc(b[k]); s += bSvg(k, b[k], xs[k], pal, can, bcc(b[k])); });
   s += '</svg>';
   const sel = S.bsel && BNAME[S.bsel] ? S.bsel : null, pr = Math.min(100, Math.round(tot / Math.max(1, 5 * mx) * 100));
   let h = `<section><h2>Satul tău: ${TW.STAGES[st][1]}</h2>${s}<div class="row" style="margin-top:6px"><span class="mute">Progres general: ${tot} niveluri de clădiri (maxim ${5 * mx} la nivelul tău)${nxt ? ' · următorul aspect la ' + nxt[0] : ' · aspect maxim'}</span></div>${bar(tot, Math.max(1, nxt ? nxt[0] : tot))}`;
-  if (sel) { const l = b[sel]; h += `<div class="row"><span><b>${BNAME[sel]}</b> nivel ${l}: ${bfx(sel, l)}${l < mx ? `<br><span class="mute">Nivelul ${l + 1}: ${bfx(sel, l + 1)}</span>` : '<br><span class="mute">Nivel maxim pentru nivelul tău.</span>'}<br><span class="mute">${bAspTxt(sel)}</span></span>${l < mx ? `<button class="p" onclick="build('${sel}')"${S.gold >= bcc(l) ? '' : ' disabled'}>${bcc(l)} aur</button>` : ''}</div>` + renRow(sel); }
+  if (sel) { const l = b[sel]; h += `<div class="row"><span><b>${BNAME[sel]}</b> nivel ${l}: ${bfx(sel, l)}${l < mx ? `<br><span class="mute">Nivelul ${l + 1}: ${bfx(sel, l + 1)}</span>` : '<br><span class="mute">Nivel maxim pentru nivelul tău.</span>'}<br><span class="mute">${bAspTxt(sel)}</span></span>${l < mx && !(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&sel==='z') ? `<button class="p" onclick="build('${sel}')"${S.gold >= bcc(l) ? '' : ' disabled'}>${bcc(l)} aur</button>` : ''}</div>` + renRow(sel); }
   else h += '<div class="mute">Atinge o clădire pentru detalii. Săgeata aurie arată ce poți îmbunătăți acum.</div>';
   h += `<div class="row"><span class="mute">Aspect: </span><span><button${S.cos.vt === 'clasic' ? ' class="p"' : ''} onclick="cosSet('clasic')">Clasic</button> <button${S.cos.vt === 'argint' ? ' class="p"' : ''} onclick="cosSet('argint')">Argint${ENT.has('cosm') ? '' : ' (Premium)'}</button></span></div></section>`;
   return h;
 }
 function vK2() {
   const b = BL();
-  return `<section><h2>Clădiri</h2><div class="mute">Nivel maxim al clădirilor la nivelul tău: ${bmax()}.${terB('bld') ? ' Cariera ta reduce costul cu ' + terB('bld') + '%.' : ''}</div>${BN.map(([k, n, d]) => `<div class="row"><span class="bl">${bth(k)}<span><b>${n}</b>, nivel ${b[k]}<br><span class="mute">${bfx(k, b[k])}${b[k] < bmax() ? ' → ' + bfx(k, b[k] + 1) : ''}</span><br><span class="mute">${bAspTxt(k)}</span>${renStage(k) || renOk(k) ? `<br><span class="mute">${renTxt(k)}</span>` : ''}</span></span><button class="p" onclick="build('${k}')"${b[k] >= bmax() ? ' disabled' : ''}>${bcc(b[k])} aur</button></div>`).join('')}</section>
-  <section><h2>La ce folosește fiecare resursă</h2><div class="mute"><b>Aur:</b> clădiri, antrenament, recrutare, vindecare, taxe de cucerire și întreținerea teritoriilor.<br><b>Minereu:</b> baza oricărei forjări.<br><b>Materiale:</b> o resursă comună pentru forjare și consumabile din explorare.<br><b>Cristale:</b> determină raritatea obiectelor forjate (Magic, Rar, Epic).<br><b>Puncte:</b> ritmul tuturor activităților (uși, raiduri, tabere, locuri de interes).</div></section>` + flagRow();
+  return `<section><h2>Clădiri</h2><div class="mute">Nivel maxim al clădirilor la nivelul tău: ${bmax()}.${terB('bld') ? ' Cariera ta reduce costul cu ' + terB('bld') + '%.' : ''}</div>${BN.filter(([k])=>typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||k!=='z').map(([k, n, d]) => `<div class="row"><span class="bl">${bth(k)}<span><b>${n}</b>, nivel ${b[k]}<br><span class="mute">${bfx(k, b[k])}${b[k] < bmax() ? ' → ' + bfx(k, b[k] + 1) : ''}</span><br><span class="mute">${bAspTxt(k)}</span>${renStage(k) || renOk(k) ? `<br><span class="mute">${renTxt(k)}</span>` : ''}</span></span><button class="p" onclick="build('${k}')"${b[k] >= bmax() ? ' disabled' : ''}>${bcc(b[k])} aur</button></div>`).join('')}</section>
+  <section><h2>La ce folosește fiecare resursă</h2><div class="mute"><b>Aur:</b> clădiri, antrenament, recrutare, vindecare, echipamente și servicii din Sat.<br><b>Minereu:</b> baza oricărei forjări.<br><b>Materiale:</b> o resursă comună pentru forjare și consumabile din explorare.<br><b>Cristale:</b> determină raritatea obiectelor forjate (Magic, Rar, Epic).<br><b>Puncte:</b> ritmul tuturor activităților (uși, raiduri, tabere, locuri de interes).</div></section>` + flagRow();
 }
 const terStage = () => { const b = BL(), n = Object.values(S.ren || {}).reduce((a, x) => a + x, 0); return TW.STAGES[TW.stage(BN.reduce((s, [k]) => s + (b[k] || 0), 0))][1] + (n ? ' · ★' + n : ''); };
 
