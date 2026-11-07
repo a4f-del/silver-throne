@@ -124,6 +124,7 @@ function admDraw() {
 <div class="adm-g"><span>Puncte · ${S.pts}</span><div class="adm-bs">${b('pts', 0, 'Umple')}${b('pts', 100, '+100')}</div></div>
 <div class="adm-g"><span>Nivel · ${S.lvl}</span><div class="adm-bs">${b('lvl', 1, '+1')}${b('lvl', 5, '+5')}${b('lvl', 10, '+10')}<input id="adm-lv" type="number" min="1" max="50" placeholder="nivel" aria-label="Nivel">${b('setlvl', 0, 'Setează')}</div></div>
 <div class="adm-g"><span>Echipă</span><div class="adm-bs">${b('heal', 0, 'Vindecă tot')}${b('scars', 0, 'Șterge cicatricile')}${b('fame', 50, '+50 faimă')}${b('fame', 1000, 'Rang maxim')}</div></div>
+${typeof simPvpAdminHtml==='function'?simPvpAdminHtml():''}
 <div class="adm-g"><span>Timp</span><div class="adm-bs">${b('forge', 0, 'Termină forja')}${b('exp', 0, 'Termină expedițiile')}${b('daily', 0, 'Cufăr zilnic din nou')}</div></div>
 ${admGenHtml()}
 <div class="adm-g"><span>Premium</span><div class="adm-bs">${b('prem', 0, 'Premium: ' + (S.prem ? 'pornit' : 'oprit'))}</div></div>
