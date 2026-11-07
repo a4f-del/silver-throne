@@ -94,4 +94,12 @@ const jS={journeyV:1,mrPrologSeen:1,mrPrologPending:0,je:{done:['poarta','urme',
 const panel=completeJourney(jS,'beta',()=>0,()=>[]);
 assert(panel().includes("cmpOpenChecklist('journey')"));
 jS.jeCampaignOpened=1;assert.equal(panel(),'');
+const storySave={mrStoryV:1,mrPrologSeen:1,mrPrologPending:0,
+ fs:[{h:1,c:'Campion',n:'Eroul'}],rs:[],sq:{claimed:[]}};
+const legacyStory=new Function('ST_SERVER','S',story+';return {sqPanel,SQ_ACT};')('beta',storySave);
+storySave.sq.claimed=legacyStory.SQ_ACT.map(x=>x.id);
+assert(legacyStory.sqPanel().includes("cmpOpenChecklist('story')"),
+ 'old BETA story completion also links to same focused checklist');
+storySave.sqCampaignOpened=1;
+assert.equal(legacyStory.sqPanel(),'','old story notification no longer repeats after opening');
 console.log('OK: campaign button jumps to first task, chapter-claim fallback, brief highlight, no repeated notification, BETA/LIVE isolation.');
