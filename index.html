@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="bresle.css?v=2026.11.07-1">
 <link rel="stylesheet" href="bresle-ranguri.css?v=2026.11.07-1">
-<link rel="stylesheet" href="aventura-carduri.css?v=2026.11.07-1">
+<link rel="stylesheet" href="aventura-carduri.css?v=2026.11.07-2">
 <link rel="icon" type="image/png" href="icons/favicon-64.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -211,9 +211,9 @@ main{padding:8px 24px;max-width:940px}
 <script src="fx.js?v=2026.11.07-2"></script>
 <script src="temnite.js?v=2026.11.07-18"></script>
 <script src="echipament-balance.js?v=2026.11.07-16"></script>
-<script src="trepte.js?v=2026.11.07-21"></script>
+<script src="trepte.js?v=2026.11.07-22"></script>
 <script src="turn.js?v=2026.11.07-1"></script>
-<script src="aventura-carduri.js?v=2026.11.07-1"></script>
+<script src="aventura-carduri.js?v=2026.11.07-2"></script>
 <script src="harta.js?v=2026.11.04-4"></script>
 <script src="lume.js?v=2026.11.07-18"></script>
 <script src="lume-pictat.js?v=2026.11.04-4"></script>
@@ -233,7 +233,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="seturi.js?v=2026.11.04-5"></script>
 <script src="legendare.js?v=2026.11.04-5"></script>
 <script src="profil.js?v=2026.11.04-5"></script>
-<script src="lume-quick.js?v=2026.11.07-3"></script>
+<script src="lume-quick.js?v=2026.11.07-4"></script>
 <script src="world-mail.js?v=2026.11.07-1"></script>
 <script src="world-friends.js?v=2026.11.07-2"></script>
 <script src="bresle.js?v=2026.11.07-2"></script>
@@ -371,7 +371,7 @@ function dToggle(i){
   if(!DG[i]||S.lvl<DG[i].lv||S.d)return;
   if(!S.fs.some(f=>f.hp>0)){S.msg='Eroul și echipa sunt căzuți. Ridică-i la Infirmerie înainte să intri.';return go()}
   if(S.adventure){if(S.adventure.di===i)return adventureExit();S.msg='Ești deja într-o altă temniță.';return go()}
-  S.adventure={di:i};(S.deo=S.deo||{})[i]=true;S.tab='c';S.msg='Ai intrat în '+DG[i].n+'.';return go();
+  S.adventure={di:i,tierLocked:false};(S.deo=S.deo||{})[i]=true;S.tab='c';S.msg='Ai intrat în '+DG[i].n+'.';return go();
  }
  (S.deo=S.deo||{})[i]=!S.deo[i];go();
 }
@@ -381,7 +381,7 @@ const dCostAt=i=>{const g=DG[i||0],d=dMk(i);return g.ev?0:d.room>=d.rooms-1?2:1}
 function startD(i){const g=DG[i||0];if(ST_SERVER==='beta'&&S.adventure&&S.adventure.di!==(i||0)){S.msg='Mai întâi retrage-te din temnița curentă.';return go()}if(S.lvl<g.lv){S.msg='Cerință: nivel '+g.lv+'.';return go()}if(S.d){S.msg='Termină întâi lupta în care ești.';return go()}if(!S.fs.some(f=>f.hp>0)){S.msg='Toți luptătorii sunt căzuți. Du-te la infirmerie.';return go()}
  const d=dMk(i),boss=d.room>=d.rooms-1,c=dCostAt(i);
  if(g.ev){if(d.room===0){const e=evs();if(e.k<=0){S.msg='Nu mai ai chei pentru evenimentul acestei săptămâni.';return go()}e.k--}}else if(S.pts<c){S.msg=`${boss?'Căpitanul costă':'Fiecare monstru costă'} ${c} ${c>1?'puncte':'punct'}. Se regenerează câte unul la 6 minute.`;return go()}else spend(c);
- if(ST_SERVER==='beta'&&!S.adventure)S.adventure={di:i||0};S.d=d;S.fl=null;S.msg='';if(d.room===0)cn('d');S.tab='c';startF(boss);go();   /* cardul VS apare o clipă înainte ca lupta să se rezolve */
+ if(ST_SERVER==='beta'){if(!S.adventure)S.adventure={di:i||0};S.adventure.tierLocked=true;}S.d=d;S.fl=null;S.msg='';if(d.room===0)cn('d');S.tab='c';startF(boss);go();   /* cardul VS apare o clipă înainte ca lupta să se rezolve */
  if(S.auto!==false)setTimeout(()=>{if(S.d===d&&S.d.f){if(typeof fxAutoRun==='function')fxAutoRun();else autoRun()}},650)}
 /* după fiecare monstru învins: prada se încasează, lista avansează (după căpitan o ia de la capăt) */
 function dOneDone(d,b){const band=typeof trBand==='function'?trBand():'',m=S.msg+band;(S.dp=S.dp||{})[d.dk]=b?0:d.room+1;if(b)adventureClear(d);leave();S.msg=(b?(d.cm?d.cm+' ':'')+`Căpitanul a căzut! ${DG[d.di].n} e terminată; lista o ia de la capăt. `:`${m} `)+S.msg;go()}

@@ -23,3 +23,12 @@ Implementarea este în `lume-quick.js` și păstrează comportamentul anterior p
 7. `node dev/test-beta-map-village-actions.js` — regresii UI simplificate.
 
 Nu șterge conturi. Nu este nevoie de SQL.
+
+
+## Ajustare 2026-11-07: meniuri care nu ies din zona vizibila
+
+In BETA, meniul rapid al **jucatorilor** si al **satelor NPC** are latime de maximum **228px** (in loc de 255px), pictograme putin mai compacte si pozitionare bazata pe **inaltimea reala** a meniului. Daca satul e sus pe harta, meniul se deschide dedesubt; daca e jos, deasupra. Pozitia este limitata atat de marginile hartii, cat si de portiunea vizibila a ferestrei. Daca e foarte putin spatiu, panoul poate fi derulat fara a ascunde actiunea Ataca / Jefuieste. Nu se modifica meniul LIVE si nici regulile atacurilor.
+
+## Restaurare dificultati Temnite in ecranul nou
+
+In modul dedicat BETA apar din nou butoanele **Normal / Greu / Cosmar** pentru temnitele unde existau anterior. Dificultatile nedeblocate raman vizibile, dar blocate. Dificultatea se poate alege **dupa Intră, inainte de prima lupta** si se fixeaza pentru restul incursiunii; dupa retragere poti intra din nou si alege alta dificultate. Progresul separat pe dificultati (`S.dp`/`S.dts`) este pastrat; fara migrari si fara schimbari de echilibru. LIVE ramane identic.

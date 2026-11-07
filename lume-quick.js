@@ -35,19 +35,40 @@
     return b;
   }
   function place(panel, target) {
-    const host = map();
-    if (!host || !target || !target.getBoundingClientRect) return;
-    const H = host.getBoundingClientRect(), R = target.getBoundingClientRect();
-    const width = Math.min(255, Math.max(180, H.width - 18));
-    const center = R.left + R.width / 2 - H.left;
-    panel.style.left = Math.max(width / 2 + 8, Math.min(H.width - width / 2 - 8, center)) + 'px';
-    const top = R.top - H.top;
-    if (top > 94) {
-      panel.style.top = Math.max(4, top - 8) + 'px';
-      panel.classList.remove('lwqa-below');
-    } else {
-      panel.style.top = Math.min(H.height - 6, R.bottom - H.top + 7) + 'px';
+    const host=map();
+    if(!host||!target||!target.getBoundingClientRect)return;
+    const H=host.getBoundingClientRect(),R=target.getBoundingClientRect();
+    const padding=8,gap=8;
+    const width=Math.min(228,Math.max(120,H.width-2*padding));
+    panel.style.width=width+'px';
+    // După inserare putem măsura înălțimea REALĂ a meniului, nu o valoare fixă.
+    // Pe mobil aceasta variază în funcție de text și de numărul acțiunilor.
+    const minCenter=width/2+padding,maxCenter=H.width-width/2-padding;
+    const center=R.left+R.width/2-H.left;
+    panel.style.left=Math.max(minCenter,Math.min(Math.max(minCenter,maxCenter),center))+'px';
+    // Constrânge meniul la partea vizibilă a hărții și a ferestrei.
+    const viewTop=Math.max(padding,padding-H.top);
+    const viewBottom=Math.min(H.height-padding,
+      (typeof window==='undefined'?H.height:window.innerHeight-H.top)-padding);
+    const available=Math.max(1,viewBottom-viewTop);
+    panel.style.maxHeight=Math.max(48,available)+'px';
+    panel.style.overflowY='auto';
+    const height=Math.min(panel.getBoundingClientRect().height||panel.offsetHeight||100,available);
+    const above=R.top-H.top-gap,below=R.bottom-H.top+gap;
+    const fitsAbove=above-height>=viewTop;
+    const fitsBelow=below+height<=viewBottom;
+    // Favorizăm sub sat când este sus; deasupra când satul este jos.
+    const useBelow=fitsBelow&&(!fitsAbove||below-viewTop<above-viewTop)
+      ||(!fitsAbove&&!fitsBelow&&viewBottom-below>=above-viewTop);
+    const top=useBelow?Math.max(viewTop,Math.min(below,viewBottom-height)):
+      Math.max(viewTop,Math.min(above-height,viewBottom-height));
+    if(useBelow){
       panel.classList.add('lwqa-below');
+      panel.style.top=top+'px';
+    }else{
+      panel.classList.remove('lwqa-below');
+      // În modul "above" transform: translateY(-100%) este activ.
+      panel.style.top=top+height+'px';
     }
   }
   function showBeta(kind, id, target) {
@@ -205,16 +226,16 @@
   if (typeof document !== 'undefined' && document.head) {
     const style = document.createElement('style');
     style.textContent = `
-.lwqa-map{position:absolute;z-index:9;transform:translate(-50%,-100%);width:min(255px,calc(100% - 16px));box-sizing:border-box;line-height:1.3;padding:8px 10px;border:1px solid #c9a24b;border-radius:10px;background:#151c1fee;box-shadow:0 7px 24px #000b;backdrop-filter:blur(6px);animation:lwqa-in .18s ease-out}
+.lwqa-map{position:absolute;z-index:9;transform:translate(-50%,-100%);width:min(228px,calc(100% - 16px));box-sizing:border-box;line-height:1.25;padding:6px 8px;border:1px solid #c9a24b;border-radius:10px;background:#151c1fee;box-shadow:0 7px 24px #000b;backdrop-filter:blur(6px);animation:lwqa-in .18s ease-out}
 .lwqa-map.lwqa-below{transform:translateX(-50%)}
 .lwqa-head{display:flex;justify-content:space-between;align-items:center;gap:7px}
-.lwqa-head strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--gold2)}
-.lwqa-map>small{display:block;color:var(--mute);font-size:10px;margin:2px 0 6px}
-.lwqa-map .lw-quick-buttons{display:flex;justify-content:center;gap:12px}
-.lwqa-map .lwqa-icon{min-width:54px;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 8px;border-radius:8px;font-size:19px;color:#f0d27a;border:1px solid #75603d;background:#253034;box-shadow:0 2px 7px #0006}
+.lwqa-head strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;color:var(--gold2)}
+.lwqa-map>small{display:block;color:var(--mute);font-size:9.5px;margin:1px 0 5px}
+.lwqa-map .lw-quick-buttons{display:flex;justify-content:center;gap:7px}
+.lwqa-map .lwqa-icon{min-width:50px;min-height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:3px 6px;border-radius:8px;font-size:18px;color:#f0d27a;border:1px solid #75603d;background:#253034;box-shadow:0 2px 7px #0006}
 .lwqa-map .lwqa-icon:hover:not(:disabled){background:#354347;transform:translateY(-2px)}
 .lwqa-map .lwqa-icon:disabled{opacity:.45;cursor:not-allowed}
-.lwqa-map .lwqa-text{display:block;font-size:10px;white-space:nowrap}
+.lwqa-map .lwqa-text{display:block;font-size:9.5px;white-space:nowrap}
 .lwqa-map .lw-quick-close{border:0;background:transparent;box-shadow:none;font-size:23px;color:#d8c7a1;min-height:30px;padding:0 4px}
 @keyframes lwqa-in{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.lwqa-map{animation:none}.lwqa-map .lwqa-icon{transition:none}}
