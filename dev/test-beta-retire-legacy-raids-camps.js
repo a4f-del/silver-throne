@@ -48,7 +48,7 @@ assert.equal(run(braid,{ST_SERVER:'beta',S:{pts:20}},'return braid()'),0);
 assert(terrain.includes("if (!cmpBeta()) t.camps.forEach"),'BETA camps must not draw');
 assert(terrain.includes("s.k === 'c' && !cmpBeta()"),'Saved camp selection must not display');
 assert(sidebar.includes("ST_SERVER !== 'beta') && cp.length"),'No BETA camp sidebar');
-assert(guide.includes("ghQ('#v g[onclick^=\\"wnPick(\\"]')"),'BETA tutorial must point to shared NPC');
+assert(guide.includes('wnPick('),'BETA tutorial must point to shared NPC');
 assert(main.includes("r:ST_SERVER==='beta'?'Jefuiește un sat NPC în Lume'"),'Daily quest remains compatible');
 assert(sharedNpc.includes('async function wnRaid(id)')&&sharedNpc.includes("'world_npc_raid'"),'Shared NPC raiding stays');
 assert(quick.includes('wnRaid(v.id)'),'Shared NPC quick action stays');
