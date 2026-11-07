@@ -7,9 +7,11 @@ const guildEnabled=()=>typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'
 function guildHeader(){
  if(!guildEnabled())return '';
  const g=GUILD.state?.guild;
- return '<button id="guild-open" class="guild-head" onclick="guildOpen()" aria-label="Deschide breslele">⚔ <span>'+guildEsc(g?'['+g.tag+']':'Bresle')+'</span></button>';
+ const unread=!g&&typeof gsrInboxCount==='function'?gsrInboxCount():0;
+ return '<button id="guild-open" class="guild-head" onclick="guildOpen()" aria-label="Deschide breslele'+(unread?' · '+unread+' invitații':'')+'">⚔ <span>'+guildEsc(g?'['+g.tag+']':'Bresle')+'</span>'+
+   (unread?'<b class="guild-invite-count">'+unread+'</b>':'')+'</button>';
 }
-function guildReset(){GUILD.uid=null;GUILD.state=null;GUILD.loading=false;GUILD.sending=false;GUILD.last=0;GUILD.error='';}
+function guildReset(){GUILD.uid=null;GUILD.state=null;GUILD.loading=false;GUILD.sending=false;GUILD.last=0;GUILD.error='';if(typeof gsrReset==='function')gsrReset();}
 async function guildSync(force){
  if(!guildEnabled()||GUILD.loading||GUILD.busy||(!force&&Date.now()-GUILD.last<25000))return;
  const uid=CONT.user.id;
@@ -24,6 +26,7 @@ async function guildSync(force){
   if(typeof hdr==='function')hdr();
  }finally{GUILD.loading=false;}
  if(!GUILD.error)guildFlush();
+ if(typeof gsrSync==='function')await gsrSync(force);
 }
 function guildStart(){
  if(!guildEnabled())return;
@@ -58,8 +61,10 @@ function guildPaint(){
  if(GUILD.error){host.innerHTML='<p class="r4">Breslele nu sunt disponibile: '+guildEsc(GUILD.error)+'. Verifică migrarea SQL BETA.</p><button onclick="guildSync(true)">Reîncearcă</button>';return;}
  if(!GUILD.state){host.innerHTML='<p class="mute">Se încarcă breslele…</p><button onclick="guildSync(true)">Reîncearcă</button>';return;}
  const st=GUILD.state,g=st.guild;
- let out='<p class="guild-message" role="status">'+guildEsc(GUILD.notice||'')+'</p>';
+ let out='<p class="guild-message" role="status">'+guildEsc(GUILD.notice||'')+'</p>'+
+   (typeof GSR!=='undefined'&&GSR.notice?'<p class="guild-message" role="status">'+guildEsc(GSR.notice)+'</p>':'');
  if(!g){
+  if(typeof gsrInvitationHtml==='function')out+=gsrInvitationHtml();
   out+='<h3>Creează o breaslă</h3><p class="mute">Maximum 20 membri · invită prietenii cu un cod.</p>'+
    '<div class="guild-fields"><label>Nume <input id="guild-name" type="text" maxlength="32" placeholder="Ex. Ordinul Cenușii"></label>'+
    '<label>Siglă <input id="guild-tag" type="text" maxlength="5" placeholder="ORD" autocapitalize="characters"></label>'+
@@ -73,7 +78,7 @@ function guildPaint(){
   const week=st.contract||{},self=week.personal||{},claimed=week.claimed||{},boss=st.boss||{};
   const contributed=(self.dungeons||0)+(self.hard_boss||0)+(self.tower||0)+(self.boss_hits||0);
   out+='<div class="guild-identity"><h3>['+guildEsc(g.tag)+'] '+guildEsc(g.name)+'</h3>'+
-   '<p>'+g.member_count+' / 20 membri · '+(g.role==='leader'?'Conducător':'Membru')+' · <b>'+g.marks+' însemne</b></p>'+
+   '<p>'+g.member_count+' / 20 membri · '+(typeof gsrRankName==='function'?gsrRankName(g.role):g.role==='leader'?'Conducător':'Membru')+' · <b>'+g.marks+' însemne</b></p>'+
    '<p>Cod invitație: <code>'+guildEsc(g.code)+'</code></p></div>'+
    '<h3>Contractul săptămânii <small>· de luni până duminică</small></h3>'+
    GUILD_GOALS.map(([key,title,max])=>guildBar(title,week[key],max)).join('')+
@@ -94,8 +99,9 @@ function guildPaint(){
    '<button onclick="guildClaim(\'boss\')"'+(boss.hp>0||!self.boss_hits||claimed.boss||contributed<3?' disabled':'')+'>'+
      (claimed.boss?'Revendicat':'Premiul căpitanului · +20 însemne')+'</button></div></div>'+
    '<h3>Membri și contribuții</h3><div class="guild-members">'+(g.members||[]).map(m=>
-    '<div><b>'+guildEsc(m.name)+(m.role==='leader'?' ♛':'')+'</b>'+
-    '<small>Temnițe '+m.dungeons+' · Căpitani '+m.hard_boss+' · Turn '+m.tower+' · Atacuri boss '+m.hits+'</small></div>').join('')+'</div>'+
+    '<div><b>'+guildEsc(m.name)+(m.role==='leader'?' ♛':'')+' · '+(typeof gsrRankName==='function'?gsrRankName(m.role):guildEsc(m.role))+'</b>'+
+    '<small>Temnițe '+m.dungeons+' · Căpitani '+m.hard_boss+' · Turn '+m.tower+' · Atacuri boss '+m.hits+'</small></div>').join('')+'</div>'+ 
+   (typeof gsrManagementHtml==='function'?gsrManagementHtml(g):'')+
    '<div class="guild-bottom"><button onclick="guildSync(true)">Actualizează</button><button class="d" onclick="guildLeave()">Părăsește bresla</button></div>';
  }
  host.innerHTML=out;
@@ -110,7 +116,7 @@ async function guildAction(action,data){
   GUILD.notice=action==='create'?'Breasla a fost creată.':action==='join'?'Ai intrat în breaslă.':
     action==='leave'?'Ai părăsit bresla.':action==='boss'?'Lovitură înregistrată pe server.':'Recompensa a fost revendicată.';
   return res.data;
- }finally{GUILD.busy=false;guildPaint();if(typeof hdr==='function')hdr();}
+ }finally{GUILD.busy=false;if(typeof gsrSync==='function')await gsrSync(true);guildPaint();if(typeof hdr==='function')hdr();}
 }
 const guildInput=id=>document.getElementById(id)?.value?.trim()||'';
 async function guildCreate(){await guildAction('create',{name:guildInput('guild-name'),tag:guildInput('guild-tag')});}

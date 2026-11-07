@@ -1,0 +1,28 @@
+/* Silver Throne — BETA, ranguri și invitații; nu afectează LIVE. */
+.guild-invite-count{display:inline-grid;place-items:center;min-width:19px;height:19px;background:#b55d35;color:#fff;border-radius:10px;padding:0 4px;font:700 11px system-ui}
+.guild-invites,.guild-management{border-top:1px solid #69563c;margin:16px 0 10px;padding-top:9px}
+.guild-invites h3,.guild-management h3{margin:8px 0;color:#f0d27a}
+.guild-invite{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #584d3c;background:#141b1f;border-radius:8px;padding:9px;margin-bottom:7px;flex-wrap:wrap}
+.guild-invite>div:first-child{display:flex;flex-direction:column;gap:4px;min-width:0}
+.guild-invite small{color:#b8b7b5;font-size:12px}
+.guild-invite>div:last-child{display:flex;gap:6px}
+.guild-ranks-list,.guild-outgoing,.guild-search-results{display:grid;gap:6px;margin:8px 0}
+.guild-rank-member,.guild-outgoing>div,.guild-search-results>div{padding:8px 9px;border:1px solid #46515a;background:#11191f;border-radius:9px;display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap}
+.guild-rank-member>div:first-child,.guild-search-results>div>span{display:flex;flex-direction:column;gap:3px}
+.guild-rank-member small,.guild-search-results small{font-size:12px;color:#c2bcb2}
+.guild-manage-actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.guild-rank-select{font-size:12px;color:#d5c4a5;display:flex;gap:5px;align-items:center}
+.guild-manage-actions select{min-height:34px;max-width:150px}
+.guild-rank-member button,.guild-outgoing button,.guild-search-results button{min-height:34px;padding:6px 10px}
+.guild-search{display:flex;gap:8px;align-items:stretch;margin:9px 0}
+.guild-search input{min-width:0;flex:1;border:1px solid #716144;border-radius:8px;background:#0d1115;color:#eee;padding:8px 10px}
+.guild-search>button{min-width:94px}
+.guild-outgoing small{color:#b8b7b5}
+@media(max-width:540px){
+ .guild-rank-member,.guild-invite{align-items:stretch}
+ .guild-manage-actions{width:100%}
+ .guild-manage-actions button{flex:1}
+ .guild-rank-select{width:100%;justify-content:space-between}
+ .guild-rank-select select{flex:1;max-width:none}
+ .guild-search input{width:100%}
+}
