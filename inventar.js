@@ -48,9 +48,21 @@ function invCmp(it) {
 const invChips = it => { const c = Object.keys(INV_L).filter(k => it.s[k]).map(k => `<span>+${it.s[k]} ${INV_L[k]}</span>`); return c.length ? `<div class="chips">${c.join('')}</div>` : ''; };
 const invCls = it => (it.lg ? 'rl' : 'r' + (it.r + 1));
 
+/* Recomandarea de clasă folosește tipul real al armei; nu schimbă
+   echiparea, scorul sau statisticile. Element de ajutor, numai BETA. */
+function invClassHint(it){
+ if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||!it||it.t!=='w'
+   ||typeof WF==='undefined'||typeof wfOf!=='function')return '';
+ const spec=WF[wfOf(it)],f=cur();
+ if(!spec||!spec.c||!f)return '';
+ const fit=spec.c===f.c;
+ return '<small class="inv-class-hint'+(fit?' good':'')+'">'+
+   (fit?'✓ Potrivit clasei '+spec.c:'Armă pentru '+spec.c+' · selectat '+f.c)+
+   '</small>';
+}
 function invCard(x) {
   const it = x.it, i = x.i;
-  return `<div class="icard ${invCls(it)}${it.lk ? ' lk' : ''}" data-i="${i}" data-t="${it.t}"><div class="ic-n"${itTipA(it, invCmp(it))}>${iname(it)}${it.lk ? ' <span title="Blocat">🔒</span>' : ''}</div>${invVerdict(it)}` +
+  return `<div class="icard ${invCls(it)}${it.lk ? ' lk' : ''}" data-i="${i}" data-t="${it.t}"><div class="ic-n"${itTipA(it, invCmp(it))}>${iname(it)}${it.lk ? ' <span title="Blocat">🔒</span>' : ''}</div>${invVerdict(it)}${invClassHint(it)}` +
     `<div class="ic-a"><button class="p" onclick="equip(${i})" aria-label="Pune pe ${tEsc(cur().n)}" title="Pune pe ${tEsc(cur().n)}">Pune</button><button onclick="invLock(${i})" title="${it.lk ? 'Deblochează' : 'Blochează: nu poate fi vândut sau dezmembrat'}">${it.lk ? '🔓' : '🔒'}</button><button onclick="dis(${i})"${it.lk ? ' disabled' : ''}>Dezmembrează</button>${it.r >= 1 && !it.lg ? `<button onclick="reroll(${i})"${it.lk ? ' disabled' : ''} title="Afixe noi la întâmplare: ${rrCost(it).o} minereu, ${rrCost(it).g} aur">Refă afixele</button>` : ''}<button onclick="sell(${i})"${it.lk ? ' disabled' : ''}>${invVal(it)} aur</button></div></div>`;
 }
 /* semnul mic de pe card: merită pus? (aceeași formulă de putere ca la alegerea din slot) */
@@ -85,7 +97,7 @@ function invPick(k) {
   const list = S.inv.map((it, i) => ({ it, i })).filter(x => x.it && x.it.t === k)
     .sort((p, q) => invScore(q.it) - invScore(p.it) || invRarKey(q.it) - invRarKey(p.it) || q.it.l - p.it.l);
   const card = x => { const g = invScore(x.it) - base;
-    return `<div class="ipk-c icard ${invCls(x.it)}"><div class="ic-n"${itTipA(x.it, eq ? invCmp(x.it) : '')}>${iname(x.it)}${x.it.lk ? ' 🔒' : ''}</div><div class="ipk-a">${eq ? `<span class="ipk-g ${g > 0 ? 'up' : g < 0 ? 'dn' : ''}">${g > 0 ? '▲ mai bun' : g < 0 ? '▼ mai slab' : '≈ la fel'}</span>` : ''}<button class="${!eq || g >= 0 ? 'p' : ''}" onclick="invPickEq(${x.i})">${eq ? 'Înlocuiește' : 'Pune'}</button></div></div>`; };
+    return `<div class="ipk-c icard ${invCls(x.it)}"><div class="ic-n"${itTipA(x.it, eq ? invCmp(x.it) : '')}>${iname(x.it)}${x.it.lk ? ' 🔒' : ''}</div>${invClassHint(x.it)}<div class="ipk-a">${eq ? `<span class="ipk-g ${g > 0 ? 'up' : g < 0 ? 'dn' : ''}">${g > 0 ? '▲ mai bun' : g < 0 ? '▼ mai slab' : '≈ la fel'}</span>` : ''}<button class="${!eq || g >= 0 ? 'p' : ''}" onclick="invPickEq(${x.i})">${eq ? 'Înlocuiește' : 'Pune'}</button></div></div>`; };
   mdl(`<div class="ipk"><h3>${SLN[k]} · ${tEsc(f.n)}</h3>`
     + `<div class="ipk-now"><span class="mute">Acum:</span> ${eq ? `<span class="ic-n"${itTipA(eq)}>${iname(eq)}</span> <button onclick="invPickOff('${k}')">Scoate</button>` : '<span class="mute">nimic echipat</span>'}</div>`
     + `<div class="ipk-l">${list.length ? list.map(card).join('') : '<p class="mute">Nu ai în rucsac obiecte de acest tip.</p>'}</div>`
@@ -141,5 +153,6 @@ function vInv() {
     + '.ipk-a{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:4px}.ipk-a button{padding:4px 14px;font-size:14px}'
     + '.ipk-g{font-size:13px;margin-right:auto;color:var(--mute)}.ipk-g.up{color:#7fd88c}.ipk-g.dn{color:#e8837b}'
     + '.ipk-f{margin-top:8px;font-size:13px}.ipk-f .lw-lnk{background:none;border:0;box-shadow:none;padding:0;color:var(--gold2);text-decoration:underline;text-underline-offset:3px;font:inherit;cursor:pointer}';
+  st.textContent += '.inv-class-hint{display:block;font-size:11px;color:var(--mute);margin:5px 0 3px;line-height:1.25}.inv-class-hint.good{color:#b5e2af}';
   document.head.appendChild(st);
 })();
