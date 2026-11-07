@@ -117,7 +117,7 @@ function contBoot(key, src) {
   SKEY = key;
   try { boot(src); }
   catch (e) { console.error(e); CONT.msg = { t: 'err', m: 'Jocul nu a pornit: ' + ((e && e.message) || e) }; return contShow('retry'); }
-  CONT.booted = true; contChip();
+  CONT.booted = true; contChip(); if(typeof wmStart==='function')setTimeout(wmStart,0);
   if (typeof hcNeed === 'function' && hcNeed()) { hcStart('new'); contShow('hero'); } else contHide();     /* cont nou: întâi eroul (erou.js) */
   contPush(); try { tronInit(); tronSync(); } catch (e) { /* Tronul se reîncearcă singur */ }
   try { lwSync(); } catch (e) { /* Lumea se reîncearcă singură */ }
