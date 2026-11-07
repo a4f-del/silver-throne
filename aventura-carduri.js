@@ -32,13 +32,14 @@ function acDungeonPage(i) {
   const g=DG[i], names=typeof trNames==='function' ? trNames(i) : null;
   if (!g || !names || !names.length) return '';
   const d=dMk(i),p=d.room,sel=typeof trSel==='function' ? trSel(i) : p, boss=sel===names.length-1;
+  const last=p===names.length-1,currentName=names[p];
   const selected=names[sel], data=typeof trDef==='function' ? trDef(g.n) : null;
   const art=acArtwork(selected,boss,g),stats=typeof monStatsAt==='function' ? monStatsAt(i,sel,boss) : null;
   const canFight=sel===p;
   const rail=names.map((name,k)=>{
     const end=k===names.length-1, done=k<p, current=k===p, image=acArtwork(name,end,g);
     return '<button class="ac-step' + (done?' ac-done':'') + (current?' ac-current':'') +
-      (k===sel?' ac-selected':'') + (end?' ac-boss':'') + '" onclick="trSelSet('+i+','+k+')" aria-pressed="'+(k===sel)+'" title="'+acSafe(name)+'">' +
+      (k===sel?' ac-selected':'') + (end?' ac-boss':'') + '" onclick="trSelSet('+i+','+k+')" aria-pressed="'+(k===sel)+'" aria-current="'+(current?'step':'false')+'" title="'+acSafe(name)+'">' +
       '<span class="ac-step-art">'+acArt(image)+'</span><span class="ac-step-text">'+(done?'✓ ':end?'♛ ':'')+acSafe(name)+'</span>' +
       '<small>'+ (done?'Învins':current?'Urmează':end?'Căpitan':'În așteptare') +'</small></button>';
   }).join('');
@@ -53,14 +54,20 @@ function acDungeonPage(i) {
     (typeof trChips==='function'&&trChips(i)?'<div class="ac-difficulty"><div class="ac-difficulty-head"><b>Dificultate: '+acSafe(TR_T.n[trTier(i)])+'</b>' +
     (S.adventure&&S.adventure.tierLocked?'<small>Fixată pentru această incursiune. Retrage-te pentru a schimba.</small>':'<small>Alege dificultatea înainte de prima luptă.</small>')+'</div>'+
     trChips(i)+'</div>':'') +
-    '<div class="ac-progress"><b>Progres '+(p+1)+' / '+names.length+'</b><div class="ac-rail">'+rail+'</div></div>' +
+    '<div class="ac-progress"><div class="ac-progress-top"><b>Progres '+(p+1)+' / '+names.length+'</b>'+
+    '<small>'+(last?'♛ Ultimul adversar: căpitanul':'⚔ Urmează: '+acSafe(currentName))+'</small></div><div class="ac-rail">'+rail+'</div></div>' +
     '<div class="ac-layout"><div class="ac-main-card'+(boss?' ac-main-boss':'')+'"><div class="ac-main-portrait">'+acArt(art) +
     '<span class="ac-status">'+(boss?'♛ Căpitan':canFight?'⚔ Următorul adversar':sel<p?'✓ Învins':'🔒 Urmează')+'</span></div>' +
     '<div class="ac-main-info"><h3>'+acSafe(selected)+'</h3>'+detail+'</div></div>' +
     '<div class="ac-side"><h3>'+ (canFight?'Pregătirea luptei':'Informații despre adversar') +'</h3>' +
     (canFight&&odds!=null?'<div class="ac-odds">Șanse de câștig <strong>'+odds+'%</strong></div>':'') +
-    (canFight?'<button class="p ac-primary" onclick="startD('+i+')">'+(boss?'⚔ Înfruntă căpitanul':'⚔ Luptă')+' · '+(cost?cost+' puncte':'gratuit')+'</button>':'') +
-    '<p class="ac-hint">'+(canFight?'Poți porni lupta cu echipa actuală.':sel<p?'Ai învins acest adversar.':'Adversarul va deveni disponibil după luptele anterioare.')+'</p>' +
+    (canFight?'<button class="p ac-primary" onclick="startD('+i+')">'+(boss?'⚔ Înfruntă căpitanul':'⚔ Luptă')+' · '+(cost?cost+' puncte':'gratuit')+'</button>':
+      '<button type="button" class="ac-return-current" onclick="trSelSet('+i+','+p+')">↶ Înapoi la '+acSafe(currentName)+'</button>') +
+    '<p class="ac-hint">'+(canFight?
+      (boss?'Ultima luptă! După victorie revii automat în Coborâre și primești prada.':
+        'Apasă Luptă pentru a învinge acest monstru. Următorul se deblochează după victorie.'):
+      (sel<p?'Acest monstru a fost deja învins.':'Acest adversar nu poate fi atacat încă.')+
+        ' Selectează adversarul curent pentru a continua.')+'</p>' +
     '<p class="ac-hint">Echipament recomandat: <b>'+acSafe(typeof recGear==='function'?recGear(d.k):'echipament potrivit nivelului')+'</b></p>' +
     '</div></div>'+acParty()+'</section>';
 }
