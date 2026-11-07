@@ -68,6 +68,11 @@ assert.equal(party.S.sel,0);
 assert.equal(party.S.soloDungeon,1,'Solo mode persists in save state');
 const busy=mk('beta',[hero,archer],{f:{}});
 busy.api.heroSolo();assert.equal(busy.S.fs.length,2,'Combat forbids party changes');
+const fallenHero={h:1,n:'Erou căzut',hp:0};
+const fallen=mk('beta',[fallenHero,archer]);
+fallen.api.heroSolo();
+assert.equal(fallen.S.fs.length,2,'Cannot expose a fallen hero by moving away companions');
+assert(!fallen.S.soloDungeon,'Failed solo operation does not persist');
 const liveSolo=mk('live',[hero,archer]);
 liveSolo.api.heroSolo();assert.equal(liveSolo.S.fs.length,2,'LIVE is unchanged');
 
@@ -88,5 +93,21 @@ assert(dungeon.includes('heroSoloControl()'),'Dungeon list has solo selector');
 assert(steps.includes('heroSoloControl()'),'Dungeon detail has solo selector');
 assert(merc.includes('heroSoloControl()'),'Mercenary inn has solo selector');
 assert(journey.includes('Ai descoperit Lumea')&&journey.includes('S.jeVisitedWorld=1'));
+
+/* Real dungeon-entry guard is exercised with a one-person party, not just UI. */
+const startAt=main.indexOf('function startD(i)');
+const startEnd=main.indexOf('/* după fiecare monstru',startAt);
+assert(startAt>=0&&startEnd>startAt);
+const entry=main.slice(startAt,startEnd);
+const soloFighter={h:1,n:'Erou',hp:50};
+const dungeonState={fs:[soloFighter],rs:[archer],d:null,lvl:5,pts:8,auto:false,tab:'a'};
+let fights=0;
+const startD=new Function('S','DG','dMk','dCostAt','evs','spend','go','cn','startF','setTimeout',
+ entry+';return startD')(dungeonState,[{lv:1,ev:0}],()=>({room:0,rooms:4}),
+ ()=>2,()=>({k:1}),n=>{dungeonState.pts-=n},()=>{},()=>{},()=>{fights++},()=>{});
+startD(0);
+assert(dungeonState.d&&dungeonState.fs.length===1,'Hero may start a dungeon alone');
+assert.equal(fights,1,'Solo hero starts the same fight engine');
+assert.equal(dungeonState.pts,6,'Solo hero pays the usual entry cost');
 assert(!html.includes('world-friends.js?v=2026.11.07-1</script>'),'Cached friends hotfix stays intact');
 console.log('OK: six dungeon-only chapters, one-time rewards, historical claims, solo team and mercenary reserve, LIVE isolation and script syntax.');
