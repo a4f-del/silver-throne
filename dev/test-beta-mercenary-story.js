@@ -51,7 +51,7 @@ beta.S.vil = 'i';
 assert.equal(beta.api.mrStoryPlaceReady('Vraci'),true,'Healer scene waits for infirmary');
 beta.S.lvl = 5; beta.api.mrTick();
 assert.equal(beta.S.mrOff.length, 3);
-assert.equal(beta.S.fs.length, 1);
+assert.equal(beta.S.fs.length, 2,'Arcașul adăugat explicit în echipă rămâne prezent');
 beta.S.vil = 'h';
 assert.equal(beta.api.mrStoryPlaceReady('Războinic'), true);
 assert.equal(beta.api.mrStoryPlaceReady('Mag'), false);
