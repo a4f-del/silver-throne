@@ -1,6 +1,6 @@
 # Silver Throne BETA — Pasul 06, parte 1: mercenari cu nume proprii
 
-Data: 7 noiembrie 2026. Schimbarea propusă se aplică **numai** noilor eroi BETA, cu `jeFocus()` activ (`journeyV=1`, `journeyUxV=2`).
+Data: 7 noiembrie 2026. Schimbarea propusă se aplică **numai** noilor eroi BETA, cu `jeFocus()` activ (`journeyV=1`, `journeyUxV=2`) și marcajul `S.mrPresetV=1` înscris doar la crearea eroului.
 
 ## De ce
 În scenariul de introducere, jucătorul primea un dialog narativ, apăsa „Primește-l”, apoi era obligat să treacă printr-un al doilea dialog pentru a accepta un nume deja sugerat. Era un pas artificial, mai ales pe mobil. Acest lucru se simplifică fără a elimina personalizarea.
@@ -22,7 +22,7 @@ Sunt primele nume din sugestiile deja existente în `MR.sug`. Dacă un nume este
 5. Scenele, condițiile de deblocare, progresul, forța, echipamentul, darurile și costurile nu sunt afectate.
 
 ## Siguranță
-- Eroii deja creați în BETA și eroii LIVE păstrează fereastra de numire și propriile nume.
+- Eroii deja creați în BETA (fără `mrPresetV`) și eroii LIVE păstrează fereastra de numire și propriile nume.
 - Nu rescriem în masă salvările existente și nu atingem datele de pe server.
 - Personajele noi păstrează marcajul de recrutare obișnuit; tutorialul le recunoaște imediat.
 - Fără SQL, fără recompense noi.
