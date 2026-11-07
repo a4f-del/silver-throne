@@ -16,7 +16,7 @@ const recEnd=merc.indexOf('/* la fiecare desenare',recStart);
 assert(recStart>=0&&recEnd>recStart);
 const logic=merc.slice(recStart,recEnd);
 function create({beta=true,newHero=true,heroName='Eroul'}={}) {
- const S={fs:[{h:1,n:heroName,c:'Campion',hp:45}],rs:[],mrOff:[]};
+ const S={fs:[{h:1,n:heroName,c:'Campion',hp:45}],rs:[],mrOff:[],mrPresetV:beta&&newHero?1:undefined};
  let goCalls=0;
  const scope=new Function('S','MR','ST_SERVER','jeFocus','mhp','P','TR','TMAX','go',
   'const mrAll=()=>[...S.fs,...S.rs];\nconst mrHas=c=>mrAll().some(f=>!f.h&&f.c===c);\n'+
@@ -51,4 +51,5 @@ assert(story.includes('mrDefaultName(c)'),'Story announces preset name before jo
 assert(story.includes('mrRecruit(c);'),'Existing recruit path is reused');
 assert(journey.includes('Paznicul s-a alăturat'),'Onboarding recognizes already-named companion');
 assert(merc.includes('const free = !f.rnf'),'First renaming remains free in Cont');
+assert(fs.readFileSync(path.join(root,'erou.js'),'utf8').includes('S.mrPresetV = 1'),'Only newly created BETA heroes opt in');
 console.log('OK: 5 preset names, no naming modal, unique names, recruit message, free rename, legacy BETA and LIVE unchanged.');
