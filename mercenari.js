@@ -222,6 +222,23 @@ function teamCtl(f) {
   if (S.fs.length < TMAX()) return `<button class="p" onclick="toParty(${ri})">Pune în echipă</button>`;
   return `<select class="tm-swap" onchange="if(this.value!=='')swapTeam(${ri},this.value)" aria-label="Pune pe ${tEsc(f.n)} în echipă"><option value="">Pune în locul lui…</option>${opts(S.fs.map((x, i) => [x, i]).filter(([x]) => !x.h), ([x, i]) => `<option value="${i}">${tEsc(x.n)} · ${x.c}</option>`)}</select>`;
 }
+/* Scenariile deja întâlnite pot fi revăzute din Han, fără panoul de teste
+   cu spoilere și butoane administrative vizibil în prima sesiune. */
+function mrStoryArchive() {
+  if(!mrPresetEnabled()||typeof mrStoryPreview!=='function')return '';
+  const prior=Array.isArray(S.mrStorySeen)?S.mrStorySeen:[];
+  const known=MR.order.map(([c])=>c).filter(c=>mrHas(c)||prior.includes(c));
+  const prolog=S.mrPrologSeen===1&&typeof stPrologPreview==='function';
+  if(!known.length&&!prolog)return '';
+  const buttons=known.map(c=>{
+    const f=mrAll().find(x=>!x.h&&x.c===c),label=f?f.n+' · '+c:c;
+    return '<button type="button" onclick="mrStoryPreview(\''+c+'\')">'+tEsc(label)+'</button>';
+  }).join('');
+  return '<section class="mr-story-archive"><details><summary>📜 Revede poveștile tovarășilor</summary>'
+    +'<div class="mr-story-links">'+(prolog?'<button type="button" onclick="stPrologPreview()">Prologul</button>':'')
+    +buttons+'</div><p class="mute">Poți reciti scenele fără să schimbi echipa sau progresul.</p>'
+    +'</details></section>';
+}
 function mrHan() {
   const fm = f => Math.floor(f.fm || 0), nx = f => (f.rk || 0) < 4 ? SP.RKF[(f.rk || 0) + 1] : null;
   const cards = MR.order.map(([c, st]) => {
@@ -239,7 +256,7 @@ function mrHan() {
   }).join('');
   const bb = BL().b || 0;
   return `<section><h2>Hanul: mercenarii tăi</h2><div class="mute">Cinci tovarăși, câte unul din fiecare clasă, care rămân cu tine pentru totdeauna. ${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'Poți lupta cu eroul singur sau cu tovarăși; mercenarii din rezervă pot pleca în expediții.':'Trei intră în luptă alături de erou; ceilalți așteaptă în rezervă.'} Puterea lor vine din erou: un Recrut are cam 85% din forța de bază a eroului în specialitatea lui, o Legendă cam 98%, dar nimeni nu trece de 95% din viața, atacul sau apărarea eroului. Faima: +1 la fiecare luptă câștigată, +3 la căpitani și raiduri${bb ? `, plus ${bb * 5}% de la Han` : ''}. Cei din rezervă pot pleca în <b>expediții</b> de 1, 4 sau 8 ore, din care se întorc cu aur, materiale și faimă.</div>${typeof heroSoloControl==='function'?heroSoloControl():''}<div class="mr-list">${cards}</div></section>`
-    + (typeof mrStoryIsBeta === 'function' && mrStoryIsBeta()
+    + (mrPresetEnabled()?mrStoryArchive():typeof mrStoryIsBeta === 'function' && mrStoryIsBeta()
       ? `<section><h2>🎬 BETA · Scenele tovarășilor</h2><div class="mute">Previzualizează întâlnirile fără să schimbi echipa sau progresul. Apar automat numai la eroii noi.</div><div class="row" style="flex-wrap:wrap;justify-content:flex-start"><button class="p" onclick="stPrologPreview()">Prolog · Ultima scânteie</button><button class="p" onclick="jePreview()">📜 Drumul Eroului (nou)</button><button onclick="sqPreview()">Misiunile anterioare</button>${MR.order.map(([c]) => `<button onclick="mrStoryPreview('${c}')">${c}</button>`).join('')}</div></section>`
       : '') + mrBld('b');
 }
@@ -250,6 +267,10 @@ function mrRes() { return `<section><h2>La ce folosește fiecare resursă</h2><d
   if (typeof document === 'undefined' || !document.head) return;
   const st = document.createElement('style');
   st.textContent = `
+.mr-story-archive{margin-top:10px}
+.mr-story-archive summary{cursor:pointer;color:var(--gold2);font-weight:700;padding:4px 0}
+.mr-story-links{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+.mr-story-links button{font-size:12px;padding:6px 10px}
 #mr-m{position:fixed;inset:0;z-index:25000;display:flex;align-items:center;justify-content:center;padding:16px;background:#05070acc;backdrop-filter:blur(3px)}
 .mr-c{width:min(420px,100%);max-height:calc(100vh - 32px);overflow-y:auto;box-sizing:border-box;padding:18px 20px 16px;text-align:center;border-radius:14px;border:1px solid var(--gold);background:radial-gradient(ellipse at 50% 0,#2a3236,#101416 70%);box-shadow:0 20px 60px #000e;animation:mrIn .35s ease-out}
 .mr-k{font:700 12px Cinzel,serif;letter-spacing:.1em;text-transform:uppercase;color:var(--gold2)}
