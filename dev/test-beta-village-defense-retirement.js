@@ -12,7 +12,7 @@ const betaWeapon=stGearStats(oldWeapon,'beta');
 assert.equal(betaWeapon.def,2,'legacy 8% defense becomes +2 combat defense in BETA');
 assert(!('vd' in betaWeapon),'BETA combat stats no longer contain retired modifier');
 assert.equal(JSON.stringify(oldWeapon),saved,'old items are never migrated or edited');
-assert.equal(stGearStats(oldWeapon,'live'),oldWeapon,'LIVE unchanged');
+assert.equal(stGearStats(oldWeapon,'live'),oldWeapon.s,'LIVE original stats remain unchanged');
 const armor={t:'a',s:{hp:10,def:5,vd:4}};
 const stats=stGearStats(armor,'beta');
 assert.equal(stats.hp,14,'existing BETA armor HP scaling is retained');
