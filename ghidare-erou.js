@@ -37,12 +37,18 @@ function jeGuidePlan(){
   return {selector:'.mr-hc.offer button[onclick="mrRecruit(\''+c+'\')"]',name:'Primește '+c};
  }
  if(tab==='a'&&v==='a'){
+  if(typeof jeStarterForgeHint==='function'&&jeStarterForgeHint().includes('je-first-prepare'))
+    return {selector:'.je-first-prepare',name:'Selectează arma eroului'};
+  if(typeof jeStarterWeaponList==='function'&&step.id==='otel'&&jeStarterWeaponList().some(x=>x.good))
+    return {selector:'.je-first-forge button',name:'Mergi la Echipă pentru arma găsită'};
   const ready=(S.forge||[]).some(x=>x&&x.end<=Date.now());
   if(ready)return {selector:'.fslot.rdy button[onclick^="collect("], .fgrid-all',name:'Ridică obiectul forjat'};
   const free=(S.forge||[]).some(x=>!x);
   return free?{selector:'button[onclick="craft()"]',name:'Forjează un obiect'}:null;
  }
  if(tab==='e'){
+  if(typeof jeStarterStep==='function'&&jeStarterStep())
+    return {selector:'.je-first-equip, .je-first-forge-go',name:'Echipează prima armă'};
   const i=(S.inv||[]).findIndex(x=>x&&x.t==='w');
   if(i>=0){
    const sel='button[onclick="equip('+i+')"]';
