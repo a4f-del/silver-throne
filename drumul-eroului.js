@@ -31,8 +31,8 @@ const JE_STEPS = [
   action:()=>['Misiuni','a','x']},
  {id:'hotar',title:'Dincolo de palisadă',icon:'🧭',
   say:'„Regatul nu se reconstruiește doar din ce găsim sub pământ.”',
-  help:'Deschide Hartă → Lumea și încearcă primul raid când te simți pregătit. Dacă nu poți încă, poți continua să crești în nivel.',
-  reward:{g:80,o:20},parts:[['Ai jefuit primul sat',()=>jeCount('r')>=1]],
+  help:'Deschide Hartă → Lumea și descoperă satele altor jucători, prietenii și Tronul. Nu trebuie să jefuiești niciun sat.',
+  reward:{g:80,o:20},parts:[['Ai descoperit Lumea',()=>!!S.jeVisitedWorld||jeCount('r')>=1]],
   action:()=>['Hartă','m','l']}
 ];
 function jeEnabled(){
@@ -116,6 +116,10 @@ function jePanel(){
  </section>`;
 }
 function jeVisit(){
+ if(jeReady()&&S.tab==='m'&&S.mt!=='k'&&!S.jeVisitedWorld){
+  S.jeVisitedWorld=1; /* explorarea socială înlocuiește raidul obligatoriu */
+  if(typeof save==='function')save();
+ }
  if(jeReady()&&S.tab==='a'&&S.vil==='x'&&!S.jeVisitedMissions){
   S.jeVisitedMissions=1; /* un singur marker, fara reward implicit */
   if(typeof save==='function')save();
