@@ -27,7 +27,7 @@ Protecții: eroul nu se scoate, un erou căzut nu poate porni o formație, nu se
 - obiectele Epic sau mai rare;
 - obiectele blocate de jucător.
 
-Este necesară confirmarea pentru lot și în caz de anulare inventarul rămâne identic. Indicii echipării normale rămân cei din `S.inv` real, nu poziția din UI filtrat.
+Este necesară confirmarea pentru lot și în caz de anulare inventarul rămâne identic. **„Ridică tot” din Topitorie există deja** și este testat: colectează numai sloturile cu forjare finalizată, cel mult o dată. Indicii echipării normale rămân cei din `S.inv` real, nu poziția din UI filtrat.
 
 ## Siguranță și limitări
 Fără schimbări ale economiei, dropurilor, claselor, costurilor sau bazei de date. UI-ul formațiilor și al etichetelor este numai pentru BETA; LIVE rămâne neschimbat. Configurațiile sunt salvate pe personaj, nu sincronizate între conturi diferite.
