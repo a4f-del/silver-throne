@@ -48,6 +48,8 @@ const live=create({beta:false});
 const oldLive=live.api.mrNew('Paznic');
 assert.equal(oldLive.n,'Paznic');assert.equal(oldLive.nn,1,'LIVE flow unchanged');
 assert(story.includes('mrDefaultName(c)'),'Story announces preset name before join');
+assert(story.includes('mrs-more')&&story.includes('Citește povestea completă'),'Story text is optional for new players');
+assert(merc.includes('mrPresetEnabled()?mrStoryArchive()'),'New players get a replay archive, not the QA preview panel');
 assert(story.includes('mrRecruit(c);'),'Existing recruit path is reused');
 assert(journey.includes('Paznicul s-a alăturat'),'Onboarding recognizes already-named companion');
 assert(merc.includes('const free = !f.rnf'),'First renaming remains free in Cont');
