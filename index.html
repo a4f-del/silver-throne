@@ -203,6 +203,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="lupta-vs.js?v=2026.11.04-4"></script>
 <script src="fx.js?v=2026.11.04-4"></script>
 <script src="temnite.js?v=2026.11.04-4"></script>
+<script src="echipament-balance.js?v=2026.11.07-1"></script>
 <script src="trepte.js?v=2026.11.04-4"></script>
 <script src="turn.js?v=2026.11.04-4"></script>
 <script src="harta.js?v=2026.11.04-4"></script>
@@ -260,7 +261,7 @@ function sync(){const n=Date.now(),PX=PTX();if(S.bp>0&&S.pts<MXP()){const k=Math
 function spend(k){if(S.pts>=MXP())S.ptsT=Date.now();S.pts-=k}
 const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 const BL=()=>{const b=S.bl||(S.bl={f:0,i:0,b:0});if(b.d==null)b.d=0;if(b.z==null)b.z=0;return b},rp=c=>Math.round(c.p*Math.pow(.97,BL().b)),ST=()=>S.st||(S.st={f:0,r:0,a:0,p:0,n:0}),E=f=>f.eq||(f.eq={w:null,a:null}),roster=()=>[...S.fs,...S.rs,...(S.gd||[])],cur=()=>{const r=roster();return r[S.sel]||r[0]};
-function bon(f){const b={dmg:0,def:0,hp:0,bleed:0,crit:0,loot:0,heal:0,vd:0,pd:0,ph:0,pf:0};if(f){for(const k of SL){const it=E(f)[k];if(it)for(const x in b)b[x]+=it.s[x]||0}tBuf(b);const w=E(f).w,wt=WF[wfOf(w)];if(wt&&wt.c===f.c)b.dmg+=Math.round(w.s.dmg*.3)}   /* arma potrivită clasei: +30% din atacul ei */
+function bon(f){const b={dmg:0,def:0,hp:0,bleed:0,crit:0,loot:0,heal:0,vd:0,pd:0,ph:0,pf:0};if(f){for(const k of SL){const it=E(f)[k];if(it){const st=stGearStats(it,ST_SERVER);for(const x in b)b[x]+=st[x]||0}}tBuf(b);const w=E(f).w,wt=WF[wfOf(w)];if(wt&&wt.c===f.c)b.dmg+=Math.round(w.s.dmg*.3)}   /* arma potrivită clasei: +30% din atacul ei */
  /* apărarea mercenarului nu trece de 95% din a eroului */
  if(isM(f)){const h=heroOf();if(h){const hb=bon(h),hd=hb.def*(1+hb.pf/100)+tr(h,'def'),md=b.def*(1+b.pf/100)+tr(f,'def');if(md>MCAP*hd)b.def=Math.max(0,(MCAP*hd-tr(f,'def'))/(1+b.pf/100))}}return b}
 /* cicatricile: la ridicare, −3 / −3 / −2 / −2 / −1 viață după rang (eroul −2), cel mult 15% din viața de bază; se vindecă la Infirmerie */
@@ -308,7 +309,7 @@ function mkItem(t,l,r,pi,si,q,wf){const m=RAR[r].m*(1+.1*(q||0)),s={dmg:0,def:0,
   🏰 Apărarea satului: ${b.vd}
   </div>`;
 }
-function desc(it){const L={dmg:'atac',def:'apărare',hp:'viață',bleed:'% sângerare',crit:'% critic',loot:'% aur',heal:'% vindecare',vd:'% apărarea satului',pd:'% atac',ph:'% viață',pf:'% apărare'},o=[];for(const k in it.s)if(it.s[k])o.push('+'+it.s[k]+(k[0]=='d'||k=='hp'?' ':' ')+L[k]);return o.join(', ')}
+function desc(it){const L={dmg:'atac',def:'apărare',hp:'viață',bleed:'% sângerare',crit:'% critic',loot:'% aur',heal:'% vindecare',vd:'% apărarea satului',pd:'% atac',ph:'% viață',pf:'% apărare'},o=[];const stats=stGearStats(it,ST_SERVER);for(const k in stats)if(stats[k])o.push('+'+stats[k]+(k[0]=='d'||k=='hp'?' ':' ')+L[k]);return o.join(', ')}
 const iname=it=>`${iic(it)}<span class="${it.lg?'rl':'r'+(it.r+1)}">${it.name}</span> <span class="mute">(niv. ${it.l}, ${it.lg?'Legendar':RAR[it.r].n}${it.q?', '+QN[it.q]:''})</span>`;
 function chance(l,r,q){const d=l-S.lvl;let b=d>0?Math.max(10,40-5*(d-1)):d==0?55:70;const sk=25*(1-Math.pow(.97,ST().p)),cap=[75,70,65,55][r];return Math.max(5,Math.min(95,Math.min(cap,b-RAR[r].pen+sk)-(r?q||0:0)*6+S.pity*5))}
 const cost=(l,r)=>Math.round(RAR[r].cost*(1+l*.3));
@@ -667,7 +668,7 @@ const hpp=()=>{const t=S.fs.reduce((a,f)=>a+mhp(f),0);return S.fs.reduce((a,f)=>
 function bl(m){(S.bg||(S.bg=[])).unshift(m);S.bg.length=Math.min(6,S.bg.length)}
 function btog(k){const b=BT();b[k]=b[k]?0:1;go()}
 function bval(k,v){BT()[k]=k=='ft'?v:+v;go()}
-function bsc(it,f){const s=it.s,w={dmg:3,def:3,hp:1,heal:1,crit:2,bleed:1,pd:6,ph:6,pf:6,loot:.5,vd:0};if(f.c=='Vraci'){w.heal=6;w.dmg=2}if(f.c=='Paznic'){w.def=6;w.hp=2;w.pf=10;w.ph=8;w.dmg=1;w.pd=2}if(f.c=='Gardian')w.vd=4;let t=0;for(const k in w)t+=(s[k]||0)*w[k];return t}
+function bsc(it,f){const s=stGearStats(it,ST_SERVER),w={dmg:3,def:3,hp:1,heal:1,crit:2,bleed:1,pd:6,ph:6,pf:6,loot:.5,vd:0};if(f.c=='Vraci'){w.heal=6;w.dmg=2}if(f.c=='Paznic'){w.def=6;w.hp=2;w.pf=10;w.ph=8;w.dmg=1;w.pd=2}if(f.c=='Gardian')w.vd=4;let t=0;for(const k in w)t+=(s[k]||0)*w[k];return t}
 function bequip(){for(const f of[...S.fs,...(S.gd||[])])for(let i=0;i<S.inv.length;i++){const it=S.inv[i],c=E(f)[it.t];if(!c||bsc(it,f)>bsc(c,f)*1.02){const e=E(f);S.inv.splice(i,1);if(c)S.inv.push(c);e[it.t]=it;bl('Echipat '+it.name+' pe '+f.n);go();return 1}}return 0}
 function bheal(){const a=S.fs,d=a.findIndex(f=>f.hp<=0),rc=Math.round(15*S.lvl*Math.pow(.96,BL().i)),hc=Math.round(6*S.lvl*Math.pow(.96,BL().i));if(d>=0&&S.gold>=rc){revive(d);bl('Ridicat: '+a[d].n);return 1}if(a.some(f=>f.hp>0&&f.hp<mhp(f)*.9)&&S.gold>=hc){heal();bl('Vindecare echipă');return 1}return 0}
 function bcraft(){const b=BT();if(S.forge.findIndex(x=>!x)<0)return 0;const ts=b.ft=='all'?['w','a','h','b']:[b.ft],t=ts[(S.bn2=(S.bn2||0)+1)%ts.length],PL=t=='w'?PW:PA;let p=0,s=0;PL.forEach((x,i)=>{if(x.lv<=S.lvl&&have(x.m)>have(PL[p].m))p=i});SF.forEach((x,i)=>{if(x.lv<=S.lvl&&have(x.m)>have(SF[s].m))s=i});
