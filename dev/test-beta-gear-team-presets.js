@@ -105,6 +105,25 @@ function testBulk(kind,confirmed=true){
  }
 }
 testBulk('sell',false);testBulk('sell',true);testBulk('dis',true);
+/* Forge: existing "Ridică tot" collects only ready slots, once each. */
+const forgeSource=read('tema.js');
+const forgeCode=slice(forgeSource,'function collectAll()','/* ------------------------------------------------ VERIFICARE DE VERSIUNE');
+const slots={slots:4,forge:[
+ {end:900,label:'Gata 0'}, {end:850,label:'Gata 1'},
+ {end:1200,label:'În lucru'}, null
+]};
+const collected=[];
+const forge=new Function('S','Date','collect','fmt',forgeCode+';return {collectAll,forgeSlots};')(
+ slots,{now:()=>1000},i=>{collected.push(i);slots.forge[i]=null;},x=>String(x));
+const ready=forge.forgeSlots();
+assert(ready.includes('Ridică tot (2)'),'Two ready items show single claim button');
+forge.collectAll();
+assert.deepEqual(collected,[1,0],'Only ready slots collected, in descending order');
+assert(slots.forge[2]&&slots.forge[2].end===1200,'In-progress item not collected');
+forge.collectAll();
+assert.deepEqual(collected,[1,0],'Repeated claim cannot collect an item again');
+assert(!forge.forgeSlots().includes('Ridică tot ('),'No bulk claim when nothing ready');
+
 assert(html.includes('inventar.js?v=2026.11.08-1')&&html.includes('mercenari.js?v=2026.11.08-2')&&
  html.includes('echipa.js?v=2026.11.08-1'),'Scripts refreshed after this UI change');
 console.log('OK: class-specific weapons, 4 saved team presets, expedition protection, no combat mutations, safe bulk actions, LIVE isolated.');
