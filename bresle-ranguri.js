@@ -117,6 +117,17 @@ async function gsrSearch(){
  }finally{GSR.busy=false;guildPaint();}
 }
 async function gsrInvite(user_id){if(gsrCanInvite())await gsrAction('invite',{user_id});}
+function gsrProfileInviteButton(id){
+ if(!gsrCanInvite()||!id||String(id)===String(CONT.user.id))return '';
+ return '<button onclick="gsrInviteFromProfile('+JSON.stringify(String(id))+')">⚔ Invită în breaslă</button>';
+}
+async function gsrInviteFromProfile(id){
+ if(!gsrCanInvite())return;
+ await gsrAction('invite',{user_id:String(id)});
+ if(typeof lgClose==='function')lgClose();
+ if(typeof guildOpen==='function')guildOpen();
+}
+
 async function gsrRespond(invite_id,accept){await gsrAction(accept?'accept':'decline',{invite_id});}
 async function gsrCancel(invite_id){await gsrAction('cancel',{invite_id});}
 async function gsrChangeRole(user_id,role){
