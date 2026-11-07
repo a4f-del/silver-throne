@@ -48,7 +48,7 @@ const fighting={...ctx,dMk:()=>({one:1,di:0,dk:'0_0',room:0,doors:[],loot:{gold:
  setTimeout:()=>{},go:ctx.go,evs:()=>({k:3})};
 S.auto=false;
 run(startD,fighting,'startD(1)');
-assert.equal(S.d,undefined,'Cannot start another dungeon during current adventure');
+assert.equal(S.d==null,true,'Cannot start another dungeon during current adventure');
 run(startD,fighting,'startD(0)');
 assert.equal(S.d.di,0,'Current dungeon fight can start');
 assert.equal(f.active(),true,'Combat remains locked');
