@@ -62,7 +62,7 @@ function acDungeonPage(i) {
     '</div></div>'+acParty()+'</section>';
 }
 function acCombatPage(d) {
-  const f=d.f, title=d.tw?'Turnul · Etajul '+(d.room+1):d.raid!=null?(d.lbl||'Raid')+' · '+(d.rn||''):DG[d.di||0].n;
+  const f=d.f, title=d.tw?'Turnul · Etajul '+Math.max(1,d.room):d.raid!=null?(d.lbl||'Raid')+' · '+(d.rn||''):DG[d.di||0].n;
   const enemies=f?f.es.map((e,i)=>{
     const boss=!!e.b, selected=i===f.t, gone=e.hp<=0, src=acArtwork(e.n,boss,d),
       max=Math.max(1,e.mh),hp=Math.max(0,e.hp);
