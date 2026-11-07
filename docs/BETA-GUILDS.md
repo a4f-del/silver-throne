@@ -64,3 +64,26 @@ node dev/test-beta-guild-boss-replay.js
 ```
 
 Dupa instalarea SQL, testeaza manual cu doua conturi de administrator BETA: creare, cod de invitatie, aderare, raport de victorie Temnita/Turn, boss de 2 ori intr-o zi, revendicare, parasire cu transfer de conducere, resetul de luni. Testele locale nu pot inlocui acest smoke test pe server.
+
+
+## Actualizare: ranguri si invitatii directe (migrarea 15)
+
+Dupa instalarea sistemului existent de bresle din `14-beta-guilds.sql`, aplica **`supabase/15-beta-guild-ranks-invites.sql`** in **Supabase Silver-Throne-Test → SQL Editor**. Nu rula scriptul in LIVE. Migrarea nu sterge membri, progres, puncte, premii sau bresle deja create; membrii vechi raman `member`, iar conducatorii raman `leader`.
+
+**Patru ranguri:**
+- **Conducator (leader):** gestioneaza rangurile, invita jucatori, elimina membri si poate preda conducerea. La predare devine ofiter.
+- **Ofiter (officer):** invita jucatori, anuleaza invitatiile trimise de el si poate elimina doar membri obisnuiti; nu poate modifica rangurile.
+- **Veteran (veteran):** rang de recunoastere, fara permisiuni de administrare.
+- **Membru (member):** participa la contract, boss si recompense, fara permisiuni de administrare.
+
+**Invitatii:**
+- In fereastra **Bresle → Invita jucatori**, conducatorul/ofiterul cauta un jucator dupa numele din Lume (minimum doua caractere) si apasa **Invita**. Aceeasi actiune este disponibila din **Lume → Profilul jucatorului → Invita in breasla**.
+- Cel invitat vede in **Bresle → Invitatii primite** optiunile **Accepta** si **Refuza**; apare si un indicator cu numarul de invitatii noi. Acceptarea nu este automata.
+- Invitatiile expira dupa **7 zile**. Maximum **12 invitatii expediate la fiecare 24 de ore** pentru fiecare conducator/ofiter. Jucatorii care sunt deja intr-o breasla nu pot fi invitati.
+- Invitatia se poate anula; ofiterii isi pot anula doar propriile invitatii, conducatorul poate anula toate invitatiile breslei.
+- La acceptare, serverul verifica din nou daca bresla mai are locuri (20 membri), iar celelalte invitatii ale jucatorului sunt refuzate automat.
+- Cautarea expune doar numele si nivelul din profilul public al Lumii, nu adresele de email ale conturilor.
+
+**Securitate:** `guild_social_api` este un RPC separat care verifica `auth.uid()`, `is_beta_admin()`, apartenenta reala la breasla, rolul si drepturile pentru fiecare actiune. `guild_invitations` are RLS si nu este accesibila direct conturilor autentificate. Actualizarea nu schimba regulile bossului sau ale contractului si nu necesita restartarea breslelor.
+
+**Teste:** `node dev/test-beta-guild-ranks-invites.js`; dupa executarea SQL verifica manual cu minim doua conturi BETA invitare → acceptare/refuz, promovare, limitari ofiter, predare conducere, eliminare si invitare din profilul Lumii.
