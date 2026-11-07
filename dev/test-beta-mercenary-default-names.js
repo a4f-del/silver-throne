@@ -52,7 +52,7 @@ assert(story.includes('mrs-more')&&story.includes('Citește povestea completă')
 assert(merc.includes('mrPresetEnabled()?mrStoryArchive()'),'New players get a replay archive, not the QA preview panel');
 assert(story.includes('mrRecruit(c);'),'Existing recruit path is reused');
 assert(journey.includes('Paznicul s-a alăturat'),'Onboarding recognizes already-named companion');
-assert(merc.includes('const free = !f.rnf'),'First renaming remains free in Cont');
+assert(merc.includes('free = !f.rnf'),'First renaming remains free in Cont');
 assert(fs.readFileSync(path.join(root,'erou.js'),'utf8').includes('S.mrPresetV = 1'),'Only newly created BETA heroes opt in');
 /* Runtime: the story is short, can be expanded, cannot open over combat,
    and replay is read-only. No browser or Supabase required. */
