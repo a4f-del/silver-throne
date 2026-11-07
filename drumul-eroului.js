@@ -9,14 +9,14 @@ const JE_STEPS = [
   action:()=>!jeHas('Paznic')?['Han','a','h']:['Mina Cenușie','c','']},
  {id:'urme',title:'Urmele din cenușă',icon:'🏹',
   say:'„Nu ne putem apăra doar cu săgeți. Aprindeți forja!” — Arcașul',
-  help:'La întoarcerea din mină, vizitează pagina principală a Satului pentru întâlnirea cu Arcașul. După ce îi alegi numele, intră în Topitorie și fă prima forjare.',
+  help:'La întoarcerea din mină, vizitează Satul pentru întâlnirea cu Arcașul. După ce îi alegi numele, mergi la Topitorie: pentru următorul jurământ, forjează o armă (Tip: Armă, Sabie pentru Campion).',
   reward:{g:30,o:25},parts:[['Arcașul s-a alăturat',()=>jeHas('Arcaș')],['Ai făcut prima forjare',()=>jeCount('f')>=1]],
   action:()=>!jeHas('Arcaș')
    ? ((S.mrStorySeen||[]).includes('Arcaș') ? ['Han','a','h'] : ['Sat','a',''])
    : ['Topitorie','a','a']},
  {id:'otel',title:'Oțel pentru cei rămași',icon:'⚒️',
   say:'„O armă uitată în rucsac nu apără pe nimeni.” — Paznicul',
-  help:'Ridică obiectul forjat din Topitorie dacă nu a fost ridicat, apoi mergi în Echipă și echipează o armă. Dacă forjarea a eșuat, încearcă din nou.',
+  help:'Ridică arma forjată din Topitorie, apoi mergi în Echipă. Deasupra echipamentului vei găsi un buton „Pune pe Erou” pentru o armă potrivită din rucsac. Dacă nu ai o armă, forjează o Sabie pentru Campion.',
   reward:{g:30,o:5},parts:[['Ai echipat prima armă',()=>jeCount('e')>=1]],
   action:()=>jeHasWeapon()?['Echipă','e','']:['Topitorie','a','a']},
  {id:'han',title:'Jurământul veteranului',icon:'⚔️',
@@ -106,6 +106,7 @@ function jePanel(){
  return `<section class="je-card" aria-label="Drumul Eroului, obiectiv curent">
    <div class="je-caption">✦ DRUMUL EROULUI · ${done+1}/${JE_STEPS.length}</div>
    <div class="je-title"><span>${s.icon}</span><h2>${s.title}</h2></div>
+   ${typeof jeFirstLootPanel==='function'?jeFirstLootPanel():''}
    <div class="je-tasks">${parts}</div>
    <div class="je-progress"><i style="width:${Math.round(100*p.n/p.total)}%"></i></div>
    <div class="je-bottom"><span class="je-reward">Recompensă: ${reward}</span>
