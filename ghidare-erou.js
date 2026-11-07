@@ -98,7 +98,10 @@ function jeGuideDecorate(){
  let target=[...document.querySelectorAll(plan.selector)].find(el=>!el.disabled);
  if(!target&&plan.selector==='.ac-side .ac-primary'){
   // Dacă jucătorul a inspectat alt card, indicăm monstrul care urmează.
-  target=document.querySelector('.ac-step.ac-current');
+  // Dacă se uită la un portret trecut/viitor, indică butonul care readuce
+  // direct la lupta posibilă, nu doar cardul din bandă.
+  target=document.querySelector('.ac-return-current')||
+    document.querySelector('.ac-step.ac-current');
  }
  if(!target)return;
  JE_GUIDE.target=target;JE_GUIDE.arrow=jeGuideArrow();
