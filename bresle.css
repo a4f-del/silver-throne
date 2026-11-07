@@ -1,0 +1,25 @@
+/* Silver Throne BETA — fereastră Bresle; niciun efect în LIVE fără markup. */
+.guild-head{display:inline-flex;align-items:center;gap:4px;border:1px solid #705b37;border-radius:8px;padding:5px 9px;background:#171d21;color:#f0d27a;font:700 12px Cinzel,Georgia,serif}
+#guild-overlay{position:fixed;inset:0;z-index:23000;padding:16px;display:grid;place-items:center;background:#030608dc}
+.guild-dialog{width:min(720px,100%);max-height:90dvh;overflow:auto;border:1px solid #a5824c;border-radius:14px;background:#141b20;box-shadow:0 20px 70px #000e;padding:14px 18px;color:#e3ddd1}
+.guild-top{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #705b37;margin-bottom:12px}
+.guild-top h2,.guild-dialog h3{font:700 17px Cinzel,Georgia,serif;color:#f0d27a;margin:12px 0 8px}.guild-top button{min-height:32px}
+.guild-dialog p{font-size:13px;line-height:1.45}.guild-dialog .mute{color:#abb1b2}
+.guild-fields,.guild-boss-actions,.guild-bottom{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.guild-fields label{display:flex;flex-direction:column;gap:4px;flex:1;min-width:140px;font-size:13px}
+.guild-fields input{width:100%;padding:8px;border:1px solid #716144;border-radius:7px;background:#0d1115;color:#eee}
+.guild-identity{border:1px solid #705b37;border-radius:10px;padding:12px;background:#1d2326}
+.guild-identity h3{margin:0 0 7px}.guild-identity p{margin:4px 0}.guild-identity code{color:#ffe19d;font-weight:700;letter-spacing:.1em}
+.guild-message{color:#d3b979;min-height:16px}.guild-discover,.guild-members{display:grid;gap:6px}
+.guild-discover>div,.guild-members>div{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px;background:#0b1115;border:1px solid #334049;border-radius:8px}
+.guild-discover small,.guild-members small{color:#a5abae;font-size:12px}
+.guild-objective{margin:11px 0}.guild-objective>div:first-child{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px}.guild-objective b{color:#f0d27a}
+.guild-meter{height:11px;border:1px solid #775e3f;border-radius:9px;overflow:hidden;margin-top:5px;background:#242022}
+.guild-meter>i{display:block;height:100%;background:linear-gradient(90deg,#81642d,#f0d27a);transition:width .3s}
+.guild-tier-list{display:flex;gap:8px;flex-wrap:wrap}.guild-tier{flex:1;min-width:140px;display:flex;flex-direction:column;gap:7px;padding:9px;border:1px solid #655341;background:#14191c;border-radius:9px}
+.guild-tier b{color:#e3c990}.guild-tier small{font-size:11px;color:#adb1b2}.guild-tier button{margin-top:auto}
+.guild-boss{border:1px solid #864c3e;border-radius:11px;padding:12px;background:linear-gradient(#2c1d1c,#161b20)}
+.guild-boss-head{display:flex;justify-content:space-between;gap:8px;color:#f0cfbd;font-size:14px}
+.guild-bottom{justify-content:space-between;margin-top:14px;padding-top:10px;border-top:1px solid #3e484c}
+body.st-adventure .guild-head{display:none!important}
+@media(max-width:530px){#guild-overlay{padding:6px}.guild-dialog{padding:10px;max-height:96dvh}.guild-tier{min-width:calc(50% - 8px)}.guild-head span{display:none}}
