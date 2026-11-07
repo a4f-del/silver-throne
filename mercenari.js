@@ -8,7 +8,7 @@
    ========================================================================== */
 const MR = {
   /* ordinea și la ce se deblochează fiecare: null = de la început; text = pasul din ghid; funcție = condiție proprie.
-     Paznic și Arcaș se alătură automat (fac parte din prezentarea inițială); Războinic, Vraci și Mag devin mai întâi
+     Pe LIVE si salvari BETA vechi, Paznic/Arcas vin automat; eroii noi BETA primesc scene. Războinic, Vraci și Mag devin mai întâi
      o OFERTĂ discretă la Han (toast + indicator pe clădire), cu portret și statistici, recrutabilă oricând, gratuit. */
   order: [['Paznic', null], ['Arcaș', null], ['Războinic', 'Hanul'], ['Vraci', () => C('bs') >= 1], ['Mag', () => S.lvl >= 5]],
   hint: { 'Războinic': 'Se alătură la pasul „Hanul” din ghid.', 'Vraci': 'Se alătură după ce termini prima temniță cu căpitan.', 'Mag': 'Se alătură la nivelul 5, când se deschide Lumea.' },
@@ -26,7 +26,14 @@ function mrDue(step) {
 }
 /* statisticile aproximative ale unui mercenar neîncă recrutat, pentru cartea de ofertă */
 function mrPreview(c) { const cand = { c, rk: 0, eq: {}, t: [] }; return { hp: Math.round(mhp(cand)), atk: Math.round(atkOf(cand)) }; }
-function mrRecruit(c) { const i = (S.mrOff || []).indexOf(c); if (i < 0) return go(); S.mrOff.splice(i, 1); mrNew(c); go(); }
+function mrRecruit(c) {
+  const i = (S.mrOff || []).indexOf(c);
+  if (i < 0 || mrHas(c)) return go();
+  if (typeof mrStoryEnabled === 'function' && mrStoryEnabled() && !mrStorySeen(c)) {
+    mrStoryShow(c, false); return;
+  }
+  S.mrOff.splice(i, 1); mrNew(c); go();
+}
 function mrNew(c) {
   const f = { n: c, c, hp: 0, sc: 0, t: [], rk: 0, fm: 0, nn: 1, eq: { w: null, a: null } };
   f.hp = mhp(f); f.t = [P(TR)]; (S.fs.length < TMAX() && !S.d ? S.fs : S.rs).push(f); return f;
@@ -34,11 +41,21 @@ function mrNew(c) {
 /* la fiecare desenare: se alătură cine a ajuns la pasul lui */
 function mrTick() {
   if (!S || S.mrv !== 2) return;
+  /* Eroul BETA nou isi alege mai intai numele. Fara aceasta verificare,
+     Paznicul si Arcasul ar fi creati inaintea prologului. */
+  if (typeof mrStoryIsBeta === 'function' && mrStoryIsBeta()
+    && !S.hc && !S.mrStoryV && S.lvl === 1 && !S.xp && !C('d')) return;
+  const story = typeof mrStoryEnabled === 'function' && mrStoryEnabled();
   for (const [c, st] of MR.order) {
-    if (mrHas(c) || (S.mrOff || []).includes(c) || !mrDue(st)) continue;
-    if (st == null) { mrNew(c); continue; }   /* Paznic/Arcaș: se alătură direct, ca parte din prezentarea inițială */
-    (S.mrOff = S.mrOff || []).push(c);          /* Războinic/Vraci/Mag: ofertă discretă la Han, nu o fereastră forțată */
-    if (!(S.mrSeen = S.mrSeen || []).includes(c)) { S.mrSeen.push(c); S.msg = (S.msg ? S.msg + ' ' : '') + `Un nou mercenar e disponibil la Han: ${c}.`; }
+    if (mrHas(c) || (S.mrOff || []).includes(c) || !(story ? mrStoryDue(c) : mrDue(st))) continue;
+    if (st == null && !story) { mrNew(c); continue; } /* LIVE si salvari vechi: neschimbate */
+    (S.mrOff = S.mrOff || []).push(c);
+    if (!(S.mrSeen = S.mrSeen || []).includes(c)) {
+      S.mrSeen.push(c);
+      S.msg = (S.msg ? S.msg + ' ' : '') + (story
+        ? `O nouă întâlnire te așteaptă: ${c}. Dacă o amâni, oferta rămâne la Han.`
+        : `Un nou mercenar e disponibil la Han: ${c}.`);
+    }
   }
   mrAll().forEach(f => { if (!f.h && !(f.t && f.t.length)) f.t = [P(TR)]; });   /* trăsătura fiecărui mercenar (și pentru cei existenți) */
   if (S.lvl >= 30 && !S.t4) { S.t4 = 1; S.msg = (S.msg ? S.msg + ' ' : '') + 'Al 4-lea loc în echipă s-a deschis: alege încă un luptător din Han.'; }
@@ -79,7 +96,12 @@ function mrPost() {
     mrTick();
     const fs = mrAll().filter(x => x.nn), old = document.getElementById('mr-m');
     const gate = document.getElementById('gate'), busy = (gate && !gate.classList.contains('g-out')) || document.querySelector('.hc');
-    if (!fs.length || busy) { if (old && !fs.length) old.remove(); if (fs.length && busy && !MR.wait) { MR.wait = 1; setTimeout(() => { MR.wait = 0; mrPost(); }, 500); } return; }   /* ecranul eroului e încă deschis: încearcă din nou */
+    if (!fs.length) {
+      if (old) old.remove();
+      if (typeof mrStoryPost === 'function') mrStoryPost();
+      return;
+    }
+    if (busy) { if (!MR.wait) { MR.wait = 1; setTimeout(() => { MR.wait = 0; mrPost(); }, 500); } return; }
     const key = fs.map(f => f.c).join(',') + (S.giftL ? '+g' : '');
     if (old && old.dataset.c === key) return;
     if (old) old.remove();
@@ -191,17 +213,20 @@ function mrHan() {
     const f = mrAll().find(x => !x.h && x.c === c);
     if (!f && (S.mrOff || []).includes(c)) {
       const pv = mrPreview(c), role = typeof roleOf === 'function' ? roleOf({ c }) : '';
-      return `<div class="mr-hc offer"><div class="mr-hp">${av({ c, n: c }, 56)}<b class="nb">✦</b></div><div><b>${c}</b>${role ? ` <span class="mute">· ${role}</span>` : ''}<div class="mute">${MR.rol[c]}</div><div class="mute">~${pv.hp} viață · ~${pv.atk} atac</div><button class="p" onclick="mrRecruit('${c}')">Recrutează · gratuit</button></div></div>`;
+      return `<div class="mr-hc offer"><div class="mr-hp">${av({ c, n: c }, 56)}<b class="nb">✦</b></div><div><b>${c}</b>${role ? ` <span class="mute">· ${role}</span>` : ''}<div class="mute">${MR.rol[c]}</div><div class="mute">~${pv.hp} viață · ~${pv.atk} atac</div><button class="p" onclick="mrRecruit('${c}')">Recrutează · gratuit</button>${typeof mrStoryEnabled === 'function' && mrStoryEnabled() ? ` <button onclick="mrStoryShow('${c}',false)">📜 Povestea</button>` : ''}</div></div>`;
     }
-    if (!f) return `<div class="mr-hc lock"><div class="mr-hp">${av({ c, n: c }, 56)}<b>🔒</b></div><div><b>${c}</b><div class="mute">${MR.rol[c]}</div><div class="mute">${MR.hint[c] || ''}</div></div></div>`;
+    if (!f) return `<div class="mr-hc lock"><div class="mr-hp">${av({ c, n: c }, 56)}<b>🔒</b></div><div><b>${c}</b><div class="mute">${MR.rol[c]}</div><div class="mute">${typeof mrStoryEnabled === 'function' && mrStoryEnabled() ? MR_STORY[c].clue : MR.hint[c] || ''}</div></div></div>`;
     const i = S.fs.indexOf(f), j = S.rs.indexOf(f), n = nx(f), p0 = SP.RKF[f.rk || 0] || 0, pc = n ? Math.min(100, Math.round((fm(f) - p0) / (n - p0) * 100)) : 100;
     const spn = f.sp && typeof spDef0 === 'function' && spDef0(f) ? spDef0(f).n : (f.rk ? 'alege specializarea în Echipă' : 'specializare de la Veteran');
     return `<div class="mr-hc"><div class="mr-hp">${av(f, 56)}</div><div class="mr-hb"><b>${tEsc(f.n)}</b> <span class="mute">${f.c} · ${RK[f.rk || 0]}</span><div class="mute">${spn}</div>`
-      + `<div class="mr-fm"><i style="width:${pc}%"></i></div><div class="mute">${f.t && f.t[0] ? `<b>${f.t[0].n}</b> (${f.t[0].d}) · ` : ''}${n ? `faimă ${fm(f)}/${n} până la ${RK[(f.rk || 0) + 1]}` : 'rang maxim: Legendă'} · ${Math.round(mhp(f))} viață · ${Math.round(atkOf(f))} atac</div>${typeof mxRow === 'function' ? mxRow(f) : ''}</div>`
+      + `${typeof mrStoryEnabled === 'function' && mrStoryEnabled() ? '<div class="mute">📜 ' + tEsc(MR_STORY[c].place) + '</div>' : ''}<div class="mr-fm"><i style="width:${pc}%"></i></div><div class="mute">${f.t && f.t[0] ? `<b>${f.t[0].n}</b> (${f.t[0].d}) · ` : ''}${n ? `faimă ${fm(f)}/${n} până la ${RK[(f.rk || 0) + 1]}` : 'rang maxim: Legendă'} · ${Math.round(mhp(f))} viață · ${Math.round(atkOf(f))} atac</div>${typeof mxRow === 'function' ? mxRow(f) : ''}</div>`
       + `<div class="mr-hx">${i >= 0 ? (f.h ? '' : `<button onclick="toBench(${i})">La rezervă</button>`) : (mxBusy(f) ? '<button disabled>Plecat</button>' : teamCtl(f))}</div></div>`;
   }).join('');
   const bb = BL().b || 0;
-  return `<section><h2>Hanul: mercenarii tăi</h2><div class="mute">Cinci tovarăși, câte unul din fiecare clasă, care rămân cu tine pentru totdeauna. Trei intră în luptă alături de erou; ceilalți așteaptă în rezervă. Puterea lor vine din erou: un Recrut are cam 85% din forța de bază a eroului în specialitatea lui, o Legendă cam 98%, dar nimeni nu trece de 95% din viața, atacul sau apărarea eroului. Faima: +1 la fiecare luptă câștigată, +3 la căpitani și raiduri${bb ? `, plus ${bb * 5}% de la Han` : ''}. Cei din rezervă pot pleca în <b>expediții</b> de 1, 4 sau 8 ore, din care se întorc cu aur, materiale și faimă.</div><div class="mr-list">${cards}</div></section>` + mrBld('b');
+  return `<section><h2>Hanul: mercenarii tăi</h2><div class="mute">Cinci tovarăși, câte unul din fiecare clasă, care rămân cu tine pentru totdeauna. Trei intră în luptă alături de erou; ceilalți așteaptă în rezervă. Puterea lor vine din erou: un Recrut are cam 85% din forța de bază a eroului în specialitatea lui, o Legendă cam 98%, dar nimeni nu trece de 95% din viața, atacul sau apărarea eroului. Faima: +1 la fiecare luptă câștigată, +3 la căpitani și raiduri${bb ? `, plus ${bb * 5}% de la Han` : ''}. Cei din rezervă pot pleca în <b>expediții</b> de 1, 4 sau 8 ore, din care se întorc cu aur, materiale și faimă.</div><div class="mr-list">${cards}</div></section>`
+    + (typeof mrStoryIsBeta === 'function' && mrStoryIsBeta()
+      ? `<section><h2>🎬 BETA · Scenele tovarășilor</h2><div class="mute">Previzualizează întâlnirile fără să schimbi echipa sau progresul. Apar automat numai la eroii noi.</div><div class="row" style="flex-wrap:wrap;justify-content:flex-start">${MR.order.map(([c]) => `<button onclick="mrStoryPreview('${c}')">${c}</button>`).join('')}</div></section>`
+      : '') + mrBld('b');
 }
 function mrFlag() { return `<section><h2>Steagul satului</h2><div class="mute">Culoarea steagurilor de pe clădiri, din capitală și de pe teritorii. Doar de aspect.</div></section>` + (typeof flagRow === 'function' ? flagRow() : ''); }
 function mrRes() { return `<section><h2>La ce folosește fiecare resursă</h2><div class="mute"><b>Aur:</b> clădiri, antrenament, vindecare, taxe de cucerire și întreținerea teritoriilor.<br><b>Minereu:</b> baza oricărei forjări.<br><b>Materiale:</b> o resursă comună pentru forjare și consumabile din explorare.<br><b>Cristale:</b> raritatea obiectelor forjate.<br><b>Puncte:</b> ritmul temnițelor, raidurilor, taberelor și locurilor de interes.</div></section>`; }

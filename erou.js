@@ -144,6 +144,8 @@ function hcDone() {
   const n = String(HC.n || '').replace(/[<>"&]/g, '').trim().slice(0, 14), m = document.getElementById('hc-msg');
   if (HC.mode === 'new' && n.length < 2) { if (m) { m.className = 'g-msg err'; m.textContent = 'Numele trebuie să aibă cel puțin 2 litere.'; } return; }
   const h = hcHero(); if (HC.mode === 'new') h.n = n; h.g = HC.g; h.ic = HC.ic; const first = !S.hc; S.hc = 1;   /* „Schimbă aspectul” nu atinge numele */
+  /* Doar eroii NOI pe BETA primesc introducerile narative. Nu schimbam salvările existente. */
+  if (first && HC.mode === 'new' && typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta') S.mrStoryV = 1;
   if (HC.mode === 'new') { contHide(); if (first) S.msg = `Bun venit, ${n}! Satul te așteaptă.`; }
   else lgClose();
   go();
