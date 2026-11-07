@@ -596,6 +596,15 @@ function terPanel() {
 function terLegend() {
   return `<div class="st-lg"><span>🏛⛏✦🛒🗼 locuri de interes</span><span><i style="background:#d4564f"></i>tabere (cu timp limitat)</span><span><i style="background:${TCOL}"></i>teritoriile tale</span></div>`;
 }
+/* Filele Hartii: handlerul era referit de onclick, dar lipsea,
+   blocand accesul la Campanie (ReferenceError: mtab is not defined). */
+function mtab(k) {
+  if (k !== 'l' && k !== 'k') return;
+  S.mt = k;
+  S.tab = 'm';
+  S.msg = '';
+  go();
+}
 function terTabs() {
   const k = S.mt === 'k' ? 'k' : 'l', r = cmpReady();
   return `<div class="tabs">${[['l', 'Lumea'], ['k', 'Campanie' + (r ? ' ●' : '')]].map(([x, n]) => `<button${x == k ? ' class="p"' : ''} onclick="mtab('${x}')">${n}</button>`).join('')}</div>`;
