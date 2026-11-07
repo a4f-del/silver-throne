@@ -44,8 +44,8 @@ const GHID = [
   { t: 'Misiunile zilnice', p: { t: 'a', v: 'x' }, c: () => S.tab === 'a' && S.vil === 'x', r: { g: 30 }, k: () => ghB('claim'),
     d: 'În <b>Misiuni</b> primești în fiecare zi 3 sarcini cu recompense. Le termini jucând normal; revino aici să le revendici.<details><summary>Mai multe</summary>Pe măsură ce înaintezi, mai apar mercenari de recrutat la Han: un mesaj discret și un semn pe clădire te anunță.</details>' },
   { t: 'Jefuiește un sat', p: { t: 'm', m: 'l' }, c: () => C('r') >= 1, r: { g: 80, o: 20 },
-    k: () => { const r = ghB('raid('); return r.length ? r : ghQ('#v g[onclick^="mv("]'); },
-    d: 'Pe <b>Hartă</b>, în chenarul auriu, e <b>ținutul tău</b>: sate conduse de alții. Atinge unul și apasă <b>„Jefuiește”</b>.<details><summary>Mai multe</summary>Mai târziu le poți și cuceri, ca teritorii.</details>' },
+    k: () => { if (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta') return ghQ('#v g[onclick^="wnPick("]'); const r = ghB('raid('); return r.length ? r : ghQ('#v g[onclick^="mv("]'); },
+    d: (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta') ? 'În <b>Hartă → Lumea</b>, atinge un sat NPC comun și alege <b>„Jefuiește”</b>. Poți reveni la același sat după 4 ore.' : 'Pe <b>Hartă</b>, în chenarul auriu, e <b>ținutul tău</b>: sate conduse de alții. Atinge unul și apasă <b>„Jefuiește”</b>.<details><summary>Mai multe</summary>Mai târziu le poți și cuceri, ca teritorii.</details>' },
   { t: 'Când rămâi fără puncte', n: 1,
     d: 'Ai o <b>rezervă de 120 de puncte</b> (sus, lângă fulger) care îți umple bara când se golește. Când nu mai ai puncte, ai destule de făcut fără ele: forjă, antrenament, clădiri, misiuni. Apare în <b>Sat</b> lista <b>„Ce poți face acum”</b>.<details><summary>Mai multe</summary>Până la nivelul 10, fiecare nivel nou îți <b>adaugă</b> 30 de puncte. După aceea punctele se refac singure, câte unul la 6 minute. De la nivelul 5 se deschide <b>Lumea</b>, cu atacuri asupra altor jucători care nu costă puncte.</details>' },
   { t: 'Ești pregătit', e: 1,
@@ -78,11 +78,11 @@ function ghHints() {
   /* fiecare temniță nouă */
   DG.forEach((g, i) => { if (i > 0 && !g.ev && g.lv > 1) L.push({ k: 'dg' + i, when: () => S.lvl >= g.lv, p: { t: 'c' }, done: () => S.tab === 'c', t: 'Temniță nouă: ' + g.n,
     d: `La nivelul ${g.lv} s-a deschis <b>${g.n}</b>, în Coborâre: ${g.rooms} camere, căpitanul ${g.bn}${g.rm >= 2 ? ' și materiale mai rare' : ''}. Lupte mai grele, pradă mai bună.` }); });
-  L.push({ k: 'camp', when: () => S.lvl >= 2 && !!(S.ter && S.ter.camps && S.ter.camps.length), p: { t: 'm', m: 'l' }, done: () => S.tab === 'm' && (S.mt === 'h' || !S.mt ? 'l' : S.mt) === 'h', t: 'Tabere pe hartă',
+  if (typeof ST_SERVER === 'undefined' || ST_SERVER !== 'beta') L.push({ k: 'camp', when: () => S.lvl >= 2 && !!(S.ter && S.ter.camps && S.ter.camps.length), p: { t: 'm', m: 'l' }, done: () => S.tab === 'm' && (S.mt === 'h' || !S.mt ? 'l' : S.mt) === 'h', t: 'Tabere pe hartă',
     d: 'Pe <b>Hartă</b>, în Regiune, apar <b>tabere</b> de bandiți care pleacă după câteva ore. Au mai multe lupte la rând și un căpitan, iar prada e mai bună decât la un jaf. Le vezi și în panoul „Acum”, cu timpul rămas.' });
-  L.push({ k: 'conq', when: () => !!S.map && MPV().vs.some(v => v.o !== 'p' && (v.rw || 0) >= TP.conq.raids), p: { t: 'm', m: 'l' }, done: () => own() > 0, t: 'Poți cuceri un sat',
+  if (typeof ST_SERVER === 'undefined' || ST_SERVER !== 'beta') L.push({ k: 'conq', when: () => !!S.map && MPV().vs.some(v => v.o !== 'p' && (v.rw || 0) >= TP.conq.raids), p: { t: 'm', m: 'l' }, done: () => own() > 0, t: 'Poți cuceri un sat',
     d: `Ai jefuit un sat de ${TP.conq.raids} ori: acum îl poți <b>cuceri</b>. Pe Hartă, atinge-l și alege „Cucerește” (costă puncte și o taxă în aur). Un sat cucerit îți aduce bonusuri zilnice, dar are și o întreținere; le vezi la <b>Teritorii</b>.` });
-  L.push({ k: 'fort', when: () => S.lvl >= TP.fort.lv && own() >= 1, p: { t: 'm', m: 't' }, done: () => S.tab === 'm' && S.mt === 't', t: 'Cetatea regiunii',
+  if (typeof ST_SERVER === 'undefined' || ST_SERVER !== 'beta') L.push({ k: 'fort', when: () => S.lvl >= TP.fort.lv && own() >= 1, p: { t: 'm', m: 't' }, done: () => S.tab === 'm' && S.mt === 't', t: 'Cetatea regiunii',
     d: `De la nivelul ${TP.fort.lv}, cu cel puțin un sat cucerit, poți asedia <b>cetatea</b> regiunii. E cel mai greu obiectiv de pe hartă și dă cele mai mari bonusuri. Condițiile le vezi la <b>Teritorii</b>.` });
   L.push({ k: 'tron', when: () => S.lvl >= 10, p: { t: 'r' }, done: () => S.tab === 'r', t: 'Tronul de Argint',
     d: 'De la nivelul 10 poți lupta pentru <b>Tron</b>. Învingi fantoma regelui (sau Garda Regală, dacă Tronul e gol) și devii rege. Cine îl ține cel mai mult într-o săptămână primește titlul și materiale rare. Provocările sunt gratuite.' });
