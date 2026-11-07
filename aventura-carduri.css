@@ -242,3 +242,34 @@ body.st-adventure .ac-scene.ac-dungeon{
 @media(prefers-reduced-motion:reduce){
  .ac-dungeon .ac-step{transition:none}
 }
+
+/* BETA, primul căpitan: claritate fără un al doilea tutorial sau scroll.
+ * Acțiunea rămâne mereu vizibilă și după inspectarea unui monstru viitor. */
+.ac-dungeon .ac-progress-top{
+  display:flex;align-items:baseline;justify-content:space-between;
+  flex-wrap:wrap;gap:3px 12px;margin-bottom:4px;
+}
+.ac-dungeon .ac-progress-top b{
+  font:700 12px Cinzel,Georgia,serif;color:#e8cc92;
+}
+.ac-dungeon .ac-progress-top small{
+  font-size:11px;color:#dccaa7;
+}
+.ac-dungeon .ac-return-current{
+  width:100%;min-height:41px;margin:2px 0;
+  border:1px solid #b99956;background:#332817;color:#ffe1a1;
+  border-radius:9px;padding:7px 10px;
+  font:700 13px Cinzel,Georgia,serif;
+  white-space:normal;line-height:1.3;
+}
+.ac-dungeon .ac-return-current:hover,
+.ac-dungeon .ac-return-current:focus-visible{
+  background:#4b351e;outline:2px solid #f0d27a;outline-offset:2px;
+}
+.ac-dungeon .ac-step[aria-current="step"]{
+  border-color:#e0b866;
+}
+@media(max-width:700px){
+ .ac-dungeon .ac-progress-top small{font-size:10px}
+ .ac-dungeon .ac-return-current{min-height:36px;font-size:11px;padding:5px}
+}
