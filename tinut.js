@@ -54,10 +54,10 @@ LWA.defs += `<radialGradient id="tn-fg"><stop offset="0" stop-color="#0b1012" st
 
 /* ============================================================================
    Satele libere din Lume: aceleași pentru toți (poziția și nivelul se calculează din lista jucătorilor),
-   jefuite separat de fiecare: o dată la 4 ore pe sat, fără server (S.wn = {id: momentul jafului}).
+   jefuite separat de fiecare: o dată la o oră pe sat (S.wn local + cooldown server BETA).
    Nivelul unui sat = media celor mai apropiați 3 jucători, deci satele cresc odată cu Lumea.
    ========================================================================== */
-const WN = { cd: 4 * 3600e3, gap: 8,
+const WN = { cd: 1 * 3600e3, gap: 8,
   pre: ['Vadul', 'Moara', 'Valea', 'Dealul', 'Podul', 'Crângul', 'Piatra', 'Fântâna'],
   suf: ['Negru', 'Arsă', 'Rece', 'Seacă', 'Vechi', 'Mut', 'Alb', 'Tulbure'] };
 const wnHash = s => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
@@ -119,7 +119,7 @@ function wnPanel() {
   const v = S.wsel && wnList().find(x => x.id === S.wsel); if (!v) return '';
   const left = wnLeft(v), e = wnEff(v), gold = Math.round((60 + 30 * e) * 1.2), d = e - S.lvl;
   const risk = d >= 4 ? 'periculos' : d >= 1 ? 'greu' : d >= -3 ? 'potrivit' : 'ușor';
-  return `<section><h2>${v.n} · sat liber</h2><div class="mute">Un sat fără stăpân, vizibil tuturor jucătorilor. Fiecare îl poate jefui o dată la 4 ore. Prada și gărzile urmează nivelul tău.</div>`
+  return `<section><h2>${v.n} · sat liber</h2><div class="mute">Un sat fără stăpân, vizibil tuturor jucătorilor. Fiecare îl poate jefui o dată pe oră. Prada și gărzile urmează nivelul tău.</div>`
     + `<div class="row"><span>Pradă estimată: ~${gold} aur, minereu și experiență · pentru tine: <b>${risk}</b></span>`
     + (left ? `<span class="mute">Jefuit de tine; din nou în ${sdT(left)}</span>` : `<button class="p" onclick="wnRaid('${v.id}')">Jefuiește · 1 punct</button>`) + '</div></section>';
 }

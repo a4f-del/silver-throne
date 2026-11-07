@@ -7,7 +7,7 @@ La click/tap pe **satul altui jucător** din Hartă → Lumea apare un meniu com
 
 Pe **satul propriu**, meniul oferă **Profil**, fără buton de auto-atac.
 
-La click/tap pe **sat NPC comun** apare doar ⚔ **Jefuiește**, cu `wnRaid(v.id)` (regulile și RPC-urile NPC existente). Dacă există cooldown individual de 4 ore sau echipa e căzută / nu ai puncte, butonul e dezactivat și afișează explicația.
+La click/tap pe **sat NPC comun** apare doar ⚔ **Jefuiește**, cu `wnRaid(v.id)` (regulile și RPC-urile NPC existente). Dacă există cooldown individual de 1 oră sau echipa e căzută / nu ai puncte, butonul e dezactivat și afișează explicația.
 
 Meniul este ancorat lângă sat, în limita hărții, și se închide la Esc, click pe fundal, zoom sau selectarea aceluiași sat. Gesturile folosite deja la hartă rămân funcționale.
 
