@@ -49,6 +49,16 @@ const modal={classList:{contains:x=>x==='ac-fx-mode'},querySelector:x=>x.include
  assert(e.classList.list.includes('ac-dash'),'animația funcționează și la ripostă');
  assert(a.classList.list.includes('ac-impact'),'atacul adversarului atinge eroul');
 
+const offsetStart=fx.indexOf('function fxStartHp('),offsetEnd=fx.indexOf('function fxPlay(',offsetStart);
+assert(offsetStart>0&&offsetEnd>offsetStart,'fxStartHp funcționează separat de redare');
+const hpFunction=fx.slice(offsetStart,offsetEnd);
+const replay={q:[{fs:[{i:0,v:-30}],es:[{i:0,v:-60}]},{fs:[{i:0,v:+10}],es:[]}]};
+const hpCast={adventure:true,fs:[{hp:120,mh:120}],es:[{hp:150,mh:150}]};
+const replayHp=(server)=>new Function('ST_SERVER','FX','cast',hpFunction+';return fxStartHp(cast,2)')(server,replay,hpCast);
+assert.equal(replayHp('beta').fs[0],100,'BETA reia viața eroului după atacuri manuale');
+assert.equal(replayHp('beta').es[0],90,'BETA reia viața adversarului după atacuri manuale');
+assert.equal(replayHp('live').es[0],150,'redarea veche LIVE nu se schimbă');
+
 assert(css.includes('@keyframes acSlash'),'efectul slash există și pentru PvP');
 assert(css.includes('prefers-reduced-motion'),'animațiile respectă accesibilitatea');
 assert(fx.includes('const cardMode=!!cast.adventure'),'fereastra folosește motorul FX, nu alte daune');
