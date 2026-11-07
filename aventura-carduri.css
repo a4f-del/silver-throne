@@ -138,3 +138,14 @@ body.st-adventure .ac-scene{
  #fx-m.ac-fx-mode .fx-av.ac-dash,#fx-m.ac-fx-mode .fx-av.ac-impact,#fx-m.ac-fx-mode .fx-av.ac-impact::after{animation:none!important}
  .ac-step{transition:none}
 }
+
+/* BETA: selectorul de dificultate este parte a ecranului dedicat Temniței. */
+.ac-difficulty{margin:0 0 15px;padding:10px 13px;border:1px solid #78613d;border-radius:10px;background:#151c21}
+.ac-difficulty-head{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline}
+.ac-difficulty-head b{color:#f0d27a;font:700 14px Cinzel,Georgia,serif}
+.ac-difficulty-head small{color:#bcb3a4;font-size:12px}
+.ac-difficulty .tr-ch{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.ac-difficulty .tr-ch button{min-height:36px;padding:7px 15px;border-radius:8px;font:700 13px Cinzel,Georgia,serif}
+.ac-difficulty .tr-ch button.p{border-color:#f0d27a;box-shadow:0 0 0 1px #e4bb6d,0 0 12px #efc76544}
+.ac-difficulty .tr-ch button:disabled{opacity:.52;cursor:not-allowed}
+@media(max-width:440px){.ac-difficulty{padding:9px}.ac-difficulty .tr-ch button{flex:1;padding:7px 5px}}
