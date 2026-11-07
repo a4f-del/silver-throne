@@ -52,11 +52,25 @@ function trBand() { if (!trHas('Vraci')) return ''; S.fs.forEach(f => { if (f.hp
 /* dificultatea aleasă pentru temnița i (doar de la nivelul 12; Greu și Coșmar se deblochează prin căpitan) */
 function trUnl(i) { return Math.min(2, (S.dtr || {})[i] || 0); }
 function trTier(i) { const g = DG[i]; if (!g || g.ev || g.lv < TR_T.lv) return 0; return Math.min(trUnl(i), (S.dts || {})[i] || 0); }
-function trPick(i, t) { if(ST_SERVER==='beta'&&S.adventure)return; (S.dts = S.dts || {})[i] = Math.min(+t, trUnl(i)); go(); }
+function trPick(i, t) {
+  // BETA: dificultatea se alege in ecranul mare, inainte de prima lupta.
+  // Dupa prima lupta se pastreaza pana la retragere (progres separat per dificultate).
+  if(ST_SERVER==='beta' && (S.d || (S.adventure && S.adventure.tierLocked))) return;
+  const tier = Number(t);
+  if(!Number.isInteger(tier)||tier<0||tier>trUnl(i))return;
+  (S.dts = S.dts || {})[i] = tier;
+  // Previzualizarea monstrului selectat trebuie sa urmeze progresul noii dificultati.
+  if(ST_SERVER==='beta'&&S.adventure&&S.adventure.di===i){
+    const key=dKey(i,tier);
+    if(S.dsel) delete S.dsel[key];
+  }
+  go();
+}
 function trChips(i) {
   const g = DG[i]; if (!g || g.ev || g.lv < TR_T.lv) return '';
-  const u = trUnl(i), cur = trTier(i);
-  return `<div class="tr-ch">${TR_T.n.map((n, t) => `<button class="${t === cur ? 'p' : ''}" onclick="trPick(${i},${t})"${t > u ? ` disabled title="Bate căpitanul pe ${TR_T.n[t - 1]} ca s-o deblochezi"` : ''}>${t > u ? '🔒 ' : ''}${n}</button>`).join('')}</div>`;
+  const u=trUnl(i),cur=trTier(i);
+  const locked=ST_SERVER==='beta'&&S.adventure&&S.adventure.di===i&&S.adventure.tierLocked;
+  return `<div class="tr-ch">${TR_T.n.map((n,t) => `<button class="${t===cur?'p':''}" onclick="trPick(${i},${t})"${locked||t>u?` disabled title="${locked?'Retrage-te din temniță pentru a schimba dificultatea.':'Bate căpitanul pe '+TR_T.n[t-1]+' ca s-o deblochezi'}"`:''}>${t>u?'🔒 ':''}${n}</button>`).join('')}</div>`;
 }
 /* la începutul fiecărei lupte: numele monstrului pasului și abilitatea căpitanului */
 function trStart(es, d, b) {
