@@ -26,3 +26,5 @@ Pe **LIVE**, zona veche este păstrată temporar: acest PR introduce doar noul a
 
 ## Test regresie
 `node dev/test-beta-shared-world-no-private-fog.js`: stratul privat lipsește doar în BETA, LIVE rămâne neschimbat, salvarea nu este modificată, funcțiile NPC și cooldownul există.
+
+> Actualizare ulterioară: cooldownul satelor NPC comune a fost redus la **1 oră** în BETA; pentru instalarea existentă se rulează `supabase/13-beta-world-npc-cooldown-1h.sql`. Mențiunile de 4 ore de mai sus descriu implementarea originală.
