@@ -75,6 +75,7 @@ function mrStoryShow(c, preview) {
   if (!preview && (!mrStoryEnabled() || !(S.mrOff || []).includes(c) || mrHas(c))) return;
   mrStoryClose();
   const story = MR_STORY[c], m = document.createElement('div');
+  const named = !preview && typeof jeFocus==='function' && jeFocus() && typeof mrDefaultName==='function';
   MR_SCENE = { c, preview: !!preview };
   m.id = 'mr-scene'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
   m.setAttribute('aria-labelledby', 'mr-scene-title');
@@ -82,6 +83,7 @@ function mrStoryShow(c, preview) {
     <div class="mrs-top">✦ ${preview ? 'BETA · previzualizare' : 'Un nou tovarăș'} ✦</div>
     <div class="mrs-place">${tEsc(story.place)}</div>
     <div class="mrs-avatar">${av({ c, n: c }, 104)}</div>
+    ${named ? `<div class="mrs-name"><b>${tEsc(mrDefaultName(c))}</b> · ${tEsc(c)}</div>` : ''}
     <h2 id="mr-scene-title">${tEsc(story.title)}</h2>
     <p class="mrs-prose">${tEsc(story.prose)}</p>
     <blockquote class="mrs-quote">${tEsc(story.quote)}</blockquote>
@@ -100,7 +102,7 @@ function mrStoryJoin() {
   const c = MR_SCENE.c;
   if (!(S.mrOff || []).includes(c) || mrHas(c)) return mrStoryClose();
   mrStoryMark(c); mrStoryClose();
-  mrRecruit(c); /* aplică fluxul existent: oferă mercenarul și solicită numele */
+  mrRecruit(c); /* BETA nou: recrutare directă cu nume; fluxurile vechi păstrează numirea */
 }
 function mrStoryLater() {
   if (!MR_SCENE || MR_SCENE.preview || !mrStoryEnabled()) return;
@@ -144,6 +146,7 @@ function mrStoryPost() {
 .mrs-place{margin-top:7px;color:var(--mute);font-size:12px}
 .mrs-avatar{margin:15px auto 10px;display:flex;justify-content:center}
 .mrs-card h2{font:700 23px Cinzel,serif;color:var(--gold2);margin:8px 0 14px}
+.mrs-name{margin:0 0 6px;font-size:14px;color:var(--gold2)}.mrs-name b{font-size:16px}
 .mrs-prose{font-size:15px;line-height:1.7;color:var(--ink);margin:0 0 13px}
 .mrs-quote{border-left:2px solid var(--gold);margin:12px 0 19px;padding:9px 14px;color:var(--gold2);font-size:15px;line-height:1.6;text-align:left;font-style:italic;background:#ffffff09}
 .mrs-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
