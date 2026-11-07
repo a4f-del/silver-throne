@@ -46,7 +46,7 @@ function setup(server='beta',done=false) {
  };
  const document={head:null,querySelector:s=>els[s]||null};
  const go=()=>{calls++;lastHtml=api.vCamp();};
- const context={S,ST_SERVER:server,TW,document,
+ const context={S,ST_SERVER:server,TW,document,terOwnedV:()=>[],
   window:{matchMedia:()=>({matches:false})},setTimeout:(fn,ms)=>timers.push([fn,ms]),
   go};
  const api=new Function(...Object.keys(context),code+
