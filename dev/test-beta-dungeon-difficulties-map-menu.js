@@ -94,6 +94,9 @@ const H={left:50,top:80,width:620,height:430};
 const topVillage=placeFor(H,{left:180,top:182,width:75,height:45,bottom:227});
 assert(topVillage.below,'Village 102px from map top should open below if the menu is 118px tall');
 assert(topVillage.top>=8&&topVillage.bottom<=H.height-8,'Village menu stays inside map');
+assert.equal(topVillage.style.bottom,'auto','Popup must override legacy bottom:12px before top placement');
+assert.equal(topVillage.style.height,'auto','Popup must use content height rather than vertical stretching');
+assert.equal(topVillage.style.minHeight,'0','Popup must have no inherited min-height');
 const highNPC=placeFor(H,{left:220,top:90,width:50,height:44,bottom:134});
 assert(highNPC.below&&highNPC.top>=8,'NPC near upper edge opens below');
 const lowVillage=placeFor(H,{left:245,top:415,width:60,height:50,bottom:465});
@@ -107,6 +110,10 @@ const tiny=placeFor({left:0,top:0,width:240,height:160},
 assert(Number.parseFloat(tiny.style.maxHeight)>0,'Small map provides scrolling bound');
 assert(tiny.style.overflowY==='auto','Scrolling prevents clipping when map is small');
 assert(Number.parseFloat(tiny.style.width)<=228,'Quick action panel is slightly smaller');
+assert(quick.includes('.lw-quick-actions-panel.lwqa-map{position:absolute;bottom:auto;height:auto;min-height:0;'),
+ 'BETA styles reset the inherited bottom on the same element');
+assert(quick.includes('margin-top:0'), 'Remove legacy margin above the icon row');
+assert(quick.includes('flex-wrap:nowrap'), 'Keep three icons on one row');
 assert(quick.includes("kind === 'village'")&&quick.includes("kind === 'npc'"),
  'Same place function is used for players and NPC');
 assert(quick.includes("aria-label', 'Acțiuni: ' + title"),'Quick menu remains accessible');
