@@ -14,9 +14,12 @@ const FXQ = FX.q;   /* alias folosit din index.html, ca să nu depindă de ordin
 function fxCast() {
   FX.q.length = 0;
   const d = S.d, f = d && d.f; if (!f) return;
-  const esIcon = e => { if (e.b) { const b = typeof tmnBoss === 'function' ? tmnBoss(d.bn) : null; return b ? `imagini/monstri/${b[0]}.jpg` : null; } return typeof monImg === 'function' ? monImg(e.n) : null; };
+  const esIcon = e => { if (e.b) { const b = typeof tmnBoss === 'function' ? tmnBoss(d.bn) : null; if(b)return `imagini/monstri/${b[0]}.jpg`; if(d.tw&&ST_SERVER==='beta'&&typeof twMob==='function'&&typeof monImg==='function')return monImg(twMob(d.room)); return null; } return typeof monImg === 'function' ? monImg(e.n) : null; };
   /* viața REALĂ de la începutul acestei lupte (echipa poate intra deja rănită, fără vindecare între monștri) */
   FX.cast = {
+    adventure: typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&!!(d.one||d.tw||d.lume||d.tron),
+    pvp: typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&!!(d.lume||d.tron),
+    adventureTitle: d.lume?'Atac în Lume · '+(d.bn||'Satul adversarului'):d.tron?'Duel pentru Tron · '+(d.bn||'Apărarea Tronului'):d.tw?'Turnul · Etajul '+Math.max(1,d.room):(DG[d.di||0]||{}).n||'Temniță',
     fs: S.fs.map(x => ({ n: x.n, c: x.c, ic: x.ic, h: x.h, mh: mhp(x), hp: Math.max(0, x.hp) })),
     es: f.es.map(e => ({ n: e.n, c: e.c, ic: e.ic, b: e.b, mh: e.mh, hp: Math.max(0, e.hp), img: esIcon(e) })),
   };
@@ -30,12 +33,18 @@ function fxPush(pre, txt, actor) {
   const dEs = f.es.map((e, i) => e.hp - (pre.es[i] || 0)).map((v, i) => v ? { i, v, mh: f.es[i].mh } : null).filter(Boolean);
   if (!dFs.length && !dEs.length && !(txt && txt.trim())) return;
   if (FX.cast && f.es.length > FX.cast.es.length) for (let i = FX.cast.es.length; i < f.es.length; i++) FX.cast.es.push({ n: f.es[i].n, mh: f.es[i].mh, hp: f.es[i].mh, img: null });   /* ajutoare chemate în luptă, apărute după începutul redării */
-  FX.q.push({ fs: dFs, es: dEs, txt: txt || '', actor: actor ? (actor.h || !S.fs.includes(actor) ? { side: actor.h !== undefined && S.fs.includes(actor) ? 'fs' : (f.es.includes(actor) ? 'es' : null), i: S.fs.includes(actor) ? S.fs.indexOf(actor) : f.es.indexOf(actor) } : null) : null });
+  /* Același identificator de actor pentru erou, mercenari și fantome PvP.
+     În vechea expresie mercenarii fără actor.h pierdeau animația de atac. */
+  const fi=actor?S.fs.indexOf(actor):-1,ei=actor?f.es.indexOf(actor):-1;
+  const tagged=typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'
+    ? (fi>=0?{side:'fs',i:fi}:ei>=0?{side:'es',i:ei}:null)
+    : (actor ? (actor.h || !S.fs.includes(actor) ? { side: actor.h !== undefined && S.fs.includes(actor) ? 'fs' : (f.es.includes(actor) ? 'es' : null), i: S.fs.includes(actor) ? S.fs.indexOf(actor) : f.es.indexOf(actor) } : null) : null);
+  FX.q.push({ fs:dFs, es:dEs, txt:txt||'', actor:tagged });
 }
 /* pentru modul manual: marchează unde începe lovitura curentă, ca să redăm doar cadrele noi */
 let FX_MARK = 0, FX_FIRST = false;
 function fxBeforeStep() { FX_MARK = FX.q.length; FX_FIRST = typeof C === 'function' && C('w') === 0; }
-function fxPlayNew(cb) { const frames = FX.q.slice(FX_MARK); fxPlay(frames, cb, FX_FIRST); }
+function fxPlayNew(cb) { const frames = FX.q.slice(FX_MARK); fxPlay(frames, cb, FX_FIRST, FX_MARK); }
 /* folosit de startD (clic pe un monstru din listă): rulează lupta exact ca autoRun(), apoi o redă */
 function fxAutoRun() {
   if (!S.d || !S.d.f) return;
@@ -43,7 +52,7 @@ function fxAutoRun() {
   const q0 = FX.q.length, lg = S.d.f.log;
   for (let g = 0; g < 300 && S.d && S.d.f; g++) step(auto1());
   S.fl = lg.slice(-6);
-  fxPlay(FX.q.slice(q0), go, first);
+  fxPlay(FX.q.slice(q0), go, first, q0);
 }
 const fxWantPlay = first => first || !S.fxInstant;
 
@@ -51,9 +60,21 @@ const fxWantPlay = first => first || !S.fxInstant;
 /* Portrete mari, unul în spatele celuilalt (primul din față); bara de viață stă sub fiecare portret.
    Cel care atacă sau e lovit „vine în față” (se mărește și urcă deasupra celorlalți) pe durata loviturii. */
 const FX_OV = 0.38;   /* cât din portret acoperă vecinul din spate */
-function fxPlay(frames, cb, first) {
+function fxStartHp(cast, offset) {
+  const hp={fs:cast.fs.map(x=>x.hp),es:cast.es.map(x=>x.hp)};
+  /* Redări succesive în BETA: reconstruim HP din cadrele deja executate,
+     ca manual → automat să nu afișeze viața de la începutul luptei. */
+  if(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&cast.adventure&&offset>0){
+    for(const fr of FX.q.slice(0,offset)) for(const side of ['fs','es']) for(const d of fr[side]||[]){
+      if(hp[side][d.i]==null||!cast[side][d.i])continue;
+      hp[side][d.i]=Math.max(0,Math.min(cast[side][d.i].mh,hp[side][d.i]+d.v));
+    }
+  }
+  return hp;
+}
+function fxPlay(frames, cb, first, offset) {
   if (!frames || !frames.length || !fxWantPlay(first) || !FX.cast) { cb(); return; }
-  const cast = FX.cast, hp = { fs: cast.fs.map(x => x.hp), es: cast.es.map(x => x.hp) };   /* viața reală de la începutul luptei, salvată în fxCast() */
+  const cast = FX.cast, hp = fxStartHp(cast, offset || 0);
   FX.playing = true;
   const m = document.createElement('div'); m.id = 'fx-m'; m.setAttribute('role', 'status'); m.setAttribute('aria-live', 'polite');
   /* mărimea portretelor: cât încape pe lățime (ambele grămezi + „VS”), cu plafon pe înălțime */
@@ -64,7 +85,9 @@ function fxPlay(frames, cb, first) {
     const w = i === list.length - 1 ? FZ : Math.round(FZ * (1 - FX_OV));   /* coloana ultimului portret e întreagă, celelalte arată doar partea vizibilă */
     return `<div class="fx-r" data-s="${side}" data-i="${i}" style="width:${w}px;z-index:${20 - i}"><span class="fx-nm">${tEsc(x.n)}</span><span class="fx-av">${x.img ? `<img src="${x.img}" alt="">` : av({ n: x.n, c: x.c, ic: x.ic, h: x.h }, FZ)}</span><i class="fx-hp"><i style="width:${Math.round(hp[side][i] / x.mh * 100)}%"></i></i><small class="fx-t">${hp[side][i]}/${x.mh}</small></div>`;
   }).join('')}</div>`;
-  m.innerHTML = `<div class="fx-c"><div class="fx-row">${stack('fs', cast.fs)}<div class="fx-vs">VS</div>${stack('es', cast.es)}</div><div class="fx-log" id="fx-log"></div><button class="fx-skip" onclick="fxSkip()">Sari peste ›</button></div>`;
+  const cardMode=!!cast.adventure&&typeof acFxMarkup==='function';
+  if(cardMode)m.classList.add('ac-fx-mode');
+  m.innerHTML=cardMode?acFxMarkup(cast,hp):`<div class="fx-c"><div class="fx-row">${stack('fs', cast.fs)}<div class="fx-vs">VS</div>${stack('es', cast.es)}</div><div class="fx-log" id="fx-log"></div><button class="fx-skip" onclick="fxSkip()">Sari peste ›</button></div>`;
   document.body.appendChild(m);
   let n = 0, frontT = null;
   const finish = () => { FX.playing = false; clearTimeout(frontT); m.remove(); window.__fxSkip = null; cb(); };
@@ -78,6 +101,7 @@ function fxPlay(frames, cb, first) {
     let crit = /critic/i.test(fr.txt), ability = /sângerea|ameți|îngheață|arde|otrăv|cheamă|urlă|renaște|scut|vindec|leagă rănile|fulger/i.test(fr.txt);
     const act = fr.actor && fr.actor.side ? [[fr.actor.side, fr.actor.i]] : [];
     front([...act, ...['fs', 'es'].flatMap(sd => fr[sd].map(d => [sd, d.i]))], Math.max(350, FX.delay - 80));
+    if(cardMode&&typeof acFxAnimate==='function')acFxAnimate(m,fr);
     for (const side of ['fs', 'es']) for (const d of fr[side]) {
       hp[side][d.i] = Math.max(0, Math.min(cast[side][d.i].mh, hp[side][d.i] + d.v));
       const r = m.querySelector(`.fx-r[data-s="${side}"][data-i="${d.i}"]`); if (!r) continue;

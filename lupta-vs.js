@@ -49,6 +49,7 @@ function vsFlash() {
 /* cardul stă în pagina temniței, deasupra luptei, până treci în camera următoare sau ieși */
 function vsPost() {
   try {
+    if(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&S.d&&(S.d.one||S.d.tw)&&typeof acCombatPage==='function')return;
     const v = document.getElementById('v'), L = VS.last;
     if (!v || !L || S.tab !== 'c' || !S.d) return;
     const el = document.createElement('div'); el.className = 'vs-in ' + (L.big ? 'full' : 'mini') + (L.fresh ? ' anim' : ''); el.setAttribute('role', 'status');
