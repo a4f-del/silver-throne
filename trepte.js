@@ -206,7 +206,7 @@ function trPage(i) {
   if (sel === p) { const c = dCostAt(i); det += `<button class="p tr-fight${selBoss ? ' boss' : ''}" onclick="startD(${i})">${selBoss ? 'Înfruntă căpitanul' : 'Luptă'} · ${c ? c + ' p' : 'gratuit'}</button>`; }
   det += '</div>';
   return `<section class="dg-page"><div class="dg-page-top"><button class="tr-back" onclick="dToggle(${i})">‹ Înapoi</button><h2>${g.n}</h2>${typeof trChips === 'function' ? trChips(i) : ''}</div>`
-    + `<div class="tr-tabs">${tabs}</div>${det}`
+    + (typeof heroSoloControl==='function'?heroSoloControl():'') + `<div class="tr-tabs">${tabs}</div>${det}`
     + '</section>';
 }
 const trOddsTag = v => v == null ? '' : `<span class="tr-odds ${v >= 75 ? 'ok' : v >= 45 ? 'mid' : 'bad'}">Șanse: ${v}%</span>`;
