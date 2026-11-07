@@ -122,6 +122,7 @@ function contBoot(key, src) {
   contPush(); try { tronInit(); tronSync(); } catch (e) { /* Tronul se reîncearcă singur */ }
   try { lwSync(); } catch (e) { /* Lumea se reîncearcă singură */ }
   if (typeof admCheck === 'function') admCheck();   /* administrator? (admin.js) */
+  if (typeof guildStart === 'function') guildStart();   /* breasla comuna, doar BETA */
 }
 
 /* ---------------------------------------------------------------- ECRANUL */
