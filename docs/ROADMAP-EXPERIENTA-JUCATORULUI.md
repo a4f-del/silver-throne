@@ -1,0 +1,89 @@
+# Silver Throne — Roadmap de experiență (jucător nou → endgame)
+Data: 7 noiembrie 2026 · BETA / implementări incrementale.
+
+## Obiectiv
+Facem jocul mai clar, mai satisfăcător și mai ușor de întreținut, fără sisteme repetitive noi. Cele trei bucle principale rămân:
+**Temnițe = progres, Turn = provocare endgame, Lume/Tron = competiție/social.**
+Expedițiile mercenarilor sunt activități pasive, nu o a patra buclă obligatorie.
+
+## Reguli pentru fiecare pas
+- Ordinea de mai jos este prioritatea implicită. **Începem cu noul jucător**.
+- Un pas = un PR BETA mic, cu teste automate și checklist manual; se bifează numai după testarea în BETA și confirmare.
+- LIVE, salvările existente, progresul, inventarele și breslele nu se resetează sau modifică neintenționat.
+- Schimbările SQL sunt documentate separat; merge-ul GitHub nu execută migrări Supabase.
+- Nu adăugăm monede, clădiri, raiduri sau sisteme de farming înainte să fie clar că sunt necesare.
+- Dacă un pas depinde de altul, se implementează mai întâi prerechizitul de siguranță.
+- Statusuri: [ ] planificat; [x] verificat în joc și acceptat.
+
+## ETAPA A — PRIMELE 10–15 MINUTE (prioritatea maximă)
+
+- [ ] **01. Parcurs QA de jucător nou.** Test BETA cu erou nou autorizat: cont → creare erou → prolog → primul mercenar → prima Temniță → primul căpitan → pradă → echipare → următor obiectiv. Documentăm blocajele, clickurile inutile și erorile. Nu resetăm personajele existente.
+- [ ] **02. Un singur obiectiv vizibil.** Drumul Eroului este CTA principal; nu concurează cu ghidul vechi, misiuni, popup-uri, bannerul de ritm sau explicații care acoperă ecranul. Testăm pe desktop și mobil.
+- [ ] **03. Prima luptă și primul căpitan.** Prima experiență de Temniță trebuie să se înțeleagă intuitiv: cum alegi inamicul, cum ataci, când apare căpitanul, cum revii după victorie. Fără apăsări inutile de «Părăsește».
+- [ ] **04. Prima recompensă și prima armă.** Jucătorul vede ce a câștigat, o comparație simplă cu echipamentul actual și un buton clar «Echipează». Nu forțăm să învețe toate statisticile.
+- [ ] **05. Puncte fără blocaj prematur.** Testăm dacă primele 10–15 minute pot fi terminate fără așteptare de regenerare; dacă este nevoie, introducem un buget limitat de lupte/tutorial fără puncte, cu protecții anti-farm. Nu oferim o oră de farming gratuit.
+- [ ] **06. Poveste bine dozată.** Prologul și scenele mercenarilor au continuare clară, pot fi revăzute sau sărite, nu întrerup lupta și nu impun citirea mai multor ferestre.
+- [ ] **07. Sat progresiv și navigare simplă.** Pentru noii eroi, arătăm doar clădirile utile atunci; restul se dezvăluie natural. «Vezi toate clădirile» rămâne disponibil. Vindecarea se vede când ai un rănit.
+- [ ] **08. Următorul obiectiv după tutorial.** După primul căpitan și prima armă, un singur card indică următoarea temniță, pragul de nivel și ce îmbunătățire te-ar ajuta.
+- [ ] **09. Zilnice fără presiune.** Evidențiem trei obiective uzuale; celelalte rămân opționale. Nu condiționăm progresul de completarea unei liste administrative lungi.
+
+**Criteriu de ieșire etapa A:** un tester care nu cunoaște jocul poate descrie, fără explicații externe, ce trebuie să facă și de ce; finalizează o primă experiență de Temniță, primește/equipează o recompensă și cunoaște următorul obiectiv. Verificăm desktop + mobil.
+
+## ETAPA B — PROGRESIA NIVEL 8–30
+
+- [ ] **10. Repere de progres 5/8/15/20/30.** Fiecare deblocare importantă are un mesaj scurt: ce s-a deschis, unde, de ce contează; fără popup-uri în cascadă.
+- [ ] **11. «Pregătește-te pentru următorul căpitan».** Un card contextual arată ținta, șansa estimată și 1–2 acțiuni reale care ar putea ajuta (echipament, compoziție, vindecare). Nu promitem creșteri exacte de șanse fără simulare.
+- [ ] **12. Comparație de obiecte după clasă.** Etichetă sugestivă pentru erou/mercenar + comparație față de ce are echipat; statisticile detaliate rămân disponibile.
+- [ ] **13. Echipe salvate simplu.** Preseturi erou singur, erou +1/+2/+3 mercenari; respectăm limita de luptători și mercenarii plecați în expediții.
+- [ ] **14. Informații tactice pentru căpitani.** Arătăm abilitatea specială, clasa care îl contracarează și dacă este în echipă/rezervă direct pe ecranul mare al Temniței.
+- [ ] **15. Inventar și revendicări rapide.** Echipare directă, «Ridică toate» unde este sigur, sortare/filtrare și dezmembrare/vânzare în lot cu protecție pentru obiectele legendare și blocate.
+
+**Criteriu de ieșire etapa B:** un jucător de nivel 20 înțelege ce temniță să joace, cum să-și pregătească echipa și cum să folosească obiectele obținute, fără să navigheze inutil prin Sat.
+
+## ETAPA C — TEMNIȚE, TURN, ENDGAME
+
+- [ ] **16. Identitate tactică pentru fiecare Temniță.** Mai puțin «aceiași monștri cu statistici diferite»; 1–2 mecanici recognoscibile pentru fiecare, fără a crea alt sistem de explorare.
+- [ ] **17. O alegere înainte de căpitan.** Opțional: siguranță, ofensivă sau pradă cu risc. O singură decizie semnificativă pe incursiune; păstrăm dificultățile Normal/Greu/Coșmar și progresul separat.
+- [ ] **18. Feedback de luptă pe toate modurile.** Verificăm portrete mari, selecție, animații și claritatea daunelor pe Temnițe, Turn, PvP și Tron; performanță și accesibilitate pe mobil.
+- [ ] **19. Turn cu puncte de pornire.** Deblocări după record (de exemplu 1/20/40/60/80), cu recompense ajustate pentru etajele sărite și fără farming suplimentar.
+- [ ] **20. Recompensele Turnului mai lizibile.** Praguri, record, următorul legendar și progres până la următoarea îmbunătățire — vizibile fără a consulta mai multe meniuri.
+- [ ] **21. Măiestrie după nivelul 50.** Obiective orizontale: solo, clase, căpitani, realizări și titluri/portrete; fără nivel 100 și fără statistică permanentă care escaladează la infinit.
+- [ ] **22. Colecții și seturi endgame.** Evidențiem echipamentele și legendarele deținute, seturile incomplete și obiectivele de colecție; începem cu UI, nu cu o nouă monedă.
+
+**Criteriu de ieșire etapa C:** un jucător de nivel 50 are scopuri vizibile, dar poate sări luptele deja triviale din Turn și nu trebuie să farmeze activități redundante.
+
+## ETAPA D — LUME, PvP, TRON, BRESLE
+
+- [ ] **23. PvP lizibil și echilibrat.** Recomandări după putere; explicăm echipa limitată la 3 pentru fantoma Lumii și duelul cu eroul la Tron. Respectăm protecția începătorilor și limitele de atac.
+- [ ] **24. Provocări Tron de prestigiu.** Istoric/sezoane/titluri și clasamente clare; nu adăugăm bonusuri de putere permanente pentru deținător.
+- [ ] **25. Contracte de breaslă adaptate.** Ținte săptămânale în funcție de membrii activi la începutul săptămânii; praguri care nu se schimbă în timpul săptămânii.
+- [ ] **26. Repară contraclasa bossului de breaslă.** În SQL14, bonusul folosește clasa eroului publicat; pentru eroul Campion nu valorifică Vraci/Arcaș/Paznic din echipă. Corectăm și testăm server-side, fără a permite valori arbitrare din browser.
+- [ ] **27. Bossul de breaslă — formații reale.** După fixul 26, alegerea compoziției echipei trebuie să conteze: protecție, vindecare, daune, cu calcul/validare sigură pe server.
+- [ ] **28. Însemnele breslei și socialul.** Utilizare cosmetică a însemnelor (steaguri, rame, embleme) și teste complete pentru invitații, ranguri, mesagerie și notificări.
+
+**Criteriu de ieșire etapa D:** participarea în Lume/Breaslă este ușor de înțeles, breslele mici pot progresa, iar competițiile importante au validări fiabile.
+
+## ETAPA E — ECONOMIE, CORECTITUDINE, CALITATE
+
+- [ ] **29. Protecție la ghinion în Fierărie.** Mecanism previzibil după eșecuri repetate, calibrat prin simulări; păstrăm un cost real al îmbunătățirilor.
+- [ ] **30. Piață, Negustor, Bazar.** Rolul fiecăruia devine evident; eliminăm explicațiile și submeniurile redundante, nu funcțiile utile.
+- [ ] **31. Economia jocului și cooldown NPC de 1 oră.** Măsurăm câștigurile aur/minereu/materiale și impactul asupra progresului și prețurilor; ajustăm numai după date.
+- [ ] **32. Corectitudinea botului Premium.** Verificăm avantajul în progres și în clasamente; păstrăm personalizările cosmetice, evităm pay-to-win.
+- [ ] **33. Validare server a competiției.** PvP/Tron/rapoarte de breaslă nu trebuie să accepte rezultate sau statistici arbitrare calculate în browser; această etapă este obligatorie înainte de extindere publică.
+- [ ] **34. Stabilitate, performanță și simplificare cod.** Smoke-test în browser desktop/mobil, regresii salvări LIVE/BETA, curățare de cod mort numai după verificarea apelurilor, telemetry minimă (primul boss, tutorial completat, D1/D7, activitate endgame).
+
+**Criteriu de ieșire etapa E:** economia nu este dominată de un singur farming sau de bot, competițiile sunt corecte și principalele ecrane sunt acoperite de teste reale.
+
+## Primul lucru pe care îl facem: pasul 01
+**Livrabil:** o matrice de test pentru un cont nou BETA și un PR mic care elimină blocajele concrete din primele 10–15 minute, fără a redesena încă restul jocului.
+
+Parcurs de verificat:
+1. Intrare și creare erou → prolog clar (skip disponibil).
+2. Primul mercenar și card unic Drumul Eroului.
+3. Intrare în Mina Cenușie → alegere/luptă cu monștri → căpitan.
+4. Recompensă → inventar → echipare.
+5. Sat → următoarea temniță / obiectiv.
+6. Reîncărcare de pagină între oricare două etape; progresul nu se pierde.
+7. QA mobil/desktop și regresii pentru erou existent BETA / LIVE.
+
+**Status inițial:** toate etapele de mai sus sunt propuneri, nu marcate ca implementate. Jocul are deja o parte dintre funcțiile de bază; fiecare pas înseamnă validare, simplificare sau completare, nu rescriere.
