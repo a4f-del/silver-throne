@@ -1,7 +1,7 @@
 /* ============================================================================
    Silver Throne — mercenari.js
    Mercenarii permanenți: câte unul din fiecare clasă (Războinic, Arcaș, Paznic, Mag, Vraci), primiți pe
-   parcursul ghidului și numiți de jucător. Nu se mai angajează și nu se concediază; rangul crește prin faimă,
+   parcursul ghidului; în BETA noii eroi îi primesc cu nume predefinite. Nu se mai angajează și nu se concediază; rangul crește prin faimă,
    ca înainte. Statisticile lor vin din erou (formulele sunt în index.html: MP, RF, mhp, atkOf, bon).
    Tot aici: paginile satului Han, Infirmerie, Antrenament, Steag și rândul de îmbunătățire al fiecărei clădiri.
    Se încarcă după ghid.js și înaintea scriptului din pagină.
@@ -32,10 +32,21 @@ function mrRecruit(c) {
   if (typeof mrStoryEnabled === 'function' && mrStoryEnabled() && !mrStorySeen(c)) {
     mrStoryShow(c, false); return;
   }
-  S.mrOff.splice(i, 1); mrNew(c); go();
+  S.mrOff.splice(i, 1); const f=mrNew(c);
+  if(typeof jeFocus==='function'&&jeFocus()&&!f.nn)
+    S.msg=`${f.n} (${f.c}) s-a alăturat ${S.fs.includes(f)?'echipei':'rezervei'}. Îi poți schimba numele din Cont → Nume.`;
+  go();
+}
+/* Nume stabilite pentru noii eroi BETA; evităm numele deja folosite în echipă.
+   Numele existente și dreptul la o redenumire gratuită rămân nemodificate. */
+function mrDefaultName(c) {
+  const taken=new Set(mrAll().map(f=>String(f.n||'').toLocaleLowerCase('ro-RO')));
+  return (MR.sug[c]||[]).find(n=>!taken.has(n.toLocaleLowerCase('ro-RO'))) || (MR.sug[c]||[])[0] || c;
 }
 function mrNew(c) {
-  const f = { n: c, c, hp: 0, sc: 0, t: [], rk: 0, fm: 0, nn: 1, eq: { w: null, a: null } };
+  const named=typeof jeFocus==='function'&&jeFocus();
+  const f = { n: named?mrDefaultName(c):c, c, hp: 0, sc: 0, t: [], rk: 0, fm: 0, eq: { w: null, a: null } };
+  if(!named)f.nn=1; /* LIVE și salvările vechi păstrează fereastra de numire */
   f.hp = mhp(f); f.t = [P(TR)]; (S.fs.length < TMAX() && !S.d && !(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&S.soloDungeon) ? S.fs : S.rs).push(f); return f;
 }
 /* la fiecare desenare: se alătură cine a ajuns la pasul lui */
@@ -78,7 +89,7 @@ function mrMig() {
   S.mrv = 2;   /* semnul trecerii la mercenarii permanenți (S.mv e satul selectat pe hartă) */
 }
 
-/* ------------------------------------------------------------------ NUMIREA */
+/* ------------------------------------------------------------------ NUMIREA (flux vechi; eroii noi BETA nu sunt opriți aici) */
 function mrName() {
   const fs = mrAll().filter(x => x.nn); if (!fs.length) return;
   const ins = fs.map((f, i) => document.getElementById('mr-in-' + i));
@@ -121,7 +132,7 @@ function mrPost() {
 }
 
 /* ------------------------------------------------------------------ SCHIMBAREA NUMELUI (Cont › Nume)
-   Numele se aleg la început (erou) și la deblocare (mercenari) și rămân fixe. Din Cont, fiecare personaj
+   Eroul își alege numele; mercenarii BETA noi primesc nume inițiale. Din Cont, fiecare personaj
    își poate schimba numele o dată gratuit (f.rnf = folosit); după aceea va costa monede (NM.cost, când apar). */
 const NM = { cost: null };   /* prețul în monede; null = monedele nu există încă */
 function nmPanel() {
