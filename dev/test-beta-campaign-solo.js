@@ -102,8 +102,8 @@ const entry=main.slice(startAt,startEnd);
 const soloFighter={h:1,n:'Erou',hp:50};
 const dungeonState={fs:[soloFighter],rs:[archer],d:null,lvl:5,pts:8,auto:false,tab:'a'};
 let fights=0;
-const startD=new Function('S','DG','dMk','dCostAt','evs','spend','go','cn','startF','setTimeout',
- entry+';return startD')(dungeonState,[{lv:1,ev:0}],()=>({room:0,rooms:4}),
+const startD=new Function('ST_SERVER','S','DG','dMk','dCostAt','evs','spend','go','cn','startF','setTimeout',
+ entry+';return startD')('beta',dungeonState,[{lv:1,ev:0}],()=>({room:0,rooms:4}),
  ()=>2,()=>({k:1}),n=>{dungeonState.pts-=n},()=>{},()=>{},()=>{fights++},()=>{});
 startD(0);
 assert(dungeonState.d&&dungeonState.fs.length===1,'Hero may start a dungeon alone');
