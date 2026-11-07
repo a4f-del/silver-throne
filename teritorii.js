@@ -155,6 +155,7 @@ function terTaken() {
   t.poi.forEach(p => s.add(TW.cellKey(p.x, p.y))); s.add(TW.cellKey(t.fort.x, t.fort.y)); t.camps.forEach(c => s.add(TW.cellKey(c.x, c.y))); return s;
 }
 function terCamps() {
+  if (cmpBeta()) return; /* BETA: dezactivăm apariția taberelor, păstrăm datele istorice. */
   const t = S.ter, now = Date.now(), sh = TP.camp.slotH * 3600000, cur = Math.floor(now / sh), back = Math.ceil(12 * 3600000 / sh);
   for (let s = Math.max(t.cslot + 1, cur - back); s <= cur; s++) {
     if (t.camps.some(c => c.sl === s)) continue;
@@ -167,6 +168,7 @@ function terCamps() {
 function campK(c) { const T = TW.camp(c.t); return TW.kb(S.lvl) * T.km; }
 function campCost(c) { const T = TW.camp(c.t); return trvC(c.x, c.y) + T.fights - 1; }
 function campGo(id) {
+  if (cmpBeta()) { S.msg = 'Taberele NPC au fost retrase din BETA.'; return go(); }
   terInit(); const c = S.ter.camps.find(x => x.id === id), T = c && TW.camp(c.t);
   if (!c || c.exp <= Date.now()) { S.msg = 'Tabăra a plecat.'; return go(); }
   if (S.d) { S.msg = 'Ești deja într-o coborâre.'; return go(); }
@@ -588,7 +590,7 @@ function terMarks() {
   const t = S.ter, sl = S.msel, c = p => smPush(p.x * SMCL + SMCL / 2, p.y * SMCL + SMCL / 2); let s = '';
   t.poi.forEach(p => { if (!terCell(p.x, p.y)) return; const [x, y] = c(p), T = TW.poiT(p.t), left = poiLeft(p); s += terIcon(x, y, T.ic, left > 0 ? '#6b6755' : '#8fb0c8', sl && sl.k === 'p' && sl.a === p.id, `terSel('p','${p.id}')`, T.nm, left > 0 ? '' : '!'); });
   { const f = t.fort; if (terCell(f.x, f.y)) { const [x, y] = c(f); s += terIcon(x, y, TW.FORT.ic, f.o === 'p' ? TCOL : '#c0504a', sl && sl.k === 'f', `terSel('f')`, TW.FORT.nm, f.o === 'p' ? 'tău' : ''); } }
-  t.camps.forEach(cp => { const [x, y] = c(cp), T = TW.camp(cp.t), h = Math.max(1, Math.round((cp.exp - Date.now()) / 3600000)); s += terIcon(x, y, T.ic, '#d4564f', sl && sl.k === 'c' && sl.a === cp.id, `terSel('c','${cp.id}')`, T.nm, '☠'.repeat(T.stars) + ' ' + h + 'h'); });
+  if (!cmpBeta()) t.camps.forEach(cp => { const [x, y] = c(cp), T = TW.camp(cp.t), h = Math.max(1, Math.round((cp.exp - Date.now()) / 3600000)); s += terIcon(x, y, T.ic, '#d4564f', sl && sl.k === 'c' && sl.a === cp.id, `terSel('c','${cp.id}')`, T.nm, '☠'.repeat(T.stars) + ' ' + h + 'h'); });
   return s;
 }
 
@@ -602,7 +604,7 @@ function terPanel() {
       const T = TW.poiT(p.t), left = poiLeft(p), c = poiCost(p), once = p.t === 'tu';
       h = `<section><h2>${T.ic} ${T.nm}</h2><div class="mute">${T.d}</div><div class="row"><span>Cost: <b>${c} ${c == 1 ? 'punct' : 'puncte'}</b> · ${once ? 'o singură dată' : 'revine după ' + T.cd + ' h'}<br><span class="mute">Alegerile din expediție au risc afișat clar. Nu pierzi niciodată nimic din depozit.${p.t === 'pe' ? ' Vena se epuizează dacă o storci des (până la −50%).' : ''}</span></span><button class="p" onclick="poiGo('${p.id}')"${left > 0 || S.pts < c || S.ex || S.d ? ' disabled' : ''}>${once ? 'Urcă în turn' : 'Intră'}</button></div>${left > 0 ? `<div class="mute">${once ? 'Ai urcat deja în acest turn.' : 'Epuizat acum. Revine peste ' + tDur(left) + '.'}</div>` : ''}</section>`;
     }
-  } else if (s && s.k === 'c') {
+  } else if (s && s.k === 'c' && !cmpBeta()) {
     const cp = t.camps.find(x => x.id === s.a); if (cp) {
       const T = TW.camp(cp.t), r = T.rw, lv = cp.lv, rw = [Math.round(TW.rawGold(lv) * r.g) + ' aur'];
       if (r.mats) rw.push(r.mats + ' materiale'); (r.cr || []).forEach(([k, n, p]) => rw.push(Math.round(p * 100) + '% ' + n + ' × ' + mn(k))); if (r.item) rw.push('un obiect ' + (r.item[0] == r.item[1] ? QN[0] && ['', 'Magic', 'Rar', 'Epic'][r.item[0]] : 'Magic sau Rar')); if (r.merc) rw.push('un mercenar de rang superior'); if (r.relic) rw.push('o relicvă');
@@ -615,9 +617,10 @@ function terPanel() {
       (f.o === 'p' ? `<div class="row"><span style="color:var(--gold2)"><b>În stăpânirea ta</b></span></div>`
         : (f.lost ? '<div class="r4">Pierdut: recucerire cu taxă redusă și apărători mai slabi.</div>' : '') + c.a.map(x => `<div class="${x.ok ? 'r2' : 'r4'}" style="font-size:15px">${x.ok ? '✔' : '✖'} ${x.t}</div>`).join('') + `<div class="row"><span class="mute">Eșecul nu pierde progresul campaniei.</span><button class="p" onclick="fortGo()"${c.ok ? '' : ' disabled'}>${c.re ? 'Recucerește' : 'Asediază'}</button></div>`) + '</section>';
   }
-  return h || '<p class="mute">Atinge un sat, o tabără sau un loc de pe hartă ca să-l vezi.</p>';
+  return h || (cmpBeta() ? '' : '<p class="mute">Atinge un sat, o tabără sau un loc de pe hartă ca să-l vezi.</p>');
 }
 function terLegend() {
+  if (cmpBeta()) return ''; /* Legenda regiunii vechi nu apare în Lumea comună. */
   return `<div class="st-lg"><span>🏛⛏✦🛒🗼 locuri de interes</span><span><i style="background:#d4564f"></i>tabere (cu timp limitat)</span><span><i style="background:${TCOL}"></i>teritoriile tale</span></div>`;
 }
 /* Filele Hartii: handlerul era referit de onclick, dar lipsea,
