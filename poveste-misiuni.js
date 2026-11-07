@@ -96,7 +96,7 @@ function sqPanel() {
   if (!sqEnabled()) return '';
   if (S.sqHelp) return sqHelpBar();
   const q=sqCurrent(),completed=SQ_ACT.length-(SQ_ACT.filter(x=>!sqClaimed().includes(x.id)).length);
-  if (!q) return '<section class="sq-panel sq-complete"><div class="sq-eyebrow">✦ CENUȘA ȘI JURĂMÂNTUL · I/III</div><h2>Primele jurăminte au fost împlinite</h2><p>Ai adunat primii tovarăși. Povestea continuă în Campanie, la Tronul Cenușiu.</p><button onclick="sdGo(\'m\',\'mt\',\'k\')">Deschide Campania</button></section>';
+  if (!q) return S.sqCampaignOpened?'':'<section class="sq-panel sq-complete"><div class="sq-eyebrow">✦ CENUȘA ȘI JURĂMÂNTUL · I/III</div><h2>Primele jurăminte au fost împlinite</h2><p>Ai adunat primii tovarăși. Povestea continuă în Campanie, la Tronul Cenușiu.</p><button class="p" onclick="cmpOpenChecklist(\'story\')">Deschide Campania și obiectivele</button></section>';
   const p=sqProgress(q),reward=[q.reward.g?q.reward.g+' aur':'',q.reward.o?q.reward.o+' minereu':''].filter(Boolean).join(' + ');
   return `<section class="sq-panel ${p.ok?'sq-ready':''}" aria-label="Misiune activă de poveste">
     <div class="sq-embers" aria-hidden="true"><i></i><i></i><i></i><i></i></div>

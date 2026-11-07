@@ -99,7 +99,7 @@ function jeReward(step){
 function jePanel(){
  if(!jeReady() || S.d)return '';
  const s=jeCurrent();
- if(!s)return '<section class="je-card je-done"><div class="je-caption">✦ DRUMUL EROULUI</div><b>Primele jurăminte sunt împlinite.</b><p>Acum povestea continuă în Campanie.</p><button onclick="S.tab=\'m\';S.mt=\'k\';go()">Deschide Campania</button></section>';
+ if(!s)return S.jeCampaignOpened?'':'<section class="je-card je-done"><div class="je-caption">✦ DRUMUL EROULUI</div><b>Primele jurăminte sunt împlinite.</b><p>Acum povestea continuă în Campanie.</p><button class="p" onclick="cmpOpenChecklist(\'journey\')">Deschide Campania și obiectivele</button></section>';
  const p=jeStatus(s),done=JE_STEPS.filter(x=>(S.je&&S.je.done||[]).includes(x.id)).length;
  const parts=s.parts.map(([label,cb])=>'<span class="'+(cb()?'je-ok':'')+'">'+(cb()?'✓ ':'○ ')+label+'</span>').join('');
  const reward=[s.reward.g?s.reward.g+' aur':'',s.reward.o?s.reward.o+' minereu':''].filter(Boolean).join(' + ');
