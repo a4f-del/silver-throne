@@ -309,6 +309,8 @@ BEGIN
   'boss',jsonb_build_object('hp',v_w.boss_hp,'max',v_w.boss_max,
     'counter',CASE mod((v_week-date '2026-01-05')/7,3)
       WHEN 0 THEN 'Vraci' WHEN 1 THEN 'Arcaș' ELSE 'Paznic' END,
+    'ability',CASE mod((v_week-date '2026-01-05')/7,3)
+      WHEN 0 THEN 'poison' WHEN 1 THEN 'storm' ELSE 'wave' END,
     'hits_today',(SELECT count(*) FROM public.guild_boss_hits WHERE user_id=v_uid AND local_day=v_day),
     'personal_damage',v_p.boss_damage),
   'server_at',now());
