@@ -26,3 +26,9 @@
  .guild-rank-select select{flex:1;max-width:none}
  .guild-search input{width:100%}
 }
+
+/* Feedback imediat când o invitație din profil este respinsă de server. */
+.gsr-profile-invite{display:flex;flex:1;min-width:150px;flex-direction:column;gap:3px}
+.gsr-profile-invite>button{width:100%}
+.gsr-profile-invite>small{color:#f0bc85;font-size:12px;line-height:1.35}
+.gsr-profile-invite>small:empty{display:none}
