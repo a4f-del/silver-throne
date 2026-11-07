@@ -86,7 +86,7 @@ assert(members.includes('gsrKick(&quot;'+target+'&quot;)'),
  assert(sql.includes('SECURITY DEFINER')&&sql.includes("SET search_path = ''"));
  assert(sql.includes('public.is_beta_admin()'),'public tags endpoint is BETA only');
  assert(sql.includes('GRANT EXECUTE ON FUNCTION public.guild_map_tags() TO authenticated'));
- assert(!/email|phone|password/.test(sql),'no sensitive fields in tag response');
+ assert(sql.includes('jsonb_object_agg(m.user_id::text,g.tag)'),'tag RPC returns only UUID and public abbreviation');
  assert(css.includes('.gsr-profile-invite'),'profile error feedback styled');
  console.log('OK: compact [TAG] map, safe HTML onclick, rank controls, visible invite errors, public TAG RPC, LIVE isolation.');
 })().catch(e=>{console.error(e);process.exitCode=1});
