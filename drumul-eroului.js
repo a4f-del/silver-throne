@@ -127,6 +127,25 @@ function jeDecorate(){
   if(el.getAttribute('data-v')===v)el.classList.add('je-target');
  });
 }
+/* Previzualizare de pe contul BETA existent, fara resetare si fara modificare salvare. */
+function jePreviewClose(){document.getElementById('je-preview')?.remove();}
+function jePreview(){
+ if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||typeof S==='undefined'||!S||S.d
+  ||typeof document==='undefined'||document.getElementById('je-preview')
+  ||document.getElementById('mr-scene')||document.getElementById('mr-m')
+  ||document.getElementById('lgm'))return;
+ const el=document.createElement('div');el.id='je-preview';
+ el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');
+ el.setAttribute('aria-label','Drumul Eroului · Previzualizare');
+ el.innerHTML='<div class="jep-card"><div class="je-caption">✦ BETA · PREVIZUALIZARE</div>'
+  +'<h2>Drumul Eroului</h2><p>Un singur fir pentru poveste, ghid și recompense.</p>'
+  +JE_STEPS.map((x,i)=>'<div class="jep-item"><b>'+x.icon+' '+(i+1)+'. '+x.title+'</b>'
+   +'<p>'+x.say+'</p><small>'+x.parts.map(p=>p[0]).join(' · ')+'</small></div>').join('')
+  +'<button class="p" onclick="jePreviewClose()">Închide</button>'
+  +'<p class="jep-hint">Nu modifică personajele, progresul sau resursele.</p></div>';
+ document.body.appendChild(el);
+ el.querySelector('button')?.focus();
+}
 (function(){
  if(typeof document==='undefined'||!document.head)return;
  const el=document.createElement('style');
@@ -140,6 +159,11 @@ function jeDecorate(){
 .je-help{margin-top:9px;color:var(--mute);font-size:12px}.je-help summary{cursor:pointer;display:inline-block;text-decoration:underline;text-underline-offset:3px}.je-help p{font-size:13px;line-height:1.55}
 .je-say{font-style:italic;color:var(--gold2)}
 .je-target{outline:2px solid #e1b969!important;outline-offset:3px;animation:je-halo 2.6s ease-in-out infinite}
+#je-preview{position:fixed;inset:0;z-index:25040;padding:16px;display:flex;justify-content:center;align-items:center;background:#05070aee}
+.jep-card{width:min(510px,100%);max-height:calc(100vh - 32px);overflow-y:auto;border:1px solid #bf9b60;border-radius:12px;background:#131b1e;padding:18px;text-align:center}
+.jep-card h2{color:var(--gold2);margin:9px 0}.jep-card>p{font-size:13px}
+.jep-item{text-align:left;border-top:1px solid #ffffff21;padding:11px 2px}.jep-item p{font-size:13px;color:var(--gold2);font-style:italic;margin:6px 0}
+.jep-item small,.jep-hint{color:var(--mute);font-size:12px}
 #je-toast{position:fixed;z-index:27010;bottom:25px;left:50%;transform:translateX(-50%);max-width:calc(100vw - 24px);min-width:min(300px,calc(100vw - 24px));display:flex;align-items:center;gap:12px;border:1px solid #bf9b60;border-radius:11px;background:#182024fa;padding:13px;box-shadow:0 12px 35px #000b;animation:je-toast-in .45s ease-out}
 #je-toast>span{font-size:29px;color:var(--gold2)}#je-toast b,#je-toast small{display:block}#je-toast b{color:#f0d27a}#je-toast small{font-size:12px;color:var(--mute)}
 @keyframes je-arrive{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
