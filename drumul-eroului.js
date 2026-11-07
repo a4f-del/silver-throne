@@ -113,6 +113,8 @@ function jePanel(){
      '<button class="p" onclick="jeNavigate()">Continuă: '+s.action()[0]+'</button>'}</div>
    <details class="je-help"><summary>📜 Poveste și ajutor</summary>
      <p class="je-say">${s.say}</p><p>${s.help}</p></details>
+   ${jeFocus()?'<button class="je-guide-toggle" onclick="jeGuideToggle()" aria-pressed="'+(S.jeHintsOff?'false':'true')+'">'+
+     (S.jeHintsOff?'↗ Arată ghidarea':'◌ Ascunde ghidarea')+'</button>':''}
  </section>`;
 }
 function jeVisit(){
@@ -126,15 +128,7 @@ function jeVisit(){
  }
 }
 function jeDecorate(){
- if(typeof document==='undefined'||!document.querySelectorAll)return;
- document.querySelectorAll('.je-target').forEach(e=>e.classList.remove('je-target'));
- if(!jeReady()||S.d)return;
- const s=jeCurrent();if(!s)return;
- const [,,v]=s.action();
- if(S.tab!=='a'||!v)return;
- document.querySelectorAll('.vh-lb[data-v],.vb-c[data-v]').forEach(el=>{
-  if(el.getAttribute('data-v')===v)el.classList.add('je-target');
- });
+ if(typeof jeGuideDecorate==='function')return jeGuideDecorate();
 }
 /* Previzualizare de pe contul BETA existent, fara resetare si fara modificare salvare. */
 function jePreviewClose(){document.getElementById('je-preview')?.remove();}
