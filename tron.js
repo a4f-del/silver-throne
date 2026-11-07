@@ -114,6 +114,27 @@ function tronFight(data) {
   S.d = d; startF(true); terFrom(); S.tab = 'c'; S.msg = 'Te lupți pentru Tronul de Argint: ' + d.bn + '.';
   if (S.auto !== false) { if (typeof fxAutoRun === 'function') fxAutoRun(); else autoRun(); return; } go();
 }
+/* Doar pe serverul BETA: scurtează protecția regelui actual pentru teste PvP.
+   Serverul validează independent rolul beta_admins, fără să atingă LIVE. */
+async function tronBetaResetProtection() {
+  if (!tronIsBetaDuel() || TRON.busy) return;
+  if (!window.confirm('Elimini acum protecția de 30 de minute a regelui BETA?')) return;
+  TRON.busy = true;
+  try {
+    const r = await tronRpc('beta_throne_reset_protection');
+    if (r.error) S.msg = 'Nu am putut reseta protecția BETA: ' + r.error;
+    else S.msg = r.data && r.data.changed
+      ? 'Protecția regelui BETA a fost eliminată. Acum poate fi provocat.'
+      : 'Regele BETA nu are protecție activă.';
+    await tronSync();
+  } catch (e) {
+    S.msg = 'Eroare la resetarea protecției BETA: ' + String((e && e.message) || e);
+  } finally {
+    TRON.busy = false;
+    go();
+  }
+}
+
 /* unitățile fantomei înlocuiesc inamicii generați (apelat din terEm) */
 function tronGhostUnits(es, d) {
   es.length = 0;
@@ -204,6 +225,9 @@ function vTron() {
   h += `<section class="tr-seatsec" style="border-left-color:var(--ember)"><div class="tr-seat"><div class="tr-av${ho ? '' : ' empty'}">${initial}</div><div class="ts-m"><h2>${ho ? '👑 ' + tEsc(ho.name) : 'Tronul e gol'}</h2>`;
   h += ho ? `<div class="mute">Nivel ${ho.level} · ține Tronul de ${tronHM((tronNow() - ho.since) / 1000)}${prot > 0 ? ` · protejat încă <span data-end="${ho.protect_until - TRON.off}">${fmt(prot)}</span>` : ''}</div>` : '<div class="mute">Îl apără Garda Regală. Cine o învinge devine rege.</div>';
   h += `</div></div><div class="tr-cta"><span>${me.can_challenge ? 'Poți provoca acum.' : `<span class="r4">${tEsc(me.reason || 'Indisponibil')}</span>${/Pauză/.test(me.reason || '') && cd > 0 ? ` <span data-end="${me.cooldown_until - TRON.off}">${fmt(cd)}</span>` : ''}`}<span class="tr-pips" title="Provocări azi: ${me.challenges_today}/${me.daily_cap}">${Array.from({ length: me.daily_cap }, (_, i) => `<i class="${i < me.challenges_today ? 'on' : ''}"></i>`).join('')}</span><span class="mute">Provocări azi: ${me.challenges_today}/${me.daily_cap}</span></span><button class="p big" onclick="tronProvoca()"${me.can_challenge && !busy ? '' : ' disabled'}>Provoacă (gratuit)</button></div>`;
+  if (tronIsBetaDuel() && ho && prot > 0) {
+    h += '<div class="row"><span class="mute">🧪 Instrument de test BETA</span><button type="button" class="p" onclick="tronBetaResetProtection()">Resetează protecția regelui</button></div>';
+  }
   if (S.tron && S.tron.cur) h += `<div class="row"><span class="r4">Rezultatul ultimei lupte nu a ajuns încă la server${TRON.repErr ? ' (' + tEsc(TRON.repErr) + ')' : ''}. Se reîncearcă automat.</span><button onclick="tronCheck()">Trimite acum</button></div>`;
   h += '</section>';
   if (me.pending.length) h += `<section class="tr-claim"><h2>Premii de revendicat</h2>` + me.pending.map(p => `<div style="margin:8px 0"><b>Săptămâna ${p.week + 1}: ${tronKindTxt(p.kind)}</b> · titlu „${tEsc(p.title)}” · <b>${p.amount}</b> materiale rare<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-start;margin-top:8px">${p.options.map(m => `<button class="p" onclick="tronClaim(${p.week},'${m}')">${tEsc(mn(m))} (${have(m)}/${cap()})</button>`).join('')}</div></div>`).join('') + '</section>';
