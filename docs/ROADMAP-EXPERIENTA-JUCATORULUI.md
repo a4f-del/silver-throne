@@ -51,7 +51,7 @@ Expedițiile mercenarilor sunt activități pasive, nu o a patra buclă obligato
 - [ ] **14. Informații tactice pentru căpitani.** Arătăm abilitatea specială, clasa care îl contracarează și dacă este în echipă/rezervă direct pe ecranul mare al Temniței.
   - **În lucru (BETA):** abilitatea căpitanului și contraclasa apar pe cardul mare, cu indicarea prezenței doar dacă mercenarul este activ și în viață; nu oferă informații false despre luptătorii în rezervă. Test: `dev/test-beta-progression-milestones-captains.js`.
 - [ ] **15. Inventar și revendicări rapide.** Echipare directă, «Ridică toate» unde este sigur, sortare/filtrare și dezmembrare/vânzare în lot cu protecție pentru obiectele legendare și blocate.
-  - **Parțial existent, testare extinsă BETA:** filtre, sortare, equip direct și vânzare/dezmembrare în lot există deja; testul nou verifică protecția pentru Legendare/Epic/blocate și anularea. „Ridică toate” rămâne de evaluat doar pentru colectarea sigură a recompenselor.
+  - **Parțial existent, testare extinsă BETA:** filtre, sortare, echipare directă și vânzare/dezmembrare în lot există deja; testul nou verifică protecția pentru Legendare/Epic/blocate, anularea și faptul că „Ridică tot” din Topitorie colectează doar sloturile finalizate, o singură dată.
 
 **Criteriu de ieșire etapa B:** un jucător de nivel 20 înțelege ce temniță să joace, cum să-și pregătească echipa și cum să folosească obiectele obținute, fără să navigheze inutil prin Sat.
 
