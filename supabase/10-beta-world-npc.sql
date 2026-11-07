@@ -67,7 +67,7 @@ BEGIN
 
   v_id := 'wn' || p_x::text || '_' || p_y::text;
   INSERT INTO public.world_npc_raids(user_id, npc_id, cooldown_until)
-  VALUES (v_uid, v_id, v_now + interval '4 hours')
+  VALUES (v_uid, v_id, v_now + interval '1 hour')
   ON CONFLICT (user_id, npc_id) DO UPDATE
     SET cooldown_until = excluded.cooldown_until
     WHERE public.world_npc_raids.cooldown_until <= v_now
