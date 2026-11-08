@@ -26,6 +26,14 @@ Versiunea inițială din GitHub definea `world_units_ok(p_units jsonb)`, deși f
 
 **Corecția este deja aplicată:** SQL30 păstrează `world_units_ok(u jsonb)` și folosește `u` în corp. Nu executa sugestia PostgreSQL de `DROP FUNCTION`; există funcții și triggere dependente. Dacă întregul SQL30 a fost rulat într-o singură tranzacție, eroarea a anulat migrarea, fără să schimbe datele. Copiază din nou fișierul actualizat din **Raw**, execută tot SQL30 doar în BETA și verifică toate cele șapte rezultate `true`. Nu este nevoie să rerulezi SQL28.
 
+## Corecție SQLSTATE 42601 — condiția de la linia 94
+
+O versiune anterioară a SQL30 folosea `CASE WHEN NEW.level>=30 THEN 4 ELSE 3 END THEN` direct în condiția `IF` din triggerul `beta_world_team_size_by_level_guard`. Pentru a elimina ambiguitatea de parsare, acum funcția setează mai întâi variabila `v_max_units` (3 implicit, 4 de la nivelul 30) și o compară în `IF`.
+
+**Important:** eroarea `syntax error at end of input` poate apărea și dacă în SQL Editor a ajuns o selecție incompletă. Folosește pagina **Raw** actualizată și copiază scriptul **integral** (aproximativ 160 de linii), inclusiv `COMMIT;` și interogarea finală cu cele șapte verificări. Nu executa doar primele 94 de linii. Nu folosi `DROP FUNCTION` și nu rerula SQL02/27/28.
+
+Dacă ai executat întreg scriptul într-o tranzacție `BEGIN; ... COMMIT;`, eroarea a anulat tranzacția. Reia întregul SQL30 actualizat în BETA.
+
 ## Ordine de instalare
 
 1. Confirmă proiectul **Silver-Throne-Test** și fă backup.
