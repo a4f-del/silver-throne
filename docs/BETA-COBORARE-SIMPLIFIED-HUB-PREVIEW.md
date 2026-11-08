@@ -1,6 +1,6 @@
 # Silver Throne BETA — Previzualizare Coborâre simplificată
 
-**Status:** implementat în frontend pe GitHub pentru **BETA**, fără SQL și fără modificări asupra bazei LIVE. Disponibil după încărcarea noii versiuni `temnite.js?v=2026.11.08-1`. Necesită verificare vizuală în browser.
+**Status:** implementat în frontend pe GitHub pentru **BETA**, fără SQL și fără modificări asupra bazei LIVE. Disponibil după încărcarea noii versiuni `temnite.js?v=2026.11.08-2`. Necesită verificare vizuală în browser.
 
 ## Ce vede jucătorul
 
