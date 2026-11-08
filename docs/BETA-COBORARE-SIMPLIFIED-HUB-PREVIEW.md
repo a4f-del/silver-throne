@@ -12,6 +12,14 @@
 
 Pe mobil, secțiunile se aliniază pe o singură coloană. În Temnița deja deschisă și în timpul unei lupte se păstrează paginile speciale existente, fără a schimba ecranul de luptă.
 
+## Ajustări suplimentare — echipa și jurnalul (BETA)
+
+- Controlul **„Erou singur”** din Coborâre are acum și **„↩ Readu mercenarii”**, plus butoane **„+ Adaugă”** lângă fiecare mercenar disponibil din rezervă. Se respectă limita echipei (3, respectiv 4 după nivelul 30), iar mercenarii în expediție sunt afișați indisponibili. Nu poți reconfigura echipa în mijlocul unei lupte.
+- În pagina de pregătire a temniței, **toți cei 1–4 luptători activi** sunt prezentați în panoul din dreapta, imediat după butonul **„Luptă”**, înaintea sfaturilor secundare. Portretul adversarului, banda de progres și selectorul de dificultate sunt mai compacte; sfaturile și echipamentul recomandat au fost mutate sub **„ⓘ Sfaturi și echipament”**. Acest lucru reduce necesitatea derulării verticale la rezoluții desktop, fără să ascundă informații.
+- Panoul **„Ultima luptă”** a fost eliminat din partea de sus a Coborârii în BETA. În butonul de sus **LUPTE**, prima înregistrare este evidențiată ca ultima luptă și jurnalul ei se deschide prin clic. Celelalte înregistrări sunt păstrate.
+- LIVE își păstrează structura anterioară, butonul manual și jurnalul din Coborâre.
+- QA nou: `node dev/test-beta-coborare-party-and-lupte.js` — verifică revenirea echipei 1–4, expedițiile, aria de pregătire și istoricul fără dubluri.
+
 ## Ce NU se modifică
 
 - **Cripta Furtunii:** păstrează exact cheile, eligibilitatea de nivel, costurile și șansa de relicvă. Acum este prezentată ca obiectiv săptămânal în Temnițe, nu un sistem nou.
