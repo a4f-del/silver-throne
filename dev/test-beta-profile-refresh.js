@@ -22,7 +22,7 @@ for(const marker of [
   'prEq(',
   'prUn('
 ]) assert(source.includes(marker),'Profile visual/interaction missing: '+marker);
-assert(source.includes('role="dialog"')&&source.includes("e.key === 'Escape'"),'Accessible modal and Escape preserved');
+assert(source.includes("o.setAttribute('role', 'dialog')")&&source.includes("e.key === 'Escape'"),'Accessible modal and Escape preserved');
 assert(source.includes('aria-pressed=')&&source.includes('aria-live="polite"'),'Filter states and count are accessible');
 assert(!source.includes('localStorage'),'Redesign does not persist new game data');
 
