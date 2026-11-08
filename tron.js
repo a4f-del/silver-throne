@@ -222,7 +222,7 @@ function tronPodium(rank) {
 function vTron() {
   tronInit(); const st = TRON.st; if (tronNeedSync() && !TRON.loading) tronSync();
   const rules = tronIsBetaDuel()
-    ? `Regele e cine ține Tronul cel mai mult timp într-o săptămână. Provocarea e <b>gratuită</b>: eroul tău principal luptă singur împotriva eroului principal al deținătorului, fără plafon de statistici. Dacă învingi, Tronul e al tău. Săptămâna se încheie vineri la 15:00 (ora României). Nivel minim ${TT.CFG.minLevel}.`
+    ? `Regele e cine ține Tronul cel mai mult timp într-o săptămână. Provocarea e <b>gratuită</b>: eroul tău principal luptă singur împotriva eroului principal al deținătorului, fără plafon de statistici. Dacă învingi, Tronul e al tău. Prestigiul vine din clasament, istoric și titluri, nu din bonusuri permanente de atac. Săptămâna se încheie vineri la 15:00 (ora României). Nivel minim ${TT.CFG.minLevel}.`
     : `Regele e cine ține Tronul cel mai mult timp într-o săptămână. Provocarea e <b>gratuită</b>: lupți cu „fantoma” (echipa salvată) a deținătorului; dacă o învingi, Tronul e al tău. Săptămâna se încheie vineri la 15:00 (ora României). Nivel minim ${TT.CFG.minLevel}.`;
   if (!st) {
     return `<section class="tr-hero"><div class="th-t"><h2>♛ Tronul de Argint</h2><div class="mute">${rules}</div><p class="${TRON.err ? 'r4' : 'mute'}" style="margin:12px 0 0">${TRON.err || 'Se încarcă starea Tronului…'}</p>${TRON.err ? '<div class="row" style="margin:6px 0 0"><span class="mute">Reîncearcă după ce te conectezi sau după ce serverul e pregătit.</span><button onclick="tronSync()">Reîncearcă</button></div>' : ''}</div></section>` + vTronPrizes();
@@ -235,19 +235,25 @@ function vTron() {
   h += `<section class="tr-seatsec" style="border-left-color:var(--ember)"><div class="tr-seat"><div class="tr-av${ho ? '' : ' empty'}">${initial}</div><div class="ts-m"><h2>${ho ? '👑 ' + tEsc(ho.name) : 'Tronul e gol'}</h2>`;
   h += ho ? `<div class="mute">Nivel ${ho.level} · ține Tronul de ${tronHM((tronNow() - ho.since) / 1000)}${prot > 0 ? ` · protejat încă <span data-end="${ho.protect_until - TRON.off}">${fmt(prot)}</span>` : ''}</div>` : '<div class="mute">Îl apără Garda Regală. Cine o învinge devine rege.</div>';
   h += `</div></div><div class="tr-cta"><span>${me.can_challenge ? 'Poți provoca acum.' : `<span class="r4">${tEsc(me.reason || 'Indisponibil')}</span>${/Pauză/.test(me.reason || '') && cd > 0 ? ` <span data-end="${me.cooldown_until - TRON.off}">${fmt(cd)}</span>` : ''}`}<span class="tr-pips" title="Provocări azi: ${me.challenges_today}/${me.daily_cap}">${Array.from({ length: me.daily_cap }, (_, i) => `<i class="${i < me.challenges_today ? 'on' : ''}"></i>`).join('')}</span><span class="mute">Provocări azi: ${me.challenges_today}/${me.daily_cap}</span></span><button class="p big" onclick="tronProvoca()"${me.can_challenge && !busy ? '' : ' disabled'}>Provoacă (gratuit)</button></div>`;
-  if (tronIsBetaDuel() && ho && prot > 0) {
+  if (tronIsBetaDuel() && typeof DEV==='function' && DEV() && ho && prot > 0) {
     h += '<div class="row"><span class="mute">🧪 Instrument de test BETA</span><button type="button" class="p" onclick="tronBetaResetProtection()">Resetează protecția regelui</button></div>';
   }
   if (S.tron && S.tron.cur) h += `<div class="row"><span class="r4">Rezultatul ultimei lupte nu a ajuns încă la server${TRON.repErr ? ' (' + tEsc(TRON.repErr) + ')' : ''}. Se reîncearcă automat.</span><button onclick="tronCheck()">Trimite acum</button></div>`;
   h += '</section>';
   if (me.pending.length) h += `<section class="tr-claim"><h2>Premii de revendicat</h2>` + me.pending.map(p => `<div style="margin:8px 0"><b>Săptămâna ${p.week + 1}: ${tronKindTxt(p.kind)}</b> · titlu „${tEsc(p.title)}” · <b>${p.amount}</b> materiale rare<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-start;margin-top:8px">${p.options.map(m => `<button class="p" onclick="tronClaim(${p.week},'${m}')">${tEsc(mn(m))} (${have(m)}/${cap()})</button>`).join('')}</div></div>`).join('') + '</section>';
-  h += `<section><h2>Clasamentul săptămânii</h2>${tronPodium(st.ranking)}</section>`;
+  const mineRank=tronIsBetaDuel()&&Array.isArray(st.ranking)?
+    st.ranking.find(x=>x.user_id===me.user_id):null;
+  h += `<section><h2>Clasamentul săptămânii</h2>${tronPodium(st.ranking)}`+
+    (tronIsBetaDuel()?'<p class="mute" style="margin-top:10px">'+
+      (mineRank?'Locul tău: '+mineRank.rank+' · '+tronHM(mineRank.seconds):
+       'Nu ai încă timp în clasamentul săptămânii.')+
+      ' · Locul se stabilește după timpul total pe Tron, nu după puterea eroului.</p>':'')+'</section>';
   h += vTronPrizes(me.level || S.lvl);
   const u = TRON.pub;
   h += `<section><h2>Apărarea ta (fantoma)</h2><div class="mute">Așa te văd ceilalți când te provoacă. ${tronIsBetaDuel() ? 'Doar eroul principal te reprezintă la Tron. Statisticile lui reale nu au plafon artificial.' : 'Statisticile sunt plafonate la ce are un luptător de nivel ' + TT.CFG.ghostCapLevel + ' cu echipament Epic complet, ca diferențele mari de nivel să nu decidă totul.'} Fantoma lovește normal, fără abilități speciale.</div>` +
     (u ? `<div class="tr-units" style="margin-top:12px">${u.map(x => `<div class="un${x.capped ? ' cap' : ''}"><b>${tEsc(x.n)}</b><span class="mute">${tEsc(x.c)}</span><br>${x.hp} viață · ${x.atk} atac · ${x.def} apărare${x.capped ? ' <span class="mute">(plafonat)</span>' : ''}</div>`).join('')}</div>` : '<p class="mute">Încă nepublicată.</p>') +
     `<div class="row"><span class="mute">${TRON.pubAt ? 'Actualizată acum ' + tronHM((Date.now() - TRON.pubAt) / 1000) : 'Se publică automat când provoci.'}</span><button onclick="tronPublish()">Actualizează apărarea</button></div></section>`;
-  if (st.hall.length) h += `<section><h2>Sala Faimei</h2>` + st.hall.map(x => `<div class="row" style="align-items:flex-start"><span><b>Săptămâna ${x.week + 1}</b></span><span style="text-align:right">${x.top.map(t => `${t.rank === 1 ? '👑' : t.rank === 2 ? '🥈' : '🥉'} ${tEsc(t.name)} <span class="mute">(${tronHM(t.seconds)})</span>`).join('<br>')}</span></div>`).join('') + '</section>';
+  if (st.hall.length) h += `<section><details><summary style="cursor:pointer;color:var(--gold2);font-weight:700;padding:7px 0">📜 Sala Faimei · ${st.hall.length} sezoane încheiate</summary>` + st.hall.map(x => `<div class="row" style="align-items:flex-start"><span><b>Săptămâna ${x.week + 1}</b></span><span style="text-align:right">${x.top.map(t => `${t.rank === 1 ? '👑' : t.rank === 2 ? '🥈' : '🥉'} ${tEsc(t.name)} <span class="mute">(${tronHM(t.seconds)})</span>`).join('<br>')}</span></div>`).join('') + '</details></section>';
   return h;
 }
 function vTronPrizes(L) {
