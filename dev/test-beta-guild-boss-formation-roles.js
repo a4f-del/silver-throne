@@ -109,6 +109,6 @@ async function verifySync(){
 verifySync().then(()=>{
  assert(client.includes('boss.formation_rules===true'),'Role UI must not activate before SQL19');
  assert(client.includes('guildBossLastHit(boss)'),'Last successful hit shown from RPC');
- assert(html.includes('bresle.js?v=2026.11.08-4'));
+ assert(html.includes('bresle.js?v=2026.11.08-5'));
  console.log('OK: BETA role classes, caps/permissions, last hit from server, synced formation, no duplicate/offline attack.');
 }).catch(e=>{console.error(e);process.exitCode=1;});
