@@ -54,8 +54,8 @@ const end=main.indexOf('function toBench(i)');
 assert(begin>=0&&end>begin);
 const solo=main.slice(begin,end);
 const mk=(server,fs0,d=null)=>{
- const S={fs:fs0.slice(),rs:[],sel:1,d},api=new Function('S','ST_SERVER','go',
- solo+';return {heroSolo,heroSoloControl}')(S,server,()=>{});
+ const S={fs:fs0.slice(),rs:[],sel:1,d},api=new Function('S','ST_SERVER','go','tEsc',
+ solo+';return {heroSolo,heroSoloControl}')(S,server,()=>{},x=>String(x));
  return {S,api};
 };
 const hero={h:1,n:'Erou',hp:50},archer={n:'Arcaș',hp:25},healer={n:'Vraci',hp:20};
