@@ -130,7 +130,7 @@ BEGIN
       in p_data la atacul bossului. */
    IF public.world_units_ok(v_units)
       AND EXISTS (
-        SELECT 1 FROM jsonb_array_elements(v_units) AS u(unit)
+        SELECT 1 FROM jsonb_array_elements(CASE WHEN jsonb_typeof(v_units)='array' THEN v_units ELSE '[]'::jsonb END) AS u(unit)
         WHERE (v_counter='Arcas' AND u.unit->>'c'='Arcaș')
            OR (v_counter<>'Arcas' AND u.unit->>'c'=v_counter)
       ) THEN
