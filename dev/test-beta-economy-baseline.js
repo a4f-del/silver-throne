@@ -16,7 +16,7 @@ assert(server.includes('WHERE public.world_npc_raids.cooldown_until <= v_now'),
  'Server-side atomic cooldown guard remains active');
 assert(npc.includes('cn(\'r\'); spend(1);'),'NPC raid entrance still costs one point');
 assert(html.includes("d.raid!=null?1"),'NPC captain still costs another point');
-assert(html.includes("const ip=it=>Math.round((25+it.l*14)*(1+it.r*1.1))"),
+assert(html.includes("ip=it=>Math.round((25+it.l*14)*(1+it.r*1.1))"),
  'Shop purchase-price formula preserved');
 assert(html.includes("function reshop(){const c=15*S.lvl"),'Shop reroll sink preserved');
 assert(html.includes('function upItem(r)'),'Upgrade still consumes ore/materials per attempt');
