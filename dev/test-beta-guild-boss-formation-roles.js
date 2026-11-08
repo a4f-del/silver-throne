@@ -85,7 +85,7 @@ async function verifySync(){
  const lwSnap=()=>({name:'team',units:['Campion','Vraci']});
  const lwSync=()=>new Promise(resolve=>{resolveSync=()=>{if(syncSuccess){LUME.pubSig=JSON.stringify(lwSnap());LUME.err='';}else{LUME.err='offline';}refresh++;resolve();};});
  const GSR={},CONT={user:{id:uid}},ST_SERVER='beta';
- const vars={S:state,FX,GUILD,CONT,ST_SERVER,LUME,lwSnap,lwSync,
+ const vars={S:state,FX:fx,GUILD,CONT,ST_SERVER,LUME,lwSnap,lwSync,
    guildEnabled:()=>true,guildPaint:()=>paint++,
    guildAction:async()=>{attackCount++;return {boss:{hp:500,personal_damage:500}};},
    guildBossReplay:()=>replay++};
