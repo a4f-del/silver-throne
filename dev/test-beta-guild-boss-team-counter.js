@@ -56,5 +56,5 @@ assert.equal(damage([champ,archer],'Vraci'),base,'Wrong class gives no bonus');
 assert.equal(damage([champ,healer,archer,guard],'Vraci'),base,'Invalid 4-unit team does not qualify');
 assert.equal(damage([champ,healer],'Vraci',30,9000,300),300,'Never exceeds remaining boss HP');
 assert(guild.includes('Bonusul de contraclasă (+25% daune)'),'UI explains rule');
-assert(html.includes('bresle.js?v=2026.11.08-5'),'JS cache version updated');
+assert(html.includes('bresle.js?v=2026.11.08-6'),'JS cache version updated');
 console.log('OK: 3 valid server-published classes, Campion+counter bonus, same caps/permissions/claims, malformed arrays, BETA isolated.');
