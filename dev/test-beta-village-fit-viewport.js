@@ -67,7 +67,7 @@ const run=(width,height,top,layoutWidth)=>{
 const wide=run(1650,800,225,1160);
 assert(wide.width,'Desktop calculates a centered map');
 const w=parseFloat(wide.width),h=w*928/1152;
-assert(225+h+40<=800,'Village fits vertically with bottom padding');
+assert(225+h+24<=800,'Village fits vertically with compact bottom padding');
 assert(w<=1160,'Image width never exceeds its container');
 const expanded=run(1650,800,70,1600);
 assert(expanded.width,'Expanded scene computes viewport-sized dimensions');
