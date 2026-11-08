@@ -64,7 +64,9 @@ Expedițiile mercenarilor sunt activități pasive, nu o a patra buclă obligato
 - [ ] **18. Feedback de luptă pe toate modurile.** Verificăm portrete mari, selecție, animații și claritatea daunelor pe Temnițe, Turn, PvP și Tron; performanță și accesibilitate pe mobil.
   - **În lucru (BETA):** am făcut Skip idempotent, accesibil la tastatură, cu Escape/focus corect; redarea respectă `prefers-reduced-motion` și logul/ținta au etichete accesibile. Acoperire de regresie pentru Temnițe, Turn, PvP/Lume și Tron. Test: `dev/test-beta-combat-feedback-accessibility.js`; QA: `docs/BETA-COMBAT-FEEDBACK-ACCESSIBILITY.md`. FPS și utilizabilitatea reală pe mobil rămân de verificat.
 - [ ] **19. Turn cu puncte de pornire.** Deblocări după record (de exemplu 1/20/40/60/80), cu recompense ajustate pentru etajele sărite și fără farming suplimentar.
+  - **În lucru (BETA):** recordurile 20/40/60/80 permit start de la 21/41/61/81. Etajele sărite dau 0 recompense, ca să nu creeze farming; costul de 6 puncte și 3 încercări zilnice rămân. Test: `dev/test-beta-tower-checkpoints.js`. Ghid: `docs/BETA-TOWER-CHECKPOINTS-PROGRESS.md`.
 - [ ] **20. Recompensele Turnului mai lizibile.** Praguri, record, următorul legendar și progres până la următoarea îmbunătățire — vizibile fără a consulta mai multe meniuri.
+  - **În lucru (BETA):** cardul Turnului include următorul străjer și progresul spre următorul prag de Fierărie, alături de recorduri și lista de legendare deja existente. Nu apar noi ferestre, resurse sau bonusuri; QA mobil/desktop necesar.
 - [ ] **21. Măiestrie după nivelul 50.** Obiective orizontale: solo, clase, căpitani, realizări și titluri/portrete; fără nivel 100 și fără statistică permanentă care escaladează la infinit.
 - [ ] **22. Colecții și seturi endgame.** Evidențiem echipamentele și legendarele deținute, seturile incomplete și obiectivele de colecție; începem cu UI, nu cu o nouă monedă.
 

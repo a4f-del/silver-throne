@@ -29,6 +29,46 @@ const twUpMax = () => { const b = (S.tw && S.tw.best) || 0; return 5 + TWR.up.fi
 /* numele monștrilor: urcă prin monștrii temnițelor pe măsură ce urci etajele */
 function twMob(n) { const L = Object.values(TR_D).flatMap(x => x.m); return L[Math.min(L.length - 1, Math.floor((twG(n) - 1) * L.length / 50))]; }
 const twAb = n => TWR.ab[(Math.floor(n / 10) - 1) % TWR.ab.length];
+/* BETA: pornește după un prag DEJA ÎNVINS. Nu se acordă XP sau pradă
+   pentru etajele sărite, nici recompensele lor legendare. Costul rămâne 6p. */
+const TW_STARTS=[1,21,41,61,81];
+function twStartChoice(t){
+ if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta')return 1;
+ const n=Number(t.start||1);
+ return TW_STARTS.includes(n)&&(n===1||(t.best||0)>=n-1)?n:1;
+}
+function twStartSet(n){
+ if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||S.d||
+   (typeof adventureActive==='function'&&adventureActive()))return;
+ const t=twSt();n=Number(n);
+ if(!TW_STARTS.includes(n)||(n>1&&(t.best||0)<n-1))return;
+ t.start=n;S.msg='';go();
+}
+function twStartControls(t){
+ if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta')return '';
+ const current=twStartChoice(t);
+ const options=TW_STARTS.map(n=>
+  '<option value="'+n+'"'+(n>1&&(t.best||0)<n-1?' disabled':'')+
+  (n===current?' selected':'')+'>'+
+  (n===1?'Etajul 1':'Etajul '+n+' (după record '+(n-1)+')')+'</option>'
+ ).join('');
+ return '<div class="tw-faststart"><label for="tw-start">Startul următoarei urcări</label>'+
+  '<select id="tw-start" onchange="twStartSet(this.value)">'+options+'</select>'+
+  '<small>Etajele sărite NU dau aur, minereu, XP, obiecte sau recompense legendare. O urcare costă tot 6 puncte și consumă una dintre cele 3 încercări.</small></div>';
+}
+/* Repere compacte deja existente în Turn, fără nouă sursă de recompense. */
+function twProgress(t){
+ if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta')return '';
+ const best=Math.max(0,Math.min(100,Number(t.best)||0));
+ const guard=best>=100?null:Math.min(100,Math.floor(best/10)*10+10);
+ const next=TWR.up.find(n=>best<n),prev=[0,...TWR.up.filter(n=>n<=best)].at(-1);
+ const pct=next?Math.round((best-prev)/(next-prev)*100):100;
+ const craft=next?'Următorul prag Fierărie: etajul '+next+' (+'+(6+TWR.up.indexOf(next))+')':'Toate treptele Fierăriei deblocate';
+ return '<div class="tw-progress"><div class="tw-progress-info">'+
+  '<span><b>Următorul străjer</b>'+(guard?'Etajul '+guard:'Toți străjerii învinși')+'</span>'+
+  '<span><b>Progres în Fierărie</b>'+craft+'</span></div>'+
+  '<div class="tw-progress-meter" role="progressbar" aria-label="Progres până la următorul prag de Fierărie" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><i style="width:'+pct+'%"></i></div></div>';
+}
 function twEnter() {
   const t = twSt();
   if (S.lvl < TWR.lv) { S.msg = `Turnul se deschide la nivelul ${TWR.lv}.`; return go(); }
@@ -36,10 +76,12 @@ function twEnter() {
   if (!S.fs.some(f => f.hp > 0)) { S.msg = 'Toți luptătorii sunt căzuți. Du-i la Infirmerie.'; return go(); }
   if (t.n >= TWR.day) { S.msg = 'Ai folosit toate cele 3 urcări de azi. Revino mâine.'; return go(); }
   if (S.pts < TWR.cost) { S.msg = `Intrarea în Turn costă ${TWR.cost} puncte.`; return go(); }
+  const start=typeof twStartChoice==='function'?twStartChoice(t):1;
   spend(TWR.cost); t.n++;
   let di = 0; DG.forEach((g, i) => { if (!g.ev && S.lvl >= g.lv) di = i; });   /* materialele vin ca din cea mai mare temniță deschisă */
-  S.d = { tw: 1, room: 0, rooms: 9999, k: twK(1), rw: 1, bn: 'Străjerul', di, tier: 0, loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false };
-  S.d.doors = doors(); S.tab = 'c'; S.msg = 'Intri în Turn. Fiecare etaj e mai greu decât cel dinainte; poți ieși oricând cu prada.'; cn('d'); go();
+  S.d = { tw: 1, room: start-1, rooms: 9999, k: twK(start), rw: 1, bn: 'Străjerul', di, tier: 0, loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false };
+  if(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta')S.d.twStart=start;
+  S.d.doors = doors(); S.tab = 'c'; S.msg = start>1?'Începi urcarea la etajul '+start+'. Etajele sărite nu acordă pradă sau XP. Primești recompense numai pentru etajele câștigate.':'Intri în Turn. Fiecare etaj e mai greu decât cel dinainte; poți ieși oricând cu prada.'; cn('d'); go();
 }
 /* înainte de fiecare etaj (din door): dificultatea, prada și numele străjerului */
 function twFloor(d) { const n = d.room; d.k = twK(n); d.rw = 1 + twG(n) * 0.04; if (n % 10 === 0) d.bn = `Străjerul etajului ${n}`; }
@@ -78,9 +120,10 @@ function twCard() {
   if (S.lvl < TWR.lv - 5) return '';   /* la nivelul 1 nu are rost: apare abia cu 5 niveluri înainte de deblocare */
   const t = twSt(), lock = S.lvl < TWR.lv, nx = TWR.up.find(f => t.best < f);
   return `<section class="tw-c"><div class="tw-img"><img src="imagini/lume/turn.webp" alt=""></div><div><h2>Turnul</h2>`
-    + `<div class="info"><div class="mute">Etaje tot mai grele, câte o luptă pe etaj.</div><details><summary>ⓘ Cum funcționează</summary><div class="mute">100 de etaje, un străjer la fiecare 10, cu un obiect la fiecare străjer. Fiecare intrare o ia de la etajul 1; rămâne recordul tău. Fără vindecare, în afară de Vraci și de un foc de tabără după fiecare străjer. Recordul deblochează treptele +6…+9 la Fierărie (etajele 10, 20, 40, 60). La etajele 20, 25, 30, 40, 50… 100 câștigi câte un legendar, prima dată când ajungi acolo.</div></details></div>`
+    + `<div class="info"><div class="mute">Etaje tot mai grele, câte o luptă pe etaj.</div><details><summary>ⓘ Cum funcționează</summary><div class="mute">100 de etaje, un străjer la fiecare 10, cu un obiect la fiecare străjer. ${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'După recorduri de 20/40/60/80 poți porni direct de la 21/41/61/81, fără pradă pentru etajele sărite.':'Fiecare intrare o ia de la etajul 1; rămâne recordul tău.'} Fără vindecare, în afară de Vraci și de un foc de tabără după fiecare străjer. Recordul deblochează treptele +6…+9 la Fierărie (etajele 10, 20, 40, 60). La etajele 20, 25, 30, 40, 50… 100 câștigi câte un legendar, prima dată când ajungi acolo.</div></details></div>`
     + (lock ? `<div class="row"><span class="mute">Se deschide la nivelul ${TWR.lv}.</span></div>` :
       `<div class="tw-st"><span>Recordul tău<b>${t.best ? 'etajul ' + t.best : '—'}</b></span><span>Săptămâna asta<b>${t.wb ? 'etajul ' + t.wb : '—'}</b></span><span>Urcări azi<b>${twLeft()} / ${TWR.day}</b></span><span>Fierăria<b>până la +${twUpMax()}</b></span></div>`
+      + twProgress(t) + twStartControls(t)
       + twLgRow(t)
       + `<div class="row"><span class="mute">${nx ? `Următoarea treaptă (+${5 + TWR.up.indexOf(nx) + 1}) la etajul ${nx}.` : 'Ai deblocat toate treptele Fierăriei.'}</span><button class="p" onclick="twEnter()"${twLeft() && !S.d ? '' : ' disabled'}>Intră · ${TWR.cost} puncte</button></div>`)
     + `</div></section>`;
@@ -116,5 +159,18 @@ function lwTwr() {
 .tw-st{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0}.tw-st span{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--mute);background:#0e1214}.tw-st b{display:block;font-size:15px;color:var(--gold2)}
 @media (max-width:600px){.tw-c{grid-template-columns:64px 1fr}.tw-img img{width:64px}.tw-st{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .tw-glow{animation:twg 2.4s ease-in-out infinite}@keyframes twg{50%{opacity:.15}}@media (prefers-reduced-motion:reduce){.tw-glow{animation:none}}`;
+  st.textContent += `
+.tw-progress{border:1px solid var(--line);background:#13191d;border-radius:9px;padding:9px;margin:10px 0}
+.tw-progress-info{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.tw-progress-info span{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mute)}
+.tw-progress-info b{font-size:12px;color:var(--gold2)}
+.tw-progress-meter{height:5px;border-radius:4px;background:#4b463c;margin-top:8px;overflow:hidden}
+.tw-progress-meter i{display:block;height:100%;background:linear-gradient(90deg,#987143,#e9c673)}
+.tw-faststart{display:flex;flex-direction:column;gap:5px;margin:9px 0}
+.tw-faststart label{font-size:13px;color:var(--gold2);font-weight:700}
+.tw-faststart select{max-width:100%;min-height:38px}
+.tw-faststart small{font-size:12px;line-height:1.4;color:var(--mute)}
+@media(max-width:500px){.tw-progress-info{grid-template-columns:1fr}.tw-progress{padding:7px}}
+`;
   document.head.appendChild(st);
 })();
