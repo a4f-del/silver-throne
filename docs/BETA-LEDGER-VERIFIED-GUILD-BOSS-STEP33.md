@@ -1,6 +1,6 @@
 # Silver Throne BETA — pasul 33 / SQL34: dovadă server-side pentru lovitura bossului de breaslă
 
-**Stare:** migrare SQL34 pregătită în GitHub. Nu se instalează automat. Ruleaz-o **manual numai în Supabase Silver-Throne-Test**, după SQL14–19 și SQL25–26. **NU LIVE.** Nu schimbă `guild_api`, recompensele, viețile, numărul de lovituri disponibile, salvările sau progresul.
+**Stare:** SQL34 instalat în Silver-Throne-Test, cu **9/9 verificări de structură `true`** confirmate de operator. Testul cu o lovitură reală nouă și verificarea ledgerului rămân de efectuat. Instalarea nu se face automat. Ruleaz-o **manual numai în Supabase Silver-Throne-Test**, după SQL14–19 și SQL25–26. **NU LIVE.** Nu schimbă `guild_api`, recompensele, viețile, numărul de lovituri disponibile, salvările sau progresul.
 
 ## Ce se schimbă cu adevărat
 
