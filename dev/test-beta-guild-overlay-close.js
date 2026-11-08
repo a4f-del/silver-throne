@@ -42,5 +42,5 @@ assert.equal(overlay,null,'Escape closes');
 assert(stopped,'Escape should not close unrelated overlays');
 guildOpen();guildClose();assert.equal(overlay,null,'X button handler still closes');
 const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
-assert(html.includes('bresle.js?v=2026.11.08-5'),'New guild JS asset version');
+assert(html.includes('bresle.js?v=2026.11.08-6'),'New guild JS asset version');
 console.log('OK: close on backdrop/Escape; inside clicks preserved; open and X unchanged; cache bumped.');
