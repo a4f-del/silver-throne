@@ -90,7 +90,12 @@ async function tronPublish(quiet) {
   if (!(await tronUid())) { if (!quiet) { S.msg = 'Conectează-te la cont ca să participi la Tron.'; go(); } return false; }
   const h = S.fs.find(f => f.h) || S.fs[0], local = tronUnits();
   const r = await tronRpc('throne_publish', { p_name: h.n, p_level: S.lvl, p_ghost: { v: tronIsBetaDuel() ? 2 : 1, units: local } });
-  if (r.error) { if (!quiet) { S.msg = 'Nu am putut publica apărarea: ' + r.error; go(); } return false; }
+  if (r.error) {
+    // Eroarea trebuie văzută și când publicarea rulează automat în BETA.
+    if (tronIsBetaDuel()) TRON.pubError = 'Sincronizarea apărării: ' + r.error;
+    if (!quiet) { S.msg = 'Nu am putut publica apărarea: ' + r.error; go(); }
+    return false;
+  }
   TRON.pub = r.data.units.map((u, i) => Object.assign({}, u, { capped: !!(local[i] && (local[i].hp > u.hp || local[i].atk > u.atk || local[i].def > u.def)) })); TRON.pubAt = Date.now();
   if (!quiet) { S.msg = 'Apărarea ta a fost actualizată.'; await tronSync(); go(); }
   return true;
@@ -130,7 +135,8 @@ async function tronAutoPublishNow() {
       TRON.pubFailAt = 0;
     } else {
       TRON.pubFailAt = Date.now();
-      TRON.pubError = 'Apărarea nu a putut fi sincronizată. Se reîncearcă automat.';
+      if (!TRON.pubError)
+        TRON.pubError = 'Apărarea nu a putut fi sincronizată. Se reîncearcă automat.';
     }
     return ok;
   })();
@@ -151,9 +157,24 @@ async function tronProvoca() {
   if (S.tron.cur) { S.msg = 'Ai un rezultat de trimis; așteaptă o clipă.'; return go(); }
   TRON.busy = true;
   try {
-    if (!(await (tronIsBetaDuel() ? tronAutoPublishNow() : tronPublish(true)))) { S.msg = 'Nu am putut publica apărarea ta. Verifică nivelul (minim ' + TT.CFG.minLevel + ') și conexiunea.'; return; }
+    const beta = tronIsBetaDuel();
+    const published = await (beta ? tronAutoPublishNow() : tronPublish(true));
+    // BETA: sincronizarea automată este un mecanism de confort, nu o
+    // condiție nouă pentru a ataca. O apărare validă poate exista deja
+    // pe server, iar publicarea nouă poate eșua temporar (sau fi în backoff).
+    // Doar throne_challenge_start decide dacă provocarea e permisă.
+    // LIVE păstrează comportamentul anterior.
+    if (!published && !beta) {
+      S.msg = 'Nu am putut publica apărarea ta. Verifică nivelul (minim ' + TT.CFG.minLevel + ') și conexiunea.';
+      return;
+    }
     const r = await tronRpc('throne_challenge_start');
-    if (r.error) { S.msg = r.error; await tronSync(); return; }
+    if (r.error) {
+      S.msg = 'Tron: ' + r.error +
+        (beta && !published && TRON.pubError ? ' · ' + TRON.pubError : '');
+      await tronSync();
+      return;
+    }
     S.tron.cur = { id: r.data.id, win: false }; tronFight(r.data);
   } finally { TRON.busy = false; if (!S.d) go(); }
 }
