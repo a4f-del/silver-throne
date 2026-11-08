@@ -24,7 +24,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for script in ./*.js dev/test-*.js; do
+          for script in ./*.js dev/test-*.js dev/smoke-beta-screens.mjs; do
             node --check "$script"
           done
       - name: Suita de regresii BETA
