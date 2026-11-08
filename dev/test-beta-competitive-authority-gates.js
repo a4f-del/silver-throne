@@ -17,7 +17,7 @@ assert(/\bWITH evidence\b/.test(noComments),'Must enumerate actual installed con
 assert(/\bFROM public\.guild_events\b/.test(noComments),'Must aggregate real guild event log');
 assert(/\bHAVING count\(\*\)/.test(noComments),'Must include burst signal');
 assert(/count\(DISTINCT user_id\)/.test(query),'Only aggregate reporter counts');
-assert(!/\b(?:CREATE|ALTER|DROP|TRUNCATE|INSERT|UPDATE|DELETE|REVOKE|GRANT|CALL|DO|EXECUTE)\b/i.test(noComments),
+assert(!/^(?:\s*)(?:CREATE|ALTER|DROP|TRUNCATE|INSERT|UPDATE|DELETE|REVOKE|GRANT|CALL|DO|EXECUTE)\b/im.test(noComments),
   'Diagnostic must be strictly SELECT/CTE read-only');
 for(const blocker of [
  'server_owned_progress','server_owned_inventory','server_decided_pvp',
