@@ -36,7 +36,7 @@ assert(logic.includes('ghostAtkMult: 1.62'),'King attack multiplier shared');
 
 // Synthetic duel illustrates why a 3-round SQL32 holder verdict can disagree
 // with a client victory. Values are invented and not user data.
-const a={hp:1600,atk:600,def:450},h={hp:1200,atk:480,def:150};
+const a={hp:1600,atk:600,def:450},h={hp:1900,atk:480,def:150};
 const capA=Math.ceil(a.hp*.38),capH=Math.ceil(h.hp*.38);
 function play(kingFirst,realistic){
  let ah=a.hp,hh=h.hp,rounds=0;
