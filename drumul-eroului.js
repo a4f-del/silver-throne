@@ -4,7 +4,7 @@
 const JE_STEPS = [
  {id:'poarta',title:'Cenușa de la poartă',icon:'🛡️',
   say:'„Nu lăsăm satul singur. Hai să aflăm ce se ascunde sub deal.” — Paznicul',
-  help:'Primește-l pe Paznic, apoi intră în Mina Cenușie din Coborâre. Numele lui poate fi schimbat ulterior din Cont. Învinge pe rând cei trei monștri și Căpitanul Cenușii. După victorie revii automat și primești prada. Dacă te retragi mai devreme, progresul în mină se păstrează, dar jurământul se încheie după căpitan.',
+  help:'Primește-l pe Paznic, apoi intră în Mina Cenușie din Coborâre. Numele lui poate fi schimbat ulterior din Erou → Cont și profil. Învinge pe rând cei trei monștri și Căpitanul Cenușii. După victorie revii automat și primești prada. Dacă te retragi mai devreme, progresul în mină se păstrează, dar jurământul se încheie după căpitan.',
   reward:{g:50,o:15},parts:[['Paznicul s-a alăturat',()=>jeHas('Paznic')],['Ai învins primul căpitan',()=>jeCount('bs')>=1]],
   action:()=>!jeHas('Paznic')?['Han','a','h']:['Mina Cenușie','c','']},
  {id:'urme',title:'Urmele din cenușă',icon:'🏹',
@@ -16,12 +16,12 @@ const JE_STEPS = [
    : ['Topitorie','a','a']},
  {id:'otel',title:'Oțel pentru cei rămași',icon:'⚒️',
   say:'„O armă uitată în rucsac nu apără pe nimeni.” — Paznicul',
-  help:'Ridică arma forjată din Topitorie, apoi mergi în Echipă. Deasupra echipamentului vei găsi un buton „Pune pe Erou” pentru o armă potrivită din rucsac. Dacă nu ai o armă, forjează o Sabie pentru Campion.',
+  help:'Ridică arma forjată din Topitorie, apoi deschide Erou → Echipă și echipament din bara de sus. Deasupra echipamentului vei găsi un buton „Pune pe Erou” pentru o armă potrivită din rucsac. Dacă nu ai o armă, forjează o Sabie pentru Campion.',
   reward:{g:30,o:5},parts:[['Ai echipat prima armă',()=>jeCount('e')>=1]],
   action:()=>jeHasWeapon()?['Echipă','e','']:['Topitorie','a','a']},
  {id:'han',title:'Jurământul veteranului',icon:'⚔️',
   say:'„Am luptat pentru regi. Aș vrea să lupt pentru oameni.” — Războinicul',
-  help:'Antrenează o dată eroul în Sat → Antrenament. Apoi mergi la Han, ascultă povestea Războinicului și primește-l în echipă. Îi poți schimba numele ulterior din Cont.',
+  help:'Antrenează o dată eroul în Sat → Antrenament. Apoi mergi la Han, ascultă povestea Războinicului și primește-l în echipă. Îi poți schimba numele ulterior din Erou → Cont și profil.',
   reward:{g:135,o:5},parts:[['Ai antrenat eroul',()=>jeCount('t')>=1],['Războinicul are un nume',()=>jeHas('Războinic')]],
   action:()=>jeCount('t')<1?['Antrenament','a','t']:['Han','a','h']},
  {id:'vesti',title:'Vești din sat',icon:'📜',
@@ -144,7 +144,7 @@ const JE_MILESTONES=[
   why:'Poți tranzacționa obiecte eligibile cu alți jucători. Echipamentul legendar rămâne legat de cont.'},
  {lv:20,title:'Turnul',where:'Coborâre → Turn',
   why:'Se deschide provocarea de endgame cu etaje și străjeri. Nu înlocuiește progresul din Temnițe.'},
- {lv:30,title:'Al patrulea loc în echipă',where:'Echipă',
+ {lv:30,title:'Al patrulea loc în echipă',where:'Erou → Echipă și echipament',
   why:'Poți folosi încă un luptător în Temnițe; la Tron și în fantoma Lumii se păstrează limita proprie.'}
 ];
 function jeMilestoneDue(){
