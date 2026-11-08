@@ -242,10 +242,30 @@ function tronCheck() {
   if (S.d && S.d.tron) { if (!S.d.done) return; S.d = null; t.cur.win = true; S.msg = 'Ai învins apărarea! Se trimite rezultatul…'; }
   if (!TRON.rep) tronReport(t.cur);
 }
+/* BETA SQL33: optional audit wrapper. Fallback is permitted ONLY when the
+   wrapper RPC is genuinely missing from PostgREST. Never retry a potentially
+   committed challenge via the legacy RPC after a generic network/server error. */
+function tronAuditFinishRpcMissing(error) {
+  return /PGRST202|Could not find the function|function public\\.beta_throne_challenge_finish_audited\\([^)]*\\) does not exist|No function matches the given name and argument types/i.test(String(error||''));
+}
 async function tronReport(cur) {
   TRON.rep = true;
   try {
-    const r = await tronRpc('throne_challenge_finish', { p_id: cur.id, p_win: !!cur.win });
+    const args = { p_id: cur.id, p_win: !!cur.win };
+    let r;
+    if (tronIsBetaDuel() && TRON.auditFinishRpc !== false) {
+      r = await tronRpc('beta_throne_challenge_finish_audited', args);
+      if (r.error && tronAuditFinishRpcMissing(r.error)) {
+        // SQL33 nu a fost încă instalat ori nu e vizibil în schema cache.
+        // Intrarea în Tron rămâne funcțională pe vechiul RPC.
+        TRON.auditFinishRpc = false;
+        r = await tronRpc('throne_challenge_finish', args);
+      } else if (!r.error) {
+        TRON.auditFinishRpc = true;
+      }
+    } else {
+      r = await tronRpc('throne_challenge_finish', args);
+    }
     if (r.error && !/necunoscut/i.test(r.error)) { TRON.repErr = r.error; return; }          /* rețea sau server: rămâne de trimis */
     TRON.repErr = ''; S.tron.cur = null;
     S.msg = r.error ? 'Provocarea nu mai există pe server.' : r.data.crowned ? '👑 Ai ocupat Tronul de Argint! Ține-l cât mai mult.' : cur.win ? 'Victorie, dar ' + String(r.data.reason || '').toLowerCase() + '.' : 'Ai pierdut provocarea. Poți reîncerca după pauză.';
