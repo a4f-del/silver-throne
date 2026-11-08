@@ -63,6 +63,33 @@ function stCompactSettingToggle(k) {
   stSettingsReopen = true;
   btog(k);
 }
+/* Buton de alimentare real: btog salvează modificarea, iar botTick execută imediat
+   prima verificare; ciclul normal al jocului continuă apoi la fiecare secundă.
+   Nu creează al doilea interval și nu ocolește limitele Asistentului BETA. */
+function stBotPower() {
+  if (!stCompactActive() || !stCompactAvailable() || !S.prem ||
+      typeof BT !== 'function' || typeof btog !== 'function') return;
+  const wasOn = !!BT().on;
+  if (!wasOn) S.bn = 0; // prima verificare nu aşteaptă temporizatorul precedent
+  stSettingsReopen = true;
+  btog('on'); // go() persistă setarea şi redesenează meniul
+  if (!wasOn && BT().on && typeof botTick === 'function') {
+    stSettingsReopen = true;
+    try { botTick(); } finally { stSettingsReopen = false; }
+  }
+}
+function stBotPowerButton(botOn, disabled, premium) {
+  const title = botOn ? '■ Oprește BOT-ul' : '▶ Pornește BOT-ul';
+  const state = botOn ? '🟢 BOT activ' : '⚪ BOT oprit';
+  const info = !premium ? 'Ai nevoie de Premium pentru a porni Asistentul.' :
+    botOn ? 'Execută automat acțiunile activate, când sunt disponibile și pagina este deschisă.' :
+      'Apasă Pornire pentru a executa automat acțiunile selectate.';
+  return '<div class="st-bot-power-box"><div class="st-bot-power-state" role="status">' +
+    state + '</div><button type="button" class="st-bot-power' + (botOn ? ' running' : '') +
+    '" onclick="stBotPower()" aria-pressed="' + botOn + '"' +
+    (disabled ? ' disabled' : '') + '>' + title +
+    '</button><small>' + info + '</small></div>';
+}
 function stCompactSettingRow(k, label, value, disabled, activeLabel, inactiveLabel) {
   return '<button type="button" class="st-setting-option' + (value ? ' on' : '') +
     '" aria-pressed="' + (!!value) + '" onclick="stCompactSettingToggle(\'' + k + '\')"' +
@@ -104,7 +131,7 @@ function stCompactHdr() {
     '<div class="st-drop-panel st-settings-panel"><div class="st-drop-head"><b>Setări</b><small>🧪 Server BETA</small></div>' +
     '<div class="st-settings-section"><b>🤖 Asistent Premium</b>' +
     '<small>Doar confort: nu pornește temnițe, raiduri sau forjări noi.</small></div>' +
-    stCompactSettingRow('on','Bot Premium',botOn,botsDisabled,'Pornit',S.prem ? 'Oprit' : 'Necesită Premium') +
+    stBotPowerButton(botOn,botsDisabled,!!S.prem) +
     stCompactSettingRow('f','Ridică obiectele forjate',!!bot.f,botsDisabled,'Activat','Dezactivat') +
     stCompactSettingRow('eq','Echipează automat',!!bot.eq,botsDisabled,'Activat','Dezactivat') +
     stCompactSettingRow('hl','Vindecă folosind aur',!!bot.hl,botsDisabled,'Activat','Dezactivat') +
@@ -185,6 +212,14 @@ body.st-compact .st-settings-panel{width:min(350px,calc(100vw - 20px));max-heigh
 body.st-compact .st-settings-section{display:flex;flex-direction:column;gap:3px;margin:6px 2px;padding:4px 6px}
 body.st-compact .st-settings-section b{font:700 13px Cinzel,Georgia,serif;color:var(--gold2)}
 body.st-compact .st-settings-section small{font-size:12px;line-height:1.3;color:var(--mute)}
+body.st-compact .st-bot-power-box{display:flex;flex-direction:column;gap:7px;margin:7px 2px 11px;padding:11px;border:1px solid #7b6543;border-radius:10px;background:linear-gradient(145deg,#222820,#10191d);box-shadow:inset 0 0 18px #0007}
+body.st-compact .st-bot-power-state{font-size:12px;font-weight:700;color:#d9c7a5}
+body.st-compact .st-bot-power-box>button.st-bot-power{display:block;width:100%;padding:11px 12px;min-height:44px;border-radius:8px;border:1px solid #e4bd69;background:linear-gradient(180deg,#5f8c4a,#214d2d);color:white;font:700 15px Cinzel,Georgia,serif;box-shadow:0 2px 12px #326c3544;text-align:center}
+body.st-compact .st-bot-power-box>button.st-bot-power.running{border-color:#c99961;background:linear-gradient(180deg,#834a35,#51251c);box-shadow:0 2px 12px #973b2944}
+body.st-compact .st-bot-power-box>button.st-bot-power:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+body.st-compact .st-bot-power-box>button.st-bot-power:focus-visible{outline:2px solid #f0d27a;outline-offset:3px}
+body.st-compact .st-bot-power-box>small{font-size:11px;line-height:1.4;color:#aebbad}
+
 body.st-compact .st-settings-break{border-top:1px solid #816b3f55;padding-top:11px;margin-top:10px}
 body.st-compact .st-settings-panel>button.st-setting-option{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;color:var(--ink);border:1px solid #ffffff14;border-radius:7px;background:#111b1f;min-height:42px}
 body.st-compact .st-setting-option span{font-size:13px;line-height:1.25;text-align:left}
