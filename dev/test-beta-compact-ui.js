@@ -29,11 +29,11 @@ assert.equal((nav.match(/<button/g)||[]).length,4,'Exactly four primary destinat
 for(const t of ['Sat','Coborâre','Hartă','Tron']) assert(nav.includes(t),t);
 assert(!nav.includes('Echipă'),'Team moved out of primary navigation');
 const header = ctx.stCompactHdr();
-for(const token of ['id="pp"','id="pt"','wm-open','bhOpen()','stCompactHeroGo','wf-open','guild-open','tab(\\\'k\\\')','stCompactToggleAccount','btog','fxToggleInstant']) assert(header.includes(token),'Header action '+token);
+for(const token of ['id="pp"','id="pt"','wm-open','bhOpen()','stCompactHeroGo','wf-open','guild-open',"tab('k')",'stCompactToggleAccount','btog','fxToggleInstant']) assert(header.includes(token),'Header action '+token);
 assert(ctx.stCompactEvent().includes('<details'),'Event starts collapsed');
 assert(styles.join('').includes('st-compact'),'Scoped styles');
 ctx.ST_SERVER='live';
 assert(!ctx.stCompactActive(),'LIVE unchanged');
 assert(html.includes('stCompactActive()')&&html.includes('stCompactNav()')&&html.includes('stCompactEvent()'),'All navigation hooks wired');
-for(const snippet of html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)) if(snippet[1].trim()) new Function(snippet[1]);
+for(const script of html.split('<script>').slice(1).map(s=>s.split('</script>')[0])) if(script.trim()) new Function(script);
 console.log('OK: four nav entries, hero/social/account/settings actions, compact event, BETA-only scope, inline JS.');
