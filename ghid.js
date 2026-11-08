@@ -16,12 +16,10 @@ const GH_MT = { h: 'Harta', l: 'Harta', b: 'Clasament', k: 'Campanie', t: 'Terit
 /* Ghidarea BETA urmeaza meniul compact, fara a schimba ghidul LIVE. */
 const ghCompact = () => typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta' &&
   typeof stCompactActive === 'function' && stCompactActive();
-const ghTeamLabel = () => ghCompact() ? 'Erou → Echipă și echipament' : 'Echipă';
+const ghTeamLabel = () => 'Echipă';
 function ghTeamNav() {
-  const selector = ghCompact()
-    ? 'header .st-hero-drop:not([open]) > summary, header .st-hero-drop[open] button[onclick^="stCompactHeroGo("]'
-    : '#nv button[onclick="tab(\'e\')"]';
-  return ghQ(selector)[0] || null;
+  // Echipă are din nou buton permanent în bara laterală, inclusiv pe BETA.
+  return ghQ('#nv button[onclick="tab(\'e\')"]')[0] || null;
 }
 function ghReplayTarget() {
   return ghQ(ghCompact()
@@ -53,7 +51,7 @@ const GHID = [
       const m = ghQ('#lgm .ipk-c button.p'); if (m.length) return m.slice(0, 1); const w = ghQ('#v button[onclick="invPick(\'w\')"]'); return w.length ? w : ghB('invPick(').concat(ghB('equip(')).slice(0, 1);
     },
     d: (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta'
-      ? 'Când arma e gata, apasă <b>„Ridică”</b> în Topitorie. Din bara de sus deschide <b>Erou → Echipă și echipament</b>, apoi pune arma pe erou.'
+      ? 'Când arma e gata, apasă <b>„Ridică”</b> în Topitorie. Din bara din stânga deschide <b>Echipă</b>, apoi pune arma pe erou.'
       : 'Când arma e gata, apasă <b>„Ridică”</b> în Topitorie. Apoi du-te în <b>Echipă</b>: la <b>Armă</b> apasă <b>„Alege”</b>, apoi <b>„Pune”</b>.') },
   { t: 'Antrenează eroul', p: { t: 'a', v: 't' }, c: () => C('t') >= 1, r: { g: 60 }, k: () => ghB('train(', 1).slice(0, 1),
     d: 'În <b>zona de antrenament</b> transformi aurul în putere pentru erou. Antrenează o dată.<details><summary>Mai multe</summary>Forță, Rezistență și Agilitate cresc eroul (iar mercenarii își trag puterea din el). Pricepere și Negoț ajută toată echipa.</details>' },
