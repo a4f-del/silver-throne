@@ -523,6 +523,12 @@ function heroSoloControl(){
  if(available.length&&S.fs.length<max&&canEdit)
   h+='<button class="p" onclick="heroDungeonRestore()">↩ Readu mercenarii</button>';
  h+='</div>';
+ // Echipa efectivă rămâne la vedere, nu doar numărul de locuri.
+ h+='<div class="cb-party-active" aria-label="Echipa activă">'+S.fs.map(f=>
+   '<span class="cb-party-member'+(f.hp<=0?' cb-member-fallen':'')+'"><b>'+
+   (f.h?'👑 ':'')+tEsc(f.n)+'</b><small>'+tEsc(f.h?'Erou':f.c||'Mercenar')+
+   (f.hp<=0?' · căzut':'')+'</small></span>'
+ ).join('')+'</div>';
  if(hero.hp<=0)h+='<p class="mute">Eroul este căzut. Ridică-l la Infirmerie înainte să intre singur în temniță.</p>';
  if(reserves.length&&S.fs.length<max){
   h+='<div class="cb-party-reserves" aria-label="Mercenari în rezervă">'+reserves.map(({f,i,busy})=>
@@ -973,9 +979,8 @@ function vFier(){if(S.lvl<UPL)return`<section><h2>Fierăria</h2><div class="mute
  return`<section><h2>Fierăria</h2><div class="mute">Fiecare treaptă adaugă 8% la atributele pozitive ale obiectului. ${ST_SERVER==='beta'?'Aurul, minereul și materialele se consumă la fiecare încercare, inclusiv la eșec.':'Minereul și materialul se consumă la fiecare încercare; aurul doar dacă reușește.'} Șansa scade de la 90% (+1) la 30% (+5). Din rucsac apar obiectele Rare și mai bune.${upPityActive()?' Protecție BETA: +1 punct procentual după fiecare eșec pe același obiect și aceeași treaptă; ultima încercare indicată este garantată. Minereul și materialele se consumă în continuare.':''}</div>${fierFilterPanel(shown)}<div id="fier-list">${rows||'<p class="mute">Nu ai obiecte de îmbunătățit.</p>'}</div>${total?`<p id="fier-empty" class="mute"${shown?' style="display:none"':''}>Niciun obiect nu corespunde filtrelor.</p>`:''}</section>`}
 function vC(){const d=S.d;if(d&&ST_SERVER==='beta'&&(d.one||d.tw)&&typeof acCombatPage==='function')return acCombatPage(d);if(!d&&ST_SERVER==='beta'&&S.adventure){const i=S.adventure.di;return DG[i]&&typeof trPage==='function'?trPage(i):''}if(!d&&ST_SERVER==='beta'){
   const fallen=S.fs.some(f=>f.hp<=0);
-  const help='<details><summary>ⓘ Reguli utile</summary><p>Temnițele sunt pentru progresul principal: lupți cu monștri, apoi cu căpitanul. Fiecare luptă afișează costul înainte de pornire; punctele se regenerează câte unul la 6 minute. Evenimentul săptămânal folosește o cheie în locul punctelor de intrare. Turnul este provocarea avansată, cu recorduri și recompense la etaje-cheie. Vindecarea în temnițe se face doar prin abilități, iar luptătorii căzuți se ridică la Infirmerie.</p></details>';
-  const header='<section class="cb-head"><div class="cb-head-title"><div><small class="cb-eyebrow">AVENTURILE TALE</small><h2>⚔ Coborâre</h2><p class="mute">Continuă temnița, caută relicva săptămânii sau urcă în Turn.</p></div>'+help+'</div></section>';
-  return header+
+  const help='<details class="cb-party-rules"><summary>ⓘ Reguli utile</summary><p>Temnițele sunt pentru progresul principal: lupți cu monștri, apoi cu căpitanul. Fiecare luptă afișează costul înainte de pornire; punctele se regenerează câte unul la 6 minute. Evenimentul săptămânal folosește o cheie în locul punctelor de intrare. Turnul este provocarea avansată, cu recorduri și recompense la etaje-cheie. Vindecarea în temnițe se face doar prin abilități, iar luptătorii căzuți se ridică la Infirmerie.</p></details>';
+  return '<div class="cb-party-first">'+(typeof heroSoloControl==='function'?heroSoloControl():'')+help+'</div>'+
     (fallen?'<section class="cb-wounded"><span class="r4">Ai luptători căzuți: ridică-i înainte de o nouă luptă.</span>'+reviveAllBtn()+'</section>':'')+
     vDung();
  }
