@@ -246,7 +246,7 @@ function tronCheck() {
    wrapper RPC is genuinely missing from PostgREST. Never retry a potentially
    committed challenge via the legacy RPC after a generic network/server error. */
 function tronAuditFinishRpcMissing(error) {
-  return /PGRST202|Could not find the function|function public\\.beta_throne_challenge_finish_audited\\([^)]*\\) does not exist|No function matches the given name and argument types/i.test(String(error||''));
+  return /PGRST202|Could not find the function|beta_throne_challenge_finish_audited.*does not exist|No function matches the given name and argument types/i.test(String(error||''));
 }
 async function tronReport(cur) {
   TRON.rep = true;
