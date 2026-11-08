@@ -1,5 +1,7 @@
 # Silver Throne BETA — Pașii 23–24: PvP lizibil și prestigiu Tron
 
+**Actualizare SQL30 (BETA):** apărarea satului folosește acum întreaga echipă activă, **până la 4 luptători de la nivelul 30**, iar Tronul rămâne duel erou contra erou. Această notă înlocuiește referirile istorice la limita de 3 din documentul de mai jos. Detalii: `docs/BETA-WORLD-FOUR-DEFENDERS-THRONE-AUTOSYNC-STEP33.md`.
+
 Data: 8 noiembrie 2026.
 
 ## Pasul 23 — Comparație după puterea reală a echipei din Lume
