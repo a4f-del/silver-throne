@@ -833,16 +833,47 @@ function vA0(){const u=S.ui,lv=[];if(((pls(u)[u.p||0])||{}).lv>u.l)u.p=0;if(SF[u
 /* Fierăria (de la nivelul 15): îmbunătățirea unui obiect de la +1 la +5. Fiecare treaptă +8% la atributele pozitive.
    Minereul și materialul se consumă mereu; aurul doar la reușită. +4 și +5 vor cere etaje din Turn, când va exista. */
 const UPC=[90,75,60,45,30,25,20,15,10],UPL=15,UPM=()=>typeof twUpMax==='function'?twUpMax():5;   /* +6…+9 se deblochează din Turn */
+/* Pas 29 · protecție de ghinion DOAR pentru eroii noi BETA.
+   Tracker per obiect și treaptă, nu poate fi încărcat cu încercări ieftine
+   ale altui obiect/rarități. Costurile din upCost rămân identice. */
+const UPP_LIMIT=[5,7,9,11,13,16,19,22,26];
+function upPityActive(){
+ return typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&
+   typeof jeFocus==='function'&&jeFocus();
+}
+function upPityFails(it){
+ if(!upPityActive()||!it)return 0;
+ const u=it.up||0,cap=UPP_LIMIT[u]||26,n=Number(it.upFails);
+ return it.upStep===u&&Number.isSafeInteger(n)?
+   Math.max(0,Math.min(cap-1,n)):0;
+}
+function upChance(it){
+ const u=it.up||0,base=UPC[u]||10;
+ if(!upPityActive())return base;
+ const fail=upPityFails(it),cap=UPP_LIMIT[u]||26;
+ return fail>=cap-1?100:Math.min(99,base+fail);
+}
 const upCost=it=>{const u=it.up||0;return{g:40*it.l*(u+1)*(it.r+1),o:Math.round(cost(it.l,Math.min(3,it.r))*(u+1)),m:(it.m&&it.m[0])||null,mn:u+1}};
 function upApply(it){if(!it.s0)it.s0={...it.s};const k=1+.08*(it.up||0);for(const x in it.s0){const v=it.s0[x];it.s[x]=v>0?Math.round(v*k):v}if(!it.nb)it.nb=it.name;it.name=it.nb+(it.up?' +'+it.up:'')}
 const upRef=r=>{const[k,a,b]=r.split(':');return k==='i'?S.inv[+a]:(mrAll()[+a]||{}).eq?.[b]};
 function upItem(r){const it=upRef(r);if(!it)return go();if(S.lvl<UPL){S.msg='Fierăria se deschide la nivelul '+UPL+'.';return go()}if(S.d){S.msg='Ieși întâi din temniță.';return go()}const u=it.up||0;if(u>=UPM()){S.msg=u>=9?'Obiectul e deja +9.':`Obiectul e la +${u}. Treptele următoare se deblochează urcând în Turn.`;return go()}
  const c=upCost(it);if(S.gold<c.g||S.ore<c.o||(c.m&&have(c.m)<c.mn)){S.msg=`Îți trebuie ${c.g} aur, ${c.o} minereu${c.m?` și ${c.mn} × ${MA[c.m]}`:''}.`;return go()}
- S.ore-=c.o;if(c.m)take(c.m,c.mn);if(Math.random()*100<UPC[u]){S.gold-=c.g;it.up=u+1;upApply(it);S.msg=`Reușit: ${it.name}.`}else S.msg=`Nu a reușit (${UPC[u]}% șansă). Minereul${c.m?' și materialul':''} s-au pierdut; aurul ți-a rămas.`;go()}
+ const rate=upChance(it);
+ S.ore-=c.o;if(c.m)take(c.m,c.mn);
+ if(Math.random()*100<rate){
+  S.gold-=c.g;it.up=u+1;upApply(it);
+  if(upPityActive()){it.upFails=0;it.upStep=u+1;}
+  S.msg=`Reușit: ${it.name}.`;
+ }else{
+  if(upPityActive()){it.upFails=upPityFails(it)+1;it.upStep=u;}
+  S.msg=`Nu a reușit (${rate}% șansă). Minereul${c.m?' și materialul':''} s-au pierdut; aurul ți-a rămas.`+
+   (upPityActive()?' Următoarea șansă: '+upChance(it)+'%. Garanție la încercarea '+UPP_LIMIT[u]+' pe această treaptă.':'');
+ }
+ go()}
 function vFier(){if(S.lvl<UPL)return`<section><h2>Fierăria</h2><div class="mute">Se deschide la nivelul ${UPL}: aici îți îmbunătățești obiectele de la +1 la +5.</div></section>`;
- const row=(it,r,who)=>{const u=it.up||0,c=upCost(it);return`<div class="row"><span>${iic(it)} <b>${tEsc(it.name)}</b> <span class="mute">${who} · ${RAR[Math.min(3,it.r)].n}</span><br><span class="mute">${u>=UPM()?(u>=9?'treapta maximă':'următoarea treaptă se deblochează în Turn'):`+${u+1}: ${UPC[u]}% șansă · ${c.g} aur, ${c.o} minereu${c.m?`, ${c.mn} × ${MA[c.m]}`:''}`}</span></span>${u<UPM()?`<button onclick="upItem('${r}')">Îmbunătățește</button>`:''}</div>`};
+ const row=(it,r,who)=>{const u=it.up||0,c=upCost(it);return`<div class="row"><span>${iic(it)} <b>${tEsc(it.name)}</b> <span class="mute">${who} · ${RAR[Math.min(3,it.r)].n}</span><br><span class="mute">${u>=UPM()?(u>=9?'treapta maximă':'următoarea treaptă se deblochează în Turn'):`+${u+1}: ${upChance(it)}% șansă${upPityActive()?' · '+(upPityFails(it)+1)+'/'+UPP_LIMIT[u]+' încercări (ultima garantată)':''} · ${c.g} aur, ${c.o} minereu${c.m?`, ${c.mn} × ${MA[c.m]}`:''}`}</span></span>${u<UPM()?`<button onclick="upItem('${r}')">Îmbunătățește</button>`:''}</div>`};
  let rows='';mrAll().forEach((f,fi)=>{for(const k of SL){const it=(f.eq||{})[k];if(it)rows+=row(it,'e:'+fi+':'+k,tEsc(f.n))}});S.inv.forEach((it,i)=>{if(it.r>=2)rows+=row(it,'i:'+i,'rucsac')});
- return`<section><h2>Fierăria</h2><div class="mute">Fiecare treaptă adaugă 8% la atributele pozitive ale obiectului. Minereul și materialul se consumă la fiecare încercare; aurul doar dacă reușește. Șansa scade de la 90% (+1) la 30% (+5). Din rucsac apar obiectele Rare și mai bune.</div>${rows||'<p class="mute">Nu ai obiecte de îmbunătățit.</p>'}</section>`}
+ return`<section><h2>Fierăria</h2><div class="mute">Fiecare treaptă adaugă 8% la atributele pozitive ale obiectului. Minereul și materialul se consumă la fiecare încercare; aurul doar dacă reușește. Șansa scade de la 90% (+1) la 30% (+5). Din rucsac apar obiectele Rare și mai bune.${upPityActive()?' Protecție BETA: +1 punct procentual după fiecare eșec pe același obiect și aceeași treaptă; ultima încercare indicată este garantată. Minereul și materialele se consumă în continuare.':''}</div>${rows||'<p class="mute">Nu ai obiecte de îmbunătățit.</p>'}</section>`}
 function vC(){const d=S.d;if(d&&ST_SERVER==='beta'&&(d.one||d.tw)&&typeof acCombatPage==='function')return acCombatPage(d);if(!d&&ST_SERVER==='beta'&&S.adventure){const i=S.adventure.di;return DG[i]&&typeof trPage==='function'?trPage(i):''}if(!d)return(typeof bhLast==='function'?bhLast():'')+`<section><h2>Coborâre</h2><div class="mute">Fiecare temniță e o listă de monștri până la căpitan. Îi iei pe rând: fiecare monstru e o luptă separată și costă 1 punct, căpitanul 2 (și are o abilitate specială). Locul din listă se păstrează; după căpitan, lista o ia de la capăt. În temnițe nu există vindecare: Vraciul își ajută echipa în luptă, iar înaintea fiecărui pas vezi șansele de câștig. De la nivelul 12, temnițele au trei dificultăți: Normal, Greu și Coșmar. Cripta Furtunii cere doar o cheie. Se regenerează câte 1 la 6 minute, până la 30, și se adună și cu pagina închisă. Dacă îi lipsesc, așteaptă sau folosește Topitoria, care nu costă puncte.</div>${S.fs.some(f=>f.hp<=0)?'<div class="row"><span class="r4">Ai luptători căzuți: ridică-i înainte să cobori.</span>'+reviveAllBtn()+'</div>':''}</section>${vDung()}${typeof twCard==='function'?twCard():''}`;
  const f=d.f;let h=`<section><h2>${d.tw?'Turnul · etajul '+d.room+(S.tw&&S.tw.best?' · record '+S.tw.best:''):(d.raid!=null?(d.lbl||'Raid')+': '+d.rn:DG[d.di||0].n)+': '+d.room+'/'+d.rooms}</h2><div class="mute">Pradă: ${d.loot.gold} aur, ${d.loot.ore} minereu, ${Object.values(d.loot.m||{}).reduce((a,b)=>a+b,0)} materiale, ${d.loot.xp} exp.${(d.loot.it||[]).length?`<br>Obiecte găsite: ${d.loot.it.map(i=>typeof bhItem==='function'?bhItem({n:i.name,r:i.r,lg:i.lg}):tEsc(i.name)).join(', ')}`:''}</div><div class="row"><button onclick="tg('auto')">Luptă: ${S.auto!==false?'automat':'manual'}</button><select onchange="tg('rule',this.value)">${[['weak','Ținta: cel mai slab'],['strong','Ținta: cel mai puternic'],['first','Ținta: primul']].map(([v,n])=>`<option value="${v}"${(S.rule||'weak')==v?' selected':''}>${n}</option>`).join('')}</select></div>${S.fl&&!f?'<div class="log">'+S.fl.map(x=>'<div>'+x+'</div>').join('')+'</div>':''}`;
  if(f){const a=S.fs[f.i];h+=f.es.map((e,i)=>e.hp>0?enCard(e,i,i==f.t):'').join('');   /* căpitanii cu portret: temnite.js */
