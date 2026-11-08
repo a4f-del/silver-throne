@@ -88,6 +88,13 @@ function guildBar(title,n,max){
 }
 const GUILD_GOALS=[['dungeons','Lupte câștigate în Temnițe',150],['hard_boss','Căpitani pe Greu sau Coșmar',25],['tower','Etaje câștigate în Turn',1000]];
 const GUILD_TIERS=[['bronz','Bronz',.25,10],['argint','Argint',.6,20],['aur','Aur',1,40]];
+/* BETA: țintele vin din snapshotul săptămânii, dar compatibilitatea cu
+   vechiul RPC păstrează 150/25/1000 până la instalarea migrării. */
+function guildWeeklyGoal(week,key,fallback){
+ const raw=week&&week.goals&&week.goals[key],value=Number(raw);
+ return raw!=null&&Number.isSafeInteger(value)&&value>0?value:fallback;
+}
+
 function guildPaint(){
  const host=document.getElementById('guild-view');if(!host)return;
  if(GUILD.error){host.innerHTML='<p class="r4">Breslele nu sunt disponibile: '+guildEsc(GUILD.error)+'. Verifică migrarea SQL BETA.</p><button onclick="guildSync(true)">Reîncearcă</button>';return;}
@@ -113,10 +120,13 @@ function guildPaint(){
    '<p>'+g.member_count+' / 20 membri · '+(typeof gsrRankName==='function'?gsrRankName(g.role):g.role==='leader'?'Conducător':'Membru')+' · <b>'+g.marks+' însemne</b></p>'+
    '<p>Cod invitație: <code>'+guildEsc(g.code)+'</code></p></div>'+
    '<h3>Contractul săptămânii <small>· de luni până duminică</small></h3>'+
-   GUILD_GOALS.map(([key,title,max])=>guildBar(title,week[key],max)).join('')+
+   GUILD_GOALS.map(([key,title,max])=>guildBar(title,week[key],guildWeeklyGoal(week,key,max))).join('')+
+   (Number.isSafeInteger(week.active_at_start)?'<p class="mute">Obiective stabilite pentru '+week.active_at_start+
+   ' membri activi la începutul săptămânii. Nu cresc dacă intră membri noi.</p>':
+   '<p class="mute">Obiective standard până la actualizarea contractelor BETA.</p>')+
    '<p class="mute">Contribuțiile tale: '+contributed+' · minimum 3 pentru a revendica premiile.</p>'+
    '<div class="guild-tier-list">'+GUILD_TIERS.map(([key,title,pct,marks])=>{
-    const ready=GUILD_GOALS.every(([k,,max])=>+week[k]>=Math.ceil(max*pct));
+    const ready=GUILD_GOALS.every(([k,,max])=>+week[k]>=Math.ceil(guildWeeklyGoal(week,k,max)*pct));
     const done=claimed[key];
     return '<div class="guild-tier"><b>'+title+'</b><small>'+Math.round(pct*100)+'% din fiecare obiectiv · +'+marks+' însemne</small>'+
       '<button onclick="guildClaim(\''+key+'\')"'+(!ready||done||contributed<3?' disabled':'')+'>'+
