@@ -1,5 +1,7 @@
 # Silver Throne BETA — Pasul 23 (completare): recomandări de adversari
 
+**Actualizare SQL30 (BETA):** comparațiile PvP folosesc acum toată echipa activă din Lume, **maximum 4 apărători** de la nivelul 30; regulile mai vechi despre 3 apărători descriu versiunea precedentă. Detalii: `docs/BETA-WORLD-FOUR-DEFENDERS-THRONE-AUTOSYNC-STEP33.md`.
+
 Data: 8 noiembrie 2026. Modificarea se bazează pe corecțiile PvP/Tron deja integrate în main.
 
 ## Funcționalitate
