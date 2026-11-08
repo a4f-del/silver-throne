@@ -49,6 +49,7 @@ const doc={
 const win={innerWidth:390,innerHeight:740,visualViewport:null,
  events:[],addEventListener(name,fn){this.events.push(name)}};
 const ctx={ST_SERVER:server,S,document:doc,window:win,
+ stCompactActive:()=>server==='beta',
  jeFocusActive:()=>server==='beta'&&S.journeyV===1&&S.journeyUxV===2,
  jeCurrent:()=>stepData[step],jeStatus:()=>({ok:isReady}),
  go:()=>{goCount++},requestAnimationFrame:fn=>{fn();return 0}};
