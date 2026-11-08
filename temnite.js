@@ -8,7 +8,7 @@
    Imaginile lipsă nu strică nimic: cardul rămâne cu fundal închis, căpitanul cu cardul simplu.
    Se încarcă înaintea scriptului din pagină.
    ========================================================================== */
-const TMN = {
+const TMN = { showAll: false,
   dg: { 'Mina Cenușie': 'mina-cenusie', 'Peștera Lupilor': 'pestera-lupilor', 'Catacombele Uitate': 'catacombele-uitate', 'Fortul Părăsit': 'fortul-parasit',
     'Cetatea Scufundată': 'cetatea-scufundata', 'Mlaștina Putredă': 'mlastina-putreda', 'Abisul Cenușiu': 'abisul-cenusiu', 'Forja Veche': 'forja-veche',
     'Tronul Cenușiu': 'tronul-cenusiu', 'Cripta Furtunii': 'cripta-furtunii' },
@@ -39,7 +39,83 @@ function vDung() {
       + `${!lock ? `<button class="p dg-enter" onclick="dToggle(${i})">Intră</button>` : ''}</div></div>`;
   };
   const shown = list.filter(([g]) => S.lvl + 10 >= g.lv);   /* ca înainte: temnițele mult peste nivel rămân ascunse */
+  if (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta')
+    return tmnHubBeta(open, rec, card, shown);
   return tmnEvent() + (typeof heroSoloControl==='function'?heroSoloControl():'') + `<section class="dg-sec"><h2>Temnițe</h2><div class="dg-grid">${shown.map(card).join('')}</div></section>`;
+}
+/* BETA — Coborâre ca o alegere principală + două activități compacte.
+   Tot conținutul vechi rămâne accesibil. Nu modifică progres/recompense. */
+function tmnHubToggle(event) {
+  if (event && event.target && event.target.id === 'tmn-hub-all')
+    TMN.showAll = !!event.target.open;
+}
+function tmnHubBeta(open, rec, card, shown) {
+  const progressed = open.filter(([g,i]) => typeof dPos === 'function'
+    && dPos(i,typeof trTier === 'function' ? trTier(i) : 0)>0);
+  const current = progressed.length ? progressed[progressed.length-1] : open[open.length-1];
+  let main = '';
+  if (current) {
+    const [g,i] = current, image = tmnImg(g.n), boss = tmnBoss(g.bn);
+    const tier = typeof trTier === 'function' ? trTier(i) : 0;
+    const step = Math.max(0,Math.min(g.rooms-1,typeof dPos==='function' ? Number(dPos(i,tier))||0 : 0));
+    const progress = Math.round(step / Math.max(1,g.rooms) * 100);
+    main = `<section class="cb-feature">
+      <div class="cb-feature-art">${image?'<img src="'+image+'" alt="" loading="lazy" onerror="this.remove()">':''}
+        <span class="cb-feature-tag">${step>0?'În desfășurare':'Recomandată pentru tine'}</span>
+        ${boss?'<img class="cb-feature-boss" src="imagini/monstri/'+boss[0]+'.jpg" alt="" loading="lazy" onerror="this.remove()">':''}
+      </div>
+      <div class="cb-feature-info"><small class="cb-eyebrow">AVENTURA PRINCIPALĂ</small><h3>${g.n}</h3>
+        <p class="mute">Nivel ${g.lv} · ${g.rooms-1} monștri și un căpitan</p>
+        <div class="cb-progress-top"><span>Progresul tău</span><strong>${step+1} / ${g.rooms}</strong></div>
+        <div class="cb-progress" role="progressbar" aria-label="Progresul temniței" aria-valuemin="0" aria-valuemax="${g.rooms}" aria-valuenow="${step}"><i style="width:${progress}%"></i></div>
+        <p class="cb-loot">Pradă: ${tmnMat(g)}</p>
+        <button class="p cb-action" onclick="dToggle(${i})">⚔ ${step?'Continuă aventura':'Intră în temniță'}</button>
+      </div>
+    </section>`;
+  } else {
+    main = '<section class="cb-feature cb-feature-empty"><h3>Pregătește-ți eroul</h3><p>Prima temniță va apărea aici când atingi nivelul necesar.</p></section>';
+  }
+  const eIndex = DG.findIndex(g=>g.ev);
+  let relic = '';
+  if (eIndex>=0) {
+    const g=DG[eIndex],e=evs(),image=tmnImg(g.n),ok=S.lvl>=g.lv;
+    const keys = [0,1,2].map(k=>'<span class="'+(k<e.k?'cb-key-on':'cb-key-off')+'">🗝</span>').join('');
+    relic = `<article class="cb-mini cb-relic">
+      <div class="cb-mini-visual">${image?'<img src="'+image+'" alt="" loading="lazy" onerror="this.remove()">':''}<span>RELICVĂ SĂPTĂMÂNALĂ</span></div>
+      <div class="cb-mini-body"><h3>${g.n}</h3>
+        <p class="mute">3 chei pe săptămână · 60% șansă de relicvă la căpitan</p>
+        <div class="cb-keyline">${keys}<span>${e.k}/3 chei disponibile</span></div>
+        <button class="p cb-action" onclick="startD(${eIndex})" ${ok&&e.k>0?'':'disabled'}>${!ok?'Disponibil de la nivelul '+g.lv:e.k>0?'Intră · 1 cheie':'Fără chei disponibile'}</button>
+        <details class="cb-info"><summary>ⓘ Reguli și recompense</summary><p>Fără puncte la intrare și la căpitan. O cheie se consumă la începutul incursiunii; cheile se reînnoiesc săptămânal. Căpitan: ${g.bn}. Următoarea reînnoire în ${evLeft()} ${evLeft()===1?'zi':'zile'}.</p></details>
+      </div>
+    </article>`;
+  }
+  let tower = '';
+  if (typeof TWR !== 'undefined' && typeof twSt === 'function') {
+    const t=twSt(),lock=S.lvl<TWR.lv,available=typeof twLeft==='function'?twLeft():0;
+    const canStart=!lock&&available>0&&S.pts>=TWR.cost;
+    tower = `<article class="cb-mini cb-tower">
+      <div class="cb-mini-visual"><img src="imagini/lume/turn.webp" alt="" loading="lazy" onerror="this.remove()"><span>PROVOCARE ENDGAME</span></div>
+      <div class="cb-mini-body"><h3>Turnul</h3>
+        <p class="mute">100 de etaje · record ${t.best?'etajul '+t.best:'—'}</p>
+        <p class="cb-mini-stat">${lock?'Se deschide la nivelul '+TWR.lv:available+' / '+TWR.day+' urcări rămase astăzi'}</p>
+        <button class="p cb-action" onclick="twEnter()" ${canStart?'':'disabled'}>${lock?'Blocat · nivel '+TWR.lv:available<=0?'Încercări epuizate':'Intră · '+TWR.cost+' puncte'}</button>
+        ${!lock?`<details class="cb-info"><summary>ⓘ Etaje, puncte de control și legendare</summary>
+          ${typeof twProgress==='function'?twProgress(t):''}
+          ${typeof twStartControls==='function'?twStartControls(t):''}
+          ${typeof twLgRow==='function'?twLgRow(t):''}
+          <p>Recordul deblochează treptele superioare de Fierărie. Etajele sărite de la punctele de control nu acordă recompense.</p>
+        </details>`:''}
+      </div>
+    </article>`;
+  }
+  return '<div class="cb-hub">'+main+
+    (typeof heroSoloControl==='function'?'<div class="cb-party-option">'+heroSoloControl()+'</div>':'')+
+    '<div class="cb-options">'+relic+tower+'</div>'+
+    `<details id="tmn-hub-all" class="cb-all" ontoggle="tmnHubToggle(event)" ${TMN.showAll?'open':''}>
+      <summary><span><b>Toate temnițele</b><small>Alege altă temniță sau verifică ce urmează să deblochezi</small></span><span class="cb-all-count">${shown.length} disponibile în listă ▾</span></summary>
+      <div class="dg-grid">${shown.map(card).join('')}</div>
+    </details>`+'</div>';
 }
 /* pe card: ce clasă contracarează căpitanul (trepte.js: TR_C) și dacă o ai în echipă */
 function tmnCtr(g) {
@@ -76,6 +152,61 @@ function bossMini(n) { const b = tmnBoss(n); return b ? `<span class="eb-mini" s
   if (typeof document === 'undefined' || !document.head) return;
   const st = document.createElement('style');
   st.textContent = `.dg-ctr{font-size:12.5px;color:#f0b07b}.dg-ctr.on{color:#9be0a6}
+
+
+/* BETA hub: o alegere principală, două provocări compacte și lista extensibilă.
+   Scoped la .cb-*; stilurile din Temnițe/Turn/LIVE rămân neschimbate. */
+.cb-hub{display:flex;flex-direction:column;gap:13px}
+.cb-feature{display:grid;grid-template-columns:minmax(175px,33%) minmax(0,1fr);overflow:hidden;border:1px solid var(--gold);border-radius:12px;background:linear-gradient(120deg,#1c211e,#111617);box-shadow:0 5px 22px #0005}
+.cb-feature-art{position:relative;min-height:205px;background:radial-gradient(circle at 40% 40%,#4b3b2a,#101517);overflow:hidden}
+.cb-feature-art>img:not(.cb-feature-boss){width:100%;height:100%;position:absolute;inset:0;object-fit:cover}
+.cb-feature-art:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#0e1315aa,transparent 65%);pointer-events:none}
+.cb-feature-tag{position:absolute;z-index:1;top:11px;left:11px;font-size:11px;font-weight:700;letter-spacing:.02em;border-radius:12px;padding:4px 9px;background:var(--gold2);color:#1b160c}
+.cb-feature-boss{position:absolute;z-index:1;bottom:10px;right:10px;width:66px;height:66px;object-fit:cover;border:2px solid var(--gold2);border-radius:50%;box-shadow:0 3px 12px #0009}
+.cb-feature-info{padding:17px 19px;display:flex;flex-direction:column;justify-content:center;gap:6px;min-width:0}
+.cb-feature-info h3,.cb-mini h3{margin:0;color:var(--ink);font:700 clamp(18px,2.3vw,23px) Cinzel,serif}
+.cb-eyebrow{color:var(--gold2);letter-spacing:.12em;font-size:10px;font-weight:800}
+.cb-feature-info p,.cb-mini p{margin:0;font-size:13px}
+.cb-progress-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px;font-size:12px;color:var(--mute)}
+.cb-progress-top strong{color:var(--ink)}
+.cb-progress{height:8px;border:1px solid #ffffff21;border-radius:7px;overflow:hidden;background:#080d10}
+.cb-progress i{display:block;height:100%;background:linear-gradient(90deg,#9a7035,var(--gold2));border-radius:7px}
+.cb-loot{margin:6px 0!important}
+.cb-action{align-self:flex-start;min-width:144px;margin-top:4px}
+.cb-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.cb-mini{min-width:0;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;background:#11181b}
+.cb-mini.cb-relic{border-color:#5cc8ff66}
+.cb-mini-visual{position:relative;height:106px;overflow:hidden;background:#1a252a}
+.cb-mini-visual img{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.8)}
+.cb-mini-visual span{position:absolute;left:10px;bottom:9px;letter-spacing:.08em;font-weight:800;font-size:10px;color:#fff;text-shadow:0 1px 6px #000}
+.cb-mini-body{padding:12px 14px 13px;display:flex;flex-direction:column;gap:8px;flex:1}
+.cb-mini-body h3{font-size:18px}
+.cb-mini-body .cb-action{margin-top:auto}
+.cb-keyline{display:flex;gap:3px;align-items:center;font-size:12px}
+.cb-keyline span:last-child{margin-left:6px;color:var(--mute)}
+.cb-key-off{opacity:.25;filter:grayscale(1)}
+.cb-mini-stat{color:var(--gold2)}
+.cb-info{border-top:1px solid #ffffff18;padding-top:8px;font-size:12px;color:var(--mute)}
+.cb-info summary{cursor:pointer;color:var(--gold2)}
+.cb-info[open]>summary{margin-bottom:9px}
+.cb-info .tw-progress,.cb-info .tw-lg{margin:8px 0}
+.cb-all{border:1px solid var(--line);border-radius:11px;background:#111619}
+.cb-all>summary{cursor:pointer;padding:15px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:none}
+.cb-all>summary::-webkit-details-marker{display:none}
+.cb-all>summary span:first-child{display:flex;flex-direction:column;gap:3px}
+.cb-all>summary b{font-family:Cinzel,serif;color:var(--ink)}
+.cb-all>summary small,.cb-all-count{font-size:12px;color:var(--mute)}
+.cb-all[open]>summary{border-bottom:1px solid var(--line)}
+.cb-all>.dg-grid{padding:12px}
+.cb-party-option{font-size:12px}
+.cb-head{padding:13px 17px!important;margin:0 0 12px!important}
+.cb-head-title{display:flex;justify-content:space-between;gap:14px;align-items:start}
+.cb-head h2{margin:2px 0 4px!important}
+.cb-head p{margin:0;font-size:13px}
+.cb-head details{max-width:360px;font-size:12px;color:var(--mute);text-align:right}
+.cb-head details summary{cursor:pointer;color:var(--gold2)}
+.cb-head details[open]{max-width:480px}
+@media(max-width:640px){.cb-feature{grid-template-columns:1fr}.cb-feature-art{min-height:150px;max-height:165px}.cb-feature-info{padding:12px 13px}.cb-options{grid-template-columns:1fr}.cb-mini-visual{height:84px}.cb-head-title{flex-direction:column}.cb-head details{text-align:left}.cb-all-count{font-size:11px}}
 
 .dg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
 .dg-card{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#101416;box-shadow:0 6px 18px #0009;transition:transform .15s,border-color .15s}
