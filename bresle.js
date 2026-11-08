@@ -39,10 +39,10 @@ function guildHeader(){
  if(!guildEnabled())return '';
  const g=GUILD.state?.guild;
  const unread=!g&&typeof gsrInboxCount==='function'?gsrInboxCount():0;
- return '<button id="guild-open" class="guild-head" onclick="guildOpen()" aria-label="Deschide breslele'+(unread?' · '+unread+' invitații':'')+'">⚔ <span>'+guildEsc(g?'['+g.tag+']':'Bresle')+'</span>'+
+ return '<button id="guild-open" class="guild-head" onclick="guildOpen()" aria-label="Deschide breslele'+(unread?' · '+unread+' invitații':'')+'">'+(g&&typeof guildCosmeticBadge==='function'?guildCosmeticBadge(g.id):'⚔')+' <span>'+guildEsc(g?'['+g.tag+']':'Bresle')+'</span>'+
    (unread?'<b class="guild-invite-count">'+unread+'</b>':'')+'</button>';
 }
-function guildReset(){GUILD.uid=null;GUILD.state=null;GUILD.loading=false;GUILD.sending=false;GUILD.bossSyncing=false;GUILD.last=0;GUILD.error='';GUILD.tags={};GUILD.tagsAt=0;GUILD.tagsBusy=false;GUILD.tagsUnavailable=false;if(typeof gsrReset==='function')gsrReset();}
+function guildReset(){GUILD.uid=null;GUILD.state=null;GUILD.loading=false;GUILD.sending=false;GUILD.bossSyncing=false;GUILD.last=0;GUILD.error='';GUILD.tags={};GUILD.tagsAt=0;GUILD.tagsBusy=false;GUILD.tagsUnavailable=false;if(typeof gsrReset==='function')gsrReset();if(typeof guildCosmeticReset==='function')guildCosmeticReset();}
 async function guildSync(force){
  if(!guildEnabled()||GUILD.loading||GUILD.busy||(!force&&Date.now()-GUILD.last<25000))return;
  const uid=CONT.user.id;
@@ -59,6 +59,7 @@ async function guildSync(force){
  if(!GUILD.error)guildFlush();
  if(typeof gsrSync==='function')await gsrSync(force);
  await guildMapTagsSync(force);
+ if(typeof guildCosmeticsSync==='function')await guildCosmeticsSync(force);
 }
 function guildStart(){
  if(!guildEnabled())return;
@@ -134,6 +135,7 @@ function guildPaint(){
   out+='<div class="guild-identity"><h3>['+guildEsc(g.tag)+'] '+guildEsc(g.name)+'</h3>'+
    '<p>'+g.member_count+' / 20 membri · '+(typeof gsrRankName==='function'?gsrRankName(g.role):g.role==='leader'?'Conducător':'Membru')+' · <b>'+g.marks+' însemne</b></p>'+
    '<p>Cod invitație: <code>'+guildEsc(g.code)+'</code></p></div>'+
+   (typeof guildCosmeticsSection==='function'?guildCosmeticsSection(g):'')+
    '<h3>Contractul săptămânii <small>· de luni până duminică</small></h3>'+
    GUILD_GOALS.map(([key,title,max])=>guildBar(title,week[key],guildWeeklyGoal(week,key,max))).join('')+
    (Number.isSafeInteger(week.active_at_start)?'<p class="mute">Obiective stabilite pentru '+week.active_at_start+
@@ -176,7 +178,14 @@ async function guildAction(action,data){
   GUILD.notice=action==='create'?'Breasla a fost creată.':action==='join'?'Ai intrat în breaslă.':
     action==='leave'?'Ai părăsit bresla.':action==='boss'?'Lovitură înregistrată pe server.':'Recompensa a fost revendicată.';
   return res.data;
- }finally{GUILD.busy=false;if(typeof gsrSync==='function')await gsrSync(true);guildPaint();if(typeof hdr==='function')hdr();}
+ }finally{
+  GUILD.busy=false;
+  if(typeof gsrSync==='function')await gsrSync(true);
+  if(['create','join','leave'].includes(action)&&typeof guildCosmeticsSync==='function')
+    await guildCosmeticsSync(true);
+  guildPaint();
+  if(typeof hdr==='function')hdr();
+ }
 }
 const guildInput=id=>document.getElementById(id)?.value?.trim()||'';
 async function guildCreate(){await guildAction('create',{name:guildInput('guild-name'),tag:guildInput('guild-tag')});}
