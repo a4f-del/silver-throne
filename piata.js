@@ -30,6 +30,28 @@ const PT_GUIDE = {
     ['🏷', 'Vinde', 'alegi un obiect din rucsac și prețul. Plătești 2% taxă la listare, iar la vânzare se rețin 5%. Oferta stă 48 de ore.'],
     ['📬', 'Ofertele mele', 'vezi ce s-a vândut și retragi ce nu mai vrei să vinzi. Aurul din vânzări îți intră singur. Legendarele nu se vând.']] }
 };
+/* Pasul 30 · BETA: un singur rând explică rolul fiecărui comerciant.
+   Ghidul detaliat rămâne opțional, fără o a doua confirmare obligatorie. */
+const PT_ROLE={
+ p:{short:'Cumperi cu aur',description:'Echipament obișnuit, mereu disponibil. Marfa se reînnoiește automat.'},
+ l:{short:'Obiecte rare și cristale',description:'Echipament de calitate și schimb de cristale, disponibile de la nivelul 10.'},
+ y:{short:'Schimb între jucători',description:'Cumperi și listezi obiecte de la nivelul 15. Taxele sunt afișate înainte de vânzare.'}
+};
+function ptFocus(){
+ return typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&
+   typeof jeFocus==='function'&&jeFocus();
+}
+function ptQuickGuide(k,locked){
+ const g=PT_GUIDE[k],r=PT_ROLE[k],lv=PT_TABS.find(x=>x.k===k).lv();
+ if(locked)return '<section class="pt-quick pt-quick-locked"><b>🔒 '+g.t+
+   ' se deschide la nivelul '+lv+'.</b><p>'+r.description+
+   '</p><div class="mute">Nivelul tău: '+(S.lvl||1)+' / '+lv+'</div></section>';
+ return '<section class="pt-quick" aria-label="Rolul '+g.t+'">'+
+  '<div class="pt-quick-title"><b>'+g.t+' — '+r.short+'</b><span>'+r.description+'</span></div>'+
+  '<details class="pt-quick-details"><summary>ℹ Mai multe despre '+g.t+'</summary>'+
+  '<ul>'+g.s.map(([ic,title,description])=>'<li><span>'+ic+'</span><div><b>'+
+    title+'</b><p>'+description+'</p></div></li>').join('')+'</ul></details></section>';
+}
 const ptOpen = k => (S.lvl || 1) >= PT_TABS.find(x => x.k === k).lv();
 const ptG = () => S.ptg || (S.ptg = {});
 /* fila e deschisă, dar n-ai intrat încă în ea */
@@ -56,10 +78,10 @@ function vPiata() {
   if (open && k !== 'p') ptG()[k + 'v'] = 1;
   const tabs = `<div class="tm-tabs pt-tabs" role="tablist">${PT_TABS.map(t => {
     const on = t.k === k, op = ptOpen(t.k), nw = ptNew(t.k);
-    return `<button role="tab" data-pt="${t.k}" aria-selected="${on}" class="${on ? 'on' : ''}${op ? '' : ' lk'}" onclick="ptTab('${t.k}')"><span class="pt-ti">${op ? t.ic : '🔒'}</span>${t.n}${nw ? ' <b class="pt-new">NOU</b>' : !op ? ` <small>niv. ${t.lv()}</small>` : t.k === 'y' && typeof BZ !== 'undefined' && BZ.inbox ? ` <b class="bz-dot">${BZ.inbox}</b>` : ''}</button>`;
+    return `<button role="tab" data-pt="${t.k}" aria-selected="${on}" class="${on ? 'on' : ''}${op ? '' : ' lk'}" onclick="ptTab('${t.k}')"><span class="pt-ti">${op ? t.ic : '🔒'}</span><span class="pt-tabtext">${t.n}${ptFocus() ? `<small class="pt-rolesub">${PT_ROLE[t.k].short}</small>` : ''}</span>${nw ? ' <b class="pt-new">NOU</b>' : !op ? ` <small>niv. ${t.lv()}</small>` : t.k === 'y' && typeof BZ !== 'undefined' && BZ.inbox ? ` <b class="bz-dot">${BZ.inbox}</b>` : ''}</button>`;
   }).join('')}</div>`;
-  if (!open) return tabs + ptGuide(k, true);
-  const guide = !ptG()[k] ? ptGuide(k, false) : `<div class="pt-help"><button class="gh-l" onclick="ptGuideShow('${k}')" aria-label="Arată mini-ghidul">? Cum funcționează ${PT_GUIDE[k].t.replace(/^\w/, c => c.toLowerCase())}</button></div>`;
+  if (!open) return tabs + (ptFocus() ? ptQuickGuide(k,true) : ptGuide(k, true));
+  const guide = ptFocus() ? ptQuickGuide(k,false) : (!ptG()[k] ? ptGuide(k, false) : `<div class="pt-help"><button class="gh-l" onclick="ptGuideShow('${k}')" aria-label="Arată mini-ghidul">? Cum funcționează ${PT_GUIDE[k].t.replace(/^\w/, c => c.toLowerCase())}</button></div>`);
   const body = k === 'p' ? vP() : k === 'l' ? vLux() : (typeof vBazar === 'function' ? vBazar() : '<p class="mute">Bazarul nu e încărcat.</p>');
   return tabs + guide + body;
 }
@@ -125,6 +147,18 @@ if (typeof window !== 'undefined') { if (document.readyState === 'complete') ptH
   if (typeof document === 'undefined' || !document.head) return;
   const st = document.createElement('style');
   st.textContent = `.pt-tabs button{display:inline-flex;align-items:center;gap:6px;font-size:15px;padding:9px 16px}
+.pt-tabtext{display:flex;flex-direction:column;align-items:flex-start;gap:2px;line-height:1.15}
+.pt-tabs button .pt-rolesub{font:500 10px system-ui,sans-serif;color:var(--mute);white-space:nowrap}
+.pt-quick{padding:9px 12px;margin:0 0 10px;border:1px solid var(--line);border-radius:9px;background:#ffffff05}
+.pt-quick-title{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px;font-size:13px}
+.pt-quick-title b{color:var(--gold2)}.pt-quick-title span{color:var(--mute)}
+.pt-quick-details{margin-top:5px}.pt-quick-details summary{cursor:pointer;color:var(--gold2);font-size:12px;padding:5px 0}
+.pt-quick-details ul{list-style:none;margin:5px 0 0;padding:0;display:grid;gap:6px}
+.pt-quick-details li{display:flex;gap:8px;padding:5px 0;border-top:1px solid var(--line)}
+.pt-quick-details li>span{flex:none}.pt-quick-details li b{font-size:12px}
+.pt-quick-details li p{margin:2px 0 0;color:var(--mute);font-size:12px;line-height:1.4}
+.pt-quick-locked p{margin:6px 0;font-size:12px;color:var(--mute)}
+@media(max-width:530px){.pt-tabs button{gap:4px;padding:7px 8px;font-size:12px}.pt-tabs button .pt-rolesub{font-size:9px;white-space:normal;line-height:1.15}.pt-ti{font-size:15px}.pt-quick-title{flex-direction:column;gap:3px}}
 .pt-tabs button.lk{opacity:.6}.pt-tabs button small{font:600 11px system-ui,sans-serif;color:var(--mute)}
 .pt-ti{font-size:16px;line-height:1}
 .pt-new{font:800 10px system-ui,sans-serif;letter-spacing:.06em;color:#1a1204;background:linear-gradient(180deg,#fff1b8,#e0b84a);border-radius:9px;padding:2px 6px;box-shadow:0 0 10px #f0d27a99;animation:ptPulse 1.6s ease-in-out infinite}
