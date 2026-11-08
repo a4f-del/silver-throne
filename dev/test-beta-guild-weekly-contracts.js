@@ -37,7 +37,7 @@ const goal=n=>[Math.min(150,12*n),Math.min(25,2*n),Math.min(1000,60*n)];
 assert.deepEqual(goal(1),[12,2,60]);assert.deepEqual(goal(2),[24,4,120]);
 assert.deepEqual(goal(10),[120,20,600]);assert.deepEqual(goal(20),[150,25,1000]);
 
-const i=js.indexOf('function guildBar('),j=js.indexOf('function guildAction(action,data)',i);
+const i=js.indexOf('function guildBar('),j=js.indexOf('async function guildAction(action,data)',i);
 assert(i>=0&&j>i,'UI functions boundary');
 const piece=js.slice(i,j);
 function guildUI(week){
