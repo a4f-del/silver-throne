@@ -85,6 +85,7 @@ function acDungeonPage(i) {
     (canFight&&odds!=null?'<div class="ac-odds">Șanse de câștig <strong>'+odds+'%</strong></div>':'') +
     (canFight?'<button class="p ac-primary" onclick="startD('+i+')">'+(boss?'⚔ Înfruntă căpitanul':'⚔ Luptă')+' · '+(cost?cost+' puncte':'gratuit')+'</button>':
       '<button type="button" class="ac-return-current" onclick="trSelSet('+i+','+p+')">↶ Înapoi la '+acSafe(currentName)+'</button>') +
+    acParty()+'<details class="ac-help-details"><summary>ⓘ Sfaturi și echipament</summary>'+
     '<p class="ac-hint">'+(canFight?
       (boss?'Ultima luptă! După victorie revii automat în Coborâre și primești prada.':
         'Apasă Luptă pentru a învinge acest monstru. Următorul se deblochează după victorie.'):
@@ -92,7 +93,7 @@ function acDungeonPage(i) {
         ' Selectează adversarul curent pentru a continua.')+'</p>' +
     '<p class="ac-hint">Echipament recomandat: <b>'+acSafe(typeof recGear==='function'?recGear(d.k):'echipament potrivit nivelului')+'</b></p>' +
     (prep?'<p class="ac-hint ac-prep">Pregătire: '+acSafe(prep)+'</p>':'')+
-    '</div></div>'+acParty()+'</section>';
+    '</details></div></div></section>';
 }
 function acCombatPage(d) {
   const f=d.f, title=d.tw?'Turnul · Etajul '+Math.max(1,d.room):d.raid!=null?(d.lbl||'Raid')+' · '+(d.rn||''):DG[d.di||0].n;
