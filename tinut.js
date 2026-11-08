@@ -119,7 +119,7 @@ function wnPanel() {
   const v = S.wsel && wnList().find(x => x.id === S.wsel); if (!v) return '';
   const left = wnLeft(v), e = wnEff(v), gold = Math.round((60 + 30 * e) * 1.2), d = e - S.lvl;
   const risk = d >= 4 ? 'periculos' : d >= 1 ? 'greu' : d >= -3 ? 'potrivit' : 'ușor';
-  return `<section><h2>${v.n} · sat liber</h2><div class="mute">Un sat fără stăpân, vizibil tuturor jucătorilor. Fiecare îl poate jefui o dată pe oră. Prada și gărzile urmează nivelul tău.</div>`
+  return `<section><h2>${v.n} · sat liber</h2><div class="mute">${ST_SERVER==='beta'?'Jaf disponibil o dată pe oră per sat. Intrarea costă 1 punct, iar căpitanul încă 1 (2 în total pentru o victorie). Prada și gărzile urmează nivelul tău.':'Un sat fără stăpân, vizibil tuturor jucătorilor. Fiecare îl poate jefui o dată pe oră. Prada și gărzile urmează nivelul tău.'}</div>`
     + `<div class="row"><span>Pradă estimată: ~${gold} aur, minereu și experiență · pentru tine: <b>${risk}</b></span>`
     + (left ? `<span class="mute">Jefuit de tine; din nou în ${sdT(left)}</span>` : `<button class="p" onclick="wnRaid('${v.id}')">Jefuiește · 1 punct</button>`) + '</div></section>';
 }
