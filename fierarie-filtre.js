@@ -11,6 +11,14 @@ function fierMatch(it,who,where){
    (FIER_FILTER.where==='all'||FIER_FILTER.where===where)&&
    (FIER_FILTER.tier==='all'||FIER_FILTER.tier===tier);
 }
+function fierData(it,who,where){
+ const rarity=it.lg?'legendary':String(Math.min(3,it.r||0));
+ const u=it.up||0,tier=u===0?'zero':u>=UPM()?'max':'plus';
+ const search=(String(it.name||'')+' '+String(who||'')).toLocaleLowerCase('ro-RO');
+ return 'data-fier-item="1" data-search="'+tEsc(search)+
+  '" data-rarity="'+rarity+'" data-where="'+where+'" data-tier="'+tier+'"'+
+  (fierMatch(it,who,where)?'':' style="display:none"');
+}
 function fierFilterPanel(shown) {
  if(ST_SERVER!=='beta')return '';
  const select=(key,options)=>'<select aria-label="Filtru '+key+
