@@ -45,7 +45,7 @@ assert(guild.includes('WHERE user_id=v_uid AND local_day=v_day'),'Guild enforces
 assert(guild.includes('v_daily>=2'),'Existing two hits/day preserved');
 assert(!/\b(?:UPDATE|DELETE|TRUNCATE)\s+public\.(?:game_saves|guild_weeks|guild_participation|guild_members|world_players)\b/i.test(sql),
  'Migration must not modify game save or guild progress tables');
-assert(docs.includes('nu autentifică echipamentul'),'Document provenance limitation');
+assert(docs.includes('nu că eroul deține realmente echipamentul'),'Document provenance limitation');
 assert(docs.includes('manual')&&docs.includes('Silver-Throne-Test'),'Manual BETA only');
 assert(roadmap.includes('34-beta-ledger-verified-guild-boss-hit.sql'),'Roadmap documents SQL34');
 
