@@ -5,14 +5,15 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 const npc=read('tinut.js'),html=read('index.html'),
- server=read('supabase/10-beta-world-npc-cooldown.sql');
+ server=read('supabase/13-beta-world-npc-cooldown-1h.sql');
 for(const s of [npc])new Function(s);
 for(const part of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
  if(part[1].trim())new Function(part[1]);
 assert(npc.includes('cd: 1 * 3600e3'),'Client cooldown remains one hour');
 assert(npc.includes("tronRpc('world_npc_raid'"),'NPC raid remains server checked');
 assert(server.includes('interval \'1 hour\''),'Server cooldown remains one hour');
-assert(server.includes('FOR UPDATE')||server.includes('ON CONFLICT'),'Server cooldown update is atomic');
+assert(server.includes('WHERE public.world_npc_raids.cooldown_until <= v_now'),
+ 'Server-side atomic cooldown guard remains active');
 assert(npc.includes('cn(\'r\'); spend(1);'),'NPC raid entrance still costs one point');
 assert(html.includes("d.raid!=null?1"),'NPC captain still costs another point');
 assert(html.includes("const ip=it=>Math.round((25+it.l*14)*(1+it.r*1.1))"),
