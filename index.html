@@ -751,10 +751,43 @@ function braid(){if(ST_SERVER==='beta')return 0;if(S.pts<3||hpp()<.7||S.fs.some(
 function bdown(){const b=BT();if(hpp()<.8||S.fs.some(f=>f.hp<=0))return 0;let i=ST_SERVER==='beta'&&S.adventure?S.adventure.di:b.di;if(i<0){DG.forEach((g,j)=>{if(!g.ev&&g.lv<=Math.max(1,S.lvl-2)&&(i<0||g.lv>DG[i].lv))i=j})}const g=DG[i];if(!g||S.lvl<g.lv||S.pts<Math.min(MXP(),DENT+2+DHEAL))return 0;startD(i);bl('Coborâre: '+g.n);return 1}
 function bdesc(){const d=S.d;if(d.f){autoRun();return 1}if(d.done){leave();bl('Ieșit cu prada din '+(d.raid!=null?'raid':DG[d.di||0].n));return 1}const h=hpp(),nx=d.doors[0];if(h<.35){leave();bl('Retragere: echipa e rănită');return 1}
  const pr=h<.7?['o','c','l','x','b']:['c','l','o','x','b'],ds=d.doors.map((x,i)=>[x,i]).filter(([x])=>x.t!='b'||h>=.5).sort((a,b)=>pr.indexOf(a[0].t)-pr.indexOf(b[0].t));if(!ds.length){leave();bl('Retragere înainte de căpitan');return 1}const [x,i]=ds[0],c=dCost(d,x.t);if(S.pts<c)return 0;door(i);return 1}
-function botTick0(){const b=BT(),n=Date.now();if(!b.on||!S.prem||n-(S.bn||0)<1500)return;S.bn=n;if(S.d&&bdesc())return;if(adventureActive()){if(!S.d&&S.adventure&&b.d)bdown();return}
+/* BETA: botul Premium numai pentru confort, nu farming automat.
+   Temnițele, raidurile și forjările noi rămân acțiuni manuale. */
+const botFairMode=()=>ST_SERVER==='beta';
+function botTick0(){const b=BT(),n=Date.now();if(!b.on||!S.prem||n-(S.bn||0)<1500)return;S.bn=n;
+ if(botFairMode()){
+  if(S.d||adventureActive())return;
+  if(b.f)for(let i=0;i<S.forge.length;i++){
+   const slot=S.forge[i];
+   if(slot&&n>=slot.end){collect(i);bl(slot.ok?'Forjat: '+slot.item.name:'Forjare eșuată');return}
+  }
+  if(b.eq&&bequip())return;
+  if(b.hl&&bheal())return;
+  return; /* nici bdesc, bdown, braid, bcraft */
+ }if(S.d&&bdesc())return;if(adventureActive()){if(!S.d&&S.adventure&&b.d)bdown();return}
  if(b.f)for(let i=0;i<S.forge.length;i++){const s=S.forge[i];if(s&&n>=s.end){collect(i);bl(s.ok?'Forjat: '+s.item.name:'Forjare eșuată');return}}
  if(b.eq&&bequip())return;if(!S.d&&b.hl&&bheal())return;if(b.f&&bcraft())return;if(!S.d){if(ST_SERVER!=='beta'&&b.r&&braid())return;if(b.d&&bdown())return}}
+function vBotBeta(b,on,chk){
+ const controls=S.prem
+  ? '<div class="row"><b>Stare: '+(on?'pornit':'oprit')+
+    '</b><button class="p" onclick="btog(&#39;on&#39;)">'+
+    (b.on?'Oprește':'Pornește')+'</button></div>'
+  : '<p class="mute">Disponibil doar cu Premium.</p>'+
+    (DEV()?'<button class="p" onclick="opt(&#39;prem&#39;)">Activează Premium (test)</button>':'');
+ return '<section><h2>Asistent Premium · doar confort</h2>'+
+  '<div class="mute">Automatizează operații când pagina este deschisă, '+
+  'dar nu pornește Temnițe, raiduri sau forjări noi. Nu produce experiență ori '+
+  'recompense de luptă. Toate activitățile de progres rămân manuale.</div>'+
+  controls+'</section><section><h2>Acțiuni de confort</h2>'+
+  chk('f','Ridică obiectele deja forjate')+
+  chk('eq','Echipează automat obiectele deținute')+
+  chk('hl','Vindecă folosind aurul existent')+
+  '</section><section><h2>Jurnal</h2>'+
+  ((S.bg||[]).map(x=>'<div class="mute">'+tEsc(x)+'</div>').join('')||
+   '<p class="mute">Nimic încă.</p>')+'</section>';
+}
 function vBot(){const b=BT(),on=b.on&&S.prem,chk=(k,n)=>`<div class="row"><span>${n}</span><button${b[k]?' class="p"':''} onclick="btog('${k}')">${b[k]?'Da':'Nu'}</button></div>`;
+ if(botFairMode())return vBotBeta(b,on,chk);
  return`<section><h2>Bot de joc</h2><div class="mute">Joacă în locul tău cât timp pagina e deschisă, cu aceleași puncte și resurse. Funcție premium.</div>${S.prem?`<div class="row"><b>Stare: ${on?'pornit':'oprit'}</b><button class="p" onclick="btog('on')">${b.on?'Oprește':'Pornește'}</button></div>`:'<p class="mute">Disponibil doar pentru premium.</p>'+(DEV()?'<button class="p" onclick="opt(\'prem\')">Activează Premium (test)</button>':'')}</section><section><h2>Ce face botul</h2>${chk('d','Coboară în temnițe')}<div class="row"><span>Temniță</span><select onchange="bval('di',this.value)"><option value="-1"${b.di<0?' selected':''}>Cea mai bună posibilă</option>${DG.map((g,i)=>g.ev?'':`<option value="${i}"${b.di==i?' selected':''}>${g.n} (nv. ${g.lv})</option>`).join('')}</select></div>${ST_SERVER==='beta'?'':chk('r','Atacă sate')}${chk('f','Forjează iteme')}<div class="row"><span>Forjează</span><span><select onchange="bval('ft',this.value)">${FT.map(([v,n])=>`<option value="${v}"${b.ft==v?' selected':''}>${n}</option>`).join('')}</select> <select onchange="bval('fr',this.value)">${RAR.map((r,i)=>`<option value="${i}"${b.fr==i?' selected':''}>${r.n}</option>`).join('')}</select></span></div>${chk('eq','Echipează automat')}${chk('hl','Vindecă automat')}</section><section><h2>Jurnal</h2>${(S.bg||[]).map(x=>`<div class="mute">${x}</div>`).join('')||'<p class="mute">Nimic încă.</p>'}</section>`}
 function cn(k){const c=S.cn||(S.cn={});c[k]=(c[k]||0)+1;if(!S.ib)dm().list.forEach(x=>{if(x.k==k&&x.g<x.n)x.g++})}
 const C=k=>(S.cn&&S.cn[k])||0,TU=GHID;   /* pașii ghidului sunt în ghid.js */
