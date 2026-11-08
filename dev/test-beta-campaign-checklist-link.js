@@ -11,7 +11,7 @@ for(const m of index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
  if(m[1].trim())new Function(m[1]);
 assert(index.includes('teritorii.js?v=2026.11.07-20'));
 assert(index.includes('poveste-misiuni.js?v=2026.11.07-11'));
-assert(index.includes('drumul-eroului.js?v=2026.11.08-4'));
+assert(index.includes('drumul-eroului.js?v=2026.11.08-5'));
 assert(journey.includes("cmpOpenChecklist(\\'journey\\')"),'new journey invokes focused navigation');
 assert(story.includes("cmpOpenChecklist(\\'story\\')"),'older BETA story uses same navigation');
 const start=territory.indexOf('const cmpBeta='),end=territory.indexOf('/* --------------------------------------------------------------- PREMIUM',start);

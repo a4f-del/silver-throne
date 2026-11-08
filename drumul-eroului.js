@@ -16,7 +16,7 @@ const JE_STEPS = [
    : ['Topitorie','a','a']},
  {id:'otel',title:'Oțel pentru cei rămași',icon:'⚒️',
   say:'„O armă uitată în rucsac nu apără pe nimeni.” — Paznicul',
-  help:'Ridică arma forjată din Topitorie, apoi deschide Erou → Echipă și echipament din bara de sus. Deasupra echipamentului vei găsi un buton „Pune pe Erou” pentru o armă potrivită din rucsac. Dacă nu ai o armă, forjează o Sabie pentru Campion.',
+  help:'Ridică arma forjată din Topitorie, apoi deschide Echipă din bara din stânga. Deasupra echipamentului vei găsi un buton „Pune pe Erou” pentru o armă potrivită din rucsac. Dacă nu ai o armă, forjează o Sabie pentru Campion.',
   reward:{g:30,o:5},parts:[['Ai echipat prima armă',()=>jeCount('e')>=1]],
   action:()=>jeHasWeapon()?['Echipă','e','']:['Topitorie','a','a']},
  {id:'han',title:'Jurământul veteranului',icon:'⚔️',
