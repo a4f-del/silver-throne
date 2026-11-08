@@ -116,7 +116,7 @@ const TR_PLAN={
 function trBossPlanAttach(d){
  if(ST_SERVER!=='beta'||!d||d.room<d.rooms-1||d.ev)return d;
  const p=S.trPlan&&S.trPlan[d.dk];
- if(p&&TR_PLAN[p]&&p!=='normal')d.bossPlan=p;
+ if(p&&Object.prototype.hasOwnProperty.call(TR_PLAN,p)&&p!=='normal')d.bossPlan=p;
  return d;
 }
 function trBossPlanAvailable(i){
@@ -126,7 +126,7 @@ function trBossPlanAvailable(i){
 function trBossPlanPick(i,p){
  if(!trBossPlanAvailable(i)||!Object.prototype.hasOwnProperty.call(TR_PLAN,p))return;
  const d=dMk(i);
- S.trPlan=S.trPlan||{};
+ if(!S.trPlan||typeof S.trPlan!=='object'||Array.isArray(S.trPlan))S.trPlan={};
  if(p==='normal')delete S.trPlan[d.dk];else S.trPlan[d.dk]=p;
  S.msg='';go();
 }
@@ -195,7 +195,7 @@ function trWin(d) {
 /* șansele de câștig pentru pasul următor: aceeași luptă, simulată de 40 de ori pe o copie a jocului */
 function dOdds(boss, N) {
   N = N || 40; if (!S.d) return null;
-  const key = [S.d.di, S.d.tier, S.d.room, boss ? 1 : 0, S.fs.map(f => f.hp).join(',')].join('|');
+  const key = [S.d.di, S.d.tier, S.d.room, boss ? 1 : 0, S.d.bossPlan||'normal', S.fs.map(f => f.hp).join(',')].join('|');
   if (S.d.oddk === key) return S.d.odds;
   const snap = JSON.stringify(S), keep = { go: window.go, render: window.render, vs: window.vsFlash, bp: window.bhPush, ba: window.bhAdd };
   if(typeof GUILD!=='undefined')GUILD.preview=true;
