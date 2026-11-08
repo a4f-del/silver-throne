@@ -24,7 +24,7 @@ function egRecordBoss(d){
  eg.classes=eg.classes&&typeof eg.classes==='object'?eg.classes:{};
  eg.bosses[idx]=1;
  const fighters=Array.isArray(S.fs)?S.fs.filter(f=>f&&f.hp>0):[];
- if(fighters.length===1&&fighters[0].h)eg.solo[idx]=1;
+ if(S.fs.length===1&&fighters.length===1&&fighters[0].h)eg.solo[idx]=1;
  for(const f of fighters)if(['Campion','Paznic','Arcaș','Războinic','Vraci','Mag'].includes(f.c))eg.classes[f.c]=1;
 }
 /* Realizări numai din chei recunoscute; ecranul nu mută progresul. */
