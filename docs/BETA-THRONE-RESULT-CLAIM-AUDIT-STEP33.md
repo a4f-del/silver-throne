@@ -1,6 +1,6 @@
 # Silver Throne BETA — SQL33 / Pasul 33: raportul Tronului, auditat fără schimbarea regulilor
 
-**Stare:** SQL31 și SQL32 sunt **instalate în Supabase Silver-Throne-Test, 8/8 `true` fiecare**, confirmate de operator. SQL33 a fost **instalat în Supabase Silver-Throne-Test, cu 8/8 verificări `true`**, confirmate de operator. QA cu o provocare nouă și comparația efectivă cu SQL32 rămân în așteptare. LIVE și salvările nu sunt modificate.
+**Stare:** SQL31 și SQL32 sunt **instalate în Supabase Silver-Throne-Test, 8/8 `true` fiecare**, confirmate de operator. SQL33 a fost **instalat în Supabase Silver-Throne-Test, cu 8/8 verificări `true`**, confirmate de operator. QA cu provocările 27 și 28 a fost realizat: au rezultat două diferențe orientative față de SQL32, explicabile prin limitele modelului; calibrarea și verificarea server-side rămân deschise. LIVE și salvările nu sunt modificate.
 
 ## Problema pe care o rezolvăm
 
@@ -85,6 +85,27 @@ Acesta afișează două rezultate: un rezumat al ultimelor 7 zile (provocări, s
 - Dacă `simulari_lipsa > 0` ori există `finalizari_fara_verdict > 0` pentru provocări noi, investigăm jurnalul backendului înainte să declarăm pasul 33 încheiat.
 
 Testul acestui diagnostic este `node dev/test-beta-throne-audit-diagnostic.js` și a trecut. Testul SQL în PostgreSQL cu date noi rămâne de verificat manual în BETA.
+
+## Verificare reală: provocările Tron 27 și 28 (8 noiembrie 2026)
+
+Din diagnosticul BETA, au fost observate două provocări finalizate:
+
+| Challenge | Sursa verdictului | Victorie înregistrată | Model SQL32 | Runde | Concluzie |
+|---|---|---|---|---:|---|
+| 27 | `won` | `true` | `holder` | 3 | Diferență între model și rezultat |
+| 28 | `won` | `true` | `holder` | 3 | Diferență între model și rezultat |
+
+**Notă:** `result_field='won'` este corect. SQL31 a extras verdictul din coloana `won` a tabelului oficial. SQL33, intenționat, nu suprascrie acest câmp cu `client_claim_via_rpc` dacă verdictul era deja capturat.
+
+**Cauze de diferență confirmate în cod:** simulatorul SQL32 aplică `0.35×DEF` la ambele tipuri de lovituri; `spEnemyHit` din joc scade apărarea efectivă completă la atacul regelui. Motorul real poate folosi și abilități cu multiplicatori, critice, vindecare, sângerare, echipament și inițiativă aleatorie. De exemplu, lovitura specială de Campion poate avea multiplicator de `1.8×` sau `2.6×`, pe când SQL32 simulează doar lovituri normale.
+
+Aceste diferențe explică **plauzibil** neconcordanța, dar fără statisticile instantaneelor și jurnalul luptelor nu demonstrează exact ce a schimbat învingătorul în provocările 27 și 28. **Nu declarăm trișare și nu recalculăm rezultatul oficial.**
+
+Pentru comparație suplimentară, fără instalarea vreunei migrări:
+
+[`supabase/CHECK-beta-throne-duels-27-28-parity.sql`](https://github.com/a4f-del/silver-throne/blob/main/supabase/CHECK-beta-throne-duels-27-28-parity.sql)
+
+Interogarea doar pentru citire compară inițiativa alternată, daunele orientative cu `0.35×DEF` față de apărarea completă și două scenarii de abilitate Campion. Nu afișează numele sau identificatorii conturilor, nu rescrie nimic și nu confirmă că abilitatea a fost efectiv folosită. Regresie: `dev/test-beta-throne-combat-parity-gaps.js`.
 
 ## Test automat și ce rămâne deschis
 
