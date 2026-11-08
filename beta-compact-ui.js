@@ -48,12 +48,34 @@ function stCompactToggleAccount() {
   const b = document.getElementById('auth-toggle');
   if (b) b.click();
 }
+/* Setările folosesc acțiunile existente ale jocului: btog / fxToggleInstant / contOut /
+   stSwitchServer. După un toggle păstrăm deschis meniul chiar dacă go() redesenează antetul. */
+let stSettingsReopen = false;
+function stCompactSettingToggle(k) {
+  if (!stCompactActive() || !stCompactAvailable()) return;
+  if (k === 'fx') {
+    if (typeof C === 'function' && C('w') === 0) return;
+    stSettingsReopen = true;
+    fxToggleInstant();
+    return;
+  }
+  if (!['on','f','eq','hl'].includes(k) || !S.prem) return;
+  stSettingsReopen = true;
+  btog(k);
+}
+function stCompactSettingRow(k, label, value, disabled, activeLabel, inactiveLabel) {
+  return '<button type="button" class="st-setting-option' + (value ? ' on' : '') +
+    '" aria-pressed="' + (!!value) + '" onclick="stCompactSettingToggle(\'' + k + '\')"' +
+    (disabled ? ' disabled' : '') + '><span>' + label + '</span><b>' +
+    (value ? activeLabel : inactiveLabel) + '</b></button>';
+}
 function stCompactHdr() {
   const hero = S.fs.find(f => f.h) || S.fs[0];
   const nd = need(S.lvl);
   const hurt = typeof navBadge === 'function' ? navBadge('e') : '';
   const locked = !stCompactAvailable();
-  const botOn = !!(S.prem && S.bt && S.bt.on);
+  const bot = typeof BT === 'function' ? BT() : (S.bt || {});
+  const botOn = !!(S.prem && bot.on);
   const fxOn = !S.fxInstant;
   const fxLock = typeof C === 'function' && C('w') === 0;
   const act = locked ? ' disabled' : '';
@@ -75,11 +97,25 @@ function stCompactHdr() {
       (typeof guildHeader === 'function' ? '<div class="st-social-link">' + guildHeader() + '</div>' : '') +
       '<button onclick="stCompactToggleAccount()">👑 Cont și profil</button>') +
     '</div></details>';
-  const settings = '<details class="st-drop st-settings"><summary title="Setări rapide" aria-label="Setări rapide">⚙</summary>' +
-    '<div class="st-drop-panel st-settings-panel"><div class="st-drop-head"><b>Setări rapide</b></div>' +
-    '<button ' + act + ' onclick="' + (S.prem ? "btog('on')" : "tab('a');vil('q')") + '">🤖 Bot · ' + (S.prem ? (botOn ? 'pornit' : 'oprit') : 'premium') + '</button>' +
-    '<button ' + (locked || fxLock ? 'disabled' : '') + ' onclick="fxToggleInstant()">⚔ Redare lupte · ' + (fxOn || fxLock ? 'pornită' : 'oprită') + '</button>' +
+  const hasSession = typeof CONT !== 'undefined' && !!(CONT.booted && CONT.user);
+  const botsDisabled = locked || !S.prem;
+  const settings = '<details class="st-drop st-settings"' + (stSettingsReopen ? ' open' : '') +
+    '><summary title="Setări" aria-label="Setări">⚙</summary>' +
+    '<div class="st-drop-panel st-settings-panel"><div class="st-drop-head"><b>Setări</b><small>🧪 Server BETA</small></div>' +
+    '<div class="st-settings-section"><b>🤖 Asistent Premium</b>' +
+    '<small>Doar confort: nu pornește temnițe, raiduri sau forjări noi.</small></div>' +
+    stCompactSettingRow('on','Bot Premium',botOn,botsDisabled,'Pornit',S.prem ? 'Oprit' : 'Necesită Premium') +
+    stCompactSettingRow('f','Ridică obiectele forjate',!!bot.f,botsDisabled,'Activat','Dezactivat') +
+    stCompactSettingRow('eq','Echipează automat',!!bot.eq,botsDisabled,'Activat','Dezactivat') +
+    stCompactSettingRow('hl','Vindecă folosind aur',!!bot.hl,botsDisabled,'Activat','Dezactivat') +
+    '<button type="button" class="st-settings-link"' + act + ' onclick="tab(\'a\');vil(\'q\')">📜 Jurnal și explicații BOT</button>' +
+    '<div class="st-settings-section st-settings-break"><b>⚔ Luptă</b></div>' +
+    stCompactSettingRow('fx','Redare lovitură cu lovitură',fxOn || fxLock,locked || fxLock,'Pornită','Oprită') +
+    '<div class="st-settings-section st-settings-break"><b>👤 Cont și server</b><small>LIVE are sesiune și progres separate de BETA.</small></div>' +
+    '<button type="button" class="st-settings-link"' + (locked || !hasSession ? ' disabled' : '') + ' onclick="contOut()">🚪 Deconectează-te</button>' +
+    '<button type="button" class="st-settings-link st-settings-live"' + act + ' onclick="stSwitchServer(\'live\')">⚔ Treci pe LIVE</button>' +
     '</div></details>';
+  stSettingsReopen = false;
   return res + '<div class="st-hquick">' + mail + fight + heroMenu + settings + '</div>';
 }
 /* Evenimentele raman vizibile, dar explicatiile nu imping aventura sub fold. */
@@ -145,6 +181,21 @@ body.st-compact .st-drop-head b{font:700 15px Cinzel,serif;color:var(--gold2)}
 body.st-compact .st-drop-head small{font-size:12px;color:var(--mute)}
 body.st-compact .st-drop-panel>button,body.st-compact .st-social-link>button{display:flex;width:100%;gap:8px;align-items:center;justify-content:flex-start;padding:9px;border-radius:6px;margin:2px 0;text-align:left;font-size:14px;background:transparent;border:1px solid transparent;box-shadow:none}
 body.st-compact .st-drop-panel>button:hover,body.st-compact .st-social-link>button:hover{background:#ffffff10;border-color:var(--gold)}
+body.st-compact .st-settings-panel{width:min(350px,calc(100vw - 20px));max-height:calc(100dvh - var(--hh,72px) - 22px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+body.st-compact .st-settings-section{display:flex;flex-direction:column;gap:3px;margin:6px 2px;padding:4px 6px}
+body.st-compact .st-settings-section b{font:700 13px Cinzel,Georgia,serif;color:var(--gold2)}
+body.st-compact .st-settings-section small{font-size:12px;line-height:1.3;color:var(--mute)}
+body.st-compact .st-settings-break{border-top:1px solid #816b3f55;padding-top:11px;margin-top:10px}
+body.st-compact .st-settings-panel>button.st-setting-option{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;color:var(--ink);border:1px solid #ffffff14;border-radius:7px;background:#111b1f;min-height:42px}
+body.st-compact .st-setting-option span{font-size:13px;line-height:1.25;text-align:left}
+body.st-compact .st-setting-option b{font-size:11px;white-space:nowrap;font-weight:700;color:var(--mute)}
+body.st-compact .st-settings-panel>button.st-setting-option.on{border-color:#9b8247;background:#25291f}
+body.st-compact .st-setting-option.on b{color:#f0d27a}
+body.st-compact .st-settings-panel>button.st-setting-option:disabled{opacity:.55;cursor:not-allowed}
+body.st-compact .st-settings-panel>button.st-settings-link{color:#d9d3bd;font-size:13px;min-height:37px}
+body.st-compact .st-settings-panel>button.st-settings-live{border:1px solid #ad8b4b;background:#2c281b;color:#f0d27a;justify-content:center;margin-top:6px}
+body.st-compact .st-settings-panel>button:focus-visible{outline:2px solid #f0d27a;outline-offset:2px}
+
 body.st-compact .st-social-link .wf-open,body.st-compact .st-social-link .guild-head{position:relative;min-height:40px;color:var(--ink);font:inherit}
 body.st-compact .st-event{border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:10px;padding:0;margin:0 0 12px;background:linear-gradient(180deg,#1d2427,#13191b)}
 body.st-compact .st-event.on{border-color:var(--gold2)}

@@ -14,7 +14,7 @@ const styles = [];
 const ctx = {
   ST_SERVER:'beta',
   document:{head:{appendChild(x){styles.push(x.textContent)}},createElement(){return {textContent:''}},getElementById(){return null}},
-  S:{tab:'c',fs:[{h:true,n:'Eroul'}],lvl:50,xp:20,pts:10,bp:0,gold:1234,ore:567,bt:{on:false},prem:true,fxInstant:false,d:null},
+  S:{tab:'c',fs:[{h:true,n:'Eroul'}],lvl:50,xp:20,pts:10,bp:0,gold:1234,ore:567,bt:{on:false,f:1,eq:1,hl:1},prem:true,fxInstant:false,d:null},
   TEMA_NAV:[['a','Sat','🏠'],['c','Coborâre','⚔'],['m','Hartă','🗺'],['r','Tron','♛'],['e','Echipă','👥']],
   temaOn:k=>k==='c',navBadge:k=>k==='e'?'<b class="nb">2</b>':'',
   IC:{p:'⚡',g:'🪙',o:'⛏'},need:()=>100,av:()=>'<span>portret</span>',tEsc:x=>x,MXP:()=>60,
@@ -26,17 +26,17 @@ const ctx = {
 };
 vm.createContext(ctx);
 vm.runInContext(js,ctx,{filename:'beta-compact-ui.js'});
-Object.assign(ctx,vm.runInContext('({stCompactActive,stCompactNav,stTronSidebarState,stCompactHdr,stCompactEvent})',ctx));
+Object.assign(ctx,vm.runInContext('({stCompactActive,stCompactNav,stTronSidebarState,stCompactHdr,stCompactEvent,stCompactSettingToggle})',ctx));
 assert(ctx.stCompactActive());
 const nav = ctx.stCompactNav();
 assert.equal((nav.match(/<button/g)||[]).length,5,'Five permanent navigation destinations');
 for(const t of ['Sat','Coborâre','Hartă','Tron','Echipă']) assert(nav.includes(t),t);
 assert(nav.includes('onclick="tab(\'e\')"'),'Team is accessible directly from the sidebar');
 const header = ctx.stCompactHdr();
-for(const token of ['id="pp"','id="pt"','wm-open','bhOpen()','stCompactHeroGo','wf-open','guild-open',"tab('k')",'stCompactToggleAccount','btog','fxToggleInstant']) assert(header.includes(token),'Header action '+token);
+for(const token of ['id="pp"','id="pt"','wm-open','bhOpen()','stCompactHeroGo','wf-open','guild-open',"tab('k')",'stCompactToggleAccount','stCompactSettingToggle','contOut()','stSwitchServer(\'live\')','Jurnal și explicații BOT','Ridică obiectele forjate','Echipează automat','Vindecă folosind aur']) assert(header.includes(token),'Header action '+token);
 assert(ctx.stCompactEvent().includes('<details'),'Event starts collapsed');
 assert(styles.join('').includes('st-compact'),'Scoped styles');
-assert(html.includes('beta-compact-ui.js?v=2026.11.08-3'),'New compact sidebar cache-busted');
+assert(html.includes('beta-compact-ui.js?v=2026.11.08-4'),'New compact sidebar cache-busted');
 ctx.TT={CFG:{minLevel:10}};
 ctx.TRON={st:{
   me:{user_id:'hero-1',pending:[],can_challenge:true},
@@ -70,9 +70,9 @@ ctx.ST_SERVER='live';
 assert(!ctx.stCompactActive(),'LIVE unchanged');
 assert(html.includes('stCompactActive()')&&html.includes('stCompactNav()')&&html.includes('stCompactEvent()'),'All navigation hooks wired');
 assert(guide.includes('function ghTeamNav()')&&guide.includes("p.t === 'e' ? ghTeamNav()")&&guide.includes('#nv button[onclick="tab('),'Legacy BETA guide points directly to restored Echipă sidebar button');
-assert(guide.includes('function ghReplayTarget()')&&guide.includes('header .st-settings:not([open])'),'Legacy BETA guide follows Setări to Redare');
+assert(guide.includes('function ghReplayTarget()')&&guide.includes('header .st-settings:not([open])')&&guide.includes('stCompactSettingToggle('),'Legacy BETA guide follows Setări to playback control');
 assert(!heroGuide.includes("tab==='e'&&typeof stCompactActive==='function'")&&heroGuide.includes("return {selector:'#nv button"),'New-hero guidance highlights Echipă in sidebar');
 assert(journey.includes('deschide Echipă din bara din stânga'),'Drumul Eroului instructions reflect restored sidebar');
-assert(html.includes('ghid.js?v=2026.11.08-3')&&html.includes('ghidare-erou.js?v=2026.11.08-3'),'Both guide scripts cache-busted');
+assert(html.includes('ghid.js?v=2026.11.08-4')&&html.includes('ghidare-erou.js?v=2026.11.08-3'),'Both guide scripts cache-busted');
 for(const script of html.split('<script>').slice(1).map(s=>s.split('</script>')[0])) if(script.trim()) new Function(script);
-console.log('OK: five nav entries including Echipă, hero/social/account/settings actions, compact event, BETA-only scope, inline JS.');
+console.log('OK: five nav entries, BOT controls, existing logout/LIVE switch, guide and BETA scope, inline JS.');

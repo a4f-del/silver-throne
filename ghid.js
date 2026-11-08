@@ -23,7 +23,7 @@ function ghTeamNav() {
 }
 function ghReplayTarget() {
   return ghQ(ghCompact()
-    ? 'header .st-settings:not([open]) > summary, header .st-settings[open] button[onclick="fxToggleInstant()"]'
+    ? 'header .st-settings:not([open]) > summary, header .st-settings[open] button[onclick="stCompactSettingToggle(\'fx\')"]'
     : 'header .hq[onclick^="fxToggleInstant"]');
 }
 const ghQ = s => [...document.querySelectorAll(s)].filter(e => e.offsetParent !== null || e instanceof SVGElement);
