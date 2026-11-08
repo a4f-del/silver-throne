@@ -55,7 +55,7 @@ async function lwSync0(force) {
     LUME.err = ''; LUME.st = r.data; LUME.off = r.data.now - Date.now(); LUME.terr = null;
     if (lwTestCooldownAllowed() && !LUME.testCdLoaded) void lwTestCooldownSync();
   } catch (e) { LUME.err = String((e && e.message) || e); }
-  finally { LUME.at = Date.now(); LUME.loading = false; lwUi(); }
+  finally { LUME.at = Date.now(); LUME.loading = false; if (!LUME.err) lwAutoPublishSoon(); lwUi(); }
 }
 let _lwSync = null;
 function lwSync(force) { if (_lwSync) return _lwSync; _lwSync = lwSync0(force).finally(() => { _lwSync = null; }); return _lwSync; }
