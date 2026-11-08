@@ -59,8 +59,8 @@ assert(!boss.includes('ac-return-current'));
 assert(steps.includes("function trSelSet(i, k)"),'button uses existing preview selector');
 assert(steps.includes("ST_SERVER==='beta'&&S.adventure&&typeof acDungeonPage"),
  'special dungeon page remains BETA-only');
-assert(html.includes('aventura-carduri.css?v=2026.11.08-4')&&
- html.includes('aventura-carduri.js?v=2026.11.08-5')&&
+assert(html.includes('aventura-carduri.css?v=2026.11.08-5')&&
+ html.includes('aventura-carduri.js?v=2026.11.08-6')&&
  html.includes('ghidare-erou.js?v=2026.11.07-2'),
  'updated UI assets are loaded without stale caching');
 assert(guide.includes("document.querySelector('.ac-return-current')"),
