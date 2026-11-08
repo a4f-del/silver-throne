@@ -27,7 +27,7 @@ assert(dungeons.includes('@media(max-width:760px)'),'Responsive placement retain
 assert(html.includes('temnite.js?v=2026.11.08-3'),'Cache-bust updated');
 
 const fn=new Function('S','ST_SERVER','DG','trPage','acCombatPage','heroSoloControl','vDung','reviveAllBtn','bhLast',
- beta+' return ""; }')(
+ beta+' return ""; }; return vC();')(
  {d:null,fs:[{h:1,n:'Erou',hp:90}],adventure:null},
  'beta',[],()=>'',()=>'',()=>'<div id="team">Erou singur · Readu mercenarii</div>',
  ()=>'<div id="feature">Temniță recomandată</div>',()=>'',()=>'<div id="last">Ultima luptă</div>'
