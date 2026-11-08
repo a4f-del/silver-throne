@@ -20,7 +20,7 @@ function make(server='beta'){
    return {ok:true};
  };
  const args={ST_SERVER:server,LUME,S,TT:{power:units=>units.reduce((s,u)=>s+u.p,0)},
-  tronTeamUnits:()=>[{p:100},{p:50},{p:50}],lwCan,
+  tronTeamUnits:()=>[{p:100},{p:40},{p:40},{p:20}],lwCan,
   lwNum:n=>Math.round(n).toLocaleString('ro-RO'),tEsc};
  const factory=new Function(...Object.keys(args),fn+';return {lwRecommendedOpponents,lwRecommendedPanel};');
  return {S,LUME,api:factory(...Object.values(args)),setAttacks:n=>attacks=n};
@@ -39,9 +39,9 @@ const players=[
 ];
 x.LUME.st.players=players;live.LUME.st.players=players;
 assert.deepEqual(x.api.lwRecommendedOpponents().map(p=>p.id),['p1','p2','p3'],
- 'Rank by actual 3-unit World ghost power, excluding cooldown and protected targets');
+ 'Rank by actual 4-unit World ghost power, excluding cooldown and protected targets');
 let html=x.api.lwRecommendedPanel();
-assert(html.includes('Fantoma ta din Lume (maximum 3 luptători): 200 putere'));
+assert(html.includes('Fantoma ta din Lume (maximum 4 luptători): 200 putere'));
 assert(html.includes('nu garantează victoria'));
 assert(html.includes('Protecția începătorilor'));
 assert(!html.includes('Protejat</b>')&&!html.includes('Cooldown</b>'));
