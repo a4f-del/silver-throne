@@ -1,6 +1,6 @@
 /* Silver Throne — Bresle BETA. Profiluri si contributii comune in Supabase.
  * Evenimentele Temnite/Turn sunt raportate din client, deduplicate si plafonate. */
-const GUILD={uid:null,state:null,loading:false,busy:false,sending:false,last:0,error:'',notice:'',timer:null,tags:{},tagsAt:0,tagsBusy:false,tagsUnavailable:false};
+const GUILD={uid:null,state:null,loading:false,busy:false,sending:false,bossSyncing:false,last:0,error:'',notice:'',timer:null,tags:{},tagsAt:0,tagsBusy:false,tagsUnavailable:false};
 const guildEsc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 /* Numele breslei este informație publică din Lume. Mapăm doar UUID -> TAG.
    Dacă migrarea SQL16 lipsește, afișăm în continuare numele jucătorului. */
@@ -42,7 +42,7 @@ function guildHeader(){
  return '<button id="guild-open" class="guild-head" onclick="guildOpen()" aria-label="Deschide breslele'+(unread?' · '+unread+' invitații':'')+'">⚔ <span>'+guildEsc(g?'['+g.tag+']':'Bresle')+'</span>'+
    (unread?'<b class="guild-invite-count">'+unread+'</b>':'')+'</button>';
 }
-function guildReset(){GUILD.uid=null;GUILD.state=null;GUILD.loading=false;GUILD.sending=false;GUILD.last=0;GUILD.error='';GUILD.tags={};GUILD.tagsAt=0;GUILD.tagsBusy=false;GUILD.tagsUnavailable=false;if(typeof gsrReset==='function')gsrReset();}
+function guildReset(){GUILD.uid=null;GUILD.state=null;GUILD.loading=false;GUILD.sending=false;GUILD.bossSyncing=false;GUILD.last=0;GUILD.error='';GUILD.tags={};GUILD.tagsAt=0;GUILD.tagsBusy=false;GUILD.tagsUnavailable=false;if(typeof gsrReset==='function')gsrReset();}
 async function guildSync(force){
  if(!guildEnabled()||GUILD.loading||GUILD.busy||(!force&&Date.now()-GUILD.last<25000))return;
  const uid=CONT.user.id;
@@ -95,6 +95,21 @@ function guildWeeklyGoal(week,key,fallback){
  return raw!=null&&Number.isSafeInteger(value)&&value>0?value:fallback;
 }
 
+/* Ultima lovitură este confirmată de guild_api, nu estimată din S.fs.
+   Valorile sunt bonusuri de contribuție, nu HP vindecat personajului. */
+function guildBossLastHit(boss){
+ const hit=boss&&boss.last_hit;
+ if(!hit||!Number.isFinite(Number(hit.damage)))return '';
+ const n=x=>Math.max(0,Math.round(Number(x)||0)).toLocaleString('ro-RO');
+ return '<details class="guild-last-hit"><summary>Detalii ultima lovitură: '+
+  n(hit.damage)+' daune</summary><p class="mute">Din formația publicată în Lume: '+
+  '⚔ Ofensivă +'+n(hit.attack_bonus)+
+  ' · 🛡 Protecție +'+n(hit.protection_bonus)+
+  ' · ✚ Vindecare +'+n(hit.healing_bonus)+
+  ' · Contraclasă: '+(hit.counter_triggered===true?'activă':'inactivă')+
+  '. Bonusurile sunt contribuții tactice la daune, nu vindecă viața eroului. '+
+  'Plafonul și viața rămasă bossului pot limita totalul.</p></details>';
+}
 function guildPaint(){
  const host=document.getElementById('guild-view');if(!host)return;
  if(GUILD.error){host.innerHTML='<p class="r4">Breslele nu sunt disponibile: '+guildEsc(GUILD.error)+'. Verifică migrarea SQL BETA.</p><button onclick="guildSync(true)">Reîncearcă</button>';return;}
@@ -136,8 +151,11 @@ function guildPaint(){
    '<div class="guild-boss"><div class="guild-boss-head"><b>Străjerul Cenușii</b><span>'+Math.max(0,2-(boss.hits_today||0))+' / 2 atacuri azi</span></div>'+
    guildBar('Viața comună',boss.hp,boss.max||1)+
    '<p>Abilitate: <b>'+guildEsc(({poison:'Otravă',storm:'Furtună',wave:'Val de forță'})[boss.ability]||'Val de forță')+'</b>. Clasa care îl contracarează: <b>'+guildEsc(boss.counter||'Vraci')+'</b>. Bonusul de contraclasă (+25% daune) se aplică dacă ai această clasă în echipa publicată din Lume (maximum 3 luptători), nu doar dacă eroul are clasa potrivită. Daunele sunt calculate pe server din acel profil. Viața se adaptează numărului de membri.</p>'+
+   (boss.formation_rules===true?
+    '<p>Roluri în atac: <b>Războinic / Arcaș / Mag</b> pentru ofensivă, <b>Paznic / Gardian</b> pentru protecție, <b>Vraci</b> pentru vindecare. Bonusurile cresc daunele utile ale incursiunii, nu modifică HP-ul personajelor.</p>':'')+
    '<p>Ai provocat '+Number(boss.personal_damage||0).toLocaleString('ro-RO')+' daune săptămâna aceasta.</p>'+
-   '<div class="guild-boss-actions"><button class="p" onclick="guildBoss()"'+((boss.hits_today||0)>=2||boss.hp<=0?' disabled':'')+'>⚔ Atacă · gratuit</button>'+
+   guildBossLastHit(boss)+
+   '<div class="guild-boss-actions"><button class="p" onclick="guildBoss()"'+((boss.hits_today||0)>=2||boss.hp<=0||GUILD.bossSyncing||GUILD.busy?' disabled':'')+'>⚔ Atacă · gratuit</button>'+
    '<button onclick="guildClaim(\'boss\')"'+(boss.hp>0||!self.boss_hits||claimed.boss||contributed<3?' disabled':'')+'>'+
      (claimed.boss?'Revendicat':'Premiul căpitanului · +20 însemne')+'</button></div></div>'+
    '<h3>Membri și contribuții</h3><div class="guild-members">'+(g.members||[]).map(m=>
@@ -170,12 +188,35 @@ async function guildLeave(){
 }
 async function guildClaim(tier){await guildAction('claim',{tier});}
 async function guildBoss(){
- if(!guildEnabled()||!GUILD.state?.guild||S.d||(typeof FX!=='undefined'&&FX.playing))return;
- const previous=GUILD.state.boss||{},before=Number(previous.personal_damage)||0;
- const state=await guildAction('boss',{});
- if(state?.boss&&typeof guildBossReplay==='function'){
-  const damage=Math.max(0,(Number(state.boss.personal_damage)||0)-before);
-  if(damage>0)guildBossReplay(previous,state.boss,damage);
+ if(!guildEnabled()||!GUILD.state?.guild||GUILD.busy||GUILD.bossSyncing||
+    S.d||(typeof FX!=='undefined'&&FX.playing))return;
+ GUILD.bossSyncing=true;
+ const uid=CONT.user.id;
+ try{
+  /* Înainte de a consuma una din cele 2 încercări, serverul Lumii primește
+     formația actuală. Dacă publicarea a eșuat, păstrăm încercarea. */
+  if(typeof lwSync!=='function'||typeof lwSnap!=='function'||
+     typeof LUME==='undefined'){
+   GUILD.notice='Nu pot verifica echipa publicată în Lume. Încearcă din nou.';
+   return;
+  }
+  await lwSync(true);
+  if(!guildEnabled()||CONT.user.id!==uid)return;
+  if(LUME.err||LUME.pubSig!==JSON.stringify(lwSnap())){
+   GUILD.notice='Echipa nu a putut fi publicată în Lume. Nicio încercare de boss nu a fost consumată.';
+   return;
+  }
+  const previous=GUILD.state.boss||{},before=Number(previous.personal_damage)||0;
+  const state=await guildAction('boss',{});
+  if(state?.boss&&typeof guildBossReplay==='function'){
+   const damage=Math.max(0,(Number(state.boss.personal_damage)||0)-before);
+   if(damage>0)guildBossReplay(previous,state.boss,damage);
+  }
+ }catch(e){
+  GUILD.notice='Nu s-a putut sincroniza formația: '+String(e&&e.message||e).slice(0,110);
+ }finally{
+  GUILD.bossSyncing=false;
+  if(typeof guildPaint==='function')guildPaint();
  }
 }
 function guildBossReplay(before,after,damage){
