@@ -137,6 +137,12 @@ function guildPaint(){
    '<p>Cod invitație: <code>'+guildEsc(g.code)+'</code></p></div>'+
    (typeof guildCosmeticsSection==='function'?guildCosmeticsSection(g):'')+
    '<h3>Contractul săptămânii <small>· de luni până duminică</small></h3>'+
+   (typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'
+    ? '<details class="mute"><summary>⚠ Raportări BETA provizorii</summary>'+
+      '<p>Unele obiective de Temnițe și Turn sunt încă raportate din browser. '+
+      'Serverul limitează și dedublează rapoartele, dar nu verifică încă '+
+      'simularea fiecărei lupte. Contractele nu sunt dovezi anti-cheat.</p></details>'
+    : '')+
    GUILD_GOALS.map(([key,title,max])=>guildBar(title,week[key],guildWeeklyGoal(week,key,max))).join('')+
    (Number.isSafeInteger(week.active_at_start)?'<p class="mute">Obiective stabilite pentru '+week.active_at_start+
    ' membri activi la începutul săptămânii. Nu cresc dacă intră membri noi.</p>':

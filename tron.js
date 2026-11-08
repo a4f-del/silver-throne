@@ -243,7 +243,11 @@ function vTron() {
   if (me.pending.length) h += `<section class="tr-claim"><h2>Premii de revendicat</h2>` + me.pending.map(p => `<div style="margin:8px 0"><b>Săptămâna ${p.week + 1}: ${tronKindTxt(p.kind)}</b> · titlu „${tEsc(p.title)}” · <b>${p.amount}</b> materiale rare<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-start;margin-top:8px">${p.options.map(m => `<button class="p" onclick="tronClaim(${p.week},'${m}')">${tEsc(mn(m))} (${have(m)}/${cap()})</button>`).join('')}</div></div>`).join('') + '</section>';
   const mineRank=tronIsBetaDuel()&&Array.isArray(st.ranking)?
     st.ranking.find(x=>x.user_id===me.user_id):null;
-  h += `<section><h2>Clasamentul săptămânii</h2>${tronPodium(st.ranking)}`+
+  h += `<section><h2>Clasamentul săptămânii</h2>${tronIsBetaDuel()?
+    '<details class="mute"><summary>⚠ Clasament BETA provizoriu</summary>'+
+    '<p>Rezultatele provocărilor și statisticile fantomelor sunt încă '+
+    'calculate/publicate în browser. Nu reprezintă un clasament '+
+    'validat anti-cheat. Validarea server-side este necesară înainte de lansarea competitivă.</p></details>':''}${tronPodium(st.ranking)}`+
     (tronIsBetaDuel()?'<p class="mute" style="margin-top:10px">'+
       (mineRank?'Locul tău: '+mineRank.rank+' · '+tronHM(mineRank.seconds):
        'Nu ai încă timp în clasamentul săptămânii.')+
