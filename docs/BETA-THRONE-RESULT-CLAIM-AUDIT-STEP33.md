@@ -71,6 +71,21 @@ Pentru un duel finalizat prin noul apel, când tabela oficială nu include `win`
 
 **Nu confunda `concordanta_model=false` cu trișarea.** Modelul SQL32 ignoră inițiativa aleatoare, criticele, abilitățile și alte efecte. Pentru duelurile vechi, `reported_win` poate rămâne `NULL`, ceea ce este normal.
 
+## Diagnostic complet SQL31–33, fără alte migrări
+
+După ce termini cel puțin **un duel nou împotriva unui rege** (nu Garda Regală), poți rula scriptul **doar pentru citire**:
+
+[`supabase/CHECK-beta-throne-sql31-33-audit.sql`](https://github.com/a4f-del/silver-throne/blob/main/supabase/CHECK-beta-throne-sql31-33-audit.sql)
+
+Acesta afișează două rezultate: un rezumat al ultimelor 7 zile (provocări, snapshoturi, simulări și verdicte disponibile) și ultimele 12 provocări cu starea comparației. Nu citește salvări, inventar sau identificatori ai utilizatorilor; nu scrie în baza de date.
+
+- `declaratii_inregistrate_sql33 > 0` confirmă că o provocare nouă a înregistrat `p_win` prin wrapperul SQL33.
+- `dueluri_comparabile > 0` confirmă că putem compara cel puțin un duel împotriva regelui, finalizat și cu predicție determinată. Până la prima provocare nouă poate fi 0.
+- `diferite > 0` indică o nepotrivire *orientativă* între model și lupta jucată; nu dovedește exploatare sau trișare.
+- Dacă `simulari_lipsa > 0` ori există `finalizari_fara_verdict > 0` pentru provocări noi, investigăm jurnalul backendului înainte să declarăm pasul 33 încheiat.
+
+Testul acestui diagnostic este `node dev/test-beta-throne-audit-diagnostic.js` și a trecut. Testul SQL în PostgreSQL cu date noi rămâne de verificat manual în BETA.
+
 ## Test automat și ce rămâne deschis
 
 `node dev/test-beta-throne-result-claim-audit-rpc.js` — verifică static preflightul SQL, drepturile, păstrarea funcției oficiale, cele opt diagnostice și comportamentul JavaScript cu RPC simulate: noul traseu, lipsa funcției, eroare de rețea, acces refuzat și LIVE. Testul **a trecut**, dar nu execută PostgreSQL sau jocul într-un browser real.
