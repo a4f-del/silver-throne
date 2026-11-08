@@ -1,6 +1,6 @@
 # Silver Throne BETA — SQL32 / Pasul 33: simulator pasiv pentru duelurile Tronului
 
-**Stare:** SQL31 instalat și confirmat de operator cu **8/8 verificări `true`**. SQL32 este **pregătit în GitHub, neinstalat**. Nu are modificări de frontend, nu necesită ștergeri și nu atinge LIVE.
+**Stare:** SQL31 și SQL32 **instalate în BETA**, fiecare cu **8/8 verificări `true`**, confirmate de operator. Testul cu dueluri noi și comparația statistică rămân de efectuat. Nu are modificări de frontend, nu necesită ștergeri și nu atinge LIVE.
 
 ## De ce un simulator pasiv?
 
@@ -81,4 +81,4 @@ SQL32 nu adaugă butoane în joc. Jucătorii nu pot citi direct aceste tabele.
 
 ## Status pas 33
 
-**SQL31: instalat 8/8. SQL32: pregătit, neinstalat.** Mai lipsesc proprietatea server-side a inventarului, nivelului și echipamentului; motorul oficial, recompensele verificate și teste cu conturi BETA. Păstrăm progresul existent. LIVE rămâne neschimbat.
+**SQL31: instalat 8/8. SQL32: instalat 8/8.** Mai lipsesc proprietatea server-side a inventarului, nivelului și echipamentului; motorul oficial, recompensele verificate și teste cu conturi BETA. Păstrăm progresul existent. LIVE rămâne neschimbat.
