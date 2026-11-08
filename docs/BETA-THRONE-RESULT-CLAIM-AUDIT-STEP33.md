@@ -119,6 +119,27 @@ Rezultă **18 scenarii de audit pentru fiecare provocare**, agregate într-un si
 
 Script: [`supabase/CHECK-beta-throne-duels-27-28-scenarios-v2.sql`](https://github.com/a4f-del/silver-throne/blob/main/supabase/CHECK-beta-throne-duels-27-28-scenarios-v2.sql). Test: `node dev/test-beta-throne-duels-v2-scenarios.js` (trecut). Niciuna dintre aceste simulări nu folosește critice, sângerare, vindecare, afixe sau viața exactă la începutul luptei. **Numărul de scenarii favorabile nu reprezintă o probabilitate de victorie.** Actualele victorii și coroane rămân neschimbate.
 
+## QA suplimentar: 18 scenarii, duelurile 27/28
+
+După rularea interogării v2 pe instantaneele reale, rezultatele raportate au fost:
+
+| Provocare | Verdict declarat | SQL32 | Scenarii erou | Scenarii rege | Scenarii remiză |
+|---|---|---|---:|---:|---:|
+| 27 | victorie | holder | 9/18 | 9/18 | 0 |
+| 28 | victorie | holder | 0/18 | 18/18 | 0 |
+
+La 27, inițiativa și variația daunelor pot explica diferența chiar în modelul simplificat. La 28, modelul v2 nu poate reproduce victoria; nu știm încă dacă decizia a depins de critice, multiplicatori de specializare, sângerare, execuție, legendare, echipament sau o diferență între instantaneul publicat și lupta reală. **18 scenarii nu sunt o distribuție statistică calibrată; 0/18 nu înseamnă victorie imposibilă și nu justifică invalidarea coroanei.**
+
+Verificarea codului confirmă că traseul obișnuit al înfrângerii elimină lupta activă și păstrează `win=false`, iar traseul victoriei marchează `done=true` după căderea adversarului. Regresie: `dev/test-beta-throne-journal-export.js`. Este o verificare a codului și a unor trasee simulate, nu o dovadă a modului în care au avut loc cele două dueluri istorice.
+
+### Diagnostic fără migrare: copierea jurnalului din LUPTE
+
+În BETA, în meniul **LUPTE**, fiecare înregistrare Tron are acum butonul **„Copiază jurnalul”**, vizibil după deschiderea înregistrării. Pentru duelurile noi, istoricul local afișează și ID-ul provocării (`#28` etc.) la care se referă jurnalul. Înregistrările vechi nu primesc retroactiv un ID inventat, dar jurnalul lor poate fi copiat dacă încă se află între ultimele 20 lupte.
+
+Copierea este **inițiată explicit de jucător** și are fallback manual dacă browserul blochează clipboard-ul. Jurnalul poate conține numele personajelor; jucătorul decide dacă îl distribuie. Este un jurnal **local, nevalidat de server**, util pentru diagnostic, nu pentru dovedirea victoriei. Nu se transmite automat și nu schimbă progresul ori RPC-urile.
+
+Pentru comparația în următoarele lupte trebuie urmărite în special: inițiativa, lovituri critice, sângerare și execuție, avantajele legendare și starea inițială a vieții. Înainte de activarea motorului autoritativ, aceste mecanici și echipamentul trebuie verificate independent pe server.
+
 ## Test automat și ce rămâne deschis
 
 `node dev/test-beta-throne-result-claim-audit-rpc.js` — verifică static preflightul SQL, drepturile, păstrarea funcției oficiale, cele opt diagnostice și comportamentul JavaScript cu RPC simulate: noul traseu, lipsa funcției, eroare de rețea, acces refuzat și LIVE. Testul **a trecut**, dar nu execută PostgreSQL sau jocul într-un browser real.
