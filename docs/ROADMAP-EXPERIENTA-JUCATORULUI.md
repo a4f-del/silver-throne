@@ -57,7 +57,7 @@ Expedițiile mercenarilor sunt activități pasive, nu o a patra buclă obligato
 
 ## ETAPA C — TEMNIȚE, TURN, ENDGAME
 
-**Previzualizare vizuală BETA — Coborâre compactă (noiembrie 2026):** o temniță recomandată cu progres vizibil, Relicva săptămânii și Turnul în două carduri secundare, lista completă de temnițe ascunsă implicit și reguli utile într-un panou extensibil. Cheile, progresul, costurile și recompensele existente rămân intacte; LIVE nu se modifică. QA vizual mobil/desktop necesar. Test: `dev/test-beta-coborare-hub.js`. Ghid: `docs/BETA-COBORARE-SIMPLIFIED-HUB-PREVIEW.md`.
+**Previzualizare vizuală BETA — Coborâre compactă (noiembrie 2026):** o temniță recomandată cu progres vizibil, Relicva săptămânii și Turnul în două carduri secundare, lista completă de temnițe ascunsă implicit și reguli utile într-un panou extensibil. Cheile, progresul, costurile și recompensele existente rămân intacte; LIVE nu se modifică. QA vizual mobil/desktop necesar. Test: `dev/test-beta-coborare-hub.js`. Ghid: `docs/BETA-COBORARE-SIMPLIFIED-HUB-PREVIEW.md`. **Completări BETA:** echipa activă este vizibilă imediat lângă acțiunea Luptă, opțiunea Erou singur permite readucerea individuală sau rapidă a mercenarilor disponibili, iar Ultima luptă/Jurnalul se consultă exclusiv din LUPTE. Teste: `dev/test-beta-coborare-party-and-lupte.js` și regresiile existente pentru temnițe; verificarea pe ecran real rămâne necesară.
 
 
 - [ ] **16. Identitate tactică pentru fiecare Temniță.** Mai puțin «aceiași monștri cu statistici diferite»; 1–2 mecanici recognoscibile pentru fiecare, fără a crea alt sistem de explorare.
