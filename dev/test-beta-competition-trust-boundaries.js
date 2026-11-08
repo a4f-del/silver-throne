@@ -31,7 +31,7 @@ assert(guild.includes('v_cap:=CASE v_kind'),'Guild daily caps exist but do not p
 assert(guild.includes('ON CONFLICT DO NOTHING'),'Guild event deduplication remains');
 const start=clientWorld.indexOf('function lwTrustNotice(){'),end=clientWorld.indexOf('function vBoard() {',start);
 assert(start>=0&&end>start);
-const note=new Function('ST_SERVER',clientWorld.slice(start,end)+';return lwTrustNotice;');
+const note=new Function('ST_SERVER',clientWorld.slice(start,end)+';return lwTrustNotice();');
 assert(note('beta').includes('Clasament BETA provizoriu'));
 assert(note('beta').includes('nu sunt verificate'));
 assert.equal(note('live')(),'','No competitive warning in LIVE UI');
