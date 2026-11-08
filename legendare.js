@@ -45,7 +45,15 @@ function lgThorn(t, e, dm, L) {
 /* după o lovitură dată (spAfter): viață furată, sângerare mai grea, fulger */
 function lgAfter(a, e, dm, L) {
   const x = lgFx(a); if (!dm) return;
-  if (x.ls && a.hp > 0) { const h = Math.max(1, Math.round(dm * x.ls)); a.hp = Math.min(mhp(a), a.hp + h); }
+  if (x.ls && a.hp > 0) {
+    const h = Math.max(1, Math.round(dm * x.ls)), before = a.hp;
+    a.hp = Math.min(mhp(a), a.hp + h);
+    /* BETA Tron: aratam vindecarea efectiva, altfel jurnalul pare sa
+       contina mai multa dauna primita decat viata cu care a pornit eroul. */
+    if (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta' &&
+        S.d && S.d.tron && S.d.ghost && a.hp > before)
+      L.push(a.n + ' recuperează ' + (a.hp - before) + ' viață din lovitură.');
+  }
   if (x.blm && e.bl > 0) e.blm = Math.max(e.blm || 1, x.blm);
   if (x.chain && Math.random() < x.chain && S.d && S.d.f) {
     const o = S.d.f.es.filter(z => z !== e && z.hp > 0); if (o.length) { const z = P(o), r = Math.max(1, Math.round(dm * 0.5)); z.hp -= r; L.push(`Fulgerul sare pe ${z.n} (-${r}).` + (z.hp <= 0 ? ' ' + z.n + ' cade!' : '')); }
@@ -54,7 +62,18 @@ function lgAfter(a, e, dm, L) {
 /* la sfârșitul turei (spRoundEnd): refacere */
 function lgRound(L) {
   let team = 0;
-  S.fs.forEach(f => { if (f.hp <= 0) return; const x = lgFx(f); if (x.regen) f.hp = Math.min(mhp(f), f.hp + Math.max(1, Math.round(mhp(f) * x.regen))); team = Math.max(team, x.treg || 0); });
+  S.fs.forEach(f => {
+    if (f.hp <= 0) return;
+    const x = lgFx(f);
+    if (x.regen) {
+      const before = f.hp;
+      f.hp = Math.min(mhp(f), f.hp + Math.max(1, Math.round(mhp(f) * x.regen)));
+      if (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta' &&
+          S.d && S.d.tron && S.d.ghost && f.hp > before)
+        L.push(f.n + ' regenerează ' + (f.hp - before) + ' viață.');
+    }
+    team = Math.max(team, x.treg || 0);
+  });
   if (team) { S.fs.forEach(f => { if (f.hp > 0) f.hp = Math.min(mhp(f), f.hp + Math.max(1, Math.round(mhp(f) * team))); }); L.push(`Crucea Izvorului vindecă echipa (+${Math.round(team * 100)}%).`); }
 }
 
