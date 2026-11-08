@@ -180,7 +180,7 @@ function vHub() {
   if (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta') {
     // Pe desktop actiunile secundare stau langa harta, nu sub o imagine mai inalta decat ecranul.
     const optional = progress ? '<details class="vh-fit-extra"><summary>📜 Progres și obiective</summary>' + progress + '</details>' : '';
-    return `<section class="vh vh-sat"><h2>${title}</h2><div class="vh-fit-layout">${map}<aside class="vh-fit-side" aria-label="Acțiuni și informații despre sat">${more}${throne}${optional}</aside></div></section>`;
+    return `<section class="vh vh-sat vh-fit-page"><h2>${title}</h2><div class="vh-fit-layout">${map}<aside class="vh-fit-side" aria-label="Acțiuni și informații despre sat">${more}${throne}${optional}</aside></div></section>`;
   }
   return `<section class="vh vh-sat"><h2>${title}</h2>${map}${more}</section>${progress}${throne}`;
 }
@@ -298,6 +298,10 @@ function satPost() {
 .vh-map img{display:block;width:100%;height:auto}
 /* Satul BETA: foloseste inaltimea reala disponibila; etichetele si poligoanele raman pe imagine. */
 .vh-fit-layout{display:flex;align-items:flex-start;gap:14px;min-width:0}
+@media(min-width:960px){
+ .vh-fit-page{padding:10px 12px 8px;margin-bottom:0}
+ .vh-fit-page h2{font-size:18px;line-height:1.2;margin-bottom:7px;padding-bottom:5px}
+}
 .vh-fit-layout .vh-map{flex:0 0 auto;width:min(65%,700px);max-width:100%;aspect-ratio:1152/928}
 .vh-fit-layout .vh-map img{width:100%;height:100%;object-fit:contain}
 .vh-fit-side{flex:1;min-width:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
