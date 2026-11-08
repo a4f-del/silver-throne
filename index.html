@@ -207,7 +207,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="prima-recompensa.js?v=2026.11.07-1"></script>
 <script src="ghidare-erou.js?v=2026.11.08-2"></script>
 <script src="specializari.js?v=2026.11.07-5"></script>
-<script src="tron.js?v=2026.11.08-4"></script>
+<script src="tron.js?v=2026.11.08-5"></script>
 <script src="lume-art.js?v=2026.11.04-4"></script>
 <script src="sat.js?v=2026.11.08-1"></script>
 <script src="lupta-vs.js?v=2026.11.07-1"></script>
@@ -234,7 +234,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="admin.js?v=2026.11.07-1"></script>
 <script src="recompense.js?v=2026.11.04-5"></script>
 <script src="seturi.js?v=2026.11.04-5"></script>
-<script src="legendare.js?v=2026.11.04-5"></script>
+<script src="legendare.js?v=2026.11.08-1"></script>
 <script src="endgame-ui.js?v=2026.11.08-1"></script>
 <script src="fierarie-filtre.js?v=2026.11.08-1"></script>
 <script src="profil.js?v=2026.11.08-1"></script>
@@ -442,7 +442,10 @@ function enemy(){const f=S.d.f,L=[],fx0t=typeof fxSnap==='function'?fxSnap():nul
  if(fx0t&&typeof fxPush==='function'&&L.length)fxPush(fx0t,L.join(' '),null);
  for(const e of f.es){if(e.hp<=0)continue;
   const L0=L.length,fx0=typeof fxSnap==='function'?fxSnap():null;
-  if(e.bl>0){e.hp-=(2+Math.floor(S.lvl/2))*(e.blm||1);e.bl--;if(e.hp<=0){L.push(e.n+' sângerează până cade.');if(fx0&&typeof fxPush==='function')fxPush(fx0,L.slice(L0).join(' '),e);continue}}
+  if(e.bl>0){const bleed=(2+Math.floor(S.lvl/2))*(e.blm||1);e.hp-=bleed;e.bl--;
+   if(ST_SERVER==='beta'&&S.d&&S.d.tron&&S.d.ghost)
+     L.push(e.n+' pierde '+(Math.round(bleed*100)/100)+' viață din sângerare.');
+   if(e.hp<=0){L.push(e.n+' sângerează până cade.');if(fx0&&typeof fxPush==='function')fxPush(fx0,L.slice(L0).join(' '),e);continue}}
   if(spTick(e,L)){if(fx0&&typeof fxPush==='function')fxPush(fx0,L.slice(L0).join(' '),e);continue}
   if(e.st>0){e.st--;L.push(e.n+' e amețit și pierde tura.');if(fx0&&typeof fxPush==='function')fxPush(fx0,L.slice(L0).join(' '),e);continue}
   const al=S.fs.filter(x=>x.hp>0);if(!al.length)break;if(e.b&&typeof trBoss==='function'&&trBoss(e,al,L,f)){if(fx0&&typeof fxPush==='function')fxPush(fx0,L.slice(L0).join(' '),e);continue}
@@ -450,7 +453,13 @@ function enemy(){const f=S.d.f,L=[],fx0t=typeof fxSnap==='function'?fxSnap():nul
  {const fx1=typeof fxSnap==='function'?fxSnap():null,L0=L.length;if(S.fs.some(x=>x.hp>0))spRoundEnd(L);if(fx1&&typeof fxPush==='function'&&L.length>L0)fxPush(fx1,L.slice(L0).join(' '),null)}
  f.log.push(L.join(' '));
  if(!S.fs.some(x=>x.hp>0)){if(typeof bhAdd==='function'){bhPush(S.d,f);bhAdd(S.d,'lost',Math.floor(S.d.loot.gold/2))}const l=S.d.loot;S.gold+=Math.floor(l.gold/2);S.ore+=Math.floor(l.ore/2);{const h={ore:0,m:{}};for(const k in(l.m||{}))h.m[k]=Math.floor(l.m[k]/2);stash(h)}adventureClear(S.d);S.d=null;S.msg='Echipa a căzut în adânc. Ai salvat doar jumătate din pradă. Du-i la infirmerie.'}else{if(typeof trRb==='function')trRb(f,f.log);if(!f.es.some(x=>x.hp>0))win(1)}}
-function win(q){cn('w');S.fs.forEach(x=>{x.ps=0});{const bb=S.d&&S.d.f&&S.d.f.es[0]&&S.d.f.es[0].b;if(bb&&S.d.raid==null&&!S.d.tw)cn('bs')}   /* căpitan de temniță învins: pentru Drumul eroului */if(typeof bhPush==='function')bhPush(S.d,S.d.f);const d=S.d,b=d.f.es[0].b,m=b?2.55:1,pr=spFame(b||d.raid!=null);d.loot.gold+=Math.round((RI(6,12)+S.lvl*3)*m*(d.rw||1));d.loot.ore+=RI(2,4)+Math.floor(S.lvl/2)+(b?8:0);d.f.es.forEach(e=>{if(e.dm)lm(e.dm,1)});rdrop(b);idrop(b);if(b){lm(pm(),2);if(d.ev){if(Math.random()<.6)relic(1)}else if(Math.random()<.35)relic()};d.loot.xp+=Math.round((8+S.lvl*4)*m*(d.rw||1));if(typeof guildTrackWin==='function')guildTrackWin(d,b);d.f=null;
+function win(q){
+ if(ST_SERVER==='beta'&&S.d&&S.d.tron&&S.d.ghost&&S.d.f){
+   const hero=S.fs.find(x=>x.h)||S.fs[0],king=S.d.f.es[0];
+   if(hero&&king)S.d.f.log.push('HP la victorie: erou '+hero.hp+'/'+mhp(hero)+
+     ' · rege '+Math.max(0,king.hp)+'/'+king.mh+'.');
+ }
+ cn('w');S.fs.forEach(x=>{x.ps=0});{const bb=S.d&&S.d.f&&S.d.f.es[0]&&S.d.f.es[0].b;if(bb&&S.d.raid==null&&!S.d.tw)cn('bs')}   /* căpitan de temniță învins: pentru Drumul eroului */if(typeof bhPush==='function')bhPush(S.d,S.d.f);const d=S.d,b=d.f.es[0].b,m=b?2.55:1,pr=spFame(b||d.raid!=null);d.loot.gold+=Math.round((RI(6,12)+S.lvl*3)*m*(d.rw||1));d.loot.ore+=RI(2,4)+Math.floor(S.lvl/2)+(b?8:0);d.f.es.forEach(e=>{if(e.dm)lm(e.dm,1)});rdrop(b);idrop(b);if(b){lm(pm(),2);if(d.ev){if(Math.random()<.6)relic(1)}else if(Math.random()<.35)relic()};d.loot.xp+=Math.round((8+S.lvl*4)*m*(d.rw||1));if(typeof guildTrackWin==='function')guildTrackWin(d,b);d.f=null;
  if(d.tw&&typeof twWin==='function'){twWin(d,b);d.doors=doors()}else if(b){if(typeof trWin==='function')trWin(d);d.done=true;d.doors=[];if(d.raid!=null)rl(d);else campBoss(d);S.msg=(d.cm?d.cm+' ':'')+'Căpitanul a căzut! Ieși cu prada.'}else{d.doors=doors();S.msg='Victorie.'}if(pr)S.msg+=' '+pr;if(d.one&&!d.tw){dOneDone(d,b);return}if(!q)go()}
 function flee(){const d=S.d,g=Math.floor(d.loot.gold/2),o=Math.floor(d.loot.ore/2);if(typeof bhAdd==='function'){if(d.f)bhPush(d,d.f);d.loot.xp=0;bhAdd(d,'retreat',g)}S.gold+=g;S.ore+=o;{const h={ore:0,m:{}};for(const k in(d.loot.m||{}))h.m[k]=Math.floor(d.loot.m[k]/2);stash(h)}adventureClear(d);S.d=null;S.msg=`Ai fugit din mină cu ${g} aur și ${o} minereu. Experiența din coborâre s-a pierdut.`;go()}
 function leave(skipGo){const d=S.d;if(typeof rtLoot==='function')rtLoot(d);if(typeof vsClear==='function')vsClear();terLeave(d);const g=Math.round(d.loot.gold*(1+(S.fs.reduce((s,f)=>s+tr(f,'loot')+bon(f).loot,0)+ST().n)/100));S.gold+=g;const lost=stash(d.loot);(d.loot.it||[]).forEach(x=>S.inv.push(x));S.xp+=d.loot.xp;let up=0;while(S.lvl<LMAX&&S.xp>=need(S.lvl)){S.xp-=need(S.lvl);S.lvl++;up++;S.pts=S.lvl<=10?Math.max(0,S.pts)+MXP():Math.max(S.pts,MXP());S.ptsT=Date.now()}   /* până la nivelul 10, un nivel nou ADAUGĂ puncte (și peste maxim); apoi doar umple bara */
