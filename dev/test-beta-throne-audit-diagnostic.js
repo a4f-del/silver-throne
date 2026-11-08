@@ -26,7 +26,7 @@ assert(query.includes("completed_at IS NOT NULL") && query.includes("sh.complete
 assert(query.includes("sh.reported_win IS NULL"),'Unknown reported result is not a loss');
 assert(query.includes("sim.predicted_challenger_win IS NULL"),'Uncertain simulation is not a loss');
 assert(query.includes("'difera_orientativ'"),'Differences are descriptive, not cheating verdicts');
-assert(!/\b(?:auth\.users|game_saves|throne_profiles|email|password|ip_address|challenger_units|holder_units)\b/i.test(query),
+assert(!/\b(?:auth\.users|game_saves|throne_profiles|email|password|ip_address|challenger_units|holder_units)\b/i.test(query.split('\n').filter(line=>!line.trim().startsWith('--')).join('\n')),
  'Query must not read or disclose saved characters/identifiers/gear');
 assert(sql31.includes('CREATE TABLE IF NOT EXISTS public.beta_throne_challenge_shadow'));
 assert(sql32.includes('CREATE TABLE IF NOT EXISTS public.beta_throne_duel_simulations'));
