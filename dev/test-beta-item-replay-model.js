@@ -97,6 +97,7 @@ for(const s of [
  'CREATE OR REPLACE FUNCTION public.beta_item_replay_model_v1(',
  'CREATE OR REPLACE FUNCTION public.beta_item_replay_receipt_v1(',
  "v_raw:=greatest(1,round(v_raw/4))",
+ "v_name:=v_name||' '||(v_suffix->>'n')",
  "round(v_raw*(1+p_level*.15))",
  "IF p_rarity>=1 THEN",
  "IF p_rarity>=2 THEN",
