@@ -99,7 +99,7 @@ function acCombatPage(d) {
   const enemies=f?f.es.map((e,i)=>{
     const boss=!!e.b, selected=i===f.t, gone=e.hp<=0, src=acArtwork(e.n,boss,d),
       max=Math.max(1,e.mh),hp=Math.max(0,e.hp);
-    return '<button class="ac-enemy'+(boss?' ac-enemy-boss':'')+(selected?' ac-target':'')+(gone?' ac-fallen':'')+'" onclick="tgt('+i+')"'+(gone?' disabled':'')+' aria-pressed="'+selected+'" aria-label="'+acSafe(e.n)+', '+hp+' din '+max+' viață">' +
+    return '<button class="ac-enemy'+(boss?' ac-enemy-boss':'')+(selected?' ac-target':'')+(gone?' ac-fallen':'')+'" onclick="tgt('+i+')"'+(gone?' disabled':'')+' aria-pressed="'+selected+'" aria-label="'+acSafe(e.n)+', '+hp+' din '+max+' viață'+(selected?', țintă selectată':'')+(gone?', eliminat':'')+'">' +
       '<span class="ac-enemy-image">'+acArt(src)+'</span>' +
       '<span class="ac-enemy-body"><b>'+acSafe(e.n)+'</b><small>'+(boss?'♛ Căpitan / Străjer':selected?'⚔ Ținta selectată':'Atinge pentru țintire')+'</small>' +
       '<span class="ac-hp ac-enemy-hp"><i style="width:'+Math.min(100,Math.round(hp/max*100))+'%"></i></span>' +
@@ -120,7 +120,7 @@ function acCombatPage(d) {
   return '<section class="ac-scene ac-combat"><div class="ac-scene-head"><div><small>'+(d.tw?'Urcare în Turn':'Temniță în desfășurare')+'</small><h2>'+acSafe(title)+'</h2></div>' +
     '<span class="ac-earn">Pradă: '+(loot.gold||0)+' aur · '+(loot.ore||0)+' minereu · '+materials+' materiale · '+(loot.xp||0)+' XP'+(items?' · '+items:'')+'</span></div>' +
     (f?'<div class="ac-fight-top"><span>Alege ținta · portrete mari</span><div class="ac-enemy-list">'+enemies+'</div></div>':'') +
-    (f&&f.log&&f.log.length?'<div class="ac-battle-log">'+f.log.slice(-3).map(x=>'<div>'+acSafe(x)+'</div>').join('')+'</div>':'') +
+    (f&&f.log&&f.log.length?'<div class="ac-battle-log" role="log" aria-live="polite" aria-atomic="false">'+f.log.slice(-3).map(x=>'<div>'+acSafe(x)+'</div>').join('')+'</div>':'') +
     '<div class="ac-battle-options"><label><input type="checkbox" '+(S.auto!==false?'checked':'')+' onchange="tg(\'auto\')"> Redare automată</label>' +
     '<label>Țintire <select onchange="tg(\'rule\',this.value)">'+[['weak','Cel mai slab'],['strong','Cel mai puternic'],['first','Primul']].map(a=>'<option value="'+a[0]+'"'+((S.rule||'weak')===a[0]?' selected':'')+'>'+a[1]+'</option>').join('')+'</select></label></div>' +
     (S.fl&&!f?'<div class="log">'+S.fl.slice(-4).map(x=>'<div>'+acSafe(x)+'</div>').join('')+'</div>':'') +
@@ -138,10 +138,12 @@ function acFxMarkup(cast,hp) {
   return '<div class="fx-c ac-fx-shell"><div class="ac-fx-title"><small>Silver Throne · Aventură</small><h2>'+acSafe(cast.adventureTitle||'Luptă')+'</h2></div>' +
     '<div class="ac-fx-enemies">'+cast.es.map((e,i)=>make('es',e,i)).join('')+'</div>' +
     '<div class="ac-fx-divider">⚔</div><div class="ac-fx-allies">'+cast.fs.map((f,i)=>make('fs',f,i)).join('')+'</div>' +
-    '<div class="fx-log" id="fx-log" aria-live="polite"></div><button class="fx-skip" onclick="fxSkip()">Sari peste ›</button></div>';
+    '<div class="fx-log" id="fx-log" role="log" aria-live="polite" aria-atomic="false"></div><button type="button" class="fx-skip" aria-label="Sari peste redarea luptei" onclick="fxSkip()">Sari peste ›</button></div>';
 }
 function acFxAnimate(modal,frame) {
   if(!modal||!modal.classList.contains('ac-fx-mode'))return;
+  /* În modul de mișcare redusă evităm calculul sincron al pozițiilor. */
+  if(typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   const actor=frame.actor&&frame.actor.side?modal.querySelector('.fx-r[data-s="'+frame.actor.side+'"][data-i="'+frame.actor.i+'"]'):null;
   const side=frame.actor&&frame.actor.side==='es'?'fs':frame.actor&&frame.actor.side==='fs'?'es':
     (frame.fs.some(d=>d.v<0)?'fs':'es');
