@@ -22,11 +22,11 @@ snap_raw AS (
          sim.outcome AS sql32_outcome,
          sh.challenger_units,sh.holder_units,
          CASE WHEN jsonb_typeof(sh.challenger_units)='array'
-                AND jsonb_array_length(sh.challenger_units)=1
-              THEN sh.challenger_units->0 END AS a,
+              THEN CASE WHEN jsonb_array_length(sh.challenger_units)=1
+                THEN sh.challenger_units->0 END END AS a,
          CASE WHEN jsonb_typeof(sh.holder_units)='array'
-                AND jsonb_array_length(sh.holder_units)=1
-              THEN sh.holder_units->0 END AS h
+              THEN CASE WHEN jsonb_array_length(sh.holder_units)=1
+                THEN sh.holder_units->0 END END AS h
   FROM public.beta_throne_challenge_shadow sh
   LEFT JOIN public.beta_throne_duel_simulations sim
     ON sim.challenge_id=sh.challenge_id
@@ -41,10 +41,11 @@ snap AS (
     greatest(0,round((a->>'def')::numeric))::bigint AS a_def,
     greatest(0,round((h->>'def')::numeric))::bigint AS h_def
   FROM snap_raw
-  WHERE a IS NOT NULL AND h IS NOT NULL
-    AND a->>'c'='Campion'
-    AND public.beta_competitive_units_within_bounds(challenger_units)
-    AND public.beta_competitive_units_within_bounds(holder_units)
+  WHERE CASE WHEN a IS NOT NULL AND h IS NOT NULL
+      AND a->>'c'='Campion' THEN
+        public.beta_competitive_units_within_bounds(challenger_units)
+        AND public.beta_competitive_units_within_bounds(holder_units)
+      ELSE false END
 ),
 settings AS (
   SELECT s.*,first_move.king_first,
@@ -94,10 +95,10 @@ actions AS (
                THEN a.skill_multiplier ELSE 1::numeric END)-a.h_def
            )::bigint))) ELSE a.holder_hp END AS holder_hp
   FROM actions a
-  CROSS JOIN LATERAL (
-    SELECT ((mod(a.action_no,2)=0 AND NOT a.king_first) OR
-            (mod(a.action_no,2)=1 AND a.king_first)) AS challenger_turn
-  ) turn
+  CROSS JOIN LATERAL (VALUES (
+    (mod(a.action_no,2)=0 AND NOT a.king_first) OR
+    (mod(a.action_no,2)=1 AND a.king_first)
+  )) AS turn(challenger_turn)
   WHERE a.challenger_hp>0 AND a.holder_hp>0 AND a.action_no<120
 ),
 last_state AS (
