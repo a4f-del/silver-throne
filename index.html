@@ -244,6 +244,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="bresle.js?v=2026.11.08-5"></script>
 <script src="bresle-ranguri.js?v=2026.11.07-2"></script>
 <script src="bresle-cosmetice.js?v=2026.11.08-1"></script>
+<script src="beta-compact-ui.js?v=2026.11.08-1"></script>
 </head>
 <body>
 <header><h1><img class="hd-tron" src="imagini/logo-tron.webp" alt="" width="34" height="40"><span class="hd-nm">Silver Throne</span></h1><div class="hs" id="hs"></div></header>
@@ -1004,14 +1005,15 @@ function deschidePortret(i){
 	}
  function vE(){let h=(typeof jeStarterWeaponPanel==='function'?jeStarterWeaponPanel():'')+vEquipTop(vInv());h+=vPre();
  if(DEV())h+=`<section><h2>Opțiuni de test</h2><div class="row"><span>Sloturi de forjă (simulare abonament)</span><select onchange="opt('slots',this.value)">${[4,6,8].map(n=>`<option${n==S.slots?' selected':''}>${n}</option>`).join('')}</select></div><div class="row"><button onclick="opt('pts')">+10 puncte</button><button onclick="opt('gold')">+1000 aur</button><button onclick="opt('ore')">+100 minereu</button><button onclick="opt('lvl')">+1 nivel</button><button onclick="opt('lvl5')">+5 niveluri</button><button onclick="opt('prem')">Premium (test): ${S.prem?'pornit':'oprit'}</button><button onclick="opt('mats')">+20 din fiecare material</button><button onclick="opt('lg')">Armă legendară (test)</button><button onclick="opt('tu')">Repornește ghidul</button><button class="d" onclick="opt('reset')">Resetează jocul</button></div></section>`;return h}
-function hdr(){const away=adventureActive();
- q('#hs').innerHTML=temaHdr()+(away?'':(typeof wmHeader==='function'?wmHeader():'')+(typeof wfHeader==='function'?wfHeader():'')+(typeof guildHeader==='function'?guildHeader():''));
- q('#nv').innerHTML=away?'':temaNav()+sideHtml()}
+function hdr(){const away=adventureActive(),compact=typeof stCompactActive==='function'&&stCompactActive();
+ document.body.classList.toggle('st-compact',compact);
+ q('#hs').innerHTML=compact?stCompactHdr():temaHdr()+(away?'':(typeof wmHeader==='function'?wmHeader():'')+(typeof wfHeader==='function'?wfHeader():'')+(typeof guildHeader==='function'?guildHeader():''));
+ q('#nv').innerHTML=away?'':(compact?stCompactNav():temaNav()+sideHtml())}
 function render(){sync();if(adventureActive()){
  S.tab='c';document.body.classList.add('st-adventure');
  q('#v').innerHTML=(S.msg?'<p class="msg">'+S.msg+'</p>':'')+vC();
  hdr();fxScan();temaPost();if(typeof vsPost==='function')vsPost();if(typeof jeDecorate==='function')jeDecorate();return;
- }document.body.classList.remove('st-adventure');if(typeof jeVisit==='function')jeVisit();q('#v').innerHTML=''+''+(S.msg?`<p class="msg">${S.msg}</p>`:'')+(typeof jeEnabled==='function' && jeEnabled()?'':typeof sqQuiet==='function' && sqQuiet() && !S.sqHelp?'':tuH())+(typeof rtBanner==='function'&&!(typeof jeFocusActive==='function'&&jeFocusActive())?rtBanner():'')+(typeof jeEnabled==='function' && jeEnabled()?'':ghIdle())+(typeof jePanel==='function'?jePanel():'')+(typeof sqPanel==='function' && S.tab==='a' && !S.vil ? sqPanel() : '')+(S.tab=='a'?vV():S.tab=='c'?vC():S.tab=='m'?vM():S.tab=='r'?vTron():S.tab=='k'?vBoard():vE());   /* k = clasamentul, deschis din bara de sus */hdr();fxScan();temaPost();satPost();if(typeof sqDecorate==='function')sqDecorate();if(typeof vsPost==='function')vsPost();if(typeof mrPost==='function')mrPost();if(typeof jeDecorate==='function')jeDecorate()}
+ }document.body.classList.remove('st-adventure');if(typeof jeVisit==='function')jeVisit();q('#v').innerHTML=''+''+(S.msg?`<p class="msg">${S.msg}</p>`:'')+(typeof jeEnabled==='function' && jeEnabled()?'':typeof sqQuiet==='function' && sqQuiet() && !S.sqHelp?'':tuH())+(typeof rtBanner==='function'&&!(typeof jeFocusActive==='function'&&jeFocusActive())?(typeof stCompactActive==='function'&&stCompactActive()?stCompactEvent():rtBanner()):'')+(typeof jeEnabled==='function' && jeEnabled()?'':ghIdle())+(typeof jePanel==='function'?jePanel():'')+(typeof sqPanel==='function' && S.tab==='a' && !S.vil ? sqPanel() : '')+(S.tab=='a'?vV():S.tab=='c'?vC():S.tab=='m'?vM():S.tab=='r'?vTron():S.tab=='k'?vBoard():vE());   /* k = clasamentul, deschis din bara de sus */hdr();fxScan();temaPost();satPost();if(typeof sqDecorate==='function')sqDecorate();if(typeof vsPost==='function')vsPost();if(typeof mrPost==='function')mrPost();if(typeof jeDecorate==='function')jeDecorate()}
 function go(){if(adventureActive())S.tab='c';pool();shop();MPV();terTick();atkCheck();tuChk();botLife();loginChk();betaFinishCompletedBattle();tronCheck();lumeCheck();terBack();if(typeof mrTick==='function')mrTick();save();if(typeof tronAutoPublishSoon==='function')tronAutoPublishSoon();if(typeof lwAutoPublishSoon==='function')lwAutoPublishSoon();render()}
 /* pornirea jocului o face cont.js, după conectare: boot(salvare) */
 function boot(src){load(src);if(typeof tronDuelRestore==='function')tronDuelRestore();terNorm();spNorm();if(S.d&&S.d.f&&!S.d.f.es.some(e=>e.hp>0))win();pool();shop();MPV();terTick();atkCheck();botLife();loginChk();if(ST_SERVER==='beta'&&S.d&&S.d.done&&!S.d.tw&&!S.d.f&&S.d.raid!=null){go();return}save();render()}
