@@ -33,7 +33,9 @@ După instalare, pornește o **provocare nouă** în Tron din BETA și finalizea
 
 ```sql
 SELECT challenge_id, challenge_started_at,
-       jsonb_array_length(challenger_units) AS challenger_count,
+       CASE WHEN jsonb_typeof(challenger_units)='array'
+            THEN jsonb_array_length(challenger_units)
+            ELSE NULL END AS challenger_count,
        CASE WHEN holder_units IS NULL THEN 0
             WHEN jsonb_typeof(holder_units)='array'
               THEN jsonb_array_length(holder_units)
