@@ -1,6 +1,6 @@
 /* Silver Throne — Bresle BETA. Profiluri si contributii comune in Supabase.
  * Evenimentele Temnite/Turn sunt raportate din client, deduplicate si plafonate. */
-const GUILD={uid:null,state:null,loading:false,busy:false,sending:false,bossSyncing:false,last:0,error:'',notice:'',timer:null,tags:{},tagsAt:0,tagsBusy:false,tagsUnavailable:false};
+const GUILD={uid:null,state:null,loading:false,busy:false,sending:false,bossSyncing:false,last:0,error:'',notice:'',timer:null,tags:{},tagsAt:0,tagsBusy:false,tagsUnavailable:false,verified:null,verifiedAt:0,verifiedBusy:false,verifiedUnavailable:false,verifiedError:''};
 const guildEsc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 /* Numele breslei este informație publică din Lume. Mapăm doar UUID -> TAG.
    Dacă migrarea SQL16 lipsește, afișăm în continuare numele jucătorului. */
@@ -42,7 +42,7 @@ function guildHeader(){
  return '<button id="guild-open" class="guild-head" onclick="guildOpen()" aria-label="Deschide breslele'+(unread?' · '+unread+' invitații':'')+'">'+(g&&typeof guildCosmeticBadge==='function'?guildCosmeticBadge(g.id):'⚔')+' <span>'+guildEsc(g?'['+g.tag+']':'Bresle')+'</span>'+
    (unread?'<b class="guild-invite-count">'+unread+'</b>':'')+'</button>';
 }
-function guildReset(){GUILD.uid=null;GUILD.state=null;GUILD.loading=false;GUILD.sending=false;GUILD.bossSyncing=false;GUILD.last=0;GUILD.error='';GUILD.tags={};GUILD.tagsAt=0;GUILD.tagsBusy=false;GUILD.tagsUnavailable=false;if(typeof gsrReset==='function')gsrReset();if(typeof guildCosmeticReset==='function')guildCosmeticReset();}
+function guildReset(){GUILD.uid=null;GUILD.state=null;GUILD.loading=false;GUILD.sending=false;GUILD.bossSyncing=false;GUILD.last=0;GUILD.error='';GUILD.tags={};GUILD.tagsAt=0;GUILD.tagsBusy=false;GUILD.tagsUnavailable=false;GUILD.verified=null;GUILD.verifiedAt=0;GUILD.verifiedBusy=false;GUILD.verifiedUnavailable=false;GUILD.verifiedError='';if(typeof gsrReset==='function')gsrReset();if(typeof guildCosmeticReset==='function')guildCosmeticReset();}
 async function guildSync(force){
  if(!guildEnabled()||GUILD.loading||GUILD.busy||(!force&&Date.now()-GUILD.last<25000))return;
  const uid=CONT.user.id;
@@ -56,6 +56,7 @@ async function guildSync(force){
   if(document.getElementById('guild-view'))guildPaint();
   if(typeof hdr==='function')hdr();
  }finally{GUILD.loading=false;}
+ if(!GUILD.error&&GUILD.state?.guild)await guildVerifiedSync(force);
  if(!GUILD.error)guildFlush();
  if(typeof gsrSync==='function')await gsrSync(force);
  await guildMapTagsSync(force);
@@ -114,6 +115,51 @@ function guildBossLastHit(boss){
   '. Bonusurile sunt contribuții tactice la daune, nu vindecă viața eroului. '+
   'Plafonul și viața rămasă bossului pot limita totalul.</p></details>';
 }
+/* SQL40: read-only proof from server SQL26/34. No client score or XP.
+   Missing migration and transient errors must never block guild gameplay. */
+async function guildVerifiedSync(force){
+ if(!guildEnabled()||!GUILD.state?.guild||GUILD.verifiedBusy||
+    GUILD.verifiedUnavailable||(!force&&Date.now()-GUILD.verifiedAt<60000))return;
+ const uid=CONT.user.id;
+ GUILD.verifiedBusy=true;
+ try{
+  const r=await tronRpc('beta_verified_activity_status',{});
+  if(!guildEnabled()||CONT.user.id!==uid||GUILD.uid!==uid)return;
+  if(r.error){
+   const msg=String(r.error);
+   if(/could not find|does not exist|schema cache|PGRST202/i.test(msg)){
+    GUILD.verifiedUnavailable=true;GUILD.verifiedError='SQL40 nu este instalat în BETA.';
+   }else GUILD.verifiedError='Verificarea serverului este temporar indisponibilă.';
+  }else if(r.data&&r.data.ready===true&&r.data.mode==='audit'&&
+    r.data.authoritative_for_game===false){
+   GUILD.verified=r.data;GUILD.verifiedAt=Date.now();
+   GUILD.verifiedError='';
+  }else GUILD.verifiedError='Răspuns de verificare necunoscut.';
+ }catch(_error){
+  if(guildEnabled()&&CONT.user.id===uid&&GUILD.uid===uid)
+   GUILD.verifiedError='Verificarea serverului este temporar indisponibilă.';
+ }finally{
+  if(GUILD.uid===uid){
+   GUILD.verifiedBusy=false;
+   if(document.getElementById('guild-view'))guildPaint();
+  }
+ }
+}
+function guildVerifiedHtml(){
+ const v=GUILD.verified;
+ const numeric=x=>Number.isSafeInteger(x)&&x>=0?x:null;
+ const boss=v?numeric(v.verified_boss_hits):null;
+ const raids=v?numeric(v.verified_raid_starts):null;
+ const valid=v&&v.ready===true&&v.mode==='audit'&&
+  v.authoritative_for_game===false&&boss!==null&&raids!==null;
+ const body=valid?
+   '<p>Lovituri la boss înregistrate: <b>'+boss+'</b> · Raiduri începute: <b>'+raids+'</b>.</p>'+
+   (v.consistent===false?'<p class="r4">Contoarele serverului nu coincid cu jurnalul. Necesită verificare QA; nu se aplică sancțiuni.</p>':''):
+   '<p class="mute">'+guildEsc(GUILD.verifiedError||
+     (GUILD.verifiedBusy?'Se verifică jurnalul…':'Datele nu sunt încă disponibile.'))+'</p>';
+ return '<details class="guild-verified"><summary>Activități confirmate de server · BETA</summary>'+
+  body+'<p class="mute">Doar atacuri acceptate de server după instalarea auditului. Nu confirmă victoria, XP-ul, nivelul sau echipamentul și nu schimbă progresul jocului.</p></details>';
+}
 function guildPaint(){
  const host=document.getElementById('guild-view');if(!host)return;
  if(GUILD.error){host.innerHTML='<p class="r4">Breslele nu sunt disponibile: '+guildEsc(GUILD.error)+'. Verifică migrarea SQL BETA.</p><button onclick="guildSync(true)">Reîncearcă</button>';return;}
@@ -138,6 +184,7 @@ function guildPaint(){
   out+='<div class="guild-identity"><h3>['+guildEsc(g.tag)+'] '+guildEsc(g.name)+'</h3>'+
    '<p>'+g.member_count+' / 20 membri · '+(typeof gsrRankName==='function'?gsrRankName(g.role):g.role==='leader'?'Conducător':'Membru')+' · <b>'+g.marks+' însemne</b></p>'+
    '<p>Cod invitație: <code>'+guildEsc(g.code)+'</code></p></div>'+
+   guildVerifiedHtml()+
    (typeof guildCosmeticsSection==='function'?guildCosmeticsSection(g):'')+
    '<h3>Contractul săptămânii <small>· de luni până duminică</small></h3>'+
    GUILD_GOALS.map(([key,title,max])=>guildBar(title,week[key],guildWeeklyGoal(week,key,max))).join('')+
@@ -220,6 +267,7 @@ async function guildBoss(){
   }
   const previous=GUILD.state.boss||{},before=Number(previous.personal_damage)||0;
   const state=await guildAction('boss',{});
+  if(state&&typeof guildVerifiedSync==='function')await guildVerifiedSync(true);
   if(state?.boss&&typeof guildBossReplay==='function'){
    const damage=Math.max(0,(Number(state.boss.personal_damage)||0)-before);
    if(damage>0)guildBossReplay(previous,state.boss,damage);
