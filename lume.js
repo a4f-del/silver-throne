@@ -17,7 +17,8 @@ const LW = {
   BOARD: [['level', 'Nivel'], ['power', 'Putere'], ['terr', 'Teritorii'], ['tron', 'Domnii la Tron']]
 };
 const LUME = { st: null, at: 0, off: 0, err: '', loading: false, busy: false, rep: false, repErr: '', pubSig: '', pubAt: 0,
-  board: {}, bAt: {}, bLoad: {}, bErr: '', bk: 'level', sel: null, full: null, cam: null, camInit: false, noClick: 0, terr: null };
+  board: {}, bAt: {}, bLoad: {}, bErr: '', bk: 'level', sel: null, full: null, cam: null, camInit: false, noClick: 0, terr: null,
+  testCd: false, testCdLoaded: false, testCdReady: false, testCdBusy: false, testCdErr: '' };
 
 const lwNow = () => Date.now() + (LUME.off || 0);
 const lwCfg = () => (LUME.st && LUME.st.cfg) || LW.CFG;
@@ -52,6 +53,7 @@ async function lwSync0(force) {
     } else r = await tronRpc('world_get');
     if (r.error) { LUME.err = /Could not find the function|does not exist|schema cache/i.test(r.error) ? 'Serverul nu are încă Lumea: rulează supabase/02-lume.sql în Supabase.' : r.error; return; }
     LUME.err = ''; LUME.st = r.data; LUME.off = r.data.now - Date.now(); LUME.terr = null;
+    if (lwTestCooldownAllowed() && !LUME.testCdLoaded) void lwTestCooldownSync();
   } catch (e) { LUME.err = String((e && e.message) || e); }
   finally { LUME.at = Date.now(); LUME.loading = false; lwUi(); }
 }
@@ -59,6 +61,60 @@ let _lwSync = null;
 function lwSync(force) { if (_lwSync) return _lwSync; _lwSync = lwSync0(force).finally(() => { _lwSync = null; }); return _lwSync; }
 function lwOnWorld() { return S && (S.tab === 'k' || (S.tab === 'm' && S.mt === 'l')); }
 function lwUi() { try { if (lwOnWorld()) render(); else if (typeof hdr === 'function') hdr(); } catch (e) { /* se reface la următoarea acțiune */ } }
+
+
+/* BETA: un administrator poate elimina doar pauza fata de ACELASI adversar.
+   Optiunea este pastrata si verificata pe server; energia si restul
+   conditiilor de atac raman obligatorii. LIVE nu o poate activa. */
+const lwTestCooldownAllowed = () => typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta'
+  && typeof CONT !== 'undefined' && !!CONT.user && !!CONT.booted;
+const lwTestCooldownOn = () => lwTestCooldownAllowed() && LUME.testCdReady && LUME.testCd === true;
+async function lwTestCooldownSync() {
+  if (!lwTestCooldownAllowed() || LUME.testCdBusy || LUME.testCdLoaded) return;
+  LUME.testCdBusy = true;
+  try {
+    const r = await tronRpc('beta_world_raid_test_mode', { p_enabled: null });
+    LUME.testCdLoaded = true;
+    if (r.error || !r.data || typeof r.data.enabled !== 'boolean') {
+      LUME.testCdReady = false;
+      LUME.testCdErr = /Could not find|does not exist|schema cache/i.test(r.error || '')
+        ? 'Disponibil după instalarea SQL 29 în BETA.'
+        : String(r.error || 'Nu se poate verifica modul de test.').slice(0,150);
+      return;
+    }
+    LUME.testCd = r.data.enabled;
+    LUME.testCdReady = true;
+    LUME.testCdErr = '';
+  } finally { LUME.testCdBusy = false; lwUi(); }
+}
+async function lwTestCooldownToggle() {
+  if (!lwTestCooldownAllowed() || !LUME.testCdReady || LUME.testCdBusy) return;
+  LUME.testCdBusy = true;
+  const requested = !LUME.testCd;
+  lwUi();
+  try {
+    const r = await tronRpc('beta_world_raid_test_mode', { p_enabled: requested });
+    if (r.error || !r.data || r.data.enabled !== requested) {
+      LUME.testCdErr = String(r.error || 'Serverul nu a confirmat setarea.').slice(0,150);
+      return;
+    }
+    LUME.testCd = requested;
+    LUME.testCdErr = '';
+  } finally { LUME.testCdBusy = false; lwUi(); }
+}
+function lwTestCooldownPanel() {
+  if (!lwTestCooldownAllowed()) return '';
+  const enabled = lwTestCooldownOn();
+  const label = !LUME.testCdLoaded ? 'Se verifică…' : enabled ? 'Dezactivează' : 'Activează';
+  const status = !LUME.testCdLoaded ? 'Se verifică setarea de pe server…'
+    : enabled ? 'Activ: poți ataca din nou același sat imediat după terminarea raidului.'
+    : 'Inactiv: se aplică pauza normală dintre atacurile asupra aceluiași sat.';
+  return `<div class="lw-test-cd" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;margin:8px 0;border:1px solid var(--line);border-radius:6px">
+    <span style="flex:1;min-width:175px"><b>🧪 PvP fără cooldown · BETA</b><small class="mute" style="display:block">${status} Consumă în continuare energie; nu ignoră protecția începătorilor.</small>
+    ${LUME.testCdErr ? '<small class="r4">'+tEsc(LUME.testCdErr)+'</small>' : ''}</span>
+    <button type="button" onclick="lwTestCooldownToggle()" ${!LUME.testCdReady || LUME.testCdBusy ? 'disabled' : ''}>${label}</button>
+  </div>`;
+}
 
 /* bara de atacuri: se reface câte unul la en_regen_min minute, până la en_max */
 function lwEn() {
@@ -74,7 +130,7 @@ function lwCan(p) {
   if (p.id === me.user_id) return { ok: false, why: 'Acesta e satul tău.' };
   if (S.lvl < c.min_level) return { ok: false, why: `Poți ataca alți jucători de la nivelul ${c.min_level}.` };
   if (p.level < c.min_level) return { ok: false, why: `${tEsc(p.name)} e începător (sub nivelul ${c.min_level}) și e protejat.` };
-  if (p.cd && p.cd > lwNow()) return { ok: false, why: `L-ai atacat recent. Poți din nou peste ${sdT(p.cd - lwNow())}.` };
+  if (p.cd && p.cd > lwNow() && !lwTestCooldownOn()) return { ok: false, why: `L-ai atacat recent. Poți din nou peste ${sdT(p.cd - lwNow())}.` };
   if (en && en.n < 1) return { ok: false, why: `Nu mai ai atacuri. Următorul se reface peste <span data-end="${Date.now() + en.next}">${fmt(en.next)}</span>.` };
   if (S.d) return { ok: false, why: 'Ești deja într-o luptă.' };
   if (S.wr && S.wr.cur) return { ok: false, why: 'Se trimite rezultatul atacului anterior…' };
@@ -197,7 +253,7 @@ function lwThrone(K) {
 function lwVil(p, sel, mine, K) {
   const vk = p.id + ':' + LWA.tier(p.level), vc = LUME.vc || (LUME.vc = {}), v = vc[vk] || (vc[vk] = LWA.village(p.id, p.level));   /* desenul satului se schimbă doar cu treapta */
   const [cx, cy] = lwPos(p), c = lwCfg(), s = v.s;
-  const prot = p.level < c.min_level, cd = p.cd && p.cd > lwNow(), won = K && K.win && K.win.id === p.id, cur = K && K.cur && K.cur.id === p.id;
+  const prot = p.level < c.min_level, cd = p.cd && p.cd > lwNow() && !lwTestCooldownOn(), won = K && K.win && K.win.id === p.id, cur = K && K.cur && K.cur.id === p.id;
   const top = -(s * 0.5 + 12 + v.t * 4.5), nm = (mine ? 'Tu · ' : '') + p.name;
   let h = `<g class="st-v lw-v${sel ? ' on' : ''}${mine ? ' me' : ''}" onclick="lwPick('${p.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lwPick('${p.id}')}" tabindex="0" role="button" aria-label="${tEsc(p.name)}, nivel ${p.level}${mine ? ', satul tău' : ''}" transform="translate(${lwF(cx)} ${lwF(cy)})">`;
   const k = LW.VS;
@@ -320,7 +376,7 @@ function vLume() {
   let h = `<section><h2>Harta</h2><div class="mute">${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?
   'Lumea este comună: satele NPC sunt vizibile tuturor, iar satele jucătorilor pot fi atacate sau vizitate prin profil. Nu există cucerire, garnizoane private sau taxe de întreținere.' :
   'Satele tuturor jucătorilor, în jurul Tronului de Argint. În jurul satului tău, în chenarul auriu, e <b>ținutul tău</b>: satele de jefuit și de cucerit, taberele, și locurile de interes, pe care doar tu le vezi.'}
-  Acum: <b>${n}</b> ${n === 1 ? 'sat' : 'sate'} de jucători.</div>${LUME.err ? `<p class="r4">${tEsc(LUME.err)}</p>` : ''}${LUME.repErr ? `<p class="r4">Rezultatul ultimului atac nu a ajuns la server (${tEsc(LUME.repErr)}). Se retrimite automat.</p>` : ''}${lwEnBar()}${lwMap()}`;
+  Acum: <b>${n}</b> ${n === 1 ? 'sat' : 'sate'} de jucători.</div>${LUME.err ? `<p class="r4">${tEsc(LUME.err)}</p>` : ''}${LUME.repErr ? `<p class="r4">Rezultatul ultimului atac nu a ajuns la server (${tEsc(LUME.repErr)}). Se retrimite automat.</p>` : ''}${lwEnBar()}${lwTestCooldownPanel()}${lwMap()}`;
   h += `<div class="st-lg"><span><i style="background:#f0d27a"></i>Satul tău</span><span><i style="background:#c0504a"></i>Poate fi atacat</span><span><i style="background:#7b7f82"></i>Începător (sub nivelul ${c.min_level}) sau atacat recent de tine</span><span>👑 auriu: regele săptămânii · argintiu: pe Tron acum</span><span>Satul crește cu nivelul jucătorului: palisadă la 10, zid și turn la 20, fortificații la 25, castel de la 30</span></div></section>`;
   return h + lwSelPanel() + lwRecommendedPanel() + lwLog() + `<section><h2>Reguli</h2><div class="mute">• Bara are ${c.en_max} atacuri și se reface câte unul la ${c.en_regen_min} de minute, adică ${Math.round(24 * 60 / c.en_regen_min)} pe zi.<br>• Același jucător îl poți ataca o dată la ${c.same_h} ore. Începătorii (sub nivelul ${c.min_level}) nu pot fi atacați și nu pot ataca.<br>${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'• Lupți cu fantoma de maximum 3 luptători publicată în Lume. Tronul are duel separat doar între eroi. Puterea este un reper, nu o șansă exactă; dacă învingi, primești pradă și experiență, iar apărătorul nu pierde nimic.':'• Lupți cu fantoma echipei lui, cu aceleași plafoane ca la Tron. Dacă învingi, iei prada calculată de joc și experiență în plus. Apărătorul nu pierde niciodată nimic, doar află din jurnal.'}<br>• Satele din Lume nu se pot cuceri; teritoriile rămân în regiunea ta.</div></section>`;
 }
