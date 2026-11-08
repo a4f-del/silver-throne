@@ -28,7 +28,6 @@ for(const marker of [
  'v_claimed<>v_derived',
  'ON CONFLICT(user_id) DO UPDATE',
  'ON CONFLICT(raid_id) DO NOTHING',
- 'world_close_stale',
  'for update',
  'reported_win',
  'accepted_gold',
@@ -46,6 +45,7 @@ assert.equal((sql.match(/\$\$/g)||[]).length,4,'Two World PL/pgSQL bodies comple
 assert.equal((sql.match(/\$function\$/g)||[]).length,2,'Throne body complete');
 assert(!sql.includes('CREATE OR REPLACE FUNCTION public.throne_challenge_finish'),
  'Server-side Throne result cannot be forged as solved without engine');
+assert(oldWorld.includes('perform world_close_stale(uid);'), 'World raid start still handles stale raids');
 assert(!sql.includes('CREATE OR REPLACE FUNCTION public.world_raid_start'),
  'Existing attack cooldown and protection must stay unchanged');
 assert(sql.includes('Client still declares the battle winner'),
