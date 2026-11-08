@@ -4,7 +4,7 @@
 
 ## Ce vede jucătorul
 
-1. **Coborâre** — titlu scurt și `ⓘ Reguli utile` extensibil. Cele câteva paragrafe de explicații nu mai ocupă din start tot ecranul.
+1. **Echipa pentru temniță** — este acum primul panou din Coborâre, în locul titlului repetat „AVENTURILE TALE / Coborâre” și al paragrafului introductiv. Arată eroul și mercenarii activi, oferă „Erou singur”, „Readu mercenarii” și „+ Adaugă” pentru rezerva disponibilă. `ⓘ Reguli utile` rămâne extensibil lângă el.
 2. **Aventura principală** — un card mare cu imaginea temniței, căpitanul, progresul `pas/nr. pași` și un singur buton de intrare. Se recomandă cu prioritate temnița eligibilă unde există progres neîncheiat; altfel, cea mai avansată temniță disponibilă pentru nivel.
 3. **Relicva săptămânii** — card compact pentru Cripta Furtunii: cheile disponibile, șansa actuală de 60% la căpitan și intrarea de o cheie, cu explicații extensibile.
 4. **Turnul** — card compact cu recordul, urcările rămase, costul de intrare și detalii extensibile cu progresul, punctele de control și legendarele.
@@ -14,11 +14,14 @@ Pe mobil, secțiunile se aliniază pe o singură coloană. În Temnița deja des
 
 ## Ajustări suplimentare — echipa și jurnalul (BETA)
 
-- Controlul **„Erou singur”** din Coborâre are acum și **„↩ Readu mercenarii”**, plus butoane **„+ Adaugă”** lângă fiecare mercenar disponibil din rezervă. Se respectă limita echipei (3, respectiv 4 după nivelul 30), iar mercenarii în expediție sunt afișați indisponibili. Nu poți reconfigura echipa în mijlocul unei lupte.
+- Controlul **„Erou singur”** din partea de sus a Coborârii are acum și **„↩ Readu mercenarii”**, plus butoane **„+ Adaugă”** lângă fiecare mercenar disponibil din rezervă. Se respectă limita echipei (3, respectiv 4 după nivelul 30), iar mercenarii în expediție sunt afișați indisponibili. Nu poți reconfigura echipa în mijlocul unei lupte.
 - În pagina de pregătire a temniței, **toți cei 1–4 luptători activi** sunt prezentați în panoul din dreapta, imediat după butonul **„Luptă”**, înaintea sfaturilor secundare. Portretul adversarului, banda de progres și selectorul de dificultate sunt mai compacte; sfaturile și echipamentul recomandat au fost mutate sub **„ⓘ Sfaturi și echipament”**. Acest lucru reduce necesitatea derulării verticale la rezoluții desktop, fără să ascundă informații.
 - Panoul **„Ultima luptă”** a fost eliminat din partea de sus a Coborârii în BETA. În butonul de sus **LUPTE**, prima înregistrare este evidențiată ca ultima luptă și jurnalul ei se deschide prin clic. Celelalte înregistrări sunt păstrate.
 - LIVE își păstrează structura anterioară, butonul manual și jurnalul din Coborâre.
 - QA nou: `node dev/test-beta-coborare-party-and-lupte.js` — verifică revenirea echipei 1–4, expedițiile, aria de pregătire și istoricul fără dubluri.
+
+
+- Test suplimentar: `dev/test-beta-coborare-team-header.js` — verifică dispariția titlului vechi, afișarea panoului echipei înaintea temniței recomandate și absența duplicării controalelor.
 
 ## Ce NU se modifică
 
