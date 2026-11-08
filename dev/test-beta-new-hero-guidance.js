@@ -82,8 +82,8 @@ assert(plan().selector.includes("mrRecruit('Arcaș')"),'Arcaș join receives a d
 hasArcas=true;S.vil='a';assert(plan().selector.includes('craft()'),'forge button highlighted');
 S.forge[0]={end:Date.now()-200};assert(plan().selector.includes('collect('),'finished forge highlights Collect');
 step='otel';S.forge=[null,null,null,null];S.inv=[{t:'w',name:'Spadă'}];S.tab='a';S.vil='';
-assert(plan().selector.includes('.st-hero-drop:not([open])'),'compact BETA guide points to Erou menu when Echipă is outside navigation');
-assert(plan().name.includes('Erou → Echipă'),'guide label uses Erou submenu');
+assert(plan().selector.includes("#nv button[onclick=\"tab('e')\"]"),'BETA guide points to restored Echipă sidebar button');
+assert(plan().name.includes('Deschide Echipă'),'guide labels direct sidebar navigation');
 S.tab='e';
 assert(plan().selector.includes('invF('),'if item card not in DOM highlight weapon filter');
 isReady=true;assert(plan().selector.includes('jeClaim('),'reward always has precedence');
