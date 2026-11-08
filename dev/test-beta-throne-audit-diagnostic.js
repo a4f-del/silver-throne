@@ -22,7 +22,7 @@ assert(query.includes("COUNT(*)")||query.includes("count(*)"),'Count audit compl
 assert(query.includes("result_field='client_claim_via_rpc'"),'Distinguish SQL33 from other finish sources');
 assert(query.includes("sim.predicted_challenger_win"),'Compare client-reported and model-predicted outcomes');
 assert(query.includes("holder_id IS NULL"),'Royal Guard must be excluded from comparable King duels');
-assert(query.includes("sh.completed_at IS NOT NULL"),'No comparison against pending fights');
+assert(query.includes("completed_at IS NOT NULL") && query.includes("sh.completed_at IS NULL"),'No comparison against pending fights');
 assert(query.includes("sh.reported_win IS NULL"),'Unknown reported result is not a loss');
 assert(query.includes("sim.predicted_challenger_win IS NULL"),'Uncertain simulation is not a loss');
 assert(query.includes("'difera_orientativ'"),'Differences are descriptive, not cheating verdicts');
