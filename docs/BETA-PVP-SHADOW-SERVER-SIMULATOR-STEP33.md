@@ -1,5 +1,7 @@
 # Silver Throne BETA — Pasul 33 / SQL27: simulator PvP pe server, în paralel
 
+**Actualizare SQL30 (BETA):** simulatorul SQL27 continuă să folosească algoritmul inițial, dar validatorul de echipă și limita maximă de acțiuni au fost extinse prin SQL30 pentru **4v4** (maximum **320** acțiuni). Nu se rerulează scriptul istoric SQL27 după SQL30.
+
 **Status:** cod în GitHub, **neinstalat automat** în Supabase. Se rulează doar în **Silver-Throne-Test** după SQL21–26. **Nu LIVE.**
 
 ## Ce schimbă
