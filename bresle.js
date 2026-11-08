@@ -152,9 +152,21 @@ function guildVerifiedHtml(){
  const raids=v?numeric(v.verified_raid_starts):null;
  const valid=v&&v.ready===true&&v.mode==='audit'&&
   v.authoritative_for_game===false&&boss!==null&&raids!==null;
+ const training=valid?v.verified_training:null;
+ const progressOk=training&&training.rules_version===1&&
+   training.hero_level_authoritative===false&&
+   numeric(training.xp_total)!==null&&numeric(training.level)!==null&&
+   training.level>=1&&training.level<=50&&
+   numeric(training.xp_in_level)!==null&&training.xp_in_level<100&&
+   (training.xp_to_next===100||training.xp_to_next===null);
+ const trainingHtml=progressOk?
+   '<p class="mute">Antrenament verificat (SHADOW): <b>'+training.xp_total+
+   ' XP de test</b> · nivel de test <b>'+training.level+
+   '</b>'+(training.xp_to_next===100?' · '+training.xp_in_level+'/100 XP':' · nivel maxim')+
+   '. Separat de nivelul eroului.</p>':'';
  const body=valid?
    '<p>Lovituri la boss înregistrate: <b>'+boss+'</b> · Raiduri începute: <b>'+raids+'</b>.</p>'+
-   (v.consistent===false?'<p class="r4">Contoarele serverului nu coincid cu jurnalul. Necesită verificare QA; nu se aplică sancțiuni.</p>':''):
+   (v.consistent===false?'<p class="r4">Contoarele serverului nu coincid cu jurnalul. Necesită verificare QA; nu se aplică sancțiuni.</p>':'')+trainingHtml:
    '<p class="mute">'+guildEsc(GUILD.verifiedError||
      (GUILD.verifiedBusy?'Se verifică jurnalul…':'Datele nu sunt încă disponibile.'))+'</p>';
  return '<details class="guild-verified"><summary>Activități confirmate de server · BETA</summary>'+

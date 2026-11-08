@@ -40,7 +40,7 @@ assert((sql.match(/\$cosmetics\$/g)||[]).length===2);
 assert(sql.trim().endsWith('COMMIT;'));
 assert(html.includes('bresle-cosmetice.js?v=2026.11.08-1'));
 assert(html.includes('bresle-cosmetice.css?v=2026.11.08-1'));
-assert(html.includes('bresle.js?v=2026.11.08-6'));
+assert(html.includes('bresle.js?v=2026.11.08-7'));
 assert(guild.includes('guildCosmeticsSync(force)')&&guild.includes('guildCosmeticsSection(g)')&&
  guild.includes('guildCosmeticBadge(g.id)'), 'Shop wired into main guild UI');
 assert(css.includes('.gc-preview')&&css.includes('.gc-frame-gold')&&css.includes('.gc-banner-forest'));

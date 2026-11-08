@@ -56,7 +56,7 @@ assert(ui.includes("if(state&&typeof guildVerifiedSync==='function')await guildV
 assert(ui.includes('guildVerifiedHtml()+'),'Display inside guild panel');
 assert(ui.includes('verifiedUnavailable=false'),'State resets on account switch');
 assert(ui.includes('GUILD.verified=null;GUILD.verifiedAt=0'),'No bleed between accounts');
-assert(html.includes('bresle.js?v=2026.11.08-6'),'New JS asset loaded');
+assert(html.includes('bresle.js?v=2026.11.08-7'),'New JS asset loaded');
 assert(doc.includes('nu reprezintă nivelul, XP-ul'),'No false claim of XP validation');
 assert(roadmap.includes('SQL40'),'Roadmap documents first vertical slice');
 const begin=ui.indexOf('async function guildVerifiedSync(');
