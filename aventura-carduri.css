@@ -286,3 +286,15 @@ body.st-adventure .ac-scene.ac-dungeon{
 .ac-plan-choices button small{font-size:10px;line-height:1.2;color:#bdc0bf}
 .ac-plan-choices button.on{border-color:#edbf69;background:#45341f;box-shadow:inset 0 0 0 1px #a8833c}
 @media(max-width:440px){.ac-plan{padding:6px}.ac-plan-choices button{padding:6px 5px}}
+
+/* Pasul 18: focus vizibil, ținte clare și butoane tactile. */
+.ac-enemy:focus-visible,.ac-turn-actions button:focus-visible,.fx-skip:focus-visible{
+  outline:3px solid #f4d27c;outline-offset:3px;
+}
+@media(max-width:620px){
+ .ac-turn-actions button{min-height:44px}
+ .ac-bottom-retreat{min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){
+ .ac-fx-mode .ac-impact,.ac-fx-mode .ac-dash{animation:none!important;transition:none!important}
+}
