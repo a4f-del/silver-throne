@@ -190,6 +190,11 @@ function tronFight(data) {
   }
   S.d = d; startF(true);
   if (tronIsBetaDuel() && d.ghost && d.f) {
+    /* BETA: notam viata efectiva de la start (poate diferi de snapshotul
+       publicat in SQL31). Nu atinge motorul si nu trimite date noi. */
+    const hero = S.fs[0], king = d.f.es[0];
+    d.f.log.push('HP la start: erou ' + hero.hp + '/' + mhp(hero) +
+      ' · rege ' + king.hp + '/' + king.mh + '.');
     /* Initiativa se decide o singura data la inceputul luptei si este salvata in S.d.
        Regele poate contraataca primul, deci duelul nu este decis automat de provocator. */
     d.duelKingFirst = TT.duelKingStarts();
