@@ -72,5 +72,5 @@ const legacy=guildUI({dungeons:3,hard_boss:1,tower:15,personal:contract.personal
 assert(legacy.markup.includes('3 / 150')&&legacy.markup.includes('1 / 25')&&legacy.markup.includes('15 / 1000'));
 assert(/guildClaim\('bronz'\)" disabled/.test(legacy.markup),'Legacy claim thresholds preserved');
 assert(legacy.markup.includes('Obiective standard până la actualizarea contractelor BETA.'));
-assert(html.includes('bresle.js?v=2026.11.08-1'),'Refresh guild JS cache version');
+assert(html.includes('bresle.js?v=2026.11.08-2'),'Refresh guild JS cache version');
 console.log('OK: frozen BETA goals, preserved prior contracts, claims use server targets, active snapshot, guild UI and legacy fallback.');
