@@ -125,5 +125,5 @@ assert.deepEqual(collected,[1,0],'Repeated claim cannot collect an item again');
 assert(!forge.forgeSlots().includes('Ridică tot ('),'No bulk claim when nothing ready');
 
 assert(html.includes('inventar.js?v=2026.11.08-1')&&html.includes('mercenari.js?v=2026.11.08-2')&&
- html.includes('echipa.js?v=2026.11.08-1'),'Scripts refreshed after this UI change');
+ html.includes('echipa.js?v=2026.11.08-2'),'Scripts refreshed after this UI change');
 console.log('OK: class-specific weapons, 4 saved team presets, expedition protection, no combat mutations, safe bulk actions, LIVE isolated.');
