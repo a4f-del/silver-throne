@@ -9,8 +9,8 @@ const world=read('lume.js'),throne=read('tron.js'),index=read('index.html');
 const get=(s,a,b)=>{const i=s.indexOf(a),j=s.indexOf(b,i+a.length);assert(i>=0&&j>i,'Missing '+a);return s.slice(i,j)};
 for(const marker of [
  'SQL28 (limitele per clasa)',
- 'CREATE OR REPLACE FUNCTION public.world_units_ok(p_units jsonb)',
- 'jsonb_array_length(p_units)>4',
+ 'CREATE OR REPLACE FUNCTION public.world_units_ok(u jsonb)',
+ 'jsonb_array_length(u)>4',
  'CASE WHEN NEW.level>=30 THEN 4 ELSE 3 END',
  'BEFORE UPDATE OF units, level ON public.world_players',
  'beta_competitive_world_units_limits',
@@ -23,6 +23,8 @@ for(const marker of [
 ])assert(sql.includes(marker),'SQL30 missing: '+marker);
 for(const label of ['prereq','units','size'])assert.equal(
  (sql.match(new RegExp('\\$'+label+'\\$','g'))||[]).length,2);
+assert(!sql.includes('world_units_ok(p_units jsonb)'), 'Original PostgreSQL argument name u must be preserved');
+assert(!sql.includes('DROP FUNCTION public.world_units_ok'), 'Do not drop functions with dependent policies/RPCs');
 assert.equal((sql.match(/^CREATE OR REPLACE FUNCTION\b/gm)||[]).length,2);
 assert.equal((sql.match(/^CREATE TRIGGER\b/gm)||[]).length,1);
 assert(!/\b(?:DELETE FROM|TRUNCATE TABLE|DROP TABLE)\b/i.test(sql),'No reset');
