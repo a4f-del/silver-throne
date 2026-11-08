@@ -42,17 +42,18 @@ function bhLast() {
 }
 function bhOpen() {
   const list = S.bh || [], RES = { win: ['Victorie', 'win'], retreat: ['Retragere', 'ret'], lost: ['Înfrângere', 'lost'] };
-  const rows = list.map(b => {
+  const rows = list.map((b,i) => {
     const [rt, rc] = RES[b.res] || RES.retreat, gain = [b.g ? `+${b.g} aur` : '', b.o ? `+${b.o} minereu` : '', b.m ? `${b.m} materiale` : '', b.x ? `+${b.x} exp.` : ''].filter(Boolean).join(' · ');
-    return `<details class="bh-r"><summary><img class="uii bh-k" src="${b.k === 'w' ? 'imagini/lume/turn.webp' : 'imagini/ui/' + (BHI.ic[b.k] || 'nav-coborare') + '.webp'}" alt=""><span class="bh-m"><b>${tEsc(b.n)}</b> <span class="bh-res ${rc}">${rt}</span><small>${bhAgo(b.t)}</small><br><small>${gain || 'fără pradă'}</small>${b.it.length ? `<br><small>Obiecte: ${b.it.map(bhItem).join(', ')}</small>` : ''}</span></summary>`
+    return (typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&i===0?'<div class="bh-latest-label">Ultima luptă · deschide pentru jurnal</div>':'') + `<details class="bh-r"><summary><img class="uii bh-k" src="${b.k === 'w' ? 'imagini/lume/turn.webp' : 'imagini/ui/' + (BHI.ic[b.k] || 'nav-coborare') + '.webp'}" alt=""><span class="bh-m"><b>${tEsc(b.n)}</b> <span class="bh-res ${rc}">${rt}</span><small>${bhAgo(b.t)}</small><br><small>${gain || 'fără pradă'}</small>${b.it.length ? `<br><small>Obiecte: ${b.it.map(bhItem).join(', ')}</small>` : ''}</span></summary>`
       + `<div class="bh-log">${b.log.length ? b.log.map(l => `<div${l.startsWith('—') ? ' class="bh-sep"' : ''}>${tEsc(l)}</div>`).join('') : '<div class="mute">Fără jurnal.</div>'}</div></details>`;
   }).join('');
-  mdl(`<h3>Istoricul luptelor</h3><p class="mute">Ultimele ${BHI.max} coborâri, atacuri și provocări. Atinge una ca să-i vezi jurnalul.</p><div class="bh-l">${rows || '<p class="mute">Nu ai dat încă nicio luptă.</p>'}</div>`, 'bh');
+  mdl(`<h3>${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'Lupte · Istoric și jurnal':'Istoricul luptelor'}</h3><p class="mute">Ultimele ${BHI.max} coborâri, atacuri și provocări. Atinge una ca să-i vezi jurnalul.</p><div class="bh-l">${rows || '<p class="mute">Nu ai dat încă nicio luptă.</p>'}</div>`, 'bh');
 }
 (function () {
   if (typeof document === 'undefined' || !document.head) return;
   const st = document.createElement('style');
   st.textContent = `#lgm.bh .lgm-c,#lgm.bh>div{max-width:620px;width:94vw;text-align:left}.bh-l{text-align:left;max-height:62vh;overflow:auto;display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.bh-latest-label{color:#e7cb8a;font:700 12px Cinzel,Georgia,serif;margin:3px 0 -2px;padding:2px 3px}
 .bh-r{border:1px solid var(--line);border-radius:10px;background:#0e1214}.bh-r summary{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;cursor:pointer;list-style:none}.bh-r summary::-webkit-details-marker{display:none}
 .bh-k{width:30px!important;height:30px!important;flex:none}.bh-m{flex:1;min-width:0;font-size:14px}.bh-m small{color:var(--mute);margin-left:6px}.bh-m br+small{margin-left:0}
 .bh-res{font-size:11.5px;padding:1px 7px;border-radius:9px;margin-left:4px}.bh-res.win{background:#1f4a2a;color:#9fe3ad}.bh-res.ret{background:#3a3220;color:#f0d27a}.bh-res.lost{background:#4a1f1f;color:#f1a29b}
