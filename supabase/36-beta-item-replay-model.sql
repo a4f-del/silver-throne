@@ -93,11 +93,13 @@ DECLARE
  v_mats jsonb := '[]'::jsonb;
  v_n integer;
 BEGIN
- IF p_type NOT IN ('w','a','h','b','j','r')
-    OR p_type IS NULL OR p_level NOT BETWEEN 1 AND 500
+ IF p_type IS NULL OR p_level IS NULL OR p_rarity IS NULL
+    OR p_quality IS NULL OR p_template IS NULL
+    OR p_type NOT IN ('w','a','h','b','j','r')
+    OR p_level NOT BETWEEN 1 AND 500
     OR p_rarity NOT BETWEEN 0 AND 3
     OR p_quality NOT BETWEEN 0 AND 4
-    OR p_seed IS NULL OR p_seed<0 OR p_template IS NULL THEN
+    OR p_seed IS NULL OR p_seed<0 THEN
    RAISE EXCEPTION 'Parametri item invalizi pentru modelul server.';
  END IF;
  IF (p_type='w' AND p_template NOT IN ('sab','top','arc','buz','toi','sce'))
