@@ -179,7 +179,10 @@ function vHub() {
     const optional = progress ? '<details class="vh-fit-extra"><summary>📜 Obiective</summary><div class="vh-fit-pop">' + progress + '</div></details>' : '';
     const hint = '<span class="vh-fit-hint">' + (satFocusOn() && !S.satShowAll
       ? 'Descoperi clădirile pe măsură ce înaintezi.' : 'Atinge o clădire pentru a o deschide.') + '</span>';
-    return `<section class="vh vh-sat vh-fit-page"><div class="vh-fit-head"><h2>${title}</h2><div class="vh-fit-toolbar">${satExploreButton()}${optional}${hint}</div></div><div class="vh-fit-layout">${map}</div></section>`;
+    const zoom = '<button type="button" class="vh-zoom-btn" onclick="satToggleExpanded()" aria-pressed="false" aria-label="Mărește harta Satului">⛶ Mărește harta</button>';
+    // Fundalul extinde decorul în laterale, dar harta interactivă rămâne integrală la raportul original.
+    const sceneImage = 'imagini/sat/sat-' + satImgN() + '.jpg';
+    return `<section class="vh vh-sat vh-fit-page"><div class="vh-fit-head"><h2>${title}</h2><div class="vh-fit-toolbar">${satExploreButton()}${optional}${zoom}${hint}</div></div><div id="vh-village-scene" class="vh-fit-layout" style="--vh-scene:url('${sceneImage}')">${map}</div></section>`;
   }
   const [bs] = satStatus('q');
   const more = `<div class="vh-more">${satVisible('q') ? `<button class="vb-c" data-v="q" onclick="vil('q')"><span class="vb-i">${satIcon('q')}</span><span>Bot · ${bs}</span></button>` : ''}${satExploreButton()}<span class="mute">${satFocusOn()&&!S.satShowAll?'Descoperi clădirile pe măsură ce înaintezi.':'Atinge o clădire ca s-o deschizi.'}</span></div>`;
@@ -258,22 +261,54 @@ function satFitViewport() {
   if (!map) return;
   map.style.removeProperty('width');
   if (window.innerWidth < 960) return; // pe mobil scena rămâne întreagă, cu scroll dacă e nevoie
-  const freeHeight = Math.floor(window.innerHeight - map.getBoundingClientRect().top - 40);
+  const freeHeight = Math.floor(window.innerHeight - map.getBoundingClientRect().top - 24);
   const availableWidth = layout.clientWidth;
   const mapWidth = Math.floor(Math.min(availableWidth - 2, freeHeight * SAT_W / SAT_H));
   if (freeHeight < 310 || mapWidth < 360) return; // fereastra prea mică: scroll normal, fără decupare
   map.style.width = mapWidth + 'px';
+}
+/* Vizualizare spațioasă, fără zoom prin deformarea hărții și fără scrollul paginii.
+   Este doar o stare vizuală temporară; progresul și salvarea nu sunt atinse. */
+function satToggleExpanded(force) {
+  if (typeof ST_SERVER === 'undefined' || ST_SERVER !== 'beta') return;
+  const page = document.querySelector('#v .vh-fit-page');
+  if (!page) return;
+  const open = typeof force === 'boolean' ? force : !page.classList.contains('st-sat-expanded');
+  page.classList.toggle('st-sat-expanded', open);
+  document.body.classList.toggle('st-sat-expanded', open);
+  if (open) {
+    page.setAttribute('role', 'dialog');
+    page.setAttribute('aria-modal', 'true');
+    page.setAttribute('aria-label', 'Harta mărită a Satului');
+  } else {
+    page.removeAttribute('role');
+    page.removeAttribute('aria-modal');
+    page.removeAttribute('aria-label');
+  }
+  const toggle = page.querySelector('.vh-zoom-btn');
+  if (toggle) {
+    toggle.textContent = open ? '✕ Închide harta mărită' : '⛶ Mărește harta';
+    toggle.setAttribute('aria-pressed', String(open));
+    toggle.setAttribute('aria-label', open ? 'Închide harta mărită' : 'Mărește harta Satului');
+  }
+  satFitViewport();
 }
 let satFitResizeReady = false;
 function satPost() {
   try {
     if (typeof tipHide === 'function') tipHide();
     satFold();
+    if (!document.querySelector('#v .vh-fit-page.st-sat-expanded')) document.body.classList.remove('st-sat-expanded');
     satFitViewport();
     if (!satFitResizeReady && typeof window !== 'undefined') {
       satFitResizeReady = true;
       window.addEventListener('resize', satFitViewport, { passive: true });
       if (window.visualViewport) window.visualViewport.addEventListener('resize', satFitViewport, { passive: true });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && document.querySelector('#v .vh-fit-page.st-sat-expanded')) {
+          e.preventDefault(); satToggleExpanded(false);
+        }
+      });
     }
     const c = document.getElementById('hdr-cl'); if (c) c.classList.toggle('on', S.tab === 'k');
   } catch (e) { /* aspectul nu blochează jocul */ }
@@ -296,9 +331,24 @@ function satPost() {
 .vh-map{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--gold);box-shadow:0 8px 24px #000a;line-height:0}
 .vh-map img{display:block;width:100%;height:auto}
 /* Satul BETA: harta este centrată și scalată complet în înălțimea ecranului. */
-.vh-fit-layout{display:flex;justify-content:center;align-items:flex-start;min-width:0}
-.vh-fit-layout .vh-map{flex:0 0 auto;width:100%;max-width:100%;aspect-ratio:1152/928}
+/* Decor atmosferic doar pe laterale: niciun crop al imaginii sau al zonelor interactive. */
+.vh-fit-layout{position:relative;isolation:isolate;display:flex;justify-content:center;align-items:flex-start;min-width:0;overflow:hidden;border:1px solid #846a35;border-radius:12px;background:#111b1f;box-shadow:inset 0 0 35px #0009}
+.vh-fit-layout::before{content:"";position:absolute;inset:-18px;z-index:0;background-image:var(--vh-scene);background-size:100% 100%;background-position:center;filter:blur(18px) brightness(.42) saturate(.65);pointer-events:none}
+.vh-fit-layout::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,#10191cc7,transparent 19%,transparent 81%,#10191cc7);pointer-events:none}
+.vh-fit-layout .vh-map{position:relative;z-index:2;flex:0 0 auto;width:100%;max-width:100%;aspect-ratio:1152/928;border-radius:8px;box-shadow:0 0 24px #000b}
 .vh-fit-layout .vh-map img{width:100%;height:100%;object-fit:contain}
+.vh-zoom-btn{white-space:nowrap;font-size:12px;padding:6px 10px;border:1px solid #a78b52;background:linear-gradient(180deg,#333225,#161b1b);color:var(--gold2);box-shadow:none}
+.vh-zoom-btn:focus-visible{outline:2px solid #f0d27a;outline-offset:3px}
+@media(max-width:1250px){.vh-fit-hint{display:none}}
+@media(min-width:960px){
+ body.st-sat-expanded{overflow:hidden!important}
+ .vh-fit-page.st-sat-expanded{position:fixed!important;inset:10px 12px!important;width:auto!important;max-width:none!important;height:auto!important;z-index:26000!important;margin:0!important;padding:12px 14px 10px!important;overflow:hidden!important;background:linear-gradient(135deg,#202d2c,#10191b 70%)!important;box-shadow:0 0 0 100vmax #04080add,0 25px 70px #000f!important}
+ .vh-fit-page.st-sat-expanded .vh-fit-head{margin-bottom:10px}
+ .vh-fit-page.st-sat-expanded .vh-fit-layout{margin:0 auto;max-width:100%}
+}
+@media(min-width:960px) and (max-height:620px){
+ .vh-fit-page.st-sat-expanded{overflow:auto!important}
+}
 .vh-fit-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;margin-bottom:8px}
 .vh-fit-head h2{min-width:0;flex:0 1 auto;margin:0;padding:0;border-bottom:0}
 .vh-fit-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap;min-width:0}
@@ -323,6 +373,8 @@ function satPost() {
  .vh-fit-layout .vh-map{width:100%;max-width:100%}
  .vh-fit-page .vh-lb b{font-size:10.5px}
  .vh-fit-page .vh-lb span{font-size:9.5px}
+ .vh-zoom-btn{display:none}
+ .vh-fit-layout::before,.vh-fit-layout::after{display:none}
 }
 .vh-map svg{position:absolute;inset:0;width:100%;height:100%}
 .vh-z{fill:#f0d27a;fill-opacity:0;stroke:#f0d27a;stroke-opacity:0;stroke-width:3;cursor:pointer;transition:fill-opacity .15s,stroke-opacity .15s}
