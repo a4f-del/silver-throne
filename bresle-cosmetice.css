@@ -1,0 +1,31 @@
+/* Silver Throne BETA — cosmetice de breaslă, exclusiv vizuale. */
+.gc-shop{margin:12px 0;padding:11px;border:1px solid #66553c;background:#171e22;border-radius:10px}
+.gc-shop h3{margin:3px 0 9px}
+.gc-preview{display:flex;align-items:center;gap:11px;padding:11px;border:2px solid #8b6a3e;border-radius:9px;background:#28313a;color:#ffe5ad}
+.gc-preview>div{min-width:0;display:flex;flex-direction:column;gap:3px}
+.gc-preview b{font-size:15px;overflow-wrap:anywhere}
+.gc-preview small{font-size:11px;color:#d7d9d2}
+.gc-banner-ash{background:linear-gradient(115deg,#252a31,#44474c)}
+.gc-banner-forest{background:linear-gradient(115deg,#203c30,#3a5741)}
+.gc-banner-royal{background:linear-gradient(115deg,#4f293e,#72414b)}
+.gc-frame-bronze{border-color:#987248}
+.gc-frame-silver{border-color:#b5c1c9}
+.gc-frame-gold{border-color:#eac96d}
+.gc-badge{display:inline-grid;place-items:center;flex:none;min-width:35px;height:35px;padding:2px;border:2px solid #aa925e;border-radius:9px;font-size:23px;line-height:1}
+.gc-badge.gc-frame-silver{border-color:#b5c1c9}
+.gc-badge.gc-frame-gold{border-color:#eac96d}
+.guild-head .gc-badge{min-width:23px;height:23px;border-width:1px;font-size:14px;border-radius:6px}
+.gc-options{margin:7px 0;border:1px solid #45515a;border-radius:8px}
+.gc-options>summary{cursor:pointer;padding:8px 9px;color:#e6cd96;font-weight:700;font-size:13px}
+.gc-list{padding:0 8px 8px}
+.gc-option{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #334049;padding:8px 1px}
+.gc-option span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.gc-option b{font-size:12px}.gc-option small{font-size:11px;color:#b5b9ba}
+.gc-option button{flex:none;font-size:12px;padding:7px 9px}
+.gc-option button[disabled]{opacity:.6}
+@media(max-width:530px){
+ .guild-head .gc-badge{display:inline-grid}
+ .gc-shop{padding:8px}
+ .gc-preview{padding:8px;gap:7px}
+ .gc-option{gap:5px}.gc-option button{max-width:54%;white-space:normal}
+}
