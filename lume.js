@@ -269,8 +269,8 @@ function lwPvpSuggestions() {
     '). Comparația nu garantează victoria.</p>'+
     chosen.map(p=>'<div class="lw-match-row"><span><b>'+tEsc(p.name)+'</b><small>Nivel '+
       Number(p.level)+' · '+lwNum(p.power)+' putere · '+
-      lwPvpComparison(p,own)+'</small></span><button type="button" onclick="lwShow(\''+
-      tEsc(String(p.id))+'\')">Vezi pe hartă</button></div>').join('')+'</section>';
+      lwPvpComparison(p,own)+'</small></span><button type="button" onclick="lwShow('+
+      tEsc(JSON.stringify(String(p.id)))+')">Vezi pe hartă</button></div>').join('')+'</section>';
 }
 function lwSelPanel() {
   const st = LUME.st, p = LUME.sel && st.players.find(x => x.id === LUME.sel);
