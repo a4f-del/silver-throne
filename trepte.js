@@ -105,15 +105,57 @@ function trChips(i) {
   const locked=ST_SERVER==='beta'&&S.adventure&&S.adventure.di===i&&S.adventure.tierLocked;
   return `<div class="tr-ch">${TR_T.n.map((n,t) => `<button class="${t===cur?'p':''}" onclick="trPick(${i},${t})"${locked||t>u?` disabled title="${locked?'Retrage-te din temniță pentru a schimba dificultatea.':'Bate căpitanul pe '+TR_T.n[t-1]+' ca s-o deblochezi'}"`:''}>${t>u?'🔒 ':''}${n}</button>`).join('')}</div>`;
 }
+/* BETA pas 17: o singură alegere opțională la poarta căpitanului.
+   Este o postură de luptă, nu o nouă resursă. */
+const TR_PLAN={
+ normal:{n:'Normal',tip:'Fără modificări.'},
+ safe:{n:'Scut',tip:'−12% atac inamic · −10% aur/minereu.'},
+ offense:{n:'Asalt',tip:'+8% daune proprii · +8% atac inamic.'},
+ loot:{n:'Risc',tip:'+15% aur/minereu · +15% atac inamic.'}
+};
+function trBossPlanAttach(d){
+ if(ST_SERVER!=='beta'||!d||d.room<d.rooms-1||d.ev)return d;
+ const p=S.trPlan&&S.trPlan[d.dk];
+ if(p&&TR_PLAN[p]&&p!=='normal')d.bossPlan=p;
+ return d;
+}
+function trBossPlanAvailable(i){
+ if(ST_SERVER!=='beta'||!S||S.d||!S.adventure||S.adventure.di!==i||!DG[i]||DG[i].ev)return false;
+ const d=dMk(i);return d.room===d.rooms-1;
+}
+function trBossPlanPick(i,p){
+ if(!trBossPlanAvailable(i)||!Object.prototype.hasOwnProperty.call(TR_PLAN,p))return;
+ const d=dMk(i);
+ S.trPlan=S.trPlan||{};
+ if(p==='normal')delete S.trPlan[d.dk];else S.trPlan[d.dk]=p;
+ S.msg='';go();
+}
+function trBossPlanPanel(i){
+ if(!trBossPlanAvailable(i))return '';
+ const d=dMk(i),selected=d.bossPlan||'normal';
+ return '<div class="ac-plan" aria-label="Alegere înainte de căpitan">'
+  +'<b>Strategia pentru căpitan <small>(opțional)</small></b><div class="ac-plan-choices">'
+  +Object.keys(TR_PLAN).map(k=>'<button type="button" class="'+(k===selected?'on':'')+
+    '" aria-pressed="'+(k===selected)+'" onclick="trBossPlanPick('+i+',&quot;'+k+'&quot;)">'+
+    '<strong>'+TR_PLAN[k].n+'</strong><small>'+TR_PLAN[k].tip+'</small></button>').join('')
+  +'</div></div>';
+}
+function trBossPlanWin(d){
+ if(ST_SERVER!=='beta'||!d||!d.one||d.ev||d.tw||d.raid!=null||!d.bossPlan)return;
+ const k=d.bossPlan==='safe'?.9:d.bossPlan==='loot'?1.15:1;
+ if(k!==1){d.loot.gold=Math.max(0,Math.round(d.loot.gold*k));d.loot.ore=Math.max(0,Math.round(d.loot.ore*k));}
+ if(S.trPlan)delete S.trPlan[d.dk];  /* reset după victoria efectivă; nu după simulare sau înfrângere */
+}
 /* la începutul fiecărei lupte: numele monstrului pasului și abilitatea căpitanului */
 function trStart(es, d, b) {
   if (d && d.tw && typeof twMob === 'function') { if (b) { const e = es[0]; if (e) { e.ba = twAb(d.room); e.tc = 0; if (e.ba === 'shield') e.sh = 1; if (trCtr(e.ba)) { e.ctr = 1; e.atk = Math.round(e.atk * 0.85); } } } else es.forEach(e => { e.n = twMob(d.room); }); return; }   /* Turnul */
   if (!d || d.raid != null || d.ghost) return; const g = DG[d.di || 0], D = g && trDef(g.n); if (!D) return;
-  if (b) { const e = es[0]; if (e) { e.ba = D.a; e.tc = 0; if (D.a === 'shield') e.sh = 1; if (trCtr(D.a)) { e.ctr = 1; e.atk = Math.round(e.atk * 0.85); } } }   /* slăbiciunea căpitanului în fața clasei potrivite */
+  if (b) { const e = es[0]; if (e) { e.ba = D.a; e.tc = 0; if (D.a === 'shield') e.sh = 1; if (trCtr(D.a)) { e.ctr = 1; e.atk = Math.round(e.atk * 0.85); } if(ST_SERVER==='beta'&&d.bossPlan) { const mul=d.bossPlan==='safe'?.88:d.bossPlan==='loot'?1.15:d.bossPlan==='offense'?1.08:1;e.atk=Math.max(1,Math.round(e.atk*mul)); } } }   /* contraclasă și postura tactică */
   else { const nm = D.m[Math.min(d.room, D.m.length - 1)]; es.forEach(e => { e.n = nm; e.hp = e.mh = Math.max(1, Math.round(e.mh * 0.8)); e.atk = Math.round(e.atk * 0.8); if(ST_SERVER==='beta')e.tm=D.a; }); }   /* identitate tactică doar pe monștrii din Temnițe BETA */
 }
 /* daunele primite de căpitan: scut, invulnerabilitate */
 function trDmg(e, dm, cr, L, a) {
+  if(ST_SERVER==='beta'&&S.d&&S.d.bossPlan==='offense'&&e.b&&S.d.raid==null&&!S.d.tw)dm=Math.max(1,Math.round(dm*1.08));
   if(ST_SERVER==='beta'&&S.d&&!S.d.tw&&S.d.raid==null&&!e.b&&e.tm==='shield'&&!e.tmShieldUsed){e.tmShieldUsed=1;L.push('Armura lui '+e.n+' oprește prima lovitură.');return Math.max(1,Math.round(dm*.75));}
   if(ST_SERVER==='beta'&&S.d&&!S.d.tw&&S.d.raid==null&&!e.b&&e.tm==='invuln'&&e.tmBarrier){e.tmBarrier=0;L.push('Umbra atenuează lovitura!');return Math.max(1,Math.round(dm*.7));}
   if (e.iv && !(a && a.c === 'Mag' && e.ba === 'invuln')) { L.push(`${e.n} nu poate fi rănit acum.`); return 0; }
@@ -143,7 +185,9 @@ function trTeamTick(f, L) { for (const x of S.fs) if (x.hp > 0 && x.ps > 0) { x.
 function trRb(f, log) { for (const e of f.es) { if(ST_SERVER==='beta'&&S.d&&!S.d.tw&&S.d.raid==null&&!e.b&&e.tm==='rebirth'&&e.hp<=0&&!e.rb){e.rb=1;e.hp=Math.max(1,Math.round(e.mh*.12));log.push(e.n+' se ridică din cenușă cu puțină viață!');} if (e.ba === 'rebirth' && e.hp <= 0 && !e.rb) { e.rb = 1; e.hp = Math.round(e.mh / (trCtr('rebirth') ? 6 : 3)); log.push(`${e.n} se ridică din cenușă!`); } } }
 /* după căpitan: dificultatea următoare se deblochează */
 function trWin(d) {
-  if (!d || d.raid != null || d.ev || d.ghost) return; const g = DG[d.di || 0]; if (!g || g.lv < TR_T.lv) return;
+  if (!d || d.raid != null || d.ev || d.ghost) return;
+  if(ST_SERVER==='beta')trBossPlanWin(d);
+  const g = DG[d.di || 0]; if (!g || g.lv < TR_T.lv) return;
   const t = d.tier || 0, u = trUnl(d.di || 0);
   if (t >= u && u < 2) { (S.dtr = S.dtr || {})[d.di || 0] = u + 1; d.cm = (d.cm ? d.cm + ' ' : '') + `Ai deblocat dificultatea ${TR_T.n[u + 1]} pentru ${g.n}!`; }
   S.fs.forEach(x => { x.ps = 0; });
@@ -179,7 +223,7 @@ function trNextLbl(i) { const n = trNames(i), d = dMk(i), c = dCostAt(i); return
 const TR_OC = {};
 function dOddsAt(i, N) {
   N = N || 24; if (S.d) return null;
-  const d0 = dMk(i), key = [i, d0.tier, d0.room, S.lvl, S.fs.map(f => f.hp + '/' + mhp(f)).join(',')].join('|');
+  const d0 = dMk(i), key = [i, d0.tier, d0.room, d0.bossPlan||'normal', S.lvl, S.fs.map(f => f.hp + '/' + mhp(f)).join(',')].join('|');
   if (TR_OC[i] && TR_OC[i].k === key) return TR_OC[i].v;
   const snap = JSON.stringify(S), keep = { go: window.go, render: window.render, vs: window.vsFlash, bp: window.bhPush, ba: window.bhAdd };
   if(typeof GUILD!=='undefined')GUILD.preview=true;
