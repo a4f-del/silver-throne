@@ -24,7 +24,7 @@ try {
     undefined,{timeout:25000});
   const screens=[
     ['Sat / clădiri','a',''],
-    ['Topitorie','a','a'],['Piață','a','p'],['Negustor','a','l'],
+    ['Topitorie','a','a'],['Fierărie','a','a','forge'],['Piață','a','p'],['Negustor','a','l'],
     ['Han','a','h'],['Infirmerie','a','i'],['Antrenament','a','t'],
     ['Misiuni','a','x'],['Depozit','a','d'],['Steag','a','g'],
     ['Bot','a','q'],['Echipă','e',''],['Coborâre','c',''],
@@ -40,15 +40,17 @@ try {
     window.contPush=async()=>true;
     try {
       if(typeof lootItem!=='function')out.push({name:'Contract lootItem',ok:false,detail:'lootItem is not defined'});
-      for(const [name,tab,sub] of screens) {
+      for(const [name,tab,sub,mode] of screens) {
         try{
           S=JSON.parse(original);
           S.d=null; S.tab=tab;
           if(tab==='a')S.vil=sub;
+          if(mode==='forge'){S.lvl=Math.max(30,S.lvl||1);S.ui=S.ui||{};S.ui.fk='u';}
           if(tab==='m')S.mt=sub;
           render();
           const host=document.getElementById('v');
           if(!host||!host.querySelector('section'))throw Error('View is empty or missing a section');
+          if(mode==='forge'&&!host.textContent.includes('Fierăria'))throw Error('Fierăria did not render');
           out.push({name,ok:true,detail:host.textContent.trim().slice(0,70)});
         }catch(e){out.push({name,ok:false,detail:e.message});}
         // Remove transient story preview overlays that could obscure the next screen.
@@ -62,6 +64,34 @@ try {
     return out;
   },screens);
   results.push(...checks);
+  /* Optional second pass with narrow mobile viewport, no further RPC writes. */
+  if(process.env.ST_SMOKE_MOBILE==='1') {
+    await page.setViewportSize({width:390,height:844});
+    const mobile=await page.evaluate(async screens=>{
+      const original=JSON.stringify(S),save0=window.save,queue0=window.contQueue,push0=window.contPush,out=[];
+      window.save=()=>{};window.contQueue=()=>{};window.contPush=async()=>true;
+      try {
+        for(const [name,tab,sub,mode] of screens){
+          try {
+            S=JSON.parse(original);S.d=null;S.tab=tab;
+            if(tab==='a')S.vil=sub;
+            if(tab==='m')S.mt=sub;
+            if(mode==='forge'){S.lvl=Math.max(30,S.lvl||1);S.ui=S.ui||{};S.ui.fk='u';}
+            render();
+            const host=document.getElementById('v');
+            if(!host?.querySelector('section'))throw Error('Empty mobile view');
+            const overflow=Math.max(0,document.documentElement.scrollWidth-window.innerWidth);
+            if(overflow>20)throw Error('Horizontal overflow '+overflow+'px');
+            out.push({name:'Mobil: '+name,ok:true});
+          }catch(e){out.push({name:'Mobil: '+name,ok:false,detail:e.message});}
+        }
+      }finally{
+        S=JSON.parse(original);window.save=save0;window.contQueue=queue0;window.contPush=push0;render();
+      }
+      return out;
+    },screens);
+    results.push(...mobile);
+  }
   for(const r of results)console.log((r.ok?'✓':'✗')+' '+r.name+(r.ok?'':' — '+r.detail));
   if(errors.length){console.error('Browser errors:',...errors);process.exitCode=1;}
   if(results.some(x=>!x.ok))process.exitCode=1;
