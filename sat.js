@@ -170,18 +170,20 @@ function vHub() {
     zones += `<polygon class="vh-z${hot ? ' hot' : ''}" data-z="${k}" points="${pts.join(' ')}" onclick="vil('${k}')"/>`;
     labels += `<button class="vh-lb${hot ? ' hot' : ''}" data-v="${k}" style="left:${(lx / SAT_W * 100).toFixed(2)}%;top:${(ly / SAT_H * 100).toFixed(2)}%" onclick="vil('${k}')" onmouseenter="satHov('${k}',1)" onmouseleave="satHov('${k}',0)" aria-label="${N[k]}${lv != null ? ', nivel ' + lv : ''}: ${st.replace(/<[^>]+>/g, '')}"><b>${N[k]}${lv != null ? ` <small>${lv}</small>` : ''}</b><span>${st}</span></button>`;
   }
-  const [bs] = satStatus('q');
   const title = typeof terStage === 'function' ? 'Satul tău · ' + terStage() : 'Satul tău';
-  // Harta si poligoanele au acelasi raport 1152:928; scalarea schimba numai dimensiunea, nu zonele clicabile.
+  // Aceeași imagine 1152:928 şi acelaşi SVG; nu se schimbă punctele clicabile.
   const map = `<div class="vh-map"><img src="imagini/sat/sat-${satImgN()}.jpg" alt="Satul tău, cu clădirile pe care le poți deschide" width="1152" height="928"><svg viewBox="0 0 1152 928" preserveAspectRatio="none" aria-hidden="true">${zones}</svg>${labels}</div>`;
-  const more = `<div class="vh-more">${satVisible('q') ? `<button class="vb-c" data-v="q" onclick="vil('q')"><span class="vb-i">${satIcon('q')}</span><span>Bot · ${bs}</span></button>` : ''}${satExploreButton()}<span class="mute">${satFocusOn()&&!S.satShowAll?'Descoperi clădirile pe măsură ce înaintezi.':'Atinge o clădire ca s-o deschizi.'}</span></div>`;
   const progress = !satFocusOn() && typeof drumPanel === 'function' ? drumPanel() : '';
-  const throne = typeof tronBanner === 'function' ? tronBanner() : '';
   if (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta') {
-    // Pe desktop actiunile secundare stau langa harta, nu sub o imagine mai inalta decat ecranul.
-    const optional = progress ? '<details class="vh-fit-extra"><summary>📜 Progres și obiective</summary>' + progress + '</details>' : '';
-    return `<section class="vh vh-sat vh-fit-page"><h2>${title}</h2><div class="vh-fit-layout">${map}<aside class="vh-fit-side" aria-label="Acțiuni și informații despre sat">${more}${throne}${optional}</aside></div></section>`;
+    // Tronul şi Botul sunt deja în meniuri: Satul arată numai harta, fără panou duplicat.
+    const optional = progress ? '<details class="vh-fit-extra"><summary>📜 Obiective</summary><div class="vh-fit-pop">' + progress + '</div></details>' : '';
+    const hint = '<span class="vh-fit-hint">' + (satFocusOn() && !S.satShowAll
+      ? 'Descoperi clădirile pe măsură ce înaintezi.' : 'Atinge o clădire pentru a o deschide.') + '</span>';
+    return `<section class="vh vh-sat vh-fit-page"><div class="vh-fit-head"><h2>${title}</h2><div class="vh-fit-toolbar">${satExploreButton()}${optional}${hint}</div></div><div class="vh-fit-layout">${map}</div></section>`;
   }
+  const [bs] = satStatus('q');
+  const more = `<div class="vh-more">${satVisible('q') ? `<button class="vb-c" data-v="q" onclick="vil('q')"><span class="vb-i">${satIcon('q')}</span><span>Bot · ${bs}</span></button>` : ''}${satExploreButton()}<span class="mute">${satFocusOn()&&!S.satShowAll?'Descoperi clădirile pe măsură ce înaintezi.':'Atinge o clădire ca s-o deschizi.'}</span></div>`;
+  const throne = typeof tronBanner === 'function' ? tronBanner() : '';
   return `<section class="vh vh-sat"><h2>${title}</h2>${map}${more}</section>${progress}${throne}`;
 }
 function satHov(k, on) { const z = document.querySelector(`.vh-z[data-z="${k}"]`); if (z) z.classList.toggle('on', !!on); }
@@ -252,18 +254,15 @@ function satFold() {
 function satFitViewport() {
   const layout = document.querySelector('#v .vh-fit-layout');
   if (!layout) return;
-  const map = layout.querySelector('.vh-map'), side = layout.querySelector('.vh-fit-side');
-  if (!map || !side) return;
+  const map = layout.querySelector('.vh-map');
+  if (!map) return;
   map.style.removeProperty('width');
-  side.style.removeProperty('max-height');
-  if (window.innerWidth < 960) return; // pe mobil nu sacrificam lizibilitatea/atingerea
-  const freeHeight = Math.floor(window.innerHeight - map.getBoundingClientRect().top - 44);
+  if (window.innerWidth < 960) return; // pe mobil scena rămâne întreagă, cu scroll dacă e nevoie
+  const freeHeight = Math.floor(window.innerHeight - map.getBoundingClientRect().top - 40);
   const availableWidth = layout.clientWidth;
-  const sideWidth = Math.max(210, Math.min(330, availableWidth * .32));
-  const mapWidth = Math.floor(Math.min(availableWidth - sideWidth - 14, freeHeight * SAT_W / SAT_H));
-  if (freeHeight < 310 || mapWidth < 360) return; // ferestre foarte mici: scroll normal, fara continut taiat
+  const mapWidth = Math.floor(Math.min(availableWidth - 2, freeHeight * SAT_W / SAT_H));
+  if (freeHeight < 310 || mapWidth < 360) return; // fereastra prea mică: scroll normal, fără decupare
   map.style.width = mapWidth + 'px';
-  side.style.maxHeight = Math.floor(mapWidth * SAT_H / SAT_W) + 'px';
 }
 let satFitResizeReady = false;
 function satPost() {
@@ -296,34 +295,34 @@ function satPost() {
 .vh-sat h2{margin-bottom:10px}
 .vh-map{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--gold);box-shadow:0 8px 24px #000a;line-height:0}
 .vh-map img{display:block;width:100%;height:auto}
-/* Satul BETA: foloseste inaltimea reala disponibila; etichetele si poligoanele raman pe imagine. */
-.vh-fit-layout{display:flex;align-items:flex-start;gap:14px;min-width:0}
+/* Satul BETA: harta este centrată și scalată complet în înălțimea ecranului. */
+.vh-fit-layout{display:flex;justify-content:center;align-items:flex-start;min-width:0}
+.vh-fit-layout .vh-map{flex:0 0 auto;width:100%;max-width:100%;aspect-ratio:1152/928}
+.vh-fit-layout .vh-map img{width:100%;height:100%;object-fit:contain}
+.vh-fit-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;margin-bottom:8px}
+.vh-fit-head h2{min-width:0;flex:0 1 auto;margin:0;padding:0;border-bottom:0}
+.vh-fit-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap;min-width:0}
+.vh-fit-hint{color:var(--mute);font-size:12px;white-space:nowrap}
+.vh-fit-toolbar>.vh-explore{font-size:12px;padding:6px 9px}
+.vh-fit-extra{position:relative;z-index:12;font-size:13px}
+.vh-fit-extra>summary{cursor:pointer;color:var(--gold2);white-space:nowrap;list-style:none;border:1px solid var(--line);border-radius:7px;padding:6px 8px}
+.vh-fit-extra>summary::-webkit-details-marker{display:none}
+.vh-fit-extra[open]>summary{border-color:var(--gold)}
+.vh-fit-pop{position:absolute;top:calc(100% + 6px);right:0;width:min(380px,calc(100vw - 36px));max-height:min(65vh,590px);overflow:auto;padding:10px;border:1px solid var(--gold);border-radius:9px;background:#121a1df7;box-shadow:0 12px 32px #000e}
+.vh-fit-pop>section{margin-bottom:8px;padding:12px}
+.vh-fit-page .vh-lb{padding:2px 6px 3px!important}
+.vh-fit-page .vh-lb b{font-size:11px}
+.vh-fit-page .vh-lb span{font-size:10px;max-width:145px}
 @media(min-width:960px){
  .vh-fit-page{padding:10px 12px 8px;margin-bottom:0}
- .vh-fit-page h2{font-size:18px;line-height:1.2;margin-bottom:7px;padding-bottom:5px}
+ .vh-fit-page h2{font-size:18px;line-height:1.2}
 }
-.vh-fit-layout .vh-map{flex:0 0 auto;width:min(65%,700px);max-width:100%;aspect-ratio:1152/928}
-.vh-fit-layout .vh-map img{width:100%;height:100%;object-fit:contain}
-.vh-fit-side{flex:1;min-width:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
-.vh-fit-side .vh-more{margin:0 0 12px;gap:8px}
-.vh-fit-side .vh-more .mute{font-size:13px}
-.vh-fit-side .tr-banner{padding:10px 12px;gap:9px;margin:0 0 10px;flex-wrap:wrap}
-.vh-fit-side .trb-ic{font-size:25px}
-.vh-fit-side .trb-t b{font-size:14px}
-.vh-fit-side .trb-t span{font-size:13px}
-.vh-fit-side .tr-banner button{font-size:12px;padding:5px 9px}
-.vh-fit-extra{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px}
-.vh-fit-extra>summary{cursor:pointer;color:var(--gold2)}
-.vh-fit-extra>section{margin-top:10px;margin-bottom:4px;padding:8px}
-.vh-fit-layout .vh-lb{padding:2px 6px 3px!important}
-.vh-fit-layout .vh-lb b{font-size:11px}
-.vh-fit-layout .vh-lb span{font-size:10px;max-width:145px}
 @media(max-width:959px){
- .vh-fit-layout{display:block}
+ .vh-fit-head{flex-direction:column;align-items:flex-start}
+ .vh-fit-toolbar{justify-content:flex-start}
  .vh-fit-layout .vh-map{width:100%;max-width:100%}
- .vh-fit-side{max-height:none!important;overflow:visible;margin-top:10px}
- .vh-fit-layout .vh-lb b{font-size:10.5px}
- .vh-fit-layout .vh-lb span{font-size:9.5px}
+ .vh-fit-page .vh-lb b{font-size:10.5px}
+ .vh-fit-page .vh-lb span{font-size:9.5px}
 }
 .vh-map svg{position:absolute;inset:0;width:100%;height:100%}
 .vh-z{fill:#f0d27a;fill-opacity:0;stroke:#f0d27a;stroke-opacity:0;stroke-width:3;cursor:pointer;transition:fill-opacity .15s,stroke-opacity .15s}

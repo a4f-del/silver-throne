@@ -2,11 +2,39 @@
    LIVE si logica de joc raman neschimbate. */
 const stCompactActive = () => typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta';
 const stCompactAvailable = () => !(typeof adventureActive === 'function' && adventureActive());
+/* Tronul are un singur punct de acces: stânga. Starea vine din răspunsul serverului,
+   nu dintr-o estimare de luptă și nu generează cereri noi la fiecare randare. */
+function stTronSidebarState() {
+  const state = typeof TRON !== 'undefined' && TRON ? TRON.st : null;
+  const me = state && state.me;
+  if (!me) return null;
+  const pending = Array.isArray(me.pending) ? me.pending.length : 0;
+  const holder = state.holder;
+  const eligible = typeof TT === 'undefined' || !TT.CFG || S.lvl >= TT.CFG.minLevel;
+  const canChallenge = !!me.can_challenge && eligible;
+  const left = Number(state.week_end) - (typeof tronNow === 'function' ? tronNow() : Date.now());
+  const time = Number.isFinite(left) && left > 0 && typeof sdT === 'function' ? sdT(left) : '';
+  if (pending) return {kind:'hot',line:'🎁 Premiu de revendicat',detail: pending + (pending === 1 ? ' premiu disponibil' : ' premii disponibile')};
+  if (!holder) return {kind:canChallenge?'hot':'quiet',line:'Tronul este liber',detail:canChallenge?'⚔ Poți provoca acum':(time?'Se închide în '+time:'Garda Regală îl apără')};
+  if (String(holder.user_id) === String(me.user_id))
+    return {kind:'king',line:'👑 Tu deții Tronul',detail:time?'Se închide în '+time:'Regele săptămânii'};
+  const name = String(holder.name || 'Regele').trim().slice(0,22);
+  return {kind:canChallenge?'hot':'holder',line:'👑 '+name+' ține Tronul',
+    detail:canChallenge?'⚔ Provoacă acum':(time?'Se închide în '+time:'Vezi deținătorul')};
+}
 function stCompactNav() {
-  return TEMA_NAV.filter(([k]) => k !== 'e').map(([k, name, icon]) =>
-    '<button class="' + (temaOn(k) ? 'on' : '') + (k === 'r' ? ' tr' : '') +
-    '" onclick="tab(\'' + k + '\')"><span class="ni">' + icon + '</span><span>' +
-    name + navBadge(k) + '</span></button>').join('');
+  const throne = stTronSidebarState();
+  return TEMA_NAV.filter(([k]) => k !== 'e').map(([k, name, icon]) => {
+    const status = k === 'r' ? throne : null;
+    const statusClass = status ? ' st-tron-' + status.kind : '';
+    const label = status
+      ? '<span class="st-tron-nav-lines"><span class="st-tron-title">' + name + navBadge(k) +
+        '</span><small class="st-tron-owner">' + (typeof tEsc === 'function' ? tEsc(status.line) : status.line) +
+        '</small><small class="st-tron-detail">' + (typeof tEsc === 'function' ? tEsc(status.detail) : status.detail) + '</small></span>'
+      : '<span>' + name + navBadge(k) + '</span>';
+    return '<button class="' + (temaOn(k) ? 'on' : '') + (k === 'r' ? ' tr st-tron-nav' + statusClass : '') +
+      '" onclick="tab(\'' + k + '\')"><span class="ni">' + icon + '</span>' + label + '</button>';
+  }).join('');
 }
 function stCompactHeroGo(t) {
   if (!stCompactAvailable()) return;
@@ -76,6 +104,22 @@ body.st-compact header{gap:10px;padding-right:12px!important}
 body.st-compact header h1{font-size:18px;letter-spacing:.04em}
 body.st-compact header .hs{gap:10px;justify-content:flex-end}
 body.st-compact #hdr-act{display:none!important}
+/* Un singur Tron, în navigația din stânga. Informații server fără banner redundant în Sat. */
+body.st-compact nav button.st-tron-nav{position:relative;align-items:center;min-width:0}
+body.st-compact nav button.st-tron-nav .ni{flex:none}
+body.st-compact .st-tron-nav-lines{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:0;flex:1;text-align:left;line-height:1.18}
+body.st-compact .st-tron-title{font:700 15px Cinzel,Georgia,serif;white-space:nowrap}
+body.st-compact .st-tron-owner,body.st-compact .st-tron-detail{display:block;width:100%;font:400 11px/1.25 Alegreya,Georgia,serif;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#d6c39a}
+body.st-compact .st-tron-detail{color:#a89c81}
+body.st-compact nav button.st-tron-nav.st-tron-holder:not(.on){border-color:#9d7e32;box-shadow:inset 3px 0 #b69a4a,0 0 10px #c9a24b19}
+body.st-compact nav button.st-tron-nav.st-tron-hot:not(.on){border-color:#d6ab50;box-shadow:inset 4px 0 #e9c76e,0 0 14px #e3b74c44;background:linear-gradient(180deg,#423316,#1d180c)}
+body.st-compact nav button.st-tron-nav.st-tron-hot .st-tron-detail{color:#f6da8f}
+body.st-compact nav button.st-tron-nav.st-tron-king:not(.on){border-color:#e1bf63;box-shadow:inset 4px 0 #efd585,0 0 13px #e9cd6b40}
+body.st-compact nav button.st-tron-nav:focus-visible{outline:2px solid #f0d27a;outline-offset:3px}
+@media(max-width:959px){
+ body.st-compact .st-tron-owner,body.st-compact .st-tron-detail{display:none}
+ body.st-compact .st-tron-title{font-size:inherit}
+}
 body.st-compact .st-hres,body.st-compact .st-hquick{display:flex;align-items:center;gap:8px}
 body.st-compact .st-hres{margin-right:auto;min-width:0}
 body.st-compact .st-res{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border:1px solid var(--line);border-radius:8px;background:#10171a;padding:5px 9px;line-height:1.1}
