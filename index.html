@@ -480,16 +480,59 @@ function roll(){const c=8*S.lvl;if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';els
 function hire(i){const p=S.pool,c=p.c[i];if(S.gold<rp(c))S.msg='Îți trebuie '+rp(c)+' aur.';else if(S.fs.length+S.rs.length>=8)S.msg='Barăcile sunt pline (8 luptători).';else{cn('h');S.gold-=rp(c);p.c.splice(i,1);const f=spNew(c,c.rk||0);f.hp=mhp(f);(S.fs.length<3&&!S.d&&!(ST_SERVER==='beta'&&S.soloDungeon)?S.fs:S.rs).push(f);S.msg=c.n+' s-a alăturat'+(S.fs.includes(f)?' echipei.':' la bancă.')}go()}
 /* BETA: eroul poate coborî singur, mercenarii rămân în rezervă,
    disponibili pentru expedițiile pasive. Nu acordă bonus de luptă sau pradă. */
+/* BETA · alegere rapida a echipei direct din Coborare.
+   Mercenarii in expeditie nu pot fi retrasi; respectam TMAX() si
+   interdictia de schimbare in timpul unei lupte. */
+function heroDungeonAddReserve(i){
+ if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||!S||!Array.isArray(S.fs)||!Array.isArray(S.rs))return;
+ if(S.d){S.msg='Termină mai întâi lupta în curs.';return go();}
+ const merc=S.rs[i];if(!merc||merc.h)return;
+ if(S.fs.length>=TMAX()){S.msg='Echipa este completă ('+TMAX()+' luptători).';return go();}
+ if(typeof mxBusy==='function'&&mxBusy(merc)){S.msg=merc.n+' este în expediție și nu poate intra în echipă.';return go();}
+ S.fs.push(S.rs.splice(i,1)[0]);S.soloDungeon=0;
+ S.msg=merc.n+' a revenit în echipa activă.';go();
+}
+function heroDungeonRestore(){
+ if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||!S||!Array.isArray(S.fs)||!Array.isArray(S.rs))return;
+ if(S.d){S.msg='Termină mai întâi lupta în curs.';return go();}
+ const slots=Math.max(0,TMAX()-S.fs.length);
+ if(!slots){S.msg='Echipa este deja completă.';return go();}
+ let count=0;
+ for(let i=0;i<S.rs.length&&count<slots;){
+  const merc=S.rs[i];
+  if(!merc||merc.h||(typeof mxBusy==='function'&&mxBusy(merc))){i++;continue;}
+  S.fs.push(S.rs.splice(i,1)[0]);count++;
+ }
+ if(count)S.soloDungeon=0;
+ S.msg=count?count+' '+(count===1?'mercenar a revenit':'mercenari au revenit')+
+  ' în echipa activă.':'Nu ai mercenari disponibili în rezervă. Cei din expediție nu pot fi adăugați.';
+ go();
+}
 function heroSoloControl(){
  if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta')return '';
  const hero=S.fs&&S.fs.find(f=>f.h);
  if(!hero)return '';
- if(hero.hp<=0)return '<p class="mute">Eroul este căzut. Ridică-l la Infirmerie înainte să intre singur în temniță.</p>';
- const solo=S.fs.length===1;
- return '<div class="row" style="flex-wrap:wrap"><span class="mute">'+
-   (solo?'⚔ Eroul intră singur. Mercenarii din rezervă pot merge în expediții.':
-   '⚔ Poți încerca temnița doar cu eroul, dacă e suficient de puternic. Mercenarii merg în rezervă, apoi în expediții.')+
-   '</span>'+(solo?'':S.d?'':'<button onclick="heroSolo()">⚔ Erou singur</button>')+'</div>';
+ const solo=S.fs.length===1,max=typeof TMAX==='function'?TMAX():3;
+ const canEdit=!S.d;
+ const reserves=Array.isArray(S.rs)?S.rs.map((f,i)=>({f,i,busy:typeof mxBusy==='function'&&mxBusy(f)})).filter(x=>x.f&&!x.f.h):[];
+ const available=reserves.filter(x=>!x.busy);
+ let h='<div class="cb-party-manage"><div class="cb-party-manage-top"><div><b>⚔ Echipa pentru temniță</b><small>'+
+    (solo?'Erou singur':'Erou și '+(S.fs.length-1)+' mercenari')+
+    ' · '+S.fs.length+'/'+max+' locuri</small></div>';
+ if(!solo&&hero.hp>0&&canEdit)h+='<button onclick="heroSolo()">Erou singur</button>';
+ if(available.length&&S.fs.length<max&&canEdit)
+  h+='<button class="p" onclick="heroDungeonRestore()">↩ Readu mercenarii</button>';
+ h+='</div>';
+ if(hero.hp<=0)h+='<p class="mute">Eroul este căzut. Ridică-l la Infirmerie înainte să intre singur în temniță.</p>';
+ if(reserves.length&&S.fs.length<max){
+  h+='<div class="cb-party-reserves" aria-label="Mercenari în rezervă">'+reserves.map(({f,i,busy})=>
+   '<span class="cb-party-reserve"><b>'+tEsc(f.n)+'</b><small>'+tEsc(f.c||'Mercenar')+
+    (busy?' · în expediție':'')+'</small><button onclick="heroDungeonAddReserve('+i+')"'+
+    (!canEdit||busy?' disabled':'')+'>'+ (busy?'Indisponibil':'+ Adaugă')+'</button></span>'
+  ).join('')+'</div>';
+ }
+ if(!reserves.length&&solo)h+='<small class="mute">Nu ai mercenari în rezervă. Îi poți recruta la Han.</small>';
+ return h+'</div>';
 }
 function heroSolo(){
  if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta')return;
@@ -498,12 +541,12 @@ function heroSolo(){
  const hero=S.fs.find(f=>f.h);
  if(!hero){S.msg='Eroul trebuie să fie în echipa activă.';return go();}
  if(hero.hp<=0){S.msg='Eroul este căzut. Ridică-l la Infirmerie înainte să intre singur în temniță.';return go();}
- S.soloDungeon=1; /* se pastreaza pana cand jucatorul alege explicit un mercenar */
+ S.soloDungeon=1;
  const others=S.fs.filter(f=>f!==hero);
  if(!others.length){S.msg='Eroul este deja singur. Poți intra în temniță.';return go();}
  S.fs=[hero];S.rs.push(...others);S.sel=0;
  S.msg='Eroul merge singur. '+others.length+' '+(others.length===1?'mercenar a trecut':'mercenari au trecut')+
-   ' în rezervă. Îi poți trimite în expediții din Han.';
+   ' în rezervă. Îi poți readuce direct din Coborâre.';
  go();
 }
 function toBench(i){if(S.d)S.msg='Nu poți schimba echipa în timpul coborârii.';else if(S.fs[i].h)S.msg='Eroul rămâne mereu în echipă.';else if(S.fs.length<2)S.msg='Eroul rămâne în echipă, chiar și singur.';else{S.rs.push(S.fs.splice(i,1)[0]);S.msg=''}go()}
@@ -932,7 +975,7 @@ function vC(){const d=S.d;if(d&&ST_SERVER==='beta'&&(d.one||d.tw)&&typeof acComb
   const fallen=S.fs.some(f=>f.hp<=0);
   const help='<details><summary>ⓘ Reguli utile</summary><p>Temnițele sunt pentru progresul principal: lupți cu monștri, apoi cu căpitanul. Fiecare luptă afișează costul înainte de pornire; punctele se regenerează câte unul la 6 minute. Evenimentul săptămânal folosește o cheie în locul punctelor de intrare. Turnul este provocarea avansată, cu recorduri și recompense la etaje-cheie. Vindecarea în temnițe se face doar prin abilități, iar luptătorii căzuți se ridică la Infirmerie.</p></details>';
   const header='<section class="cb-head"><div class="cb-head-title"><div><small class="cb-eyebrow">AVENTURILE TALE</small><h2>⚔ Coborâre</h2><p class="mute">Continuă temnița, caută relicva săptămânii sau urcă în Turn.</p></div>'+help+'</div></section>';
-  return (typeof bhLast==='function'?bhLast():'')+header+
+  return header+
     (fallen?'<section class="cb-wounded"><span class="r4">Ai luptători căzuți: ridică-i înainte de o nouă luptă.</span>'+reviveAllBtn()+'</section>':'')+
     vDung();
  }
