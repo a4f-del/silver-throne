@@ -82,20 +82,27 @@ END
 $units$;
 
 -- Nivelul minim pentru slotul al patrulea este 30, exact ca in TMAX().
+-- Corectie 42601: calculam limita separat de IF, fara CASE ... END THEN.
 -- Acest trigger nu introduce echipe obligatorii de patru luptatori.
 CREATE OR REPLACE FUNCTION public.beta_world_team_size_by_level_guard()
 RETURNS trigger
 LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
 AS $size$
+DECLARE
+  v_max_units integer := 3;
 BEGIN
- IF jsonb_typeof(NEW.units) IS DISTINCT FROM 'array'
-    OR jsonb_array_length(NEW.units)<1
-    OR jsonb_array_length(NEW.units)>
-       CASE WHEN NEW.level>=30 THEN 4 ELSE 3 END THEN
+  -- Evitam CASE direct in conditia IF, pentru a nu avea un END/THEN
+  -- ambiguu in parserul PL/pgSQL (eroare 42601).
+  IF NEW.level >= 30 THEN
+    v_max_units := 4;
+  END IF;
+  IF jsonb_typeof(NEW.units) IS DISTINCT FROM 'array'
+     OR jsonb_array_length(NEW.units) < 1
+     OR jsonb_array_length(NEW.units) > v_max_units THEN
     RAISE EXCEPTION 'Apărarea satului: maxim % luptători pentru nivelul %.',
-      CASE WHEN NEW.level>=30 THEN 4 ELSE 3 END, NEW.level;
- END IF;
- RETURN NEW;
+      v_max_units, NEW.level;
+  END IF;
+  RETURN NEW;
 END
 $size$;
 
