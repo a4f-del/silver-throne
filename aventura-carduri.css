@@ -367,3 +367,80 @@ body.st-adventure .ac-scene.ac-dungeon{
 @media(prefers-reduced-motion:reduce){
  .ac-fx-mode .ac-impact,.ac-fx-mode .ac-dash{animation:none!important;transition:none!important}
 }
+
+
+/* BETA · În pregătirea Temniței, întreaga echipă este lângă butonul
+   Luptă, nu dedesubtul portretului. Strict ecranul dedicat Temniței. */
+.ac-dungeon .ac-side .ac-party{margin:3px 0 0;padding:7px 0 0;border-top:1px solid #6c553b}
+.ac-dungeon .ac-side .ac-small-title{margin:0 0 5px;font-size:12px}
+.ac-dungeon .ac-side .ac-party-list{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:4px;
+  min-width:0;
+}
+.ac-dungeon .ac-side .ac-ally{
+  min-width:0;
+  padding:5px 4px;
+  display:block;
+  text-align:center;
+  border-radius:7px;
+}
+.ac-dungeon .ac-side .ac-ally-face{display:none}
+.ac-dungeon .ac-side .ac-ally-info{gap:2px}
+.ac-dungeon .ac-side .ac-ally-info b{
+  font-size:10px;
+  line-height:1.15;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  display:block;
+}
+.ac-dungeon .ac-side .ac-ally-info small{font-size:9px;line-height:1.15}
+.ac-dungeon .ac-side .ac-hp{height:5px}
+.ac-dungeon .ac-side .ac-help-details{
+  border-top:1px solid #544834;
+  margin-top:2px;
+  padding-top:6px;
+}
+.ac-dungeon .ac-side .ac-help-details summary{
+  font-size:11px;
+  color:#d8c296;
+  cursor:pointer;
+}
+.ac-dungeon .ac-side .ac-help-details[open]{
+  padding-bottom:4px;
+}
+.ac-dungeon .ac-side .ac-help-details .ac-hint{margin:6px 0 0}
+.ac-dungeon .ac-scene-head{margin-bottom:5px}
+.ac-dungeon .ac-difficulty{padding:7px 10px;margin-bottom:7px}
+.ac-dungeon .ac-difficulty .tr-ch{margin-top:6px}
+.ac-dungeon .ac-difficulty .tr-ch button{min-height:32px;padding:4px 10px}
+.ac-dungeon .ac-progress{margin-bottom:5px}
+.ac-dungeon .ac-rail{padding-bottom:3px;gap:5px}
+.ac-dungeon .ac-step{padding:3px;gap:1px}
+.ac-dungeon .ac-step-art{height:37px;width:min(100%,55px)}
+.ac-dungeon .ac-step-text{min-height:21px}
+.ac-dungeon .ac-main-portrait{height:clamp(116px,19dvh,175px)}
+.ac-dungeon .ac-side{gap:7px}
+.ac-dungeon .ac-primary{min-height:40px}
+@media(max-height:760px){
+ .ac-dungeon .ac-scene-head{margin-bottom:3px}
+ .ac-dungeon .ac-difficulty{margin-bottom:5px;padding:5px 8px}
+ .ac-dungeon .ac-step-art{height:32px}
+ .ac-dungeon .ac-step-text{min-height:18px}
+ .ac-dungeon .ac-main-portrait{height:clamp(88px,15dvh,125px)}
+ .ac-dungeon .ac-side .ac-party{padding-top:4px}
+}
+@media(max-width:700px){
+ .ac-dungeon .ac-side .ac-party-list{
+   display:grid;
+   grid-template-columns:repeat(2,minmax(0,1fr));
+   gap:3px;
+ }
+ .ac-dungeon .ac-side .ac-ally{padding:3px 2px}
+ .ac-dungeon .ac-side .ac-ally-info b{font-size:9px}
+ .ac-dungeon .ac-side .ac-ally-info small{font-size:8px}
+ .ac-dungeon .ac-main-portrait{height:clamp(96px,18dvh,140px)}
+ .ac-dungeon .ac-difficulty .tr-ch button{padding:4px 5px}
+}
