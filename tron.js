@@ -118,7 +118,8 @@ function tronAutoPublishSoon() {
 }
 async function tronAutoPublishNow() {
   const sig = tronAutoSnapshot();
-  if (!sig || sig === TRON.pubSig) return true;
+  if (!sig) return false;
+  if (sig === TRON.pubSig) return true;
   if (TRON.pubFlight) return TRON.pubFlight;
   if (TRON.pubFailAt && Date.now() - TRON.pubFailAt < 12000) return false;
   TRON.pubFlight = (async () => {
