@@ -261,6 +261,31 @@ function lwMatchAdvice(p,can){
   (known?' · puterea adversarului '+lwNum(enemy):' · puterea adversarului indisponibilă')+'.</small>'+
   '<p>'+tip+' '+rule+'</p><small>La Tron este duel erou contra erou, nu fantomă de echipă.</small></div>';
 }
+/* Pas 23 · BETA: listă opțională de adversari atacabili, fără matchmaking
+   nou. Folosește regula de protecție existentă și puterea fantomei din Lume. */
+function lwRecommendedOpponents(){
+ if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||!LUME.st||!LUME.st.me||
+  !Array.isArray(LUME.st.players))return [];
+ const own=Math.max(1,Math.round(TT.power(tronTeamUnits())));
+ return LUME.st.players.filter(p=>p.id!==LUME.st.me.user_id&&lwCan(p).ok&&
+    Number.isFinite(+p.power)&&Number(p.power)>0)
+  .sort((a,b)=>Math.abs(Math.log(+a.power/own))-Math.abs(Math.log(+b.power/own))||
+    String(a.id).localeCompare(String(b.id))).slice(0,3);
+}
+function lwRecommendedPanel(){
+ if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||!LUME.st||!LUME.st.me)return '';
+ const list=lwRecommendedOpponents();
+ const own=Math.max(1,Math.round(TT.power(tronTeamUnits())));
+ return '<section class="lw-recommend"><h2>Adversari de putere apropiată</h2>'+
+  '<p class="mute">Fantoma ta din Lume (maximum 3 luptători): '+lwNum(own)+
+  ' putere. Comparația este orientativă, nu garantează victoria. '+
+  'Protecția începătorilor și limita de atacuri rămân active.</p>'+
+  (list.length?list.map(p=>'<div class="lw-rec-row"><span><b>'+tEsc(p.name)+
+  '</b><small>Nivel '+Math.round(+p.level||0)+' · '+lwNum(p.power)+
+  ' putere</small></span><button type="button" onclick="lwShow('+
+  tEsc(JSON.stringify(String(p.id)))+')">Vezi pe hartă</button></div>').join(''):
+  '<p class="mute">Nu există momentan adversari atacabili disponibili.</p>')+'</section>';
+}
 function lwSelPanel() {
   const st = LUME.st, p = LUME.sel && st.players.find(x => x.id === LUME.sel);
   if (!p) return '<p class="mute">Atinge un sat ca să vezi cine locuiește acolo.</p>';
@@ -289,7 +314,7 @@ function vLume() {
   'Satele tuturor jucătorilor, în jurul Tronului de Argint. În jurul satului tău, în chenarul auriu, e <b>ținutul tău</b>: satele de jefuit și de cucerit, taberele, și locurile de interes, pe care doar tu le vezi.'}
   Acum: <b>${n}</b> ${n === 1 ? 'sat' : 'sate'} de jucători.</div>${LUME.err ? `<p class="r4">${tEsc(LUME.err)}</p>` : ''}${LUME.repErr ? `<p class="r4">Rezultatul ultimului atac nu a ajuns la server (${tEsc(LUME.repErr)}). Se retrimite automat.</p>` : ''}${lwEnBar()}${lwMap()}`;
   h += `<div class="st-lg"><span><i style="background:#f0d27a"></i>Satul tău</span><span><i style="background:#c0504a"></i>Poate fi atacat</span><span><i style="background:#7b7f82"></i>Începător (sub nivelul ${c.min_level}) sau atacat recent de tine</span><span>👑 auriu: regele săptămânii · argintiu: pe Tron acum</span><span>Satul crește cu nivelul jucătorului: palisadă la 10, zid și turn la 20, fortificații la 25, castel de la 30</span></div></section>`;
-  return h + lwSelPanel() + lwLog() + `<section><h2>Reguli</h2><div class="mute">• Bara are ${c.en_max} atacuri și se reface câte unul la ${c.en_regen_min} de minute, adică ${Math.round(24 * 60 / c.en_regen_min)} pe zi.<br>• Același jucător îl poți ataca o dată la ${c.same_h} ore. Începătorii (sub nivelul ${c.min_level}) nu pot fi atacați și nu pot ataca.<br>${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'• Lupți cu fantoma de maximum 3 luptători publicată în Lume. Tronul are duel separat doar între eroi. Puterea este un reper, nu o șansă exactă; dacă învingi, primești pradă și experiență, iar apărătorul nu pierde nimic.':'• Lupți cu fantoma echipei lui, cu aceleași plafoane ca la Tron. Dacă învingi, iei prada calculată de joc și experiență în plus. Apărătorul nu pierde niciodată nimic, doar află din jurnal.'}<br>• Satele din Lume nu se pot cuceri; teritoriile rămân în regiunea ta.</div></section>`;
+  return h + lwSelPanel() + lwRecommendedPanel() + lwLog() + `<section><h2>Reguli</h2><div class="mute">• Bara are ${c.en_max} atacuri și se reface câte unul la ${c.en_regen_min} de minute, adică ${Math.round(24 * 60 / c.en_regen_min)} pe zi.<br>• Același jucător îl poți ataca o dată la ${c.same_h} ore. Începătorii (sub nivelul ${c.min_level}) nu pot fi atacați și nu pot ataca.<br>${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'• Lupți cu fantoma de maximum 3 luptători publicată în Lume. Tronul are duel separat doar între eroi. Puterea este un reper, nu o șansă exactă; dacă învingi, primești pradă și experiență, iar apărătorul nu pierde nimic.':'• Lupți cu fantoma echipei lui, cu aceleași plafoane ca la Tron. Dacă învingi, iei prada calculată de joc și experiență în plus. Apărătorul nu pierde niciodată nimic, doar află din jurnal.'}<br>• Satele din Lume nu se pot cuceri; teritoriile rămân în regiunea ta.</div></section>`;
 }
 
 /* ------------------------------------------------------------------ CLASAMENT */
@@ -423,6 +448,9 @@ if (typeof setInterval === 'function') setInterval(() => {
 .lw-stats b{display:block;font:700 19px Cinzel,serif;color:var(--gold2)}.lw-stats span{font-size:13px;color:var(--mute)}
 .lw-act{flex-wrap:wrap;gap:8px}.lw-act>span:last-child{display:flex;gap:6px;flex-wrap:wrap}
 .lw-ok{color:#7fd88c}
+.lw-rec-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.lw-rec-row span{display:flex;flex-direction:column;gap:4px;min-width:0}.lw-rec-row small{font-size:12px;color:var(--mute)}.lw-rec-row button{flex:none}
+@media(max-width:520px){.lw-rec-row{gap:6px}.lw-rec-row button{padding:7px 9px}}
 .lw-lnk{background:none!important;border:0!important;box-shadow:none!important;padding:0;color:var(--gold2);text-decoration:underline;text-underline-offset:3px;font:inherit}
 .lw-bt{flex-wrap:wrap}
 @media (max-width:600px){.lw-bt{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}.lw-bt button{flex:none}}
