@@ -172,7 +172,7 @@ BEGIN
    WHERE coalesce((a.item->>'lv')::integer,1)<=p_level;
    v_prefix:=v_prefix_pool->public.beta_item_roll_index_v1(
       p_seed,'prefix',jsonb_array_length(v_prefix_pool));
-   v_name:=v_prefix->>'n'||' '||v_name;
+   v_name:=(v_prefix->>'n')||' '||v_name;
    IF v_prefix ? 'm' THEN
       v_mats:=v_mats||jsonb_build_array(v_prefix->>'m');
    END IF;
@@ -185,7 +185,7 @@ BEGIN
    WHERE coalesce((a.item->>'lv')::integer,1)<=p_level;
    v_suffix:=v_suffix_pool->public.beta_item_roll_index_v1(
       p_seed,'suffix',jsonb_array_length(v_suffix_pool));
-   v_name:=v_name||' '||v_suffix->>'n';
+   v_name:=v_name||' '||(v_suffix->>'n');
    IF v_suffix ? 'm' THEN
       v_mats:=v_mats||jsonb_build_array(v_suffix->>'m');
    END IF;
