@@ -251,6 +251,7 @@ BEGIN
     'claimed',jsonb_build_object('bronz',v_p.bronze_claimed,'argint',v_p.silver_claimed,
       'aur',v_p.gold_claimed,'boss',v_p.boss_claimed)),
   'boss',jsonb_build_object('hp',v_w.boss_hp,'max',v_w.boss_max,
+    'formation_rules',true,
     'counter',CASE mod((v_week-date '2026-01-05')/7,3)
       WHEN 0 THEN 'Vraci' WHEN 1 THEN 'Arcaș' ELSE 'Paznic' END,
     'ability',CASE mod((v_week-date '2026-01-05')/7,3)
