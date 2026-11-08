@@ -1,6 +1,6 @@
 # Silver Throne BETA — SQL33 / Pasul 33: raportul Tronului, auditat fără schimbarea regulilor
 
-**Stare:** SQL31 și SQL32 sunt **instalate în Supabase Silver-Throne-Test, 8/8 `true` fiecare**, confirmate de operator. SQL33 este **pregătit în GitHub, dar încă nu a fost instalat**. LIVE și salvările nu sunt modificate.
+**Stare:** SQL31 și SQL32 sunt **instalate în Supabase Silver-Throne-Test, 8/8 `true` fiecare**, confirmate de operator. SQL33 a fost **instalat în Supabase Silver-Throne-Test, cu 8/8 verificări `true`**, confirmate de operator. QA cu o provocare nouă și comparația efectivă cu SQL32 rămân în așteptare. LIVE și salvările nu sunt modificate.
 
 ## Problema pe care o rezolvăm
 
