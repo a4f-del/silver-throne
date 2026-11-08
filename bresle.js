@@ -151,7 +151,8 @@ function guildPaint(){
    '<div class="guild-boss"><div class="guild-boss-head"><b>Străjerul Cenușii</b><span>'+Math.max(0,2-(boss.hits_today||0))+' / 2 atacuri azi</span></div>'+
    guildBar('Viața comună',boss.hp,boss.max||1)+
    '<p>Abilitate: <b>'+guildEsc(({poison:'Otravă',storm:'Furtună',wave:'Val de forță'})[boss.ability]||'Val de forță')+'</b>. Clasa care îl contracarează: <b>'+guildEsc(boss.counter||'Vraci')+'</b>. Bonusul de contraclasă (+25% daune) se aplică dacă ai această clasă în echipa publicată din Lume (maximum 3 luptători), nu doar dacă eroul are clasa potrivită. Daunele sunt calculate pe server din acel profil. Viața se adaptează numărului de membri.</p>'+
-   '<p>Roluri în atac: <b>Războinic / Arcaș / Mag</b> pentru ofensivă, <b>Paznic / Gardian</b> pentru protecție, <b>Vraci</b> pentru vindecare. Bonusurile cresc daunele utile ale incursiunii, nu modifică HP-ul personajelor.</p>'+
+   (boss.formation_rules===true?
+    '<p>Roluri în atac: <b>Războinic / Arcaș / Mag</b> pentru ofensivă, <b>Paznic / Gardian</b> pentru protecție, <b>Vraci</b> pentru vindecare. Bonusurile cresc daunele utile ale incursiunii, nu modifică HP-ul personajelor.</p>':'')+
    '<p>Ai provocat '+Number(boss.personal_damage||0).toLocaleString('ro-RO')+' daune săptămâna aceasta.</p>'+
    guildBossLastHit(boss)+
    '<div class="guild-boss-actions"><button class="p" onclick="guildBoss()"'+((boss.hits_today||0)>=2||boss.hp<=0||GUILD.bossSyncing||GUILD.busy?' disabled':'')+'>⚔ Atacă · gratuit</button>'+
