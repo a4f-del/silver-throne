@@ -68,7 +68,7 @@ assert(card.includes('lwShow(&quot;closest&quot;)'),'Opponent ID is safely HTML-
 x.LUME.sel='closest';
 const selected=x.api.lwSelPanel();
 assert(selected.includes('a ta: 200'),'Selected-village comparison uses World team power');
-assert(selected.includes('maximum 3 luptători'),'3-fighter limit explained to users');
+assert(selected.includes('până la 3 luptători'),'3-fighter limit explained to users');
 assert(selected.includes('orientativă'),'Comparison is not a probability');
 assert(selected.includes('onclick="lwAttack'),'Attack action stays available when allowed');
 x.en.n=0;
