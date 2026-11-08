@@ -52,7 +52,8 @@ DECLARE
  a_def bigint[] := ARRAY[]::bigint[];
  d_def bigint[] := ARRAY[]::bigint[];
  v_unit jsonb;
- v_round integer := 0;
+ v_round integer;
+ v_rounds integer := 0;
  v_phase integer;
  v_i integer;
  v_j integer;
@@ -90,6 +91,7 @@ BEGIN
  -- Un plafon de 40 ture, 2 faze/tura, max 3 lovituri/faza.
  -- Tinta este primul adversar viu, iar dauna e ATK - 35% DEF.
  FOR v_round IN 1..40 LOOP
+   v_rounds:=v_round;
    FOR v_phase IN 1..2 LOOP
      v_attacker_turn := (v_phase=1)=v_attacker_first;
      IF v_attacker_turn THEN
@@ -135,7 +137,7 @@ BEGIN
    'outcome',v_outcome,
    'predicted_attacker_win',CASE WHEN v_outcome='draw' THEN NULL
       ELSE v_outcome='attacker' END,
-   'rounds',v_round,'actions',v_actions,
+   'rounds',v_rounds,'actions',v_actions,
    'attacker_hp_left',v_ah,'defender_hp_left',v_dh);
 END
 $sim$;
