@@ -186,7 +186,7 @@ function trRb(f, log) { for (const e of f.es) { if(ST_SERVER==='beta'&&S.d&&!S.d
 /* după căpitan: dificultatea următoare se deblochează */
 function trWin(d) {
   if (!d || d.raid != null || d.ev || d.ghost) return;
-  if(ST_SERVER==='beta')trBossPlanWin(d);
+  if(ST_SERVER==='beta'&&typeof trBossPlanWin==='function')trBossPlanWin(d);
   const g = DG[d.di || 0]; if (!g || g.lv < TR_T.lv) return;
   const t = d.tier || 0, u = trUnl(d.di || 0);
   if (t >= u && u < 2) { (S.dtr = S.dtr || {})[d.di || 0] = u + 1; d.cm = (d.cm ? d.cm + ' ' : '') + `Ai deblocat dificultatea ${TR_T.n[u + 1]} pentru ${g.n}!`; }
