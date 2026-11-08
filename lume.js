@@ -242,14 +242,33 @@ function lwEnBar() {
   let p = ''; for (let i = 0; i < pips; i++) p += `<i class="${i < full ? 'on' : ''}">${i === full && part > 0 ? `<b style="width:${Math.round(part * 100)}%"></b>` : ''}</i>`;
   return `<div class="lw-en" role="img" aria-label="Atacuri disponibile: ${e.n} din ${e.max}"><span class="lw-en-t">⚔ Atacuri <b>${e.n}/${e.max}</b></span><span class="lw-pips">${p}</span><small>${e.n >= e.max ? 'Bara e plină' : `Următorul peste <span data-end="${Math.round(Date.now() + e.next)}">${fmt(e.next)}</span>`}</small></div>`;
 }
+/* BETA: comparăm puterea FANTOMEI LUMII (maxim 3), nu duelul solo al Tronului.
+   Puterea e orientativă, nu reprezintă șansa simulată a luptei. */
+function lwMatchAdvice(p,can){
+ if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||!p)return '';
+ const party=typeof tronTeamUnits==='function'?tronTeamUnits():[];
+ const myP=Math.round(TT.power(party)),enemy=Number(p.power);
+ const known=Number.isFinite(enemy)&&enemy>0;
+ const ratio=known?enemy/Math.max(1,myP):null;
+ const tier=!known?'Putere necunoscută':ratio>1.25?'Adversar mai puternic':ratio<0.8?'Adversar mai slab':'Forțe apropiate';
+ const tip=!known?'Vezi profilul și echipa publicată înainte de atac.'
+   :ratio>1.25?'Pregătește echipamentul și echipa înainte să consumi un atac.'
+   :ratio<0.8?'Este o potrivire favorabilă după putere, nu o victorie garantată.'
+   :'Puterea este apropiată: compoziția și obiectele pot decide lupta.';
+ const rule=can&&!can.ok?'Atacul este indisponibil acum: '+String(can.why||'').replace(/<[^>]*>/g,'')+'.':'Atacul consumă o încercare din bara Lumii; apărătorul nu pierde nimic.';
+ return '<div class="lw-match" role="note"><b>⚔ Potrivire orientativă: '+tier+'</b>'+
+  '<small>Fantoma Lumii: maxim '+(TT.CFG&&TT.CFG.maxUnits||3)+' luptători · puterea ta '+lwNum(myP)+
+  (known?' · puterea adversarului '+lwNum(enemy):' · puterea adversarului indisponibilă')+'.</small>'+
+  '<p>'+tip+' '+rule+'</p><small>La Tron este duel erou contra erou, nu fantomă de echipă.</small></div>';
+}
 function lwSelPanel() {
   const st = LUME.st, p = LUME.sel && st.players.find(x => x.id === LUME.sel);
   if (!p) return '<p class="mute">Atinge un sat ca să vezi cine locuiește acolo.</p>';
-  const mine = st.me && p.id === st.me.user_id, can = mine ? null : lwCan(p), myP = Math.round(TT.power(tronUnits()));
+  const mine = st.me && p.id === st.me.user_id, can = mine ? null : lwCan(p), myP = Math.round(TT.power(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?tronTeamUnits():tronUnits()));
   const cmp = mine ? '' : p.power > myP * 1.25 ? '<span class="r4">mai puternic decât tine</span>' : p.power < myP * 0.8 ? '<span class="lw-ok">mai slab decât tine</span>' : 'cam cât tine';
   return `<section class="lw-sel"><div class="lw-sel-h">${av({ n: p.hero && p.hero.n || p.name, c: (p.hero && p.hero.c) || 'Campion', ic: p.hero && p.hero.ic }, 56)}<div><h2>${tEsc(p.name)}${mine ? ' <span class="mute">(tu)</span>' : ''}</h2><div class="mute">${p.title ? '♛ ' + tEsc(p.title) + ' · ' : ''}${tEsc(p.stage_name)} · văzut ${lwAgo(p.seen)}</div></div></div>`
     + `<div class="lw-stats"><div><b>${p.level}</b><span>Nivel</span></div><div><b>${lwNum(p.power)}</b><span>Putere</span></div>${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'':'<div><b>'+p.territories+'</b><span>Teritorii</span></div>'}</div>`
-    + (mine ? '' : `<div class="mute">Puterea echipei lui: ${cmp} (a ta: ${lwNum(myP)}).</div>`)
+    + (mine ? '' : (typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?lwMatchAdvice(p,can):`<div class="mute">Puterea echipei lui: ${cmp} (a ta: ${lwNum(myP)}).</div>`))
     + `<div class="row lw-act"><span class="mute">${mine ? 'Satul tău, așa cum îl văd ceilalți.' : can.ok ? 'Dacă învingi, iei prada și experiența. El nu pierde nimic.' : can.why}</span><span>${mine ? '' : `<button class="p" onclick="lwAttack('${p.id}')"${can.ok && !LUME.busy ? '' : ' disabled'}>Atacă · 1 ⚔</button> `}<button onclick="lwProfile('${p.id}')">Vezi profilul</button></span></div></section>`;
 }
 function lwLog() {
@@ -270,7 +289,7 @@ function vLume() {
   'Satele tuturor jucătorilor, în jurul Tronului de Argint. În jurul satului tău, în chenarul auriu, e <b>ținutul tău</b>: satele de jefuit și de cucerit, taberele, și locurile de interes, pe care doar tu le vezi.'}
   Acum: <b>${n}</b> ${n === 1 ? 'sat' : 'sate'} de jucători.</div>${LUME.err ? `<p class="r4">${tEsc(LUME.err)}</p>` : ''}${LUME.repErr ? `<p class="r4">Rezultatul ultimului atac nu a ajuns la server (${tEsc(LUME.repErr)}). Se retrimite automat.</p>` : ''}${lwEnBar()}${lwMap()}`;
   h += `<div class="st-lg"><span><i style="background:#f0d27a"></i>Satul tău</span><span><i style="background:#c0504a"></i>Poate fi atacat</span><span><i style="background:#7b7f82"></i>Începător (sub nivelul ${c.min_level}) sau atacat recent de tine</span><span>👑 auriu: regele săptămânii · argintiu: pe Tron acum</span><span>Satul crește cu nivelul jucătorului: palisadă la 10, zid și turn la 20, fortificații la 25, castel de la 30</span></div></section>`;
-  return h + lwSelPanel() + lwLog() + `<section><h2>Reguli</h2><div class="mute">• Bara are ${c.en_max} atacuri și se reface câte unul la ${c.en_regen_min} de minute, adică ${Math.round(24 * 60 / c.en_regen_min)} pe zi.<br>• Același jucător îl poți ataca o dată la ${c.same_h} ore. Începătorii (sub nivelul ${c.min_level}) nu pot fi atacați și nu pot ataca.<br>• Lupți cu fantoma echipei lui, cu aceleași plafoane ca la Tron. Dacă învingi, iei prada calculată de joc și experiență în plus. Apărătorul nu pierde niciodată nimic, doar află din jurnal.<br>• Satele din Lume nu se pot cuceri; teritoriile rămân în regiunea ta.</div></section>`;
+  return h + lwSelPanel() + lwLog() + `<section><h2>Reguli</h2><div class="mute">• Bara are ${c.en_max} atacuri și se reface câte unul la ${c.en_regen_min} de minute, adică ${Math.round(24 * 60 / c.en_regen_min)} pe zi.<br>• Același jucător îl poți ataca o dată la ${c.same_h} ore. Începătorii (sub nivelul ${c.min_level}) nu pot fi atacați și nu pot ataca.<br>${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'• Lupți cu fantoma de maximum 3 luptători publicată în Lume. Tronul are duel separat doar între eroi. Puterea este un reper, nu o șansă exactă; dacă învingi, primești pradă și experiență, iar apărătorul nu pierde nimic.':'• Lupți cu fantoma echipei lui, cu aceleași plafoane ca la Tron. Dacă învingi, iei prada calculată de joc și experiență în plus. Apărătorul nu pierde niciodată nimic, doar află din jurnal.'}<br>• Satele din Lume nu se pot cuceri; teritoriile rămân în regiunea ta.</div></section>`;
 }
 
 /* ------------------------------------------------------------------ CLASAMENT */
@@ -424,5 +443,6 @@ if (typeof setInterval === 'function') setInterval(() => {
 .lwp-a{display:flex;gap:8px;margin:10px 0 4px}.lwp-a button{flex:1}
 @media (max-width:520px){.lw-stats b{font-size:17px}}
 `;
+  st.textContent += '.lw-match{border:1px solid #8f754b;background:#171e22;padding:9px 11px;margin:10px 0;border-radius:8px}.lw-match>b{color:var(--gold2);display:block}.lw-match small{font-size:12px;color:var(--mute);display:block;margin-top:4px}.lw-match p{font-size:13px;margin:7px 0;line-height:1.4}';
   document.head.appendChild(st);
 })();
