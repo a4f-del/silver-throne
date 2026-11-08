@@ -346,6 +346,9 @@ function satPost() {
  .vh-fit-page.st-sat-expanded .vh-fit-head{margin-bottom:10px}
  .vh-fit-page.st-sat-expanded .vh-fit-layout{margin:0 auto;max-width:100%}
 }
+@media(min-width:960px) and (max-height:620px){
+ .vh-fit-page.st-sat-expanded{overflow:auto!important}
+}
 .vh-fit-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;margin-bottom:8px}
 .vh-fit-head h2{min-width:0;flex:0 1 auto;margin:0;padding:0;border-bottom:0}
 .vh-fit-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap;min-width:0}
