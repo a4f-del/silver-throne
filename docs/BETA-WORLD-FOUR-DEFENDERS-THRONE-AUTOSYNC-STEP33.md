@@ -20,6 +20,12 @@
 - Dacă publicarea eșuează, se reîncearcă cu temporizare și se afișează un mesaj în fila Tron. Fără acces la server, ultima apărare publicată rămâne cea existentă.
 - **Limitare:** inventarul și statisticile provin încă din client, nu există dovadă server-side a fiecărui obiect. Publicarea automată este confort, nu anti-cheat complet. Nu schimbă rezultatul duelurilor.
 
+## Corecție SQLSTATE 42P13 — parametrul existent `u`
+
+Versiunea inițială din GitHub definea `world_units_ok(p_units jsonb)`, deși funcția deja instalată de SQL02 avea argumentul numit `u`. PostgreSQL refuză redenumirea unui parametru cu `CREATE OR REPLACE FUNCTION` și semnalează `42P13`.
+
+**Corecția este deja aplicată:** SQL30 păstrează `world_units_ok(u jsonb)` și folosește `u` în corp. Nu executa sugestia PostgreSQL de `DROP FUNCTION`; există funcții și triggere dependente. Dacă întregul SQL30 a fost rulat într-o singură tranzacție, eroarea a anulat migrarea, fără să schimbe datele. Copiază din nou fișierul actualizat din **Raw**, execută tot SQL30 doar în BETA și verifică toate cele șapte rezultate `true`. Nu este nevoie să rerulezi SQL28.
+
 ## Ordine de instalare
 
 1. Confirmă proiectul **Silver-Throne-Test** și fă backup.
