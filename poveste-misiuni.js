@@ -17,8 +17,7 @@ const SQ_ACT = [
    task:'Fă un antrenament și recrutează Războinicul',reward:{g:35,o:5},target:'h'}
 ];
 function sqEnabled() {
-  return typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta'
-    && typeof S !== 'undefined' && !!S && S.mrStoryV === 1
+  return typeof S !== 'undefined' && !!S && S.mrStoryV === 1
     && S.mrPrologSeen === 1 && !S.mrPrologPending
     && S.journeyV !== 1; /* noul Drumul Eroului inlocuieste acest panou si recompensele */
 }
@@ -138,7 +137,7 @@ function sqDecorate() {
   }
 }
 function sqPreview() {
-  if (typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||!S||S.d) return;
+  if (!S||S.d) return;
   if (typeof document==='undefined' || document.getElementById('sq-preview')
       || document.getElementById('mr-scene') || document.getElementById('mr-m')
       || document.getElementById('st-prolog') || document.getElementById('lgm')) return;

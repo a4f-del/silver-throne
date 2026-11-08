@@ -38,8 +38,7 @@ const MR_STORY = {
     action: 'Primește-l pe Mag'
   }
 };
-function mrStoryIsBeta() { return typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta'; }
-function mrStoryEnabled() { return mrStoryIsBeta() && typeof S !== 'undefined' && S && S.mrStoryV === 1; }
+function mrStoryEnabled() { return typeof S !== 'undefined' && S && S.mrStoryV === 1; }
 function mrStoryDue(c) {
   if (!mrStoryEnabled() || !S.hc) return false;
   switch (c) {
@@ -71,7 +70,7 @@ function mrStoryClose() {
   MR_SCENE = null;
 }
 function mrStoryShow(c, preview) {
-  if (!mrStoryIsBeta() || !MR_STORY[c] || typeof S === 'undefined' || !S || S.d) return;
+  if (!MR_STORY[c] || typeof S === 'undefined' || !S || S.d) return;
   if (!preview && (!mrStoryEnabled() || !(S.mrOff || []).includes(c) || mrHas(c))) return;
   mrStoryClose();
   const story = MR_STORY[c], m = document.createElement('div');
@@ -113,7 +112,7 @@ function mrStoryLater() {
   mrStoryMark(c); mrStoryClose(); go();
 }
 function mrStoryPreview(c) {
-  if (!mrStoryIsBeta() || !MR_STORY[c] || document.getElementById('mr-m')) return;
+  if (!MR_STORY[c] || document.getElementById('mr-m')) return;
   mrStoryShow(c, true);
 }
 function mrStoryPost() {
@@ -162,4 +161,4 @@ function mrStoryPost() {
   document.head.appendChild(css);
 })();
 if (typeof module !== 'undefined' && module.exports)
-  module.exports = { MR_STORY, mrStoryDue, mrStoryPlaceReady, mrStoryIsBeta };
+  module.exports = { MR_STORY, mrStoryDue, mrStoryPlaceReady };

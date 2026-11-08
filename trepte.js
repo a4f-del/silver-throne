@@ -41,11 +41,10 @@ const TR_MOB={
  storm:'La fiecare 3 ture, un fulger slab lovește un luptător.'
 };
 function trMobInfo(i){
- if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta')return '';
  const g=DG[i],d=g&&trDef(g.n);return d&&TR_MOB[d.a]||'';
 }
 function trMobTurn(e,al,L){
- if(ST_SERVER!=='beta'||!S.d||S.d.tw||S.d.raid!=null||e.b||!TR_MOB[e.tm])return;
+ if(!S.d||S.d.tw||S.d.raid!=null||e.b||!TR_MOB[e.tm])return;
  e.tmc=(e.tmc||0)+1;
  switch(e.tm){
   case 'call':if(e.tmc===1){e.atk=Math.max(1,Math.round(e.atk*1.08));L.push(e.n+' se mobilizează (+8% atac).')}break;
@@ -85,15 +84,14 @@ function trBand() { if (!trHas('Vraci')) return ''; S.fs.forEach(f => { if (f.hp
 function trUnl(i) { return Math.min(2, (S.dtr || {})[i] || 0); }
 function trTier(i) { const g = DG[i]; if (!g || g.ev || g.lv < TR_T.lv) return 0; return Math.min(trUnl(i), (S.dts || {})[i] || 0); }
 function trPick(i, t) {
-  if(ST_SERVER!=='beta'){(S.dts=S.dts||{})[i]=Math.min(+t,trUnl(i));return go();}
   // BETA: dificultatea se alege in ecranul mare, inainte de prima lupta.
   // Dupa prima lupta se pastreaza pana la retragere (progres separat per dificultate).
-  if(ST_SERVER==='beta' && (S.d || (S.adventure && S.adventure.tierLocked))) return;
+  if(((S.d || (S.adventure && S.adventure.tierLocked)))) return;
   const tier = Number(t);
   if(!Number.isInteger(tier)||tier<0||tier>trUnl(i))return;
   (S.dts = S.dts || {})[i] = tier;
   // Previzualizarea monstrului selectat trebuie sa urmeze progresul noii dificultati.
-  if(ST_SERVER==='beta'&&S.adventure&&S.adventure.di===i){
+  if(S.adventure&&S.adventure.di===i){
     const key=dKey(i,tier);
     if(S.dsel) delete S.dsel[key];
   }
@@ -102,7 +100,7 @@ function trPick(i, t) {
 function trChips(i) {
   const g = DG[i]; if (!g || g.ev || g.lv < TR_T.lv) return '';
   const u=trUnl(i),cur=trTier(i);
-  const locked=ST_SERVER==='beta'&&S.adventure&&S.adventure.di===i&&S.adventure.tierLocked;
+  const locked=S.adventure&&S.adventure.di===i&&S.adventure.tierLocked;
   return `<div class="tr-ch">${TR_T.n.map((n,t) => `<button class="${t===cur?'p':''}" onclick="trPick(${i},${t})"${locked||t>u?` disabled title="${locked?'Retrage-te din temniță pentru a schimba dificultatea.':'Bate căpitanul pe '+TR_T.n[t-1]+' ca s-o deblochezi'}"`:''}>${t>u?'🔒 ':''}${n}</button>`).join('')}</div>`;
 }
 /* BETA pas 17: o singură alegere opțională la poarta căpitanului.
@@ -114,13 +112,13 @@ const TR_PLAN={
  loot:{n:'Risc',tip:'+15% aur/minereu · +15% atac inamic.'}
 };
 function trBossPlanAttach(d){
- if(ST_SERVER!=='beta'||!d||d.room<d.rooms-1||d.ev)return d;
+ if(!d||d.room<d.rooms-1||d.ev)return d;
  const p=S.trPlan&&S.trPlan[d.dk];
  if(p&&Object.prototype.hasOwnProperty.call(TR_PLAN,p)&&p!=='normal')d.bossPlan=p;
  return d;
 }
 function trBossPlanAvailable(i){
- if(ST_SERVER!=='beta'||!S||S.d||!S.adventure||S.adventure.di!==i||!DG[i]||DG[i].ev)return false;
+ if(!S||S.d||!S.adventure||S.adventure.di!==i||!DG[i]||DG[i].ev)return false;
  const d=dMk(i);return d.room===d.rooms-1;
 }
 function trBossPlanPick(i,p){
@@ -141,7 +139,7 @@ function trBossPlanPanel(i){
   +'</div></div>';
 }
 function trBossPlanWin(d){
- if(ST_SERVER!=='beta'||!d||!d.one||d.ev||d.tw||d.raid!=null||!d.bossPlan)return;
+ if(!d||!d.one||d.ev||d.tw||d.raid!=null||!d.bossPlan)return;
  const k=d.bossPlan==='safe'?.9:d.bossPlan==='loot'?1.15:1;
  if(k!==1){d.loot.gold=Math.max(0,Math.round(d.loot.gold*k));d.loot.ore=Math.max(0,Math.round(d.loot.ore*k));}
  if(S.trPlan)delete S.trPlan[d.dk];  /* reset după victoria efectivă; nu după simulare sau înfrângere */
@@ -150,14 +148,14 @@ function trBossPlanWin(d){
 function trStart(es, d, b) {
   if (d && d.tw && typeof twMob === 'function') { if (b) { const e = es[0]; if (e) { e.ba = twAb(d.room); e.tc = 0; if (e.ba === 'shield') e.sh = 1; if (trCtr(e.ba)) { e.ctr = 1; e.atk = Math.round(e.atk * 0.85); } } } else es.forEach(e => { e.n = twMob(d.room); }); return; }   /* Turnul */
   if (!d || d.raid != null || d.ghost) return; const g = DG[d.di || 0], D = g && trDef(g.n); if (!D) return;
-  if (b) { const e = es[0]; if (e) { e.ba = D.a; e.tc = 0; if (D.a === 'shield') e.sh = 1; if (trCtr(D.a)) { e.ctr = 1; e.atk = Math.round(e.atk * 0.85); } if(ST_SERVER==='beta'&&d.bossPlan) { const mul=d.bossPlan==='safe'?.88:d.bossPlan==='loot'?1.15:d.bossPlan==='offense'?1.08:1;e.atk=Math.max(1,Math.round(e.atk*mul)); } } }   /* contraclasă și postura tactică */
-  else { const nm = D.m[Math.min(d.room, D.m.length - 1)]; es.forEach(e => { e.n = nm; e.hp = e.mh = Math.max(1, Math.round(e.mh * 0.8)); e.atk = Math.round(e.atk * 0.8); if(ST_SERVER==='beta')e.tm=D.a; }); }   /* identitate tactică doar pe monștrii din Temnițe BETA */
+  if (b) { const e = es[0]; if (e) { e.ba = D.a; e.tc = 0; if (D.a === 'shield') e.sh = 1; if (trCtr(D.a)) { e.ctr = 1; e.atk = Math.round(e.atk * 0.85); } if(d.bossPlan) { const mul=d.bossPlan==='safe'?.88:d.bossPlan==='loot'?1.15:d.bossPlan==='offense'?1.08:1;e.atk=Math.max(1,Math.round(e.atk*mul)); } } }   /* contraclasă și postura tactică */
+  else { const nm = D.m[Math.min(d.room, D.m.length - 1)]; es.forEach(e => { e.n = nm; e.hp = e.mh = Math.max(1, Math.round(e.mh * 0.8)); e.atk = Math.round(e.atk * 0.8); e.tm=D.a; }); }   /* identitate tactică doar pe monștrii din Temnițe BETA */
 }
 /* daunele primite de căpitan: scut, invulnerabilitate */
 function trDmg(e, dm, cr, L, a) {
-  if(ST_SERVER==='beta'&&S.d&&S.d.bossPlan==='offense'&&e.b&&S.d.raid==null&&!S.d.tw)dm=Math.max(1,Math.round(dm*1.08));
-  if(ST_SERVER==='beta'&&S.d&&!S.d.tw&&S.d.raid==null&&!e.b&&e.tm==='shield'&&!e.tmShieldUsed){e.tmShieldUsed=1;L.push('Armura lui '+e.n+' oprește prima lovitură.');return Math.max(1,Math.round(dm*.75));}
-  if(ST_SERVER==='beta'&&S.d&&!S.d.tw&&S.d.raid==null&&!e.b&&e.tm==='invuln'&&e.tmBarrier){e.tmBarrier=0;L.push('Umbra atenuează lovitura!');return Math.max(1,Math.round(dm*.7));}
+  if(S.d&&S.d.bossPlan==='offense'&&e.b&&S.d.raid==null&&!S.d.tw)dm=Math.max(1,Math.round(dm*1.08));
+  if(S.d&&!S.d.tw&&S.d.raid==null&&!e.b&&e.tm==='shield'&&!e.tmShieldUsed){e.tmShieldUsed=1;L.push('Armura lui '+e.n+' oprește prima lovitură.');return Math.max(1,Math.round(dm*.75));}
+  if(S.d&&!S.d.tw&&S.d.raid==null&&!e.b&&e.tm==='invuln'&&e.tmBarrier){e.tmBarrier=0;L.push('Umbra atenuează lovitura!');return Math.max(1,Math.round(dm*.7));}
   if (e.iv && !(a && a.c === 'Mag' && e.ba === 'invuln')) { L.push(`${e.n} nu poate fi rănit acum.`); return 0; }
   if (e.sh) { if (cr || (a && a.c === 'Arcaș')) { e.sh = 0; L.push(`Scutul lui ${e.n} se sparge!`); } else return Math.max(1, Math.round(dm * 0.5)); }
   return e.ctr ? Math.round(dm * 1.2) : dm;
@@ -182,11 +180,11 @@ function trBoss(e, al, L, f) {
 /* otrava și arsura pe echipă, la începutul rândului inamicilor */
 function trTeamTick(f, L) { for (const x of S.fs) if (x.hp > 0 && x.ps > 0) { x.hp -= x.psd || 1; x.ps--; L.push(`${x.n} suferă (-${x.psd || 1}).`); if (x.hp <= 0) L.push(x.n + ' cade.'); } }
 /* renașterea Tronului Cenușiu */
-function trRb(f, log) { for (const e of f.es) { if(ST_SERVER==='beta'&&S.d&&!S.d.tw&&S.d.raid==null&&!e.b&&e.tm==='rebirth'&&e.hp<=0&&!e.rb){e.rb=1;e.hp=Math.max(1,Math.round(e.mh*.12));log.push(e.n+' se ridică din cenușă cu puțină viață!');} if (e.ba === 'rebirth' && e.hp <= 0 && !e.rb) { e.rb = 1; e.hp = Math.round(e.mh / (trCtr('rebirth') ? 6 : 3)); log.push(`${e.n} se ridică din cenușă!`); } } }
+function trRb(f, log) { for (const e of f.es) { if(S.d&&!S.d.tw&&S.d.raid==null&&!e.b&&e.tm==='rebirth'&&e.hp<=0&&!e.rb){e.rb=1;e.hp=Math.max(1,Math.round(e.mh*.12));log.push(e.n+' se ridică din cenușă cu puțină viață!');} if (e.ba === 'rebirth' && e.hp <= 0 && !e.rb) { e.rb = 1; e.hp = Math.round(e.mh / (trCtr('rebirth') ? 6 : 3)); log.push(`${e.n} se ridică din cenușă!`); } } }
 /* după căpitan: dificultatea următoare se deblochează */
 function trWin(d) {
   if (!d || d.raid != null || d.ev || d.ghost) return;
-  if(ST_SERVER==='beta'&&typeof trBossPlanWin==='function')trBossPlanWin(d);
+  if(typeof trBossPlanWin==='function')trBossPlanWin(d);
   const g = DG[d.di || 0]; if (!g || g.lv < TR_T.lv) return;
   const t = d.tier || 0, u = trUnl(d.di || 0);
   if (t >= u && u < 2) { (S.dtr = S.dtr || {})[d.di || 0] = u + 1; d.cm = (d.cm ? d.cm + ' ' : '') + `Ai deblocat dificultatea ${TR_T.n[u + 1]} pentru ${g.n}!`; }
@@ -285,9 +283,9 @@ function trSel(i) { const d = dMk(i), k = d.dk; const cur = (S.dsel = S.dsel || 
 function trSelSet(i, k) { const d = dMk(i); (S.dsel = S.dsel || {})[d.dk] = Math.min(k, d.rooms - 1); go(); }
 /* pagina dedicată a unei temnițe, odată intrat: titlu, înapoi, banda cu toți monștrii, panoul de detalii pentru fila aleasă */
 function trPage(i) {
-  if(ST_SERVER==='beta'&&S.adventure&&typeof acDungeonPage==='function'){const h=acDungeonPage(i);if(h)return h;}
+  if(S.adventure&&typeof acDungeonPage==='function'){const h=acDungeonPage(i);if(h)return h;}
   const g = DG[i], n = trNames(i);
-  if(!n&&ST_SERVER==='beta'&&S.adventure&&S.adventure.di===i){
+  if(!n&&S.adventure&&S.adventure.di===i){
     const d=dMk(i),c=dCostAt(i),boss=d.room>=d.rooms-1;
     return '<section class="dg-page"><h2>'+g.n+' · pasul '+(d.room+1)+'/'+d.rooms+'</h2><p>Ai plecat din Sat. Poți continua sau te poți retrage.</p><div class="row"><button class="p" onclick="startD('+i+')">'+(boss?'Înfruntă căpitanul':'Continuă')+' · '+(c?c+' p':'gratuit')+'</button><button onclick="adventureExit()">Retrage-te</button></div></section>';
   }
@@ -306,8 +304,8 @@ function trPage(i) {
   det += `<div class="tr-det-row"><b>Echipament recomandat</b><span>${recGear(d.k)}</span></div>`;
   if (sel === p) { const c = dCostAt(i); det += `<button class="p tr-fight${selBoss ? ' boss' : ''}" onclick="startD(${i})">${selBoss ? 'Înfruntă căpitanul' : 'Luptă'} · ${c ? c + ' p' : 'gratuit'}</button>`; }
   det += '</div>';
-  return `<section class="dg-page"><div class="dg-page-top"><button class="tr-back" onclick="${ST_SERVER==='beta'&&S.adventure?'adventureExit()':'dToggle('+i+')'}">${ST_SERVER==='beta'&&S.adventure?'‹ Retrage-te':'‹ Înapoi'}</button><h2>${g.n}</h2>${typeof trChips === 'function' && !(ST_SERVER==='beta'&&S.adventure) ? trChips(i) : ''}</div>`
-    + (ST_SERVER==='beta'&&S.adventure?'':typeof heroSoloControl==='function'?heroSoloControl():'') + `<div class="tr-tabs">${tabs}</div>${det}`
+  return `<section class="dg-page"><div class="dg-page-top"><button class="tr-back" onclick="${S.adventure?'adventureExit()':'dToggle('+i+')'}">${S.adventure?'‹ Retrage-te':'‹ Înapoi'}</button><h2>${g.n}</h2>${typeof trChips === 'function' && !S.adventure ? trChips(i) : ''}</div>`
+    + (S.adventure?'':typeof heroSoloControl==='function'?heroSoloControl():'') + `<div class="tr-tabs">${tabs}</div>${det}`
     + '</section>';
 }
 const trOddsTag = v => v == null ? '' : `<span class="tr-odds ${v >= 75 ? 'ok' : v >= 45 ? 'mid' : 'bad'}">Șanse: ${v}%</span>`;

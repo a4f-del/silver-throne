@@ -14,8 +14,7 @@
 const GH_TAB = { a: 'Sat', c: 'Coborâre', m: 'Hartă', r: 'Tron', e: 'Echipă' };
 const GH_MT = { h: 'Harta', l: 'Harta', b: 'Clasament', k: 'Campanie', t: 'Teritorii' };
 /* Ghidarea BETA urmeaza meniul compact, fara a schimba ghidul LIVE. */
-const ghCompact = () => typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta' &&
-  typeof stCompactActive === 'function' && stCompactActive();
+const ghCompact = () => true;
 const ghTeamLabel = () => 'Echipă';
 function ghTeamNav() {
   // Echipă are din nou buton permanent în bara laterală, inclusiv pe BETA.
@@ -35,9 +34,7 @@ const GHID = [
   { t: 'Bine ai venit!', n: 1,
     d: 'Ești eroul unui sat. Cobori în temnițe după pradă, forjezi echipament și îți strângi o echipă. Ghidul te duce pas cu pas, în ritmul tău: urmează săgeata aurie.' },
   { t: 'Redarea luptelor', p: { t: 'c' }, n: 1, k: ghReplayTarget,
-    d: (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta')
-      ? 'În <b>Coborâre</b>, luptele se văd lovitură cu lovitură. Apasă <b>⚙ Setări</b> în bara de sus, apoi <b>Redare lupte</b> ca să schimbi între animație și rezultat direct.<details><summary>Mai multe</summary>Prima luptă se vede mereu, ca să înțelegi cum funcționează. În același meniu găsești și <b>Botul</b> (premium).</details>'
-      : 'În <b>Coborâre</b> te lupți cu monștri. Fiecare luptă se vede <b>lovitură cu lovitură</b>. Butonul <b>Redare</b> din bara de sus (săgeata) o pornește sau o oprește: oprită, sari direct la rezultat.<details><summary>Mai multe</summary>Prima ta luptă se vede mereu, ca să înțelegi cum merge. Butonul de lângă el pornește <b>Botul</b> (premium).</details>' },
+    d: ('În <b>Coborâre</b>, luptele se văd lovitură cu lovitură. Apasă <b>⚙ Setări</b> în bara de sus, apoi <b>Redare lupte</b> ca să schimbi între animație și rezultat direct.<details><summary>Mai multe</summary>Prima luptă se vede mereu, ca să înțelegi cum funcționează. În același meniu găsești și <b>Botul</b> (premium).</details>') },
   { t: 'Prima coborâre', p: { t: 'c' }, c: () => C('l') >= 1, r: { g: 30, o: 15 },
     k: () => { if (!S.d) return (typeof dOpen === 'function' && !dOpen(0)) ? ghB('dToggle(0)') : ghB('startD(0)'); if (S.d.f) return []; const d = ghB('startD(', 1), l = ghB('leave('); return d.length ? [...d, ...l] : l; },
     d: 'Apasă <b>„Intră”</b> la <b>Mina Cenușie</b> și ia monștrii pe rând: fiecare costă 1 punct. Înaintea fiecărui pas vezi <b>șansele de câștig</b>. Când vrei să te oprești, apasă <b>„Ieși cu prada”</b>.<details><summary>Mai multe</summary>Lista se termină cu un căpitan (2 puncte, cu o abilitate specială). Locul din listă se păstrează; după căpitan, lista o ia de la capăt.</details>' },
@@ -50,9 +47,7 @@ const GHID = [
       if (!hasW) { const c = ghB('collect('); if (c.length) return c; const t = ghQ('#v .fslot [data-end], #v [data-end]'); if (t.length) return t.slice(0, 1); return ghB('craft('); }
       const m = ghQ('#lgm .ipk-c button.p'); if (m.length) return m.slice(0, 1); const w = ghQ('#v button[onclick="invPick(\'w\')"]'); return w.length ? w : ghB('invPick(').concat(ghB('equip(')).slice(0, 1);
     },
-    d: (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta'
-      ? 'Când arma e gata, apasă <b>„Ridică”</b> în Topitorie. Din bara din stânga deschide <b>Echipă</b>, apoi pune arma pe erou.'
-      : 'Când arma e gata, apasă <b>„Ridică”</b> în Topitorie. Apoi du-te în <b>Echipă</b>: la <b>Armă</b> apasă <b>„Alege”</b>, apoi <b>„Pune”</b>.') },
+    d: ('Când arma e gata, apasă <b>„Ridică”</b> în Topitorie. Din bara din stânga deschide <b>Echipă</b>, apoi pune arma pe erou.') },
   { t: 'Antrenează eroul', p: { t: 'a', v: 't' }, c: () => C('t') >= 1, r: { g: 60 }, k: () => ghB('train(', 1).slice(0, 1),
     d: 'În <b>zona de antrenament</b> transformi aurul în putere pentru erou. Antrenează o dată.<details><summary>Mai multe</summary>Forță, Rezistență și Agilitate cresc eroul (iar mercenarii își trag puterea din el). Pricepere și Negoț ajută toată echipa.</details>' },
   { t: 'Hanul', p: { t: 'a', v: 'h' }, c: () => mrHas('Războinic') && !mrAll().some(f => f.nn), r: { g: 40 },
@@ -61,8 +56,8 @@ const GHID = [
   { t: 'Misiunile zilnice', p: { t: 'a', v: 'x' }, c: () => S.tab === 'a' && S.vil === 'x', r: { g: 30 }, k: () => ghB('claim'),
     d: 'În <b>Misiuni</b> primești în fiecare zi 3 sarcini cu recompense. Le termini jucând normal; revino aici să le revendici.<details><summary>Mai multe</summary>Pe măsură ce înaintezi, mai apar mercenari de recrutat la Han: un mesaj discret și un semn pe clădire te anunță.</details>' },
   { t: 'Jefuiește un sat', p: { t: 'm', m: 'l' }, c: () => C('r') >= 1, r: { g: 80, o: 20 },
-    k: () => { if (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta') return ghQ('#v g[onclick^="wnPick("]'); const r = ghB('raid('); return r.length ? r : ghQ('#v g[onclick^="mv("]'); },
-    d: (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta') ? 'În <b>Hartă → Lumea</b>, atinge un sat NPC comun și alege <b>„Jefuiește”</b>. Poți reveni la același sat după o oră.' : 'Pe <b>Hartă</b>, în chenarul auriu, e <b>ținutul tău</b>: sate conduse de alții. Atinge unul și apasă <b>„Jefuiește”</b>.<details><summary>Mai multe</summary>Mai târziu le poți și cuceri, ca teritorii.</details>' },
+    k: () => { return ghQ('#v g[onclick^="wnPick("]'); },
+    d: ('În <b>Hartă → Lumea</b>, atinge un sat NPC comun și alege <b>„Jefuiește”</b>. Poți reveni la același sat după o oră.') },
   { t: 'Când rămâi fără puncte', n: 1,
     d: 'Ai o <b>rezervă de 120 de puncte</b> (sus, lângă fulger) care îți umple bara când se golește. Când nu mai ai puncte, ai destule de făcut fără ele: forjă, antrenament, clădiri, misiuni. Apare în <b>Sat</b> lista <b>„Ce poți face acum”</b>.<details><summary>Mai multe</summary>Până la nivelul 10, fiecare nivel nou îți <b>adaugă</b> 30 de puncte. După aceea punctele se refac singure, câte unul la 6 minute. De la nivelul 5 se deschide <b>Lumea</b>, cu atacuri asupra altor jucători care nu costă puncte.</details>' },
   { t: 'Ești pregătit', e: 1,
@@ -95,12 +90,6 @@ function ghHints() {
   /* fiecare temniță nouă */
   DG.forEach((g, i) => { if (i > 0 && !g.ev && g.lv > 1) L.push({ k: 'dg' + i, when: () => S.lvl >= g.lv, p: { t: 'c' }, done: () => S.tab === 'c', t: 'Temniță nouă: ' + g.n,
     d: `La nivelul ${g.lv} s-a deschis <b>${g.n}</b>, în Coborâre: ${g.rooms} camere, căpitanul ${g.bn}${g.rm >= 2 ? ' și materiale mai rare' : ''}. Lupte mai grele, pradă mai bună.` }); });
-  if (typeof ST_SERVER === 'undefined' || ST_SERVER !== 'beta') L.push({ k: 'camp', when: () => S.lvl >= 2 && !!(S.ter && S.ter.camps && S.ter.camps.length), p: { t: 'm', m: 'l' }, done: () => S.tab === 'm' && (S.mt === 'h' || !S.mt ? 'l' : S.mt) === 'h', t: 'Tabere pe hartă',
-    d: 'Pe <b>Hartă</b>, în Regiune, apar <b>tabere</b> de bandiți care pleacă după câteva ore. Au mai multe lupte la rând și un căpitan, iar prada e mai bună decât la un jaf. Le vezi și în panoul „Acum”, cu timpul rămas.' });
-  if (typeof ST_SERVER === 'undefined' || ST_SERVER !== 'beta') L.push({ k: 'conq', when: () => !!S.map && MPV().vs.some(v => v.o !== 'p' && (v.rw || 0) >= TP.conq.raids), p: { t: 'm', m: 'l' }, done: () => own() > 0, t: 'Poți cuceri un sat',
-    d: `Ai jefuit un sat de ${TP.conq.raids} ori: acum îl poți <b>cuceri</b>. Pe Hartă, atinge-l și alege „Cucerește” (costă puncte și o taxă în aur). Un sat cucerit îți aduce bonusuri zilnice, dar are și o întreținere; le vezi la <b>Teritorii</b>.` });
-  if (typeof ST_SERVER === 'undefined' || ST_SERVER !== 'beta') L.push({ k: 'fort', when: () => S.lvl >= TP.fort.lv && own() >= 1, p: { t: 'm', m: 't' }, done: () => S.tab === 'm' && S.mt === 't', t: 'Cetatea regiunii',
-    d: `De la nivelul ${TP.fort.lv}, cu cel puțin un sat cucerit, poți asedia <b>cetatea</b> regiunii. E cel mai greu obiectiv de pe hartă și dă cele mai mari bonusuri. Condițiile le vezi la <b>Teritorii</b>.` });
   L.push({ k: 'tron', when: () => S.lvl >= 10, p: { t: 'r' }, done: () => S.tab === 'r', t: 'Tronul de Argint',
     d: 'De la nivelul 10 poți lupta pentru <b>Tron</b>. Învingi fantoma regelui (sau Garda Regală, dacă Tronul e gol) și devii rege. Cine îl ține cel mai mult într-o săptămână primește titlul și materiale rare. Provocările sunt gratuite.' });
   L.push({ k: 'lv10', when: () => S.lvl > 10, t: 'Ai trecut de nivelul 10',

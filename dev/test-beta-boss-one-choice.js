@@ -76,10 +76,6 @@ beta.api.trBossPlanPick(0,'invalid');assert.equal(redraws,redrawBefore,'Invalid 
 beta.S.dp['0_0']=1;assert.equal(beta.api.trBossPlanPanel(0),'','Not offered before boss');
 beta.S.dp['0_0']=3;beta.S.d={f:{}};assert.equal(beta.api.trBossPlanPanel(0),'','Not offered in combat');
 beta.S.d=null;beta.S.adventure=null;assert.equal(beta.api.trBossPlanAvailable(0),false,'Only within dungeon');
-const live=mk('live');
-assert.equal(live.api.trBossPlanPanel(0),'','No LIVE panel');
-live.api.trBossPlanPick(0,'loot');assert.deepEqual(live.S.trPlan,{},'LIVE save untouched');
-assert.equal(live.dMk(0).bossPlan,undefined,'LIVE encounter unchanged');
 const event=beta.dMk(0);event.ev=1;event.bossPlan='loot';
 const oldBonus=event.loot.gold;beta.api.trBossPlanWin(event);
 assert.equal(event.loot.gold,oldBonus,'Weekly event never receives the stance reward');
@@ -87,6 +83,6 @@ const bossInUi=ui.includes("canFight&&boss&&typeof trBossPlanPanel==='function'?
 assert(bossInUi&&css.includes('.ac-plan-choices'),'Boss-only UI is compact');
 assert(src.includes("d0.bossPlan||'normal'"),'Odds cache varies when the plan changes');
 assert(html.includes("trBossPlanAttach(d)"),'Real encounter and odds simulation share the same plan');
-assert(src.includes("if(ST_SERVER==='beta'&&typeof trBossPlanWin==='function')trBossPlanWin(d);"),
+assert(src.includes("if(typeof trBossPlanWin==='function')trBossPlanWin(d);"),
  'Plan reward comes only from captain victory hook');
-console.log('OK: boss-only choices, safe/offense/loot tradeoffs, 15% capped resources, one-time claim, odds, LIVE/events protected.');
+console.log('OK: boss-only choices, safe/offense/loot tradeoffs, 15% capped resources, one-time claim, odds, events protected.');

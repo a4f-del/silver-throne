@@ -10,15 +10,11 @@ const tmn=read('temnite.js'),index=read('index.html'),tower=read('turn.js');
 new Function(tmn);
 for(const m of index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
  if(m[1].trim())new Function(m[1]);
-assert(index.includes('temnite.js?v=2026.11.08-3'),'Fresh dungeon UI loaded');
-assert(index.includes("if(!d&&ST_SERVER==='beta'){"),'BETA dedicated hub path');
+assert(index.includes('temnite.js?v=2026.11.09-1'),'Fresh dungeon UI loaded');
+assert(index.includes("if(!d){\n  const fallen="),'Dedicated hub path');
 assert(index.includes('ⓘ Reguli utile'),'Old wall of text goes behind details');
 assert(index.includes('vDung();'),'New hub invoked in BETA');
-assert(index.includes("\${vDung()}\${typeof twCard==='function'?twCard():''}"),
- 'LIVE keeps original dungeon/Tower layout');
-assert(tmn.includes('if (typeof ST_SERVER !== \'undefined\' && ST_SERVER === \'beta\')'));
 assert(tmn.includes("return tmnHubBeta(open, rec, card, shown)"));
-assert(tmn.includes('return tmnEvent() +'),'LIVE event unchanged');
 assert(tmn.includes('function tmnHubToggle(event)'));
 assert(tmn.includes('TMN.showAll = !!event.target.open'),'Expand state retained during redraw');
 assert(tmn.includes('onclick="dToggle('),'Primary action uses existing dungeon entry');
@@ -33,7 +29,7 @@ assert(tmn.includes('class="cb-options"'),'Two compact secondary activities');
 assert(tmn.includes('id="tmn-hub-all"'),'One collapsed dungeon collection');
 assert(tmn.includes('class="cb-hub"'),'Scoped hub CSS');
 assert(tmn.includes('@media(max-width:640px)'),'Mobile layout included');
-assert(tmn.includes('heroSoloControl()'),'Hero-alone dungeon option retained');
+assert(index.includes("'<div class=\"cb-party-first\">'+(typeof heroSoloControl==='function'?heroSoloControl():'')"),'Hero-alone dungeon option retained');
 assert(tower.includes('function twCard()'),'Old Tower card not altered');
 assert(tower.includes('function twEnter()'),'Tower operation untouched');
 assert(!/CREATE OR REPLACE FUNCTION|DELETE FROM public/.test(tmn),'UI-only change');
@@ -96,8 +92,4 @@ assert.equal((html.match(/<article class="cb-mini/g)||[]).length,2,
 veteran.setKeys(0);
 html=veteran.vDung();
 assert(html.includes('Fără chei disponibile'),'Depleted key state visible');
-const live=make('live',40);
-html=live.vDung();
-assert(!html.includes('cb-hub'),'LIVE screen unchanged');
-assert(html.includes('dg-ev')&&html.includes('dg-sec'),'Old LIVE panels remain');
-console.log('OK: compact BETA Coborare hub for newbie, progress, endgame, keys and Tower; old LIVE UI untouched.');
+console.log('OK: compact BETA Coborare hub for newbie, progress, endgame, keys and Tower.');

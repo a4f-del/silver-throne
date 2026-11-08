@@ -31,7 +31,7 @@ function satNeedsInfirmary(){
  catch(e){return false;}
 }
 function satVisible(k){
- if(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&k==='z')return false;
+ if(k==='z')return false;
  if(!satFocusOn()||S.satShowAll)return true;
  if(['a','h','t','x'].includes(k))return true;
  if(k==='i')return satStage()>=1||satNeedsInfirmary();
@@ -149,8 +149,7 @@ function satStatus(k) {
     if (k === 'l') return [S.lvl < 6 ? 'se deschide la nivelul 6' : 'obiecte de calitate', 0];
     if (k === 'd') return [`minereu ${S.ore} · capacitate ${cap()}`, 0];
     if (k === 'z') {
-      if(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta')return ['doar aspect vizual',0];
-      const t = (S.na || now) - now; return [`putere ${dpw()} · atac în ${sdT(t)}`, !!(S.al && S.al.length)];
+      return ['doar aspect vizual',0];
     }
     if (k === 'q') return [S.prem ? (S.bt && S.bt.on ? 'pornit' : 'oprit') : 'premium', 0];
     if (k === 'i') { const d = deadAll().length, h = mrAll().filter(f => f.hp > 0 && f.hp < mhp(f)).length; return [d ? `${d} ${d === 1 ? 'căzut' : 'căzuți'} de ridicat` : h ? `${h} ${h === 1 ? 'rănit' : 'răniți'}` : 'toți sănătoși', d > 0]; }
@@ -174,7 +173,7 @@ function vHub() {
   // Aceeași imagine 1152:928 şi acelaşi SVG; nu se schimbă punctele clicabile.
   const map = `<div class="vh-map"><img src="imagini/sat/sat-${satImgN()}.jpg" alt="Satul tău, cu clădirile pe care le poți deschide" width="1152" height="928"><svg viewBox="0 0 1152 928" preserveAspectRatio="none" aria-hidden="true">${zones}</svg>${labels}</div>`;
   const progress = !satFocusOn() && typeof drumPanel === 'function' ? drumPanel() : '';
-  if (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta') {
+  {
     // Tronul şi Botul sunt deja în meniuri: Satul arată numai harta, fără panou duplicat.
     const optional = progress ? '<details class="vh-fit-extra"><summary>📜 Obiective</summary><div class="vh-fit-pop">' + progress + '</div></details>' : '';
     const hint = '<span class="vh-fit-hint">' + (satFocusOn() && !S.satShowAll
@@ -184,15 +183,11 @@ function vHub() {
     const sceneImage = 'imagini/sat/sat-' + satImgN() + '.jpg';
     return `<section class="vh vh-sat vh-fit-page"><div class="vh-fit-head"><h2>${title}</h2><div class="vh-fit-toolbar">${satExploreButton()}${optional}${zoom}${hint}</div></div><div id="vh-village-scene" class="vh-fit-layout" style="--vh-scene:url('${sceneImage}')">${map}</div></section>`;
   }
-  const [bs] = satStatus('q');
-  const more = `<div class="vh-more">${satVisible('q') ? `<button class="vb-c" data-v="q" onclick="vil('q')"><span class="vb-i">${satIcon('q')}</span><span>Bot · ${bs}</span></button>` : ''}${satExploreButton()}<span class="mute">${satFocusOn()&&!S.satShowAll?'Descoperi clădirile pe măsură ce înaintezi.':'Atinge o clădire ca s-o deschizi.'}</span></div>`;
-  const throne = typeof tronBanner === 'function' ? tronBanner() : '';
-  return `<section class="vh vh-sat"><h2>${title}</h2>${map}${more}</section>${progress}${throne}`;
 }
 function satHov(k, on) { const z = document.querySelector(`.vh-z[data-z="${k}"]`); if (z) z.classList.toggle('on', !!on); }
 /* banda din interiorul unei clădiri: înapoi la Sat + celelalte clădiri */
 function vBar(k) {
-  return `${satDefs()}<div class="vb"><button class="vb-back" onclick="vil('')" aria-label="Înapoi la Sat">‹ Sat</button><div class="vb-ch">${SAT_B.filter(([x])=>satVisible(x)||(x===k&&!(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&x==='z'))).map(([x, n]) => { const hot = satStatus(x)[1]; return `<button class="vb-c${x === k ? ' on' : ''}${hot ? ' hot' : ''}" data-v="${x}" onclick="vil('${x}')" aria-current="${x === k}"><span class="vb-i">${satIcon(x)}</span><span>${n}</span></button>`; }).join('')}</div>${satExploreButton()}</div>`;
+  return `${satDefs()}<div class="vb"><button class="vb-back" onclick="vil('')" aria-label="Înapoi la Sat">‹ Sat</button><div class="vb-ch">${SAT_B.filter(([x])=>satVisible(x)||(x===k&&x!=='z')).map(([x, n]) => { const hot = satStatus(x)[1]; return `<button class="vb-c${x === k ? ' on' : ''}${hot ? ' hot' : ''}" data-v="${x}" onclick="vil('${x}')" aria-current="${x === k}"><span class="vb-i">${satIcon(x)}</span><span>${n}</span></button>`; }).join('')}</div>${satExploreButton()}</div>`;
 }
 
 /* ------------------------------------------------------------------ FEREASTRA CU BONUSURI */
@@ -270,7 +265,6 @@ function satFitViewport() {
 /* Vizualizare spațioasă, fără zoom prin deformarea hărții și fără scrollul paginii.
    Este doar o stare vizuală temporară; progresul și salvarea nu sunt atinse. */
 function satToggleExpanded(force) {
-  if (typeof ST_SERVER === 'undefined' || ST_SERVER !== 'beta') return;
   const page = document.querySelector('#v .vh-fit-page');
   if (!page) return;
   const open = typeof force === 'boolean' ? force : !page.classList.contains('st-sat-expanded');

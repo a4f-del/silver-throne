@@ -68,11 +68,6 @@ f.open(0);
 run(enterTower,twCtx,'twEnter()');
 assert.equal(t.n,1,'Tower cannot start over an active dungeon session');
 f.exit();
-const live={S:{tab:'a',lvl:25,deo:{}},DG,ST_SERVER:'live',go:()=>{}};
-const liveFn=run(adventure,live,'return {active:adventureActive,open:dToggle};');
-liveFn.open(0);
-assert.equal(liveFn.active(),false,'LIVE stays outside special mode');
-assert.equal(live.S.deo[0],true,'LIVE existing dungeon details unchanged');
 assert(main.includes("S.tab='c';document.body.classList.add('st-adventure')"));
 assert(main.includes("body.st-adventure #nv"));
 assert(main.includes("adventureClear(S.d);S.d=null"),'Defeat clears adventure');
@@ -83,4 +78,4 @@ assert(sidebar.includes("adventureActive()&&t!=='c'"),'Sidebar navigation guarde
 for(const script of [steps,tower,team,sidebar])new Function(script);
 for(const m of main.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
  if(m[1].trim())new Function(m[1]);
-console.log('OK: BETA dungeon/tower navigation lock, boss auto-return, retreat, refresh state, LIVE isolation.');
+console.log('OK: BETA dungeon/tower navigation lock, boss auto-return, retreat, refresh state.');

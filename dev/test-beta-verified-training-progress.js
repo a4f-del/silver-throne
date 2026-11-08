@@ -43,7 +43,7 @@ assert(prev.includes("'authoritative_for_game',false"),'Additive to existing SQL
 assert(ui.includes('Antrenament verificat (SHADOW)'),'Show explicit shadow label');
 assert(ui.includes('Separat de nivelul eroului'),'No fake hero level');
 assert(ui.includes('guildVerifiedHtml()+'),'Keep display in existing disclosure');
-assert(html.includes('bresle.js?v=2026.11.08-7'),'Guild asset cache refreshed');
+assert(html.includes('bresle.js?v=2026.11.09-1'),'Guild asset cache refreshed');
 assert(doc.includes('nu încheie') && doc.includes('nu certifică autoritatea nivelului eroului'),
  'Explicit non-authoritative progress disclosure');
 assert(roadmap.includes('SQL41'),'Roadmap status updated');

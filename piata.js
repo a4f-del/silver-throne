@@ -38,8 +38,7 @@ const PT_ROLE={
  y:{short:'Schimb între jucători',description:'Cumperi și listezi obiecte de la nivelul 15. Taxele sunt afișate înainte de vânzare.'}
 };
 function ptFocus(){
- return typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&
-   typeof jeFocus==='function'&&jeFocus();
+ return typeof jeFocus==='function'&&jeFocus();
 }
 function ptQuickGuide(k,locked){
  const g=PT_GUIDE[k],r=PT_ROLE[k],lv=PT_TABS.find(x=>x.k===k).lv();

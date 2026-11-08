@@ -36,8 +36,8 @@ assert.equal((sql.match(/^CREATE TRIGGER\b/gm)||[]).length,1);
 assert(!/\b(?:DELETE FROM|TRUNCATE TABLE|DROP TABLE)\b/i.test(sql),'No reset');
 assert(!/CREATE OR REPLACE FUNCTION public\.(?:world_join|world_raid_start|world_raid_finish|throne_publish)\b/i.test(sql),'Do not override production RPCs');
 assert(!/\b(?:INSERT INTO|UPDATE)\s+public\.(?:world_raids|wallet|game_saves|throne_profiles)\b/i.test(sql));
-assert(throne.includes('tronIsBetaDuel() ? 4 : TT.CFG.maxUnits'),'BETA full active party');
-assert(world.includes('TT.throneDuelUnit(u) : TT.ghostUnit(u)'),'BETA world does not impose level-40 cap');
+assert(throne.includes('S.fs.slice(0, 4)'),'Full active party');
+assert(world.includes('map(u => TT.throneDuelUnit(u))'),'World does not impose level-40 cap');
 assert(world.includes('lwAutoPublishSoon()'),'World republish scheduling');
 assert(index.includes("if(typeof tronAutoPublishSoon==='function')tronAutoPublishSoon()"));
 assert(index.includes("if(typeof lwAutoPublishSoon==='function')lwAutoPublishSoon()"));
@@ -45,36 +45,34 @@ assert(throne.includes('function tronAutoPublishNow()'));
 assert(throne.includes('function tronAutoSnapshot()'));
 assert(throne.includes("TRON.pubSig = sig"),'Only successful publication updates signature');
 assert(throne.includes('TRON.pubFailAt'),'Errors back off');
-assert(throne.includes("tronIsBetaDuel() ? '' : '<button onclick="),'Manual Throne button hidden in BETA only');
+assert(!throne.includes('onclick="tronPublish()"'),'No manual Throne publish button');
 assert(throne.includes('!CONT.booted'),'Wait for a logged-in and booted account');
-assert(index.includes('tron.js?v=2026.11.08-5'));
-assert(index.includes('lume.js?v=2026.11.08-5'));
+assert(index.includes('tron.js?v=2026.11.09-1'));
+assert(index.includes('lume.js?v=2026.11.09-1'));
 
 const testSquad=get(throne,'function tronTeamUnits() {','function tronDuelRestore()');
-const makeSquad=server=>new Function('S','TT','bon','mhp','atkOf','tr','tronIsBetaDuel',
+const makeSquad=()=>new Function('S','TT','bon','mhp','atkOf','tr',
  testSquad+';return {tronTeamUnits,tronUnits};')(
  {fs:[
   {h:1,n:'Erou',c:'Campion',hp:100},
   {n:'Paznic',c:'Paznic',hp:80},
   {n:'Arcas',c:'Arcaș',hp:70},
   {n:'Vraci',c:'Vraci',hp:65}
- ]},{CFG:{maxUnits:3}},()=>({def:10,pf:0}),f=>f.hp,()=>30,()=>0,()=>server==='beta'
+ ]},{CFG:{maxUnits:3}},()=>({def:10,pf:0}),f=>f.hp,()=>30,()=>0
 );
-let beta=makeSquad('beta'),live=makeSquad('live');
+let beta=makeSquad();
 assert.equal(beta.tronTeamUnits().length,4,'BETA World has 4 defenders');
-assert.equal(live.tronTeamUnits().length,3,'LIVE remains 3 defenders');
 assert.equal(beta.tronUnits().length,1,'BETA throne remains hero-only');
-assert.equal(live.tronUnits().length,3,'LIVE throne remains unchanged');
 
 const part=get(throne,'function tronAutoSnapshot() {','/* ------------------------------------------------------------------ LUPTA */');
 const S={lvl:50,fs:[{h:true,n:'Erou',hp:100}],d:null,tron:{cur:null}};
 const CONT={booted:true,user:{id:'beta-test-user'}};
 const TRON={pubSig:'',pubFlight:null,pubTimer:null,pubFailAt:0,pubError:'',pubAt:0};
 let stats=100,writes=0;
-const auto=new Function('TRON','S','CONT','TT','tronIsBetaDuel',
+const auto=new Function('TRON','S','CONT','TT',
  'tronUnits','tronPublish','tronUi','setTimeout','clearTimeout','Date',
  part+';return {tronAutoSnapshot,tronAutoPublishNow,tronAutoPublishSoon};')(
- TRON,S,CONT,{CFG:{minLevel:10}},()=>true,
+ TRON,S,CONT,{CFG:{minLevel:10}},
  ()=>[{n:'Erou',c:'Campion',hp:stats,atk:40,def:8}],
  async()=>{writes++;return true},()=>{},()=>0,()=>{},Date);
 (async()=>{
@@ -94,5 +92,5 @@ const auto=new Function('TRON','S','CONT','TT','tronIsBetaDuel',
  CONT.user.id='other-player';
  assert.equal(await auto.tronAutoPublishNow(),true);
  assert.equal(writes,4,'A new account has its own publication signature');
- console.log('OK: SQL30 4 defenders, level 30 guard, 320 simulator actions, automatic BETA Throne updates; LIVE isolated.');
+ console.log('OK: SQL30 4 defenders, level 30 guard, 320 simulator actions, automatic BETA Throne updates.');
 })().catch(e=>{console.error(e);process.exitCode=1;});

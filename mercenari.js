@@ -40,7 +40,7 @@ function mrRecruit(c) {
 /* Nume stabilite pentru noii eroi BETA; evităm numele deja folosite în echipă.
    Numele existente și dreptul la o redenumire gratuită rămân nemodificate. */
 function mrPresetEnabled() {
-  return typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&S.mrPresetV===1
+  return (S.mrPresetV===1)
     &&typeof jeFocus==='function'&&jeFocus();
 }
 function mrDefaultName(c) {
@@ -51,14 +51,14 @@ function mrNew(c) {
   const named=mrPresetEnabled();
   const f = { n: named?mrDefaultName(c):c, c, hp: 0, sc: 0, t: [], rk: 0, fm: 0, eq: { w: null, a: null } };
   if(!named)f.nn=1; /* LIVE și salvările vechi păstrează fereastra de numire */
-  f.hp = mhp(f); f.t = [P(TR)]; (S.fs.length < TMAX() && !S.d && !(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&S.soloDungeon) ? S.fs : S.rs).push(f); return f;
+  f.hp = mhp(f); f.t = [P(TR)]; (S.fs.length < TMAX() && !S.d && !S.soloDungeon ? S.fs : S.rs).push(f); return f;
 }
 /* la fiecare desenare: se alătură cine a ajuns la pasul lui */
 function mrTick() {
   if (!S || S.mrv !== 2) return;
   /* Eroul BETA nou isi alege mai intai numele. Fara aceasta verificare,
      Paznicul si Arcasul ar fi creati inaintea prologului. */
-  if (typeof mrStoryIsBeta === 'function' && mrStoryIsBeta() && !(typeof jeFocusActive === 'function' && jeFocusActive())
+  if ((!(typeof jeFocusActive === 'function' && jeFocusActive()))
     && !S.hc && !S.mrStoryV && S.lvl === 1 && !S.xp && !C('d')) return;
   const story = typeof mrStoryEnabled === 'function' && mrStoryEnabled();
   for (const [c, st] of MR.order) {
@@ -243,7 +243,7 @@ function mrStoryArchive() {
    clase memorate în salvare. Nu atinge expedițiile sau progresul LIVE. */
 function mrTeamPresetLabel(n){return n===0?'Erou singur':'Erou +'+n;}
 function mrTeamPresetReady(){
- return typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&!!S&&
+ return (!!S)&&
    Array.isArray(S.fs)&&Array.isArray(S.rs);
 }
 function mrTeamPresetPanel(){
@@ -317,10 +317,8 @@ function mrHan() {
       + `<div class="mr-hx">${i >= 0 ? (f.h ? '' : `<button onclick="toBench(${i})">La rezervă</button>`) : (mxBusy(f) ? '<button disabled>Plecat</button>' : teamCtl(f))}</div></div>`;
   }).join('');
   const bb = BL().b || 0;
-  return `<section><h2>Hanul: mercenarii tăi</h2><div class="mute">Cinci tovarăși, câte unul din fiecare clasă, care rămân cu tine pentru totdeauna. ${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'Poți lupta cu eroul singur sau cu tovarăși; mercenarii din rezervă pot pleca în expediții.':'Trei intră în luptă alături de erou; ceilalți așteaptă în rezervă.'} Puterea lor vine din erou: un Recrut are cam 85% din forța de bază a eroului în specialitatea lui, o Legendă cam 98%, dar nimeni nu trece de 95% din viața, atacul sau apărarea eroului. Faima: +1 la fiecare luptă câștigată, +3 la căpitani și raiduri${bb ? `, plus ${bb * 5}% de la Han` : ''}. Cei din rezervă pot pleca în <b>expediții</b> de 1, 4 sau 8 ore, din care se întorc cu aur, materiale și faimă.</div>${typeof heroSoloControl==='function'?heroSoloControl():''}<div class="mr-list">${cards}</div></section>`
-    + (mrPresetEnabled()?mrStoryArchive():typeof mrStoryIsBeta === 'function' && mrStoryIsBeta()
-      ? `<section><h2>🎬 BETA · Scenele tovarășilor</h2><div class="mute">Previzualizează întâlnirile fără să schimbi echipa sau progresul. Apar automat numai la eroii noi.</div><div class="row" style="flex-wrap:wrap;justify-content:flex-start"><button class="p" onclick="stPrologPreview()">Prolog · Ultima scânteie</button><button class="p" onclick="jePreview()">📜 Drumul Eroului (nou)</button><button onclick="sqPreview()">Misiunile anterioare</button>${MR.order.map(([c]) => `<button onclick="mrStoryPreview('${c}')">${c}</button>`).join('')}</div></section>`
-      : '') + mrBld('b');
+  return `<section><h2>Hanul: mercenarii tăi</h2><div class="mute">Cinci tovarăși, câte unul din fiecare clasă, care rămân cu tine pentru totdeauna. Poți lupta cu eroul singur sau cu tovarăși; mercenarii din rezervă pot pleca în expediții. Puterea lor vine din erou: un Recrut are cam 85% din forța de bază a eroului în specialitatea lui, o Legendă cam 98%, dar nimeni nu trece de 95% din viața, atacul sau apărarea eroului. Faima: +1 la fiecare luptă câștigată, +3 la căpitani și raiduri${bb ? `, plus ${bb * 5}% de la Han` : ''}. Cei din rezervă pot pleca în <b>expediții</b> de 1, 4 sau 8 ore, din care se întorc cu aur, materiale și faimă.</div>${typeof heroSoloControl==='function'?heroSoloControl():''}<div class="mr-list">${cards}</div></section>`
+    + (mrPresetEnabled()?mrStoryArchive():(`<section><h2>🎬 BETA · Scenele tovarășilor</h2><div class="mute">Previzualizează întâlnirile fără să schimbi echipa sau progresul. Apar automat numai la eroii noi.</div><div class="row" style="flex-wrap:wrap;justify-content:flex-start"><button class="p" onclick="stPrologPreview()">Prolog · Ultima scânteie</button><button class="p" onclick="jePreview()">📜 Drumul Eroului (nou)</button><button onclick="sqPreview()">Misiunile anterioare</button>${MR.order.map(([c]) => `<button onclick="mrStoryPreview('${c}')">${c}</button>`).join('')}</div></section>`)) + mrBld('b');
 }
 function mrFlag() { return `<section><h2>Steagul satului</h2><div class="mute">Culoarea steagurilor de pe clădiri, din capitală și de pe teritorii. Doar de aspect.</div></section>` + (typeof flagRow === 'function' ? flagRow() : ''); }
 function mrRes() { return `<section><h2>La ce folosește fiecare resursă</h2><div class="mute"><b>Aur:</b> clădiri, antrenament, vindecare, taxe de cucerire și întreținerea teritoriilor.<br><b>Minereu:</b> baza oricărei forjări.<br><b>Materiale:</b> o resursă comună pentru forjare și consumabile din explorare.<br><b>Cristale:</b> raritatea obiectelor forjate.<br><b>Puncte:</b> ritmul temnițelor, raidurilor, taberelor și locurilor de interes.</div></section>`; }

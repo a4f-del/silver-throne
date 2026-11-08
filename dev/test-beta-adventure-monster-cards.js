@@ -65,7 +65,7 @@ assert(css.includes('max-width:700px')&&css.includes('max-width:440px'), 'layout
 assert(css.includes('prefers-reduced-motion'), 'mod accesibil fără animații');
 assert(fx.includes('const cardMode=!!cast.adventure')&&fx.includes('acFxAnimate(m,fr)'), 'motorul FX redă cardul lovit');
 assert(vs.includes("S.d.one||S.d.tw"), 'nu se dublează fereastra VS în BETA');
-assert(index.includes("ST_SERVER==='beta'&&(d.one||d.tw)&&typeof acCombatPage"), 'combatul cardurilor e exclusiv BETA');
-assert(tr.includes("ST_SERVER==='beta'&&S.adventure&&typeof acDungeonPage"), 'selecția cardurilor e exclusiv BETA');
+assert(index.includes("if(d&&(d.one||d.tw)&&typeof acCombatPage"), 'combatul cardurilor pentru Temnițe/Turn');
+assert(tr.includes("if(S.adventure&&typeof acDungeonPage"), 'selecția cardurilor în aventură');
 assert(index.includes('aventura-carduri.js?v=')&&index.includes('aventura-carduri.css?v='), 'asseturile sunt încărcate');
-console.log('OK: carduri mari, progres, ținte, HP, impact animat, responsive și izolare LIVE.');
+console.log('OK: carduri mari, progres, ținte, HP, impact animat, responsive.');

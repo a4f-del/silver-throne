@@ -7,9 +7,9 @@ const path = require('node:path');
 const src = fs.readFileSync(path.join(__dirname, '..', 'sat.js'), 'utf8');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 new Function(src);
-assert(html.includes('sat.js?v=2026.11.08-3'),'Updated Sat asset busts browser cache');
+assert(html.includes('sat.js?v=2026.11.09-1'),'Updated Sat asset busts browser cache');
 assert(src.includes('vh-fit-page') && src.includes('vh-fit-layout') && !src.includes('vh-fit-side'),'BETA has one centered map without the former right column');
-assert(src.includes("ST_SERVER === 'beta'"),'LIVE remains a separate layout');
+assert(!src.includes('ST_SERVER'),'Single village layout, no server branching');
 assert(src.includes('aspect-ratio:1152/928') && src.includes('object-fit:contain'),'Village image keeps original ratio without cropping');
 assert(src.includes('preserveAspectRatio="none"') && src.includes('SAT_W = 1152, SAT_H = 928'),'SVG and image still share original coordinates');
 assert(src.includes('vh-fit-pop'),'Optional progress is available in a collapsible panel');
@@ -47,9 +47,6 @@ assert(!beta.includes('duplicate-tron') && throneCalls===0,'BETA does not even c
 assert(!beta.includes('Bot ·'),'BETA uses existing Bot setting instead of duplicate village action');
 assert(beta.includes('⛶ Mărește harta')&&beta.includes('id="vh-village-scene"'),'BETA has an accessible larger-view control');
 assert(beta.includes("style=\"--vh-scene:url('imagini/sat/sat-1.jpg')\""),'Same village art is used in ambient backdrop');
-const live=village('live');
-assert(live.includes('duplicate-tron') && throneCalls===1,'LIVE original Throne banner preserved');
-assert(live.includes('Bot ·') && !live.includes('vh-fit-layout'),'LIVE village keeps original layout');
 
 const s=src.indexOf('function satFitViewport() {'),e=src.indexOf('\nlet satFitResizeReady',s);
 assert(s>=0&&e>s,'Viewport sizing function exists');
@@ -111,8 +108,4 @@ zoom(false);
 assert(!pageClasses.contains('st-sat-expanded')&&!bodyClasses.contains('st-sat-expanded'),'Close restores normal display');
 assert(attrs['aria-modal']===undefined && attrs['aria-pressed']==='false','Close restores accessibility state');
 assert.equal(fitCalls,2,'Map recomputed on both transitions');
-const liveZoom=new Function('ST_SERVER','document','satFitViewport',zSource+
- ';return satToggleExpanded;')('live',dom,()=>{fitCalls++});
-liveZoom();
-assert.equal(fitCalls,2,'LIVE does not activate zoom');
-console.log('OK: BETA Sat immersive sides, fullscreen expand/close, accurate map alignment, no-scroll fit, LIVE/mobile isolation.');
+console.log('OK: BETA Sat immersive sides, fullscreen expand/close, accurate map alignment, no-scroll fit, mobile isolation.');

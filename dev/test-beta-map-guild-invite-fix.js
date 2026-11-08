@@ -10,7 +10,7 @@ const social=read('bresle-ranguri.js'),guild=read('bresle.js'),
 for(const src of [social,guild,quick])new Function(src);
 for(const m of main.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
  if(m[1].trim())new Function(m[1]);
-assert(main.includes('lume-quick.js?v=2026.11.07-6') &&
+assert(main.includes('lume-quick.js?v=2026.11.09-1') &&
  main.includes('bresle-ranguri.js?v=2026.11.07-2'),'assets reloaded');
 assert(quick.includes("title = (tag?'['+tag+'] ':'') + p.name"),'player titles use guild tag');
 assert(quick.includes("panel.append(head, buttons)"),'two-row compact popup');

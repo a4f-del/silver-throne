@@ -36,10 +36,8 @@ function campaign(server,S){
   S,server,TW,()=>{},()=>{paid++;return 'premiu';},()=>{});
  return {api,paid:()=>paid};
 }
-const b=campaign('beta',fresh()),live=campaign('live',fresh());
+const b=campaign('beta',fresh());
 assert(b.api.cmpChapters().every(c=>c.obj.length>0&&c.obj.every(o=>o.k==='boss')));
-assert.equal(live.api.cmpChapters(),TW.CH,'LIVE uses original chapter definitions');
-assert(!live.api.chReady(live.api.chCur()),'LIVE raid requirements are unchanged');
 assert(b.api.chReady(b.api.chCur()),'BETA only requires boss progress');
 assert(b.api.cmpChapters().every((c,i)=>c.rw===CH[i].rw),'Rewards are unchanged');
 b.api.cmpClaim(1);b.api.cmpClaim(1);
@@ -73,8 +71,6 @@ const fallen=mk('beta',[fallenHero,archer]);
 fallen.api.heroSolo();
 assert.equal(fallen.S.fs.length,2,'Cannot expose a fallen hero by moving away companions');
 assert(!fallen.S.soloDungeon,'Failed solo operation does not persist');
-const liveSolo=mk('live',[hero,archer]);
-liveSolo.api.heroSolo();assert.equal(liveSolo.S.fs.length,2,'LIVE is unchanged');
 
 const beg=merc.indexOf('function mrNew(c) {');
 const stop=merc.indexOf('/* la fiecare desenare',beg);
@@ -87,9 +83,9 @@ assert.equal(soloS.fs.length,1,'Recruited mercs do not silently rejoin solo squa
 assert.equal(soloS.rs.length,1);
 const ordinaryS={fs:[hero],rs:[],d:null};
 new Function('S','ST_SERVER','mrPresetEnabled','mhp','P','TR','TMAX',spawn+';return mrNew')(
- ordinaryS,'live',()=>false,()=>25,a=>a[0],[{n:'Trăsătură'}],()=>3)('Arcaș');
-assert.equal(ordinaryS.fs.length,2,'LIVE recruitment unchanged');
-assert(dungeon.includes('heroSoloControl()'),'Dungeon list has solo selector');
+ ordinaryS,'beta',()=>false,()=>25,a=>a[0],[{n:'Trăsătură'}],()=>3)('Arcaș');
+assert.equal(ordinaryS.fs.length,2,'Outside solo mode recruits join the active team');
+assert(main.includes("'<div class=\"cb-party-first\">'+(typeof heroSoloControl==='function'?heroSoloControl():'')"),'Dungeon hub has solo selector');
 assert(steps.includes('heroSoloControl()'),'Dungeon detail has solo selector');
 assert(merc.includes('heroSoloControl()'),'Mercenary inn has solo selector');
 assert(journey.includes('Ai descoperit Lumea')&&journey.includes('S.jeVisitedWorld=1'));
@@ -110,4 +106,4 @@ assert(dungeonState.d&&dungeonState.fs.length===1,'Hero may start a dungeon alon
 assert.equal(fights,1,'Solo hero starts the same fight engine');
 assert.equal(dungeonState.pts,6,'Solo hero pays the usual entry cost');
 assert(!html.includes('world-friends.js?v=2026.11.07-1</script>'),'Cached friends hotfix stays intact');
-console.log('OK: six dungeon-only chapters, one-time rewards, historical claims, solo team and mercenary reserve, LIVE isolation and script syntax.');
+console.log('OK: six dungeon-only chapters, one-time rewards, historical claims, solo team and mercenary reserve and script syntax.');

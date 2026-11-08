@@ -55,9 +55,6 @@ function panel(server){
 assert(panel('beta').includes('2 în total pentru o victorie'),
  'BETA explains the real two-point full raid cost');
 assert(panel('beta').includes('o dată pe oră per sat'));
-assert(panel('live').includes('Un sat fără stăpân, vizibil tuturor jucătorilor'),
- 'LIVE panel remains unchanged');
-assert(!panel('live').includes('2 în total'));
 const priceSrc=html.slice(html.indexOf('const SH='),html.indexOf('function shop()'));
 const ip=new Function(priceSrc+';return ip;')();
 const levels=[5,15,30,45],rates=[1,3,5],rows=[];
@@ -86,4 +83,4 @@ rows.forEach(x=>console.log(String(x.level).padStart(5)+' | '+String(x.raidsPerH
  ' | '+String(x.gold).padStart(7)+' | '+String(x.ore).padStart(12)+' | '+
  String(x.materials).padStart(13)+' | '+String(x.points).padStart(11)+' | '+
  String(x.rareShopPrice).padStart(15)+' | '+x.shopEquivalent));
-console.log('OK: server/client 1h cooldown, actual 2-point full raid, 4-level baseline, shop rerolls and other sinks preserved, LIVE isolated.');
+console.log('OK: server/client 1h cooldown, actual 2-point full raid, 4-level baseline, shop rerolls and other sinks preserved.');

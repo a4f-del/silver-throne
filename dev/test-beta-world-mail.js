@@ -44,11 +44,6 @@ function make(server='beta') {
  vm.runInContext('wmReply(1)',x.ctx);
  assert.equal(vm.runInContext('WM.recipient',x.ctx),'b');
  assert(x.dom.get('wm-overlay').html.includes('Mesaj către Bela'));
- const live=make('live');
- assert.equal(vm.runInContext('wmAuth()',live.ctx),false);
- vm.runInContext('wmOpen();wmCompose("b","Bela");wmStart()',live.ctx);
- assert.equal(live.calls,0,'LIVE: nu exista apeluri la mesagerie');
- assert(!live.dom.has('wm-overlay'),'LIVE: niciun dialog');
  assert(mapMenu.includes("wmCompose(p.id,p.name)"),'iconita de pe harta e conectata');
  assert(sql.includes("recipient_id=v_uid"),'inboxul este filtrat pe destinatar');
  assert(sql.includes("WHERE id=p_id AND recipient_id=v_uid"),'citirea este autorizata');
@@ -56,5 +51,5 @@ function make(server='beta') {
  assert(sql.includes("pg_advisory_xact_lock"),'anti-spam serializat');
  assert(sql.includes("REVOKE ALL ON TABLE public.world_mail"),'fara acces direct la tabela');
  assert(sql.includes("public.is_beta_admin()"),'acces doar pe proiectul BETA');
- console.log('OK: inbox, citire, raspuns, escape HTML, protectie LIVE, reguli SQL.');
+ console.log('OK: inbox, citire, raspuns, escape HTML, reguli SQL.');
 })().catch(err=>{console.error(err);process.exitCode=1});

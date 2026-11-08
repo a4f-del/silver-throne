@@ -57,16 +57,16 @@ assert(boss.includes('revii automat în Coborâre și primești prada'),
 assert(boss.includes('onclick="startD(0)"'));
 assert(!boss.includes('ac-return-current'));
 assert(steps.includes("function trSelSet(i, k)"),'button uses existing preview selector');
-assert(steps.includes("ST_SERVER==='beta'&&S.adventure&&typeof acDungeonPage"),
- 'special dungeon page remains BETA-only');
+assert(steps.includes("if(S.adventure&&typeof acDungeonPage"),
+ 'special dungeon page is used inside an adventure');
 assert(html.includes('aventura-carduri.css?v=2026.11.08-5')&&
- html.includes('aventura-carduri.js?v=2026.11.08-6')&&
+ html.includes('aventura-carduri.js?v=2026.11.09-1')&&
  html.includes('ghidare-erou.js?v=2026.11.08-3'),
  'updated UI assets are loaded without stale caching');
 assert(guide.includes("document.querySelector('.ac-return-current')"),
  'new hero guidance points at return button rather than a future boss');
 // Victoria reală a căpitanului este deja automată. Testăm mesajul de după loot
-// separat, ca informația pentru jucător să nu fie ambiguă și LIVE să fie intact.
+// separat, ca informația pentru jucător să nu fie ambiguă.
 const start=html.indexOf('function dOneDone(d,b)'),end=html.indexOf('/* o singură cameră',start);
 assert(start>=0&&end>start,'Dungeon completion function exists');
 const finishCode=html.slice(start,end);
@@ -78,14 +78,13 @@ function finish(server){
  new Function(...Object.keys(ctx),finishCode+';dOneDone({one:1,di:0,dk:"0_0",room:3},true);')(...Object.values(ctx));
  return {state,closed,rerenders};
 }
-const betaFinish=finish('beta'),liveFinish=finish('live');
+const betaFinish=finish('beta');
 assert.equal(betaFinish.closed,1,'boss closes the dungeon adventure');
 assert.equal(betaFinish.state.dp['0_0'],0,'next run starts from first monster');
 assert(betaFinish.state.msg.includes('Ai revenit automat în Coborâre')&&
  betaFinish.state.msg.includes('Pradă: 42 aur'),'after-boss message and loot visible');
-assert(liveFinish.state.msg.includes('lista o ia de la capăt'),'LIVE victory message unchanged');
 assert(css.includes('.ac-dungeon .ac-progress-top{'),'new step status stays compact');
 assert(css.includes('.ac-dungeon .ac-return-current{'),'return button is visible in small screens');
 assert(css.includes('@media(max-width:700px)'),'mobile styling remains');
 assert(!css.includes('.ac-dungeon{height:100vh'),'no forced viewport clipping');
-console.log('OK: primul monstru, previzualizare viitoare/trecută, revenire într-un click, căpitan, auto-return, BETA/LIVE.');
+console.log('OK: primul monstru, previzualizare viitoare/trecută, revenire într-un click, căpitan, auto-return.');

@@ -36,7 +36,7 @@ const JE_STEPS = [
   action:()=>['Hartă','m','l']}
 ];
 function jeEnabled(){
- return typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&typeof S!=='undefined'
+ return (typeof S!=='undefined')
    &&!!S&&S.journeyV===1;
 }
 function jeReady(){return jeEnabled() && S.mrPrologSeen===1 && !S.mrPrologPending;}
@@ -204,7 +204,7 @@ function jeDecorate(){
 /* Previzualizare de pe contul BETA existent, fara resetare si fara modificare salvare. */
 function jePreviewClose(){document.getElementById('je-preview')?.remove();}
 function jePreview(){
- if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||typeof S==='undefined'||!S||S.d
+ if(typeof S==='undefined'||!S||S.d
   ||typeof document==='undefined'||document.getElementById('je-preview')
   ||document.getElementById('mr-scene')||document.getElementById('mr-m')
   ||document.getElementById('lgm'))return;

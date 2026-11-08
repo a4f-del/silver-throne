@@ -12,8 +12,8 @@ new Function(leg);
 for(const m of index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
  if(m[1].trim())new Function(m[1]);
 new Function(tron);
-assert(index.includes('legendare.js?v=2026.11.08-1'),'Legendary script cache refreshed');
-assert(index.includes('tron.js?v=2026.11.08-5'),'Tron script cache refreshed');
+assert(index.includes('legendare.js?v=2026.11.09-1'),'Legendary script cache refreshed');
+assert(index.includes('tron.js?v=2026.11.09-1'),'Tron script cache refreshed');
 const section=(s,start,end)=>{
  const a=s.indexOf(start),b=s.indexOf(end,a+start.length);
  assert(a>=0&&b>a,'Missing section '+start);return s.slice(a,b);
@@ -49,10 +49,6 @@ e=make();log=[];
 e.round(log);
 assert.equal(e.hero.hp,1672,'3% regeneration behavior unchanged (72)');
 assert(log.some(s=>s.includes('regenerează 72 viață')),'Actual regen logged');
-e=make('live');log=[];
-e.after(e.hero,{hp:100},886,log);e.round(log);
-assert.equal(e.hero.hp,1805,'LIVE receives same healing calculations');
-assert.equal(log.length,0,'LIVE journal format unchanged');
 e=make('beta',false);log=[];
 e.after(e.hero,{hp:100},886,log);e.round(log);
 assert.equal(log.length,0,'Non-Tron battle UI untouched');
@@ -60,10 +56,10 @@ assert.equal(log.length,0,'Non-Tron battle UI untouched');
 const onStart=section(tron,'function tronFight(', '/* Doar pe serverul BETA');
 assert(onStart.includes('HP la start: erou'),'Starts with real hero HP');
 assert(onStart.includes(' · rege '),'Includes actual defender HP');
-assert(onStart.includes('if (tronIsBetaDuel() && d.ghost && d.f)'),'Guarded to BETA duel');
+assert(onStart.includes('if (d.ghost && d.f)'),'Guarded to ghost duel');
 const enemy=section(index,'function enemy(){','\nfunction win(');
-assert(enemy.includes("if(ST_SERVER==='beta'&&S.d&&S.d.tron&&S.d.ghost)"),
-  'Bleeding damage disclosed only in BETA Tron');
+assert(enemy.includes("if(S.d&&S.d.tron&&S.d.ghost)"),
+  'Bleeding damage disclosed only in Tron duels');
 assert(enemy.includes("const bleed=(2+Math.floor(S.lvl/2))*(e.blm||1);e.hp-=bleed;e.bl--;"),
  'Existing bleed tick damage and timing retained');
 const win=section(index,'function win(q){','\nfunction flee()');
@@ -81,4 +77,4 @@ assert(2658>Math.ceil(886/.38)-4,'Three capped hits exceed a ~2330-HP defender')
 // without gear/replay do not assert which one occurred.
 assert.equal(892+745+931,2568);
 assert(2568>Math.ceil(936/.38),'Some compensation or HP mismatch required');
-console.log('OK: local BETA Tron passive healing, regeneration, bleeding and HP snapshots; 27 criticals are consistent with lethal cap, LIVE healing unchanged.');
+console.log('OK: local BETA Tron passive healing, regeneration, bleeding and HP snapshots; 27 criticals are consistent with lethal cap.');

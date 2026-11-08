@@ -14,7 +14,7 @@ assert(html.includes('function leave(skipGo){'),'Explicit no-recursion option on
 assert(html.includes("if(d.xm)S.msg+=' '+d.xm;if(!skipGo)go()}"),'Manual Exit behavior preserved');
 assert(html.includes('loginChk();betaFinishCompletedBattle();tronCheck();lumeCheck();terBack();'),
   'Settle rewards before result reporting and return to source tab');
-assert(html.includes("if(ST_SERVER==='beta'&&S.d&&S.d.done&&!S.d.tw&&!S.d.f&&S.d.raid!=null){go();return}"),
+assert(html.includes("if(S.d&&S.d.done&&!S.d.tw&&!S.d.f&&S.d.raid!=null){go();return}"),
   'Resume completed raid after reloading game, without double credit');
 assert(tron.includes('function tronDuelRestore()'),'Tron restores original 4-player party');
 assert(tron.includes('if (!TRON.rep) tronReport(t.cur)'),'Tron reports pending results');
@@ -27,7 +27,7 @@ function run(server,d,additional={}){
  const S={d,tron:{cur:{id:9,win:false}},msg:'Rezultat anterior',...additional};
  let leaves=0,skips=[],reward=0;
  const leave=skipGo=>{leaves++;skips.push(skipGo);reward+=10;S.d=null;S.msg='Pradă: 10 aur și XP.';};
- const fn=new Function('S','ST_SERVER','leave',source+';return betaFinishCompletedBattle;')(S,server,leave);
+ const fn=new Function('S','leave',source+';return betaFinishCompletedBattle;')(S,leave);
  return {S,fn,get leaves(){return leaves},get skips(){return skips},get reward(){return reward}};
 }
 const completed={raid:-3,tron:1,done:true,f:null,loot:{gold:10,ore:0,xp:0,m:{}}};
@@ -59,8 +59,6 @@ x=run('beta',{...completed,done:false});
 assert.equal(x.fn(),false,'Never exit an unfinished fight');
 x=run('beta',{...completed,f:{es:[{hp:0}]}});
 assert.equal(x.fn(),false,'Never exit before finish callback clears encounter');
-x=run('live',{...completed});
-assert.equal(x.fn(),false,'LIVE behavior unchanged');
 x=run('beta',null);
 assert.equal(x.fn(),false,'No active battle to settle');
-console.log('OK: completed PvP/Tron/world raids auto-settle once, Tower stays manual; dungeon and LIVE unchanged.');
+console.log('OK: completed PvP/Tron/world raids auto-settle once, Tower stays manual; dungeon unchanged.');

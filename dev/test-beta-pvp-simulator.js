@@ -64,7 +64,6 @@ assert.notEqual(mixed.fs[3].n,'Arcașul','nu duplicăm mercenarul');
 assert.equal(JSON.stringify(S),env.snap);
 S.d={tw:1};assert.equal(api.simPvpStart(),false,'nu se pornește peste o luptă reală');S.d=null;
 FX.playing=true;assert.equal(api.simPvpStart(),false,'nu se suprapun două animații');FX.playing=false;
-const live=create('live');assert.equal(live.api.simPvpAdminHtml(),'');assert.equal(live.api.simPvpStart(),false);
 const outsider=create('beta',false);assert.equal(outsider.api.simPvpAdminHtml(),'');assert.equal(outsider.api.simPvpStart(),false);
 const noSrv=create();noSrv.ADM.srv=false;assert.equal(noSrv.api.simPvpStart(),false,'admin neconfirmat pe server');
 assert(!/\b(?:tronRpc|save|spend|tronProvoca|lwAttack)\s*\(|supabaseClient\.(?:rpc|from)\s*\(/.test(source),'simulatorul nu face RPC-uri sau cheltuieli');

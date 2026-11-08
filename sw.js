@@ -7,7 +7,7 @@
    Cererile către alte site-uri (Supabase, fonturi, CDN) nu trec deloc prin aici.
    Schimbă VERSIUNE doar dacă vrei să golești memoria tuturor (de exemplu după o reorganizare a fișierelor).
    ========================================================================== */
-const VERSIUNE = 'st-2026-10-30';
+const VERSIUNE = 'st-2026-11-09';
 
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {

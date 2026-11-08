@@ -63,8 +63,7 @@ function lwSync(force) { if (_lwSync) return _lwSync; _lwSync = lwSync0(force).f
    echipa completa, fara sa cerem vizitarea hartii. Se deduplica dupa
    semnatura instantaneului deja acceptat de server. */
 function lwAutoPublishSoon() {
-  if (typeof ST_SERVER === 'undefined' || ST_SERVER !== 'beta'
-    || typeof CONT === 'undefined' || !CONT.user || !CONT.booted
+  if (typeof CONT === 'undefined' || !CONT.user || !CONT.booted
     || typeof S === 'undefined' || !S || S.d
     || !LUME.st || !LUME.st.me || LUME.loading || LUME.pubTimer) return;
   if (JSON.stringify(lwSnap()) === LUME.pubSig) return;
@@ -81,8 +80,7 @@ function lwUi() { try { if (lwOnWorld()) render(); else if (typeof hdr === 'func
 /* BETA: un administrator poate elimina doar pauza fata de ACELASI adversar.
    Optiunea este pastrata si verificata pe server; energia si restul
    conditiilor de atac raman obligatorii. LIVE nu o poate activa. */
-const lwTestCooldownAllowed = () => typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta'
-  && typeof CONT !== 'undefined' && !!CONT.user && !!CONT.booted;
+const lwTestCooldownAllowed = () => typeof CONT !== 'undefined' && !!CONT.user && !!CONT.booted;
 const lwTestCooldownOn = () => lwTestCooldownAllowed() && LUME.testCdReady && LUME.testCd === true;
 async function lwTestCooldownSync() {
   if (!lwTestCooldownAllowed() || LUME.testCdBusy || LUME.testCdLoaded) return;
@@ -169,9 +167,7 @@ async function lwAttack(id) {
 }
 function lwFight(data) {
   if (typeof cn === 'function') cn('a');   /* misiunea zilnică „Atacă jucători în Lume” */
-  const g = (data.units || []).map(u =>
-    typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta'
-      ? TT.throneDuelUnit(u) : TT.ghostUnit(u));
+  const g = (data.units || []).map(u => TT.throneDuelUnit(u));
   const d = { room: 1, rooms: 1, k: 1, rw: 0, bn: data.name, di: 0, raid: -4, rn: 'satul lui ' + data.name, lbl: 'Atac', lume: 1, dlv: data.level, vsh: data.hero || null,
     rf: 1, fx: 1, loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false, em: { ghost: 1 }, ghost: g };
   S.d = d; startF(true); terFrom(); S.tab = 'c'; S.msg = 'Ataci satul lui ' + data.name + '. Apărarea lui e o fantomă a echipei sale.';
@@ -318,7 +314,7 @@ function lwEnBar() {
 /* BETA: comparăm puterea FANTOMEI LUMII (maxim 4), nu duelul solo al Tronului.
    Puterea e orientativă, nu reprezintă șansa simulată a luptei. */
 function lwMatchAdvice(p,can){
- if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||!p)return '';
+ if(!p)return '';
  const party=typeof tronTeamUnits==='function'?tronTeamUnits():[];
  const myP=Math.round(TT.power(party)),enemy=Number(p.power);
  const known=Number.isFinite(enemy)&&enemy>0;
@@ -330,14 +326,14 @@ function lwMatchAdvice(p,can){
    :'Puterea este apropiată: compoziția și obiectele pot decide lupta.';
  const rule=can&&!can.ok?'Atacul este indisponibil acum: '+tEsc(String(can.why||'').replace(/<[^>]*>/g,''))+'.':'Atacul consumă o încercare din bara Lumii; apărătorul nu pierde nimic.';
  return '<div class="lw-match" role="note"><b>⚔ Potrivire orientativă: '+tier+'</b>'+
-  '<small>Fantoma Lumii: maxim '+(typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta' ? 4 : (TT.CFG&&TT.CFG.maxUnits||3))+' luptători · puterea ta '+lwNum(myP)+
+  '<small>Fantoma Lumii: maxim '+(4)+' luptători · puterea ta '+lwNum(myP)+
   (known?' · puterea adversarului '+lwNum(enemy):' · puterea adversarului indisponibilă')+'.</small>'+
   '<p>'+tip+' '+rule+'</p><small>La Tron este duel erou contra erou, nu fantomă de echipă.</small></div>';
 }
 /* Pas 23 · BETA: listă opțională de adversari atacabili, fără matchmaking
    nou. Folosește regula de protecție existentă și puterea fantomei din Lume. */
 function lwRecommendedOpponents(){
- if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||!LUME.st||!LUME.st.me||
+ if(!LUME.st||!LUME.st.me||
   !Array.isArray(LUME.st.players))return [];
  const own=Math.max(1,Math.round(TT.power(tronTeamUnits())));
  return LUME.st.players.filter(p=>p.id!==LUME.st.me.user_id&&lwCan(p).ok&&
@@ -346,7 +342,7 @@ function lwRecommendedOpponents(){
     String(a.id).localeCompare(String(b.id))).slice(0,3);
 }
 function lwRecommendedPanel(){
- if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||!LUME.st||!LUME.st.me)return '';
+ if(!LUME.st||!LUME.st.me)return '';
  const list=lwRecommendedOpponents();
  const own=Math.max(1,Math.round(TT.power(tronTeamUnits())));
  return '<section class="lw-recommend"><h2>Adversari de putere apropiată</h2>'+
@@ -362,25 +358,20 @@ function lwRecommendedPanel(){
 function lwSelPanel() {
   const st = LUME.st, p = LUME.sel && st.players.find(x => x.id === LUME.sel);
   if (!p) return '<p class="mute">Atinge un sat ca să vezi cine locuiește acolo.</p>';
-  const mine = st.me && p.id === st.me.user_id, can = mine ? null : lwCan(p), myP = Math.round(TT.power(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?tronTeamUnits():tronUnits()));
+  const mine = st.me && p.id === st.me.user_id, can = mine ? null : lwCan(p), myP = Math.round(TT.power(tronTeamUnits()));
   const cmp = mine ? '' : p.power > myP * 1.25 ? '<span class="r4">mai puternic decât tine</span>' : p.power < myP * 0.8 ? '<span class="lw-ok">mai slab decât tine</span>' : 'cam cât tine';
   return `<section class="lw-sel"><div class="lw-sel-h">${av({ n: p.hero && p.hero.n || p.name, c: (p.hero && p.hero.c) || 'Campion', ic: p.hero && p.hero.ic }, 56)}<div><h2>${tEsc(p.name)}${mine ? ' <span class="mute">(tu)</span>' : ''}</h2><div class="mute">${p.title ? '♛ ' + tEsc(p.title) + ' · ' : ''}${tEsc(p.stage_name)} · văzut ${lwAgo(p.seen)}</div></div></div>`
-    + `<div class="lw-stats"><div><b>${p.level}</b><span>Nivel</span></div><div><b>${lwNum(p.power)}</b><span>Putere</span></div>${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'':'<div><b>'+p.territories+'</b><span>Teritorii</span></div>'}</div>`
-    + (mine ? '' : (typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?lwMatchAdvice(p,can):`<div class="mute">Puterea echipei lui: ${cmp} (a ta: ${lwNum(myP)}).</div>`))
+    + `<div class="lw-stats"><div><b>${p.level}</b><span>Nivel</span></div><div><b>${lwNum(p.power)}</b><span>Putere</span></div></div>`
+    + (mine ? '' : lwMatchAdvice(p,can))
     + `<div class="row lw-act"><span class="mute">${mine ? 'Satul tău, așa cum îl văd ceilalți.' : can.ok ? 'Dacă învingi, iei prada și experiența. El nu pierde nimic.' : can.why}</span><span>${mine ? '' : `<button class="p" onclick="lwAttack('${p.id}')"${can.ok && !LUME.busy ? '' : ' disabled'}>Atacă · 1 ⚔</button> `}<button onclick="lwProfile('${p.id}')">Vezi profilul</button></span></div></section>`;
 }
 function lwLog() {
   const l = (LUME.st && LUME.st.log) || []; if (!l.length) return '';
-  const beta = typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta';
   // Jurnalul competitiv si portofelul din salvare nu sunt inca aceeasi sursa.
-  const note = beta
-    ? '<p class="mute" style="font-size:13px;margin:6px 0 10px">Sumele din jurnalul BETA sunt evidența raidurilor pe server, nu plata din portofel. Până la migrarea economiei, prada din joc poate diferi.</p>'
-    : '';
+  const note = '<p class="mute" style="font-size:13px;margin:6px 0 10px">Sumele din jurnalul BETA sunt evidența raidurilor pe server, nu plata din portofel. Până la migrarea economiei, prada din joc poate diferi.</p>';
   return `<section><h2>Jurnalul atacurilor</h2>${note}${l.map(x => {
     const o = `<button class="lw-lnk" onclick="lwProfile('${x.other_id}')">${tEsc(x.other)}</button>`;
-    const victory = beta
-      ? `Ai atacat satul lui ${o} și ai câștigat. Jurnal: ${lwNum(x.gold)} aur, ${lwNum(x.xp)} exp.`
-      : `Ai atacat satul lui ${o} și ai câștigat: +${lwNum(x.gold)} aur, +${lwNum(x.xp)} exp.`;
+    const victory = `Ai atacat satul lui ${o} și ai câștigat. Jurnal: ${lwNum(x.gold)} aur, ${lwNum(x.xp)} exp.`;
     const t = x.att ? (x.win ? victory : `Ai atacat satul lui ${o} și ai pierdut.`)
       : (x.win ? `${o} ți-a atacat satul și a câștigat. Nu ai pierdut nimic.` : `${o} ți-a atacat satul și a fost respins.`);
     return `<div class="row"><span>${x.att ? '⚔' : '🛡'} ${t}</span><span class="mute">${lwAgo(x.t)}</span></div>`;
@@ -390,12 +381,10 @@ function vLume() {
   if (!LUME.loading && (!LUME.st || Date.now() - LUME.at > 45000 || (Date.now() - LUME.at > 8000 && JSON.stringify(lwSnap()) !== LUME.pubSig))) lwSync();
   if (!LUME.st) return `<section><h2>Lumea</h2><p class="mute">${LUME.err ? tEsc(LUME.err) : 'Se încarcă harta lumii…'}</p>${LUME.err ? '<button onclick="lwSync(true)">Încearcă din nou</button>' : ''}</section>`;
   const n = LUME.st.players.length, c = lwCfg();
-  let h = `<section><h2>Harta</h2><div class="mute">${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?
-  'Lumea este comună: satele NPC sunt vizibile tuturor, iar satele jucătorilor pot fi atacate sau vizitate prin profil. Nu există cucerire, garnizoane private sau taxe de întreținere.' :
-  'Satele tuturor jucătorilor, în jurul Tronului de Argint. În jurul satului tău, în chenarul auriu, e <b>ținutul tău</b>: satele de jefuit și de cucerit, taberele, și locurile de interes, pe care doar tu le vezi.'}
+  let h = `<section><h2>Harta</h2><div class="mute">Lumea este comună: satele NPC sunt vizibile tuturor, iar satele jucătorilor pot fi atacate sau vizitate prin profil. Nu există cucerire, garnizoane private sau taxe de întreținere.
   Acum: <b>${n}</b> ${n === 1 ? 'sat' : 'sate'} de jucători.</div>${LUME.err ? `<p class="r4">${tEsc(LUME.err)}</p>` : ''}${LUME.repErr ? `<p class="r4">Rezultatul ultimului atac nu a ajuns la server (${tEsc(LUME.repErr)}). Se retrimite automat.</p>` : ''}${lwEnBar()}${lwTestCooldownPanel()}${lwMap()}`;
   h += `<div class="st-lg"><span><i style="background:#f0d27a"></i>Satul tău</span><span><i style="background:#c0504a"></i>Poate fi atacat</span><span><i style="background:#7b7f82"></i>Începător (sub nivelul ${c.min_level}) sau atacat recent de tine</span><span>👑 auriu: regele săptămânii · argintiu: pe Tron acum</span><span>Satul crește cu nivelul jucătorului: palisadă la 10, zid și turn la 20, fortificații la 25, castel de la 30</span></div></section>`;
-  return h + lwSelPanel() + lwRecommendedPanel() + lwLog() + `<section><h2>Reguli</h2><div class="mute">• Bara are ${c.en_max} atacuri și se reface câte unul la ${c.en_regen_min} de minute, adică ${Math.round(24 * 60 / c.en_regen_min)} pe zi.<br>• Același jucător îl poți ataca o dată la ${c.same_h} ore. Începătorii (sub nivelul ${c.min_level}) nu pot fi atacați și nu pot ataca.<br>${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'• Lupți cu fantoma de maximum 4 luptători publicată în Lume (eroul și până la 3 mercenari). Tronul are duel separat doar între eroi. Puterea este un reper, nu o șansă exactă; dacă învingi, primești pradă și experiență, iar apărătorul nu pierde nimic.':'• Lupți cu fantoma echipei lui, cu aceleași plafoane ca la Tron. Dacă învingi, iei prada calculată de joc și experiență în plus. Apărătorul nu pierde niciodată nimic, doar află din jurnal.'}<br>• Satele din Lume nu se pot cuceri; teritoriile rămân în regiunea ta.</div></section>`;
+  return h + lwSelPanel() + lwRecommendedPanel() + lwLog() + `<section><h2>Reguli</h2><div class="mute">• Bara are ${c.en_max} atacuri și se reface câte unul la ${c.en_regen_min} de minute, adică ${Math.round(24 * 60 / c.en_regen_min)} pe zi.<br>• Același jucător îl poți ataca o dată la ${c.same_h} ore. Începătorii (sub nivelul ${c.min_level}) nu pot fi atacați și nu pot ataca.<br>• Lupți cu fantoma de maximum 4 luptători publicată în Lume (eroul și până la 3 mercenari). Tronul are duel separat doar între eroi. Puterea este un reper, nu o șansă exactă; dacă învingi, primești pradă și experiență, iar apărătorul nu pierde nimic.<br>• Satele din Lume nu se pot cuceri; teritoriile rămân în regiunea ta.</div></section>`;
 }
 
 /* ------------------------------------------------------------------ CLASAMENT */
@@ -422,7 +411,7 @@ const lwMaxAv = (lv, html, big) => lv >= (typeof LMAX !== 'undefined' ? LMAX : 5
 function vBoard() {
   const k = LUME.bk, b = LUME.board[k], me = LUME.st && LUME.st.me && LUME.st.me.user_id;
   if (!LUME.bLoad[k] && (!b || Date.now() - (LUME.bAt[k] || 0) > 60000)) lwBoard(k);
-  const tabs = `<div class="tabs lw-bt">${LW.BOARD.filter(([x])=>typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||x!=='terr').map(([x, n]) => `<button${x === k ? ' class="p"' : ''} onclick="lwBk('${x}')">${n}</button>`).join('')}</div>`;
+  const tabs = `<div class="tabs lw-bt">${LW.BOARD.filter(([x])=>x!=='terr').map(([x, n]) => `<button${x === k ? ' class="p"' : ''} onclick="lwBk('${x}')">${n}</button>`).join('')}</div>`;
   let h = `<section><h2>Clasament</h2>${tabs}`;
   if (!b) return h + `<p class="mute">${LUME.bErr ? tEsc(LUME.bErr) : 'Se încarcă…'}</p></section>`;
   if (!b.rows.length) return h + `<p class="mute">${k === 'tron' ? 'Nu sunt încă date despre domnii la Tron.' : 'Nimeni în clasament încă.'}</p></section>`;
@@ -443,13 +432,13 @@ async function lwProfile(id) {
   const units = (p.units || []).map(u => `<div class="lwp-u"><b>${tEsc(u.n)}</b><span class="mute">${tEsc(u.c)}</span><span>${lwNum(u.hp)} viață · ${lwNum(u.atk)} atac · ${lwNum(u.def)} apărare</span></div>`).join('');
   const rec = (p.recent || []).map(x => `<div class="row"><span>${x.att ? (x.win ? '⚔ A învins satul lui ' : '⚔ A pierdut la satul lui ') : (x.win ? '🛡 A fost învins de ' : '🛡 L-a respins pe ')}${tEsc(x.other)}</span><span class="mute">${lwAgo(x.t)}</span></div>`).join('');
   mdl(`<div class="lwp"><div class="lwp-hd">${lwMaxAv(p.level, av({ n: p.hero.n || p.name, c: p.hero.c || 'Campion', ic: p.hero.ic }, 76), 1)}<div><h3>${tEsc(p.name)}${p.me ? ' <span class="mute">(tu)</span>' : ''}</h3><div class="lwp-t">${p.title ? '♛ ' + tEsc(p.title) : '<span class="mute">Fără titlu</span>'}</div><div class="mute">${tEsc(p.stage_name)} · joacă din ${lwDate(p.joined)}</div></div></div>`
-    + `<div class="lw-stats"><div><b>${p.level}</b><span>Nivel</span></div><div><b>${lwNum(p.power)}</b><span>Putere</span></div>${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'':'<div><b>'+p.territories+'</b><span>Teritorii</span></div>'}</div>`
+    + `<div class="lw-stats"><div><b>${p.level}</b><span>Nivel</span></div><div><b>${lwNum(p.power)}</b><span>Putere</span></div></div>`
     + `<div class="lwp-rk mute">Locul <b>${rk.level}</b> la nivel și <b>${rk.power}</b> la putere, din ${rk.total} jucători.</div>`
     + `<h4>Echipa</h4>${units || '<p class="mute">Nepublicată.</p>'}`
     + `<h4>Lupte</h4><div class="lwp-g"><div><b>${p.raids_won}</b><span>atacuri câștigate</span></div><div><b>${p.raids_lost}</b><span>atacuri pierdute</span></div><div><b>${p.def_won}</b><span>atacuri respinse</span></div><div><b>${p.def_lost}</b><span>ori învins acasă</span></div></div>`
     + (t ? `<h4>Tronul de Argint</h4><div class="mute">${t.crowns} ${t.crowns === 1 ? 'încoronare' : 'încoronări'} · ${tronHM(t.seconds)} pe Tron, în total</div>` : '')
     + (rec ? `<h4>Ultimele lupte</h4><div class="lwp-rec">${rec}</div>` : '')
-    + `<div class="mute lwp-seen">Văzut ${lwAgo(p.seen)}</div><div class="lwp-a"><button onclick="lwShow('${p.id}')">Vezi pe hartă</button>${!p.me && typeof wfProfileButton==='function' ? wfProfileButton(p.id) : ''}${!p.me && typeof gsrProfileInviteButton==='function' ? gsrProfileInviteButton(p.id) : ''}${!p.me && typeof wmBeta==='function' && wmBeta() ? `<button onclick="lgClose();wmCompose('${p.id}')">✉ Mesaj</button>` : ''}${can ? `<button class="p" onclick="lwAttack('${p.id}')"${can.ok ? '' : ' disabled'}>Atacă · 1 ⚔</button>` : ''}</div>${can && !can.ok ? `<div class="mute" style="font-size:14px">${can.why}</div>` : ''}</div>`, 'lwp-b');
+    + `<div class="mute lwp-seen">Văzut ${lwAgo(p.seen)}</div><div class="lwp-a"><button onclick="lwShow('${p.id}')">Vezi pe hartă</button>${!p.me && typeof wfProfileButton==='function' ? wfProfileButton(p.id) : ''}${!p.me && typeof gsrProfileInviteButton==='function' ? gsrProfileInviteButton(p.id) : ''}${!p.me ? `<button onclick="lgClose();wmCompose('${p.id}')">✉ Mesaj</button>` : ''}${can ? `<button class="p" onclick="lwAttack('${p.id}')"${can.ok ? '' : ' disabled'}>Atacă · 1 ⚔</button>` : ''}</div>${can && !can.ok ? `<div class="mute" style="font-size:14px">${can.why}</div>` : ''}</div>`, 'lwp-b');
 }
 function lwShow(id) { lgClose(); S.tab = 'm'; S.mt = 'l'; S.msg = ''; LUME.sel = id; const p = LUME.st && LUME.st.players.find(x => x.id === id); if (p && LUME.full) lwCenter(p); else LUME.camInit = false; go(); }
 

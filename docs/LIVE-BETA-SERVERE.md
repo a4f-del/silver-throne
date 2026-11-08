@@ -1,5 +1,7 @@
 # Silver Throne — două servere, LIVE + BETA
 
+> **Actualizare 9 noiembrie 2026:** BETA este acum jocul implicit. `ST_SERVER`, selectorul LIVE/BETA, `stSwitchServer` și configurația Supabase LIVE au fost scoase din client; `servere.js` conține doar `ST_BETA_CONFIG`. Poarta `is_beta_admin()` și blocarea conturilor noi rămân active. Secțiunile de mai jos descriu configurația istorică cu două servere.
+
 ## LIVE
 - Păstrează URL-ul și cheia publicabilă deja folosite în `index.html`.
 - `?server=beta` nu poate schimba LIVE fără configurarea BETA.

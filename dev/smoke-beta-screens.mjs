@@ -19,7 +19,7 @@ const page = await context.newPage();
 page.on('pageerror',e=>errors.push(e.message));
 page.on('console',m=>{if(m.type()==='error'&&/ReferenceError|SyntaxError|TypeError|not defined/i.test(m.text()))errors.push(m.text());});
 try {
-  await page.goto('https://a4f-del.github.io/silver-throne/?server=beta',{waitUntil:'domcontentloaded'});
+  await page.goto('https://a4f-del.github.io/silver-throne/',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>typeof CONT!=='undefined'&&CONT.booted&&typeof S!=='undefined'&&S&&S.fs&&document.querySelector('#v'),
     undefined,{timeout:25000});
   const screens=[

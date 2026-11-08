@@ -155,32 +155,12 @@ function terTaken() {
   t.poi.forEach(p => s.add(TW.cellKey(p.x, p.y))); s.add(TW.cellKey(t.fort.x, t.fort.y)); t.camps.forEach(c => s.add(TW.cellKey(c.x, c.y))); return s;
 }
 function terCamps() {
-  if (cmpBeta()) return; /* BETA: dezactivăm apariția taberelor, păstrăm datele istorice. */
-  const t = S.ter, now = Date.now(), sh = TP.camp.slotH * 3600000, cur = Math.floor(now / sh), back = Math.ceil(12 * 3600000 / sh);
-  for (let s = Math.max(t.cslot + 1, cur - back); s <= cur; s++) {
-    if (t.camps.some(c => c.sl === s)) continue;
-    TW.campsForSlot(terKey(), s, S.lvl, terTaken(), TP).forEach(c => { if (c.exp > now && !t.cdn[c.id]) t.camps.push(c); });
-  }
-  t.cslot = Math.max(t.cslot, cur);
-  t.camps = t.camps.filter(c => c.exp > now && !t.cdn[c.id]).sort((a, b) => a.exp - b.exp).slice(-TP.camp.max);
-  const ids = Object.keys(t.cdn); if (ids.length > 60) ids.slice(0, ids.length - 60).forEach(k => delete t.cdn[k]);
+  return;
 }
 function campK(c) { const T = TW.camp(c.t); return TW.kb(S.lvl) * T.km; }
 function campCost(c) { const T = TW.camp(c.t); return trvC(c.x, c.y) + T.fights - 1; }
 function campGo(id) {
-  if (cmpBeta()) { S.msg = 'Taberele NPC au fost retrase din BETA.'; return go(); }
-  terInit(); const c = S.ter.camps.find(x => x.id === id), T = c && TW.camp(c.t);
-  if (!c || c.exp <= Date.now()) { S.msg = 'Tabăra a plecat.'; return go(); }
-  if (S.d) { S.msg = 'Ești deja într-o coborâre.'; return go(); }
-  if (!S.fs.some(f => f.hp > 0)) { S.msg = 'Toți luptătorii sunt căzuți. Du-te la infirmerie.'; return go(); }
-  if (c.att >= TP.camp.retries) { S.msg = 'Ai încercat deja de ' + TP.camp.retries + ' ori. Tabăra s-a întărit și nu mai poate fi atacată.'; return go(); }
-  const cost = trvC(c.x, c.y) + 0; if (S.pts < campCost(c)) { S.msg = 'Îți trebuie ' + campCost(c) + ' puncte (drum, lupte și căpitan).'; return go(); }
-  cn('r'); spend(cost); c.att++;
-  const k = campK(c);
-  S.d = { room: 1, rooms: T.fights, k, rw: TP.camp.rw, bn: T.bn, di: 0, raid: -1, rn: T.nm, lbl: 'Tabără', camp: c.id, rf: 1, fx: 1, xn: T.xn, loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false,
-    em: { nm: T.en, dr: T.drops, hm: T.hm, am: T.am, dm: T.dm } };
-  startF(false); terFrom(); S.tab = 'c'; S.msg = 'Ai ajuns la ' + T.nm + '.';
-  if (S.auto !== false) { autoRun(); return; } go();
+   S.msg = 'Taberele NPC au fost retrase din BETA.'; return go(); 
 }
 /* recompensa la căderea căpitanului: deterministă după seed-ul taberei */
 function terCampWin(d) {
@@ -324,9 +304,7 @@ function terDevPanel() { return DEV(); }
 /* ---------------------------------------------------------------- CAMPANIE ---- */
 /* BETA: obiective concentrate pe căpitanii temnițelor; ID-urile și premiile
    deja revendicate rămân intacte. Datele TW.CH/TW.SEC din LIVE nu se modifică. */
-const cmpBeta=()=>typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta';
 function cmpChapters(){
- if(!cmpBeta())return TW.CH;
  const bosses={1:[0],2:[4],3:[1],4:[5,9],5:[2,6],6:[3,7,8]};
  const lore={
   2:{tx:'Alfa Haitei păzește al doilea sigiliu în Peștera Lupilor. Înfrânge-l ca să deschizi drumul spre Catacombe.',out:'Al doilea sigiliu s-a stins. Drumul spre Catacombe e deschis.'},
@@ -337,7 +315,6 @@ function cmpChapters(){
   obj:c.obj.filter(o=>o.k==='boss'&&bosses[c.id].includes(o.di))}));
 }
 function cmpSides(){
- if(!cmpBeta())return TW.SEC;
  return TW.SEC.map(s=>s.id==='pust'
   ?{...s,nm:'Cronica căpitanilor',t:'Înfrânge 3 căpitani diferiți în temnițe',k:'bosses',n:3}
   :s.id==='vana'
@@ -386,7 +363,7 @@ const cmpReady = () => { const c = chCur(); return (c && chReady(c) ? 1 : 0) + c
    sarcină concretă, nu la introducerea lungă de deasupra listei.
    Nu pornim automat lupta și nu schimbăm progresul campaniei. */
 function cmpOpenChecklist(source) {
-  if (!cmpBeta() || typeof S === 'undefined' || !S || S.d) return;
+  if (typeof S === 'undefined' || !S || S.d) return;
   S.tab = 'm'; S.mt = 'k'; S.msg = '';
   if (source === 'journey') S.jeCampaignOpened = 1;
   if (source === 'story') S.sqCampaignOpened = 1;
@@ -413,7 +390,7 @@ function cmpOpenChecklist(source) {
 /* BETA: checklist vizibil și highlight fin al următoarei sarcini.
    Nu apar animatii continue si nu există overlay deasupra hărții. */
 (function(){
-  if(!cmpBeta()||typeof document==='undefined'||!document.head)return;
+  if(typeof document==='undefined'||!document.head)return;
   const el=document.createElement('style');
   el.textContent=[
     '.cmp-todo{border:1px solid #c5a46255;border-radius:9px;background:#c5a46208;padding:9px 11px;margin:11px 0}',
@@ -432,15 +409,15 @@ function cmpOpenChecklist(source) {
 })();
 function vCamp() {
   const chapters=cmpChapters(), sides=cmpSides(),cur=chCur(),n=chapters.filter(c=>S.camp.rw[c.id]).length;
-  let h = `<section><h2>Campania: Tronul Cenușiu</h2><div class="mute">Regele Cenușiu a stins Vatra Regală și stă pe Tronul de Argint. Șase sigilii țin Cenușa vie, fiecare păzit de un căpitan. ${cmpBeta()?'Progresul campaniei este permanent: învinge căpitanii din temnițe. Nu sunt necesare cuceriri sau raiduri repetate.':'Progresul campaniei e permanent: nu se pierde dacă pierzi un sat sau o fortăreață.'}</div><div class="row" style="justify-content:center;gap:10px;margin-top:8px">${chapters.map(c => `<span title="Sigiliul ${c.id}: ${c.nm}" style="display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;border:2px solid ${S.camp.rw[c.id] ? 'var(--gold2)' : 'var(--line)'};background:${S.camp.rw[c.id] ? 'radial-gradient(#f0d27a,#8a6a1e)' : '#0b0e10'};color:${S.camp.rw[c.id] ? '#1a1306' : 'var(--mute)'};font:700 14px Cinzel,serif">${c.id}</span>`).join('')}</div><div class="mute" style="text-align:center">${n}/${chapters.length} sigilii arse</div></section>`;
+  let h = `<section><h2>Campania: Tronul Cenușiu</h2><div class="mute">Regele Cenușiu a stins Vatra Regală și stă pe Tronul de Argint. Șase sigilii țin Cenușa vie, fiecare păzit de un căpitan. Progresul campaniei este permanent: învinge căpitanii din temnițe. Nu sunt necesare cuceriri sau raiduri repetate.</div><div class="row" style="justify-content:center;gap:10px;margin-top:8px">${chapters.map(c => `<span title="Sigiliul ${c.id}: ${c.nm}" style="display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;border:2px solid ${S.camp.rw[c.id] ? 'var(--gold2)' : 'var(--line)'};background:${S.camp.rw[c.id] ? 'radial-gradient(#f0d27a,#8a6a1e)' : '#0b0e10'};color:${S.camp.rw[c.id] ? '#1a1306' : 'var(--mute)'};font:700 14px Cinzel,serif">${c.id}</span>`).join('')}</div><div class="mute" style="text-align:center">${n}/${chapters.length} sigilii arse</div></section>`;
   if (cur) {
     const ok = chReady(cur);
-    h += `<section${cmpBeta()?' class="cmp-next"':''} style="border-left-color:var(--ember)"><h2>Capitolul ${cur.id}: ${cur.nm}</h2><div class="mute">${cur.reg} · recomandat nivel ${cur.lv}${S.lvl < cur.lv ? ' <b class="r4">(ai ' + S.lvl + ')</b>' : ''}</div><p>${cur.tx}</p>` + (cmpBeta()?'<div id="cmp-to-do" class="cmp-todo" aria-label="Lucruri de făcut în Campanie"><b class="cmp-todo-title">Ce ai de făcut acum</b>':'') + cur.obj.map(o => cmpBeta()?`<div class="cmp-task${objDone(o)?' done':''}"><span aria-hidden="true">${objDone(o)?'✔':'○'}</span><span>${o.t}${o.n ? ' <span class="mute">(' + objProg(o) + ')</span>' : ''}</span></div>`:`<div class="${objDone(o) ? 'r2' : ''}">${objDone(o) ? '✔' : '○'} ${o.t}${o.n ? ' <span class="mute">(' + objProg(o) + ')</span>' : ''}</div>`).join('') + (cmpBeta()?'</div>':'') +
-      `<div class="row"><span class="mute">Recompensă unică: ${Object.entries(TW.chRw(cur.rw, Math.max(S.lvl, cur.lv))).filter(([, v]) => v).map(([k, v]) => v + ' ' + ({ g: 'aur', o: 'minereu', x: 'exp' })[k]).join(', ')}${cur.rw.item ? ', un obiect' : ''}${cur.rw.relic ? ', o relicvă' : ''}${cur.rw.mat ? ', materiale' : ''}${cur.rw.cr ? ', cristale' : ''}${cur.rw.legend ? ', Sabia Runelor' : ''}</span><button class="p${cmpBeta()&&ok?' cmp-claim-ready':''}" onclick="cmpClaim(${cur.id})"${ok ? '' : ' disabled'}>Încheie capitolul</button></div></section>`;
-  } else h += `<section><h2>Tronul de Argint e al tău</h2><p>Toate cele șase sigilii au ars. Ținutul e liber, iar Tronul Cenușiu își așteaptă regele. ${cmpBeta()?'Temnițele, Turnul și Lumea te așteaptă.':'Explorarea, taberele și satele rămân deschise.'}</p></section>`;
-  h += `<section${cmpBeta()?' class="cmp-secondary"':''}><h2>Obiective secundare</h2><div class="mute">Recompense unice. Se revendică o singură dată.</div>` + sides.map(s => { const d = objDone(s), cl = S.camp.sec[s.id]; return `<div class="row${cmpBeta()?' cmp-task'+(cl?' done':''):''}"><span>${cl ? '✔' : d ? '★' : '○'} <b>${s.nm}</b>: ${s.t} <span class="mute">${s.n ? '(' + objProg(s) + ')' : ''}</span></span>${cl ? '<span class="mute">Revendicat</span>' : `<button class="p" onclick="secClaim('${s.id}')"${d ? '' : ' disabled'}>Revendică</button>`}</div>`; }).join('') + '</section>';
+    h += `<section class="cmp-next" style="border-left-color:var(--ember)"><h2>Capitolul ${cur.id}: ${cur.nm}</h2><div class="mute">${cur.reg} · recomandat nivel ${cur.lv}${S.lvl < cur.lv ? ' <b class="r4">(ai ' + S.lvl + ')</b>' : ''}</div><p>${cur.tx}</p>` + ('<div id="cmp-to-do" class="cmp-todo" aria-label="Lucruri de făcut în Campanie"><b class="cmp-todo-title">Ce ai de făcut acum</b>') + cur.obj.map(o => (`<div class="cmp-task${objDone(o)?' done':''}"><span aria-hidden="true">${objDone(o)?'✔':'○'}</span><span>${o.t}${o.n ? ' <span class="mute">(' + objProg(o) + ')</span>' : ''}</span></div>`)).join('') + ('</div>') +
+      `<div class="row"><span class="mute">Recompensă unică: ${Object.entries(TW.chRw(cur.rw, Math.max(S.lvl, cur.lv))).filter(([, v]) => v).map(([k, v]) => v + ' ' + ({ g: 'aur', o: 'minereu', x: 'exp' })[k]).join(', ')}${cur.rw.item ? ', un obiect' : ''}${cur.rw.relic ? ', o relicvă' : ''}${cur.rw.mat ? ', materiale' : ''}${cur.rw.cr ? ', cristale' : ''}${cur.rw.legend ? ', Sabia Runelor' : ''}</span><button class="p${ok?' cmp-claim-ready':''}" onclick="cmpClaim(${cur.id})"${ok ? '' : ' disabled'}>Încheie capitolul</button></div></section>`;
+  } else h += `<section><h2>Tronul de Argint e al tău</h2><p>Toate cele șase sigilii au ars. Ținutul e liber, iar Tronul Cenușiu își așteaptă regele. Temnițele, Turnul și Lumea te așteaptă.</p></section>`;
+  h += `<section class="cmp-secondary"><h2>Obiective secundare</h2><div class="mute">Recompense unice. Se revendică o singură dată.</div>` + sides.map(s => { const d = objDone(s), cl = S.camp.sec[s.id]; return `<div class="row${(' cmp-task'+(cl?' done':''))}"><span>${cl ? '✔' : d ? '★' : '○'} <b>${s.nm}</b>: ${s.t} <span class="mute">${s.n ? '(' + objProg(s) + ')' : ''}</span></span>${cl ? '<span class="mute">Revendicat</span>' : `<button class="p" onclick="secClaim('${s.id}')"${d ? '' : ' disabled'}>Revendică</button>`}</div>`; }).join('') + '</section>';
   const cls = Object.keys(S.ter.cl);
-  if(!cmpBeta()||cls.length)h += `<section><h2>${cmpBeta()?'Arhivă de indicii':'Jurnal de indicii'} (${cls.length}/${Object.keys(TW.CLUES).length})</h2>` + (cls.length ? cls.map(k => `<div style="margin:4px 0">• ${TW.CLUES[k]}</div>`).join('') : '<p class="mute">Vizitează ruine, peșteri, sanctuare și turnuri ca să afli ce se întâmplă în ținut.</p>') + '</section>';
+  if(cls.length)h += `<section><h2>Arhivă de indicii (${cls.length}/${Object.keys(TW.CLUES).length})</h2>` + (cls.length ? cls.map(k => `<div style="margin:4px 0">• ${TW.CLUES[k]}</div>`).join('') : '<p class="mute">Vizitează ruine, peșteri, sanctuare și turnuri ca să afli ce se întâmplă în ținut.</p>') + '</section>';
   const done = chapters.filter(c => S.camp.rw[c.id]); if (done.length) h += `<section><h2>Capitole încheiate</h2>` + done.map(c => `<div style="margin:6px 0"><b>${c.id}. ${c.nm}</b><br><span class="mute">${c.out}</span></div>`).join('') + '</section>';
   return h;
 }
@@ -512,7 +489,7 @@ function bfx(k, l) {
     case 'i': return 'cost vindecare/ridicare −' + Math.round((1 - Math.pow(.96, l)) * 100) + '%';
     case 'b': return 'faimă pentru mercenari +' + 5 * l + '%';
     case 'd': return 'capacitate ' + (100 + 50 * l) + ' / material';
-    case 'z': return typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'doar aspect vizual (bonus defensiv retras)':'apărarea satului +' + Math.round(60 * (1 - Math.pow(.92, l))) + '%';
+    case 'z': return ('doar aspect vizual (bonus defensiv retras)');
   }
   return '';
 }
@@ -612,19 +589,19 @@ function vScene() {
   s += `<path d="M225 200L246 168M295 200L278 168" stroke="#6b5a3a" stroke-width="5" opacity=".6"/>`;
   if (S.ter.fort.o === 'p') s += `<g transform="translate(498 150)"><rect x="-10" y="-34" width="20" height="34" fill="#4d555b" stroke="#1a1d20"/><path d="M-13 -34l13 -11 13 11z" fill="#3a4147"/><path class="st-fl" d="M0 -45v-10l9 3-9 3" fill="${flagCol()}"/></g>`;
   const own = terOwnedV().length; for (let i = 0; i < Math.min(own, 5); i++) s += `<g transform="translate(${22 + i * 13} 194)"><path d="M0 0v-14" stroke="#2a1d10"/><path class="st-fl" d="M0 -14l8 3-8 3z" fill="${flagCol()}"/></g>`;
-  s += bSvg('z', b.z, 260, pal, typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'?b.z < mx && S.gold >= bcc(b.z):false, bcc(b.z));
+  s += bSvg('z', b.z, 260, pal, false, bcc(b.z));
   ['f', 'i', 'b', 'd'].forEach(k => { const can = b[k] < mx && S.gold >= bcc(b[k]); s += bSvg(k, b[k], xs[k], pal, can, bcc(b[k])); });
   s += '</svg>';
   const sel = S.bsel && BNAME[S.bsel] ? S.bsel : null, pr = Math.min(100, Math.round(tot / Math.max(1, 5 * mx) * 100));
   let h = `<section><h2>Satul tău: ${TW.STAGES[st][1]}</h2>${s}<div class="row" style="margin-top:6px"><span class="mute">Progres general: ${tot} niveluri de clădiri (maxim ${5 * mx} la nivelul tău)${nxt ? ' · următorul aspect la ' + nxt[0] : ' · aspect maxim'}</span></div>${bar(tot, Math.max(1, nxt ? nxt[0] : tot))}`;
-  if (sel) { const l = b[sel]; h += `<div class="row"><span><b>${BNAME[sel]}</b> nivel ${l}: ${bfx(sel, l)}${l < mx ? `<br><span class="mute">Nivelul ${l + 1}: ${bfx(sel, l + 1)}</span>` : '<br><span class="mute">Nivel maxim pentru nivelul tău.</span>'}<br><span class="mute">${bAspTxt(sel)}</span></span>${l < mx && !(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&sel==='z') ? `<button class="p" onclick="build('${sel}')"${S.gold >= bcc(l) ? '' : ' disabled'}>${bcc(l)} aur</button>` : ''}</div>` + renRow(sel); }
+  if (sel) { const l = b[sel]; h += `<div class="row"><span><b>${BNAME[sel]}</b> nivel ${l}: ${bfx(sel, l)}${l < mx ? `<br><span class="mute">Nivelul ${l + 1}: ${bfx(sel, l + 1)}</span>` : '<br><span class="mute">Nivel maxim pentru nivelul tău.</span>'}<br><span class="mute">${bAspTxt(sel)}</span></span>${l < mx && sel!=='z' ? `<button class="p" onclick="build('${sel}')"${S.gold >= bcc(l) ? '' : ' disabled'}>${bcc(l)} aur</button>` : ''}</div>` + renRow(sel); }
   else h += '<div class="mute">Atinge o clădire pentru detalii. Săgeata aurie arată ce poți îmbunătăți acum.</div>';
   h += `<div class="row"><span class="mute">Aspect: </span><span><button${S.cos.vt === 'clasic' ? ' class="p"' : ''} onclick="cosSet('clasic')">Clasic</button> <button${S.cos.vt === 'argint' ? ' class="p"' : ''} onclick="cosSet('argint')">Argint${ENT.has('cosm') ? '' : ' (Premium)'}</button></span></div></section>`;
   return h;
 }
 function vK2() {
   const b = BL();
-  return `<section><h2>Clădiri</h2><div class="mute">Nivel maxim al clădirilor la nivelul tău: ${bmax()}.${terB('bld') ? ' Cariera ta reduce costul cu ' + terB('bld') + '%.' : ''}</div>${BN.filter(([k])=>typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||k!=='z').map(([k, n, d]) => `<div class="row"><span class="bl">${bth(k)}<span><b>${n}</b>, nivel ${b[k]}<br><span class="mute">${bfx(k, b[k])}${b[k] < bmax() ? ' → ' + bfx(k, b[k] + 1) : ''}</span><br><span class="mute">${bAspTxt(k)}</span>${renStage(k) || renOk(k) ? `<br><span class="mute">${renTxt(k)}</span>` : ''}</span></span><button class="p" onclick="build('${k}')"${b[k] >= bmax() ? ' disabled' : ''}>${bcc(b[k])} aur</button></div>`).join('')}</section>
+  return `<section><h2>Clădiri</h2><div class="mute">Nivel maxim al clădirilor la nivelul tău: ${bmax()}.${terB('bld') ? ' Cariera ta reduce costul cu ' + terB('bld') + '%.' : ''}</div>${BN.filter(([k])=>k!=='z').map(([k, n, d]) => `<div class="row"><span class="bl">${bth(k)}<span><b>${n}</b>, nivel ${b[k]}<br><span class="mute">${bfx(k, b[k])}${b[k] < bmax() ? ' → ' + bfx(k, b[k] + 1) : ''}</span><br><span class="mute">${bAspTxt(k)}</span>${renStage(k) || renOk(k) ? `<br><span class="mute">${renTxt(k)}</span>` : ''}</span></span><button class="p" onclick="build('${k}')"${b[k] >= bmax() ? ' disabled' : ''}>${bcc(b[k])} aur</button></div>`).join('')}</section>
   <section><h2>La ce folosește fiecare resursă</h2><div class="mute"><b>Aur:</b> clădiri, antrenament, recrutare, vindecare, echipamente și servicii din Sat.<br><b>Minereu:</b> baza oricărei forjări.<br><b>Materiale:</b> o resursă comună pentru forjare și consumabile din explorare.<br><b>Cristale:</b> determină raritatea obiectelor forjate (Magic, Rar, Epic).<br><b>Puncte:</b> ritmul tuturor activităților (uși, raiduri, tabere, locuri de interes).</div></section>` + flagRow();
 }
 const terStage = () => { const b = BL(), n = Object.values(S.ren || {}).reduce((a, x) => a + x, 0); return TW.STAGES[TW.stage(BN.reduce((s, [k]) => s + (b[k] || 0), 0))][1] + (n ? ' · ★' + n : ''); };
@@ -639,7 +616,6 @@ function terMarks() {
   const t = S.ter, sl = S.msel, c = p => smPush(p.x * SMCL + SMCL / 2, p.y * SMCL + SMCL / 2); let s = '';
   t.poi.forEach(p => { if (!terCell(p.x, p.y)) return; const [x, y] = c(p), T = TW.poiT(p.t), left = poiLeft(p); s += terIcon(x, y, T.ic, left > 0 ? '#6b6755' : '#8fb0c8', sl && sl.k === 'p' && sl.a === p.id, `terSel('p','${p.id}')`, T.nm, left > 0 ? '' : '!'); });
   { const f = t.fort; if (terCell(f.x, f.y)) { const [x, y] = c(f); s += terIcon(x, y, TW.FORT.ic, f.o === 'p' ? TCOL : '#c0504a', sl && sl.k === 'f', `terSel('f')`, TW.FORT.nm, f.o === 'p' ? 'tău' : ''); } }
-  if (!cmpBeta()) t.camps.forEach(cp => { const [x, y] = c(cp), T = TW.camp(cp.t), h = Math.max(1, Math.round((cp.exp - Date.now()) / 3600000)); s += terIcon(x, y, T.ic, '#d4564f', sl && sl.k === 'c' && sl.a === cp.id, `terSel('c','${cp.id}')`, T.nm, '☠'.repeat(T.stars) + ' ' + h + 'h'); });
   return s;
 }
 
@@ -653,24 +629,16 @@ function terPanel() {
       const T = TW.poiT(p.t), left = poiLeft(p), c = poiCost(p), once = p.t === 'tu';
       h = `<section><h2>${T.ic} ${T.nm}</h2><div class="mute">${T.d}</div><div class="row"><span>Cost: <b>${c} ${c == 1 ? 'punct' : 'puncte'}</b> · ${once ? 'o singură dată' : 'revine după ' + T.cd + ' h'}<br><span class="mute">Alegerile din expediție au risc afișat clar. Nu pierzi niciodată nimic din depozit.${p.t === 'pe' ? ' Vena se epuizează dacă o storci des (până la −50%).' : ''}</span></span><button class="p" onclick="poiGo('${p.id}')"${left > 0 || S.pts < c || S.ex || S.d ? ' disabled' : ''}>${once ? 'Urcă în turn' : 'Intră'}</button></div>${left > 0 ? `<div class="mute">${once ? 'Ai urcat deja în acest turn.' : 'Epuizat acum. Revine peste ' + tDur(left) + '.'}</div>` : ''}</section>`;
     }
-  } else if (s && s.k === 'c' && !cmpBeta()) {
-    const cp = t.camps.find(x => x.id === s.a); if (cp) {
-      const T = TW.camp(cp.t), r = T.rw, lv = cp.lv, rw = [Math.round(TW.rawGold(lv) * r.g) + ' aur'];
-      if (r.mats) rw.push(r.mats + ' materiale'); (r.cr || []).forEach(([k, n, p]) => rw.push(Math.round(p * 100) + '% ' + n + ' × ' + mn(k))); if (r.item) rw.push('un obiect ' + (r.item[0] == r.item[1] ? QN[0] && ['', 'Magic', 'Rar', 'Epic'][r.item[0]] : 'Magic sau Rar')); if (r.merc) rw.push('un mercenar de rang superior'); if (r.relic) rw.push('o relicvă');
-      const left = cp.exp - Date.now(), cost = campCost(cp);
-      h = `<section><h2>${T.ic} ${T.nm}</h2><div class="row"><span>Nivel ${lv} · risc <b class="r4">${'☠'.repeat(T.stars)}</b> · ${T.fights} lupte<br><span class="mute">Inamici: ${T.en.join(', ')}. ${T.why}</span></span></div><div class="row"><span>Recompense (la căderea căpitanului): <b>${rw.join(', ')}</b></span></div><div class="row"><span class="mute">Pleacă peste <span data-end="${cp.exp}">${tDur(left)}</span> · încercări rămase: ${TP.camp.retries - cp.att}/${TP.camp.retries} · recompensa nu poate fi cerută de două ori</span><button class="p" onclick="campGo('${cp.id}')"${S.pts < cost || S.d || cp.att >= TP.camp.retries ? ' disabled' : ''}>Atacă (${cost} p)</button></div></section>`;
-    }
   } else if (s && s.k === 'f') {
     const f = t.fort, c = fortCheck();
     h = `<section><h2>${TW.FORT.ic} ${TW.FORT.nm}</h2><div class="mute">Fortăreața Regelui pe marginea ținutului: 3 lupte (poartă, curte, castelan), fără odihnă între ele.</div><div class="row"><span>Beneficiu: <b>${TW.FORT.bd}</b></span></div>` +
       (f.o === 'p' ? `<div class="row"><span style="color:var(--gold2)"><b>În stăpânirea ta</b></span></div>`
         : (f.lost ? '<div class="r4">Pierdut: recucerire cu taxă redusă și apărători mai slabi.</div>' : '') + c.a.map(x => `<div class="${x.ok ? 'r2' : 'r4'}" style="font-size:15px">${x.ok ? '✔' : '✖'} ${x.t}</div>`).join('') + `<div class="row"><span class="mute">Eșecul nu pierde progresul campaniei.</span><button class="p" onclick="fortGo()"${c.ok ? '' : ' disabled'}>${c.re ? 'Recucerește' : 'Asediază'}</button></div>`) + '</section>';
   }
-  return h || (cmpBeta() ? '' : '<p class="mute">Atinge un sat, o tabără sau un loc de pe hartă ca să-l vezi.</p>');
+  return h;
 }
 function terLegend() {
-  if (cmpBeta()) return ''; /* Legenda regiunii vechi nu apare în Lumea comună. */
-  return `<div class="st-lg"><span>🏛⛏✦🛒🗼 locuri de interes</span><span><i style="background:#d4564f"></i>tabere (cu timp limitat)</span><span><i style="background:${TCOL}"></i>teritoriile tale</span></div>`;
+  return '';
 }
 /* Filele Hartii: handlerul era referit de onclick, dar lipsea,
    blocand accesul la Campanie (ReferenceError: mtab is not defined). */

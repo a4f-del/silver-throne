@@ -39,23 +39,23 @@ const checks=[
 ];
 for(const k of checks)assert(sql.includes('AS '+k),'Missing SQL diagnostic: '+k);
 assert.equal(checks.length,8);
-assert(index.includes('tron.js?v=2026.11.08-5'),'New JS version must be visible in BETA');
+assert(index.includes('tron.js?v=2026.11.09-1'),'New JS version must be visible in BETA');
 const begin=tron.indexOf('function tronAuditFinishRpcMissing(error) {');
 const end=tron.indexOf('/* ------------------------------------------------------------------ PREMII */',begin);
 assert(begin>=0&&end>begin,'Audited report code exists');
 const js=tron.slice(begin,end);
-assert(js.includes("tronIsBetaDuel() && TRON.auditFinishRpc !== false"),'BETA only');
+assert(js.includes("if (TRON.auditFinishRpc !== false)"),'Audited RPC preferred');
 assert(js.includes("tronRpc('beta_throne_challenge_finish_audited', args)"),'Wrapper attempted');
 assert(js.includes("tronRpc('throne_challenge_finish', args)"),'Legacy fallback preserved');
 assert(js.includes('if (r.error && tronAuditFinishRpcMissing(r.error))'),'Fallback only for missing RPC');
-function harness(beta, replies) {
+function harness(replies) {
  const S={tron:{cur:{id:5,win:true}},tab:'r',d:null,msg:''};
  const TRON={rep:false,repErr:'',auditFinishRpc:null};
  const calls=[];let saved=0,synced=0,redraw=0;
  const fn=new Function(
- 'S','TRON','tronIsBetaDuel','tronRpc','save','tronSync','go',
+ 'S','TRON','tronRpc','save','tronSync','go',
  js+';return {tronReport,tronAuditFinishRpcMissing};'
- )(S,TRON,()=>beta,async (name,args)=>{
+ )(S,TRON,async (name,args)=>{
    calls.push([name,args]);
    const r=replies.shift();
    if(!r)throw Error('Unmocked RPC '+name);
@@ -64,7 +64,7 @@ function harness(beta, replies) {
  return {S,TRON,calls,fn,get saved(){return saved},get synced(){return synced},get redraw(){return redraw}};
 }
 (async()=>{
- let x=harness(true,[{data:{crowned:true}}]);
+ let x=harness([{data:{crowned:true}}]);
  await x.fn.tronReport({id:5,win:true});
  assert.deepEqual(x.calls.map(v=>v[0]),['beta_throne_challenge_finish_audited']);
  assert.deepEqual(x.calls[0][1],{p_id:5,p_win:true});
@@ -74,7 +74,7 @@ function harness(beta, replies) {
  assert.match(x.S.msg,/Tronul de Argint/);
  assert.equal(x.TRON.rep,false);
  
- x=harness(true,[{error:'PGRST202: Could not find the function public.beta_throne_challenge_finish_audited(p_id,p_win) in schema cache'},{data:{crowned:false,reason:'Protectie'}},{data:{crowned:false,reason:'Pauză'}}]);
+ x=harness([{error:'PGRST202: Could not find the function public.beta_throne_challenge_finish_audited(p_id,p_win) in schema cache'},{data:{crowned:false,reason:'Protectie'}},{data:{crowned:false,reason:'Pauză'}}]);
  await x.fn.tronReport({id:5,win:true});
  assert.deepEqual(x.calls.map(v=>v[0]),['beta_throne_challenge_finish_audited','throne_challenge_finish']);
  assert.equal(x.TRON.auditFinishRpc,false);
@@ -86,22 +86,20 @@ function harness(beta, replies) {
    'beta_throne_challenge_finish_audited','throne_challenge_finish','throne_challenge_finish'
  ],'After a missing RPC use only the legacy finish for the rest of this page session');
 })().then(async()=>{
- let x=harness(true,[{error:'Connection reset after sending request'}]);
+ let x=harness([{error:'Connection reset after sending request'}]);
  await x.fn.tronReport({id:5,win:true});
  assert.deepEqual(x.calls.map(v=>v[0]),['beta_throne_challenge_finish_audited'],
    'Do not repeat an uncertainly committed result');
  assert.deepEqual(x.S.tron.cur,{id:5,win:true},'Pending report kept on network failure');
  assert.equal(x.saved,0);assert.match(x.TRON.repErr,/Connection reset/);
- x=harness(true,[{error:'Acces BETA neautorizat.'}]);
+ x=harness([{error:'Acces BETA neautorizat.'}]);
  await x.fn.tronReport({id:5,win:false});
  assert.equal(x.calls.length,1,'No fallback on permissions failure');
  assert(x.S.tron.cur,'Denied challenge remains pending');
- x=harness(false,[{data:{crowned:true}}]);
- await x.fn.tronReport({id:5,win:true});
- assert.deepEqual(x.calls.map(v=>v[0]),['throne_challenge_finish'],'LIVE unchanged');
+ x=harness([]);
  assert(x.fn.tronAuditFinishRpcMissing('PGRST202'));
  assert(x.fn.tronAuditFinishRpcMissing('function public.beta_throne_challenge_finish_audited(bigint,boolean) does not exist'));
  assert(!x.fn.tronAuditFinishRpcMissing('Permission denied'));
  assert(!x.fn.tronAuditFinishRpcMissing('Gateway timeout'));
- console.log('OK: SQL33 server guards and 8 checks, BETA audit call, safe missing-only fallback, no retry on uncertain success, LIVE unchanged.');
+ console.log('OK: SQL33 server guards and 8 checks, BETA audit call, safe missing-only fallback, no retry on uncertain success.');
 }).catch(e=>{console.error(e);process.exitCode=1});

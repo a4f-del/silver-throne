@@ -25,7 +25,7 @@ function make(server='beta'){
  const factory=new Function(...Object.keys(args),fn+';return {lwRecommendedOpponents,lwRecommendedPanel};');
  return {S,LUME,api:factory(...Object.values(args)),setAttacks:n=>attacks=n};
 }
-const x=make(),live=make('live');
+const x=make();
 const players=[
  {id:'me',name:'Eu',power:200,level:20},
  {id:'p1',name:'Aproape',power:205,level:20},
@@ -37,7 +37,7 @@ const players=[
  {id:'bad',name:'Fără putere',power:0,level:20},
  {id:'x&quot;onclick',name:'Caz special',power:99999,level:20}
 ];
-x.LUME.st.players=players;live.LUME.st.players=players;
+x.LUME.st.players=players;
 assert.deepEqual(x.api.lwRecommendedOpponents().map(p=>p.id),['p1','p2','p3'],
  'Rank by actual 4-unit World ghost power, excluding cooldown and protected targets');
 let html=x.api.lwRecommendedPanel();
@@ -51,12 +51,10 @@ x.LUME.st.players=[players[0],players[8]];
 html=x.api.lwRecommendedPanel();
 assert(!html.includes('onclick="lwShow("'),'No unencoded literal onclick IDs');
 assert(html.includes('lwShow(&quot;x&amp;quot;onclick&quot;)'),'HTML encoding of unusual IDs is preserved');
-assert.equal(live.api.lwRecommendedPanel(),'','No LIVE UI changes');
-assert.deepEqual(live.api.lwRecommendedOpponents(),[],'No LIVE recommendations');
 x.LUME.st.players=players;x.setAttacks(0);
 assert.equal(x.api.lwRecommendedOpponents().length,0,'No attacks means no recommendations');
 assert(x.api.lwRecommendedPanel().includes('Nu există momentan'));
 x.setAttacks(18);x.S.d={f:{}};
 assert.equal(x.api.lwRecommendedOpponents().length,0,'Never recommend attacks while in combat');
-assert(index.includes('lume.js?v=2026.11.08-5'),'New asset version is referenced');
-console.log('OK: power-ranked attackable opponents, beginner/cooldown/energy/combat protection, safe HTML, LIVE isolation.');
+assert(index.includes('lume.js?v=2026.11.09-1'),'New asset version is referenced');
+console.log('OK: power-ranked attackable opponents, beginner/cooldown/energy/combat protection, safe HTML.');

@@ -27,12 +27,11 @@ assert(!town({showAll:true}).satVisible('z'),'BETA defense is retired even with 
 assert(activeExtras.every(k=>town({done:['poarta','urme','otel','han']}).satVisible(k)),
  'Veteran unlocks all');
 assert(activeExtras.every(k=>town({focus:false}).satVisible(k)),'Existing BETA heroes retain nondefense buildings');
-assert(extras.every(k=>town({focus:false,server:'live'}).satVisible(k)),'LIVE defense remains visible');
 const code=Object.fromEntries(['index.html','erou.js','panou.js','mercenari.js','ghid.js','drumul-eroului.js'].map(n=>
  [n,fs.readFileSync(path.join(root,n),'utf8')]));
 assert(code['erou.js'].includes('S.journeyUxV = 2'),'New BETA hero opt-in');
 assert(code['panou.js'].includes("jeFocusActive())return ''"),'Hide competing side tasks');
-assert(code['index.html'].includes('jeFocusActive())?(typeof stCompactActive') || code['index.html'].includes('jeFocusActive())?rtBanner()'),'Hide event banner during focus');
+assert(code['index.html'].includes('jeFocusActive())?stCompactEvent()'),'Hide event banner during focus');
 assert(code['mercenari.js'].includes('jeFocusActive()'),'Hide QA story preview during focus');
 assert(code['ghid.js'].includes('jeFocusActive()'),'Hide old guide highlight arrow during focus');
 assert(code['drumul-eroului.js'].includes('function jeFocus()'),'Gate focus to new hero');

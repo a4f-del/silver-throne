@@ -1,4 +1,4 @@
-/* BETA Bresle: flux local, rapoarte, model de afisare, izolare LIVE,
+/* BETA Bresle: flux local, rapoarte, model de afisare,
  * verificari statice ale SQL. Rulare: node dev/test-beta-guilds.js
  * Nu trimite cereri si nu modifica date reale. */
 'use strict';
@@ -12,7 +12,7 @@ for(const m of index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))if(m
 assert(index.includes('bresle.js?v=')&&index.includes('bresle.css?v='),'script si stil BETA');
 assert(index.includes("typeof guildTrackWin==='function'")&&index.includes("guildTrackWin(d,b)"),'victoriile ajung la bresle');
 assert(cont.includes('guildStart()'),'se porneste dupa conectare');
-assert(index.includes("typeof guildHeader==='function'?guildHeader():''"),'butonul Bresle');
+assert(read('beta-compact-ui.js').includes("typeof guildHeader === 'function'"),'butonul Bresle');
 
 const saved={fs:[{n:'Eroul',hp:100}],tab:'c',gold:100,pts:20,tw:{best:9}};
 const snapshot=JSON.stringify(saved);let calls=[],saveCount=0;
@@ -79,7 +79,5 @@ assert.equal(saved.guildEvents.length,3,'raidurile vechi nu se contorizeaza');
  assert(sql.includes('ON CONFLICT DO NOTHING'),'evenimente deduplicate');
  assert(!sql.includes('REVOKE ALL ON ALL SEQUENCES IN SCHEMA'),'nu afecteaza alte sisteme');
  assert(css.includes('@media(max-width:530px)'),'interfata mobil');
- const live=new Function('ST_SERVER','CONT',code+';return guildEnabled()')('live',ctx.CONT);
- assert.equal(live,false,'LIVE nu afiseaza bresle');
- console.log('OK: bresle BETA, 3 obiective, boss, deduplicare, limitare, RPC securizat, LIVE nemodificat.');
+ console.log('OK: bresle BETA, 3 obiective, boss, deduplicare, limitare, RPC securizat.');
 })().catch(e=>{console.error(e);process.exitCode=1});

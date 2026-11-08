@@ -1,5 +1,5 @@
 /* Silver Throne BETA: Throne challenge must not be blocked by
-   a failed background defense publication. LIVE remains unchanged.
+   a failed background defense publication.
    Run: node dev/test-beta-throne-challenge-autopublish-fallback.js */
 'use strict';
 const assert=require('node:assert/strict');
@@ -11,10 +11,10 @@ const begin=client.indexOf('async function tronProvoca() {');
 const end=client.indexOf('function tronFight(',begin);
 assert(begin>0&&end>begin,'Tron challenge function exists');
 const body=client.slice(begin,end);
-assert(body.includes('if (!published && !beta)'), 'BETA challenge cannot be gated on publishing');
+assert(!body.includes('if (!published') && !body.includes('tronPublish('), 'Challenge cannot be gated on publishing');
 assert(body.includes("tronRpc('throne_challenge_start')"),'Backend decides whether challenger is allowed');
 assert(body.includes('TRON.pubError'), 'Server errors exposed when publish fails');
-assert(index.includes('tron.js?v=2026.11.08-5'), 'Client cache must be refreshed');
+assert(index.includes('tron.js?v=2026.11.09-1'), 'Client cache must be refreshed');
 
 async function attempt(server,publishOk,rpcError=null) {
  const TRON={busy:false,pubError:'Statistici respinse'};
@@ -37,10 +37,7 @@ async function attempt(server,publishOk,rpcError=null) {
  assert.equal(x.request,1);
  assert.equal(x.battle,0,'Server refusal prevents a battle');
  assert(x.S.msg.includes('Regele trebuie'),'Actual server refusal must be shown');
- x=await attempt('live',false);
- assert.equal(x.request,0,'LIVE retains blocking behavior');
- assert.equal(x.battle,0);
  x=await attempt('beta',true);
  assert.equal(x.battle,1);
- console.log('OK: BETA challenge allowed despite shadow publish failure, actual RPC errors shown; LIVE unchanged.');
+ console.log('OK: BETA challenge allowed despite shadow publish failure, actual RPC errors shown.');
 })().catch(e=>{console.error(e);process.exitCode=1});

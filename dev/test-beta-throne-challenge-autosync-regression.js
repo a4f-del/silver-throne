@@ -13,11 +13,11 @@ const end=js.indexOf('\nfunction tronFight(',begin);
 assert(begin>=0&&end>begin,'Throne challenge handler exists');
 const block=js.slice(begin,end);
 assert(block.includes('tronAutoPublishNow()'),'BETA auto-sync attempted before server challenge');
-assert(block.includes('if (!published && !beta)'),'LIVE retains existing publish requirement');
+assert(!block.includes('if (!published'),'No client-side publish requirement remains');
 assert(block.includes("'throne_challenge_start'"),'Server remains authoritative for challenge access');
 assert(block.includes("'Tron: ' + r.error"),'Server refusal is displayed');
 assert(js.includes("TRON.pubError = 'Sincronizarea apărării: ' + r.error"),'Auto-publication error recorded');
-assert(index.includes('tron.js?v=2026.11.08-5'),'Updated asset cache');
+assert(index.includes('tron.js?v=2026.11.09-1'),'Updated asset cache');
 assert(!/CREATE OR REPLACE FUNCTION public\.throne_/.test(js),'Client fix cannot change server functions');
 
 function session({beta=true,publish=false,error=null,healthy=true}={}){
@@ -52,10 +52,6 @@ function session({beta=true,publish=false,error=null,healthy=true}={}){
  assert(a.S.msg.includes('Sincronizarea apărării'),'Secondary sync error visible');
  assert.equal(a.syncs,1,'Server state refreshes after rejection');
  assert.equal(a.TRON.busy,false,'Busy flag released on rejection');
- a=session({beta:false,publish:false});
- await a.c();
- assert.equal(a.rpcCalls,0,'LIVE still requires a successful publish');
- assert.equal(a.fights,0,'LIVE unchanged');
  a=session({beta:true,publish:true});
  await a.c();
  assert.equal(a.rpcCalls,1);assert.equal(a.fights,1);
@@ -65,5 +61,5 @@ function session({beta=true,publish=false,error=null,healthy=true}={}){
  a=session({beta:true,publish:false});a.S.tron.cur={id:11};
  await a.c();
  assert.equal(a.rpcCalls,0,'Pending challenge result blocks another');
- console.log('OK: BETA Throne proceeds to server after autosync failure, shows real refusal; LIVE rules and in-fight gates preserved.');
+ console.log('OK: BETA Throne proceeds to server after autosync failure, shows real refusal; in-fight gates preserved.');
 })().catch(e=>{console.error(e);process.exitCode=1;});

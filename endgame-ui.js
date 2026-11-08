@@ -11,8 +11,7 @@ const EG_COLLECTIONS=[
  {name:'Arsenalul Turnului',ids:['fum','smarald','ametist']},
  {name:'Coroana Cenușii',ids:['izvor','tunet','zori','rege']}
 ];
-const egEnabled=()=>typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&
- typeof S!=='undefined'&&!!S&&S.lvl>=50;
+const egEnabled=()=>typeof S!=='undefined'&&!!S&&S.lvl>=50;
 function egRecordBoss(d){
  if(!egEnabled()||!d||!d.one||d.tw||d.ev||d.raid!=null||d.egRecorded)return;
  const idx=Number(d.di);

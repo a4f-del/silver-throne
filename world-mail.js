@@ -1,8 +1,7 @@
 /* Silver Throne · mesagerie privata, BETA-only.
    Serverul valideaza destinatarul, accesul si rate-limit-ul. */
 const WM={messages:[],unread:0,ready:false,loading:false,sending:false,err:'',last:0,uid:null,timer:null};
-const wmBeta=()=>typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta';
-const wmAuth=()=>wmBeta()&&typeof CONT!=='undefined'&&CONT.booted&&CONT.user&&CONT.user.id;
+const wmAuth=()=>typeof CONT!=='undefined'&&CONT.booted&&CONT.user&&CONT.user.id;
 const wmEsc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const wmErr=e=>String(e||'Eroare de server.').replace(/<[^>]+>/g,'').slice(0,220);
 function wmBadge(){
@@ -135,4 +134,4 @@ async function wmSend(){
 `;
  document.head.appendChild(style);
 })();
-if(typeof module!=='undefined'&&module.exports)module.exports={wmBeta,wmAuth,wmEsc};
+if(typeof module!=='undefined'&&module.exports)module.exports={wmAuth,wmEsc};

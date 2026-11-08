@@ -33,8 +33,7 @@ async function guildMapTagsSync(force){
  finally{GUILD.tagsBusy=false;}
 }
 
-const guildEnabled=()=>typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'
- &&typeof CONT!=='undefined'&&CONT.booted&&CONT.user&&!!CONT.user.id;
+const guildEnabled=()=>typeof CONT!=='undefined'&&CONT.booted&&CONT.user&&!!CONT.user.id;
 function guildHeader(){
  if(!guildEnabled())return '';
  const g=GUILD.state?.guild;
@@ -292,7 +291,6 @@ async function guildBoss(){
  }
 }
 function guildBossReplay(before,after,damage){
- if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta')return;
  /* Un atac înregistrat pe server, o singură animație fără mutarea echipei reale.
     Contraloviturile și HP jucătorului nu sunt simulate ca daune reale. */
  if(typeof FX==='undefined'||FX.playing||typeof fxPlay!=='function'||

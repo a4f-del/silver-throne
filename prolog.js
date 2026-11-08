@@ -25,9 +25,8 @@ const ST_PROLOG_SCENES = [
   }
 ];
 const ST_PROLOG_UI = { active: false, index: 0, preview: false };
-function stPrologIsBeta() { return typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta'; }
 function stPrologDue() {
-  return stPrologIsBeta() && typeof S !== 'undefined' && S
+  return typeof S !== 'undefined' && S
     && S.hc === 1 && S.mrStoryV === 1
     && S.mrPrologPending === 1 && !S.mrPrologSeen;
 }
@@ -62,7 +61,7 @@ function stPrologRender() {
   modal.querySelector('.stp-buttons .p')?.focus();
 }
 function stPrologShow(preview) {
-  if (!stPrologIsBeta() || (!preview && !stPrologDue())) return;
+  if (((!preview && !stPrologDue()))) return;
   if (document.getElementById('st-prolog') || document.getElementById('mr-scene')
       || document.getElementById('mr-m')) return;
   ST_PROLOG_UI.active = true;
@@ -106,7 +105,7 @@ function stPrologBack() {
 }
 function stPrologSkip() { stPrologFinish(); }
 function stPrologPreview() {
-  if (!stPrologIsBeta() || !S || S.d || document.getElementById('lgm')) return;
+  if (!S || S.d || document.getElementById('lgm')) return;
   stPrologShow(true);
 }
 (function () {
@@ -134,4 +133,4 @@ function stPrologPreview() {
   document.head.appendChild(style);
 })();
 if (typeof module !== 'undefined' && module.exports)
-  module.exports = { ST_PROLOG_SCENES, stPrologIsBeta, stPrologDue };
+  module.exports = { ST_PROLOG_SCENES, stPrologDue };

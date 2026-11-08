@@ -145,7 +145,7 @@ function spEnemyHit(e, al, L) {
   if (typeof lgHit === 'function') dm = lgHit(t, e, dm, L);   /* legendare: ferire, daune reduse */
   const sh = spX(t).sh || 0; if (sh > 0) { const a = Math.min(sh, dm); spX(t).sh = sh - a; dm -= a; if (a) L.push(`Scutul lui ${t.n} oprește ${a}.`); }
   /* Aceeasi limita de daune ca la lovitura atacatorului, numai in dueluri PvP pe BETA. */
-  if (S.d && S.d.tron && S.d.ghost && typeof tronIsBetaDuel === 'function' && tronIsBetaDuel())
+  if (S.d && S.d.tron && S.d.ghost)
     dm = TT.duelDamageCap(dm, mhp(t));
   if (t.hp - dm <= 0) {
     const g = al.find(x => x !== t && spOn(x, 'scu', 4) && !spX(x).grd && x.hp > dmOn(x));

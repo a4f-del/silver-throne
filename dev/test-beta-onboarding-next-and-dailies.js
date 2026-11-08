@@ -42,7 +42,7 @@ assert.equal(next.jeNextAdventurePanel(),'','No overlay in Campaign/World');
 S.tab='a';activeQuest=true;
 next.jeGoNextAdventure();assert.equal(goCalls,0,'Active quest cannot be bypassed');
 activeQuest=false;focused=false;
-assert.equal(next.jeNextAdventurePanel(),'','LIVE/legacy focus inactive');
+assert.equal(next.jeNextAdventurePanel(),'','legacy focus inactive');
 focused=true;next.jeGoNextAdventure();
 assert.equal(S.tab,'c');assert.equal(S.jeNextHintVisited,1);assert.equal(goCalls,1);
 assert.equal(next.jeNextAdventurePanel(),'','No repeated hint after following CTA');
@@ -69,7 +69,7 @@ for(const x of list)x.c=1;
 page=missions({list,bonus:0});
 assert(page.includes('claimB()'),'Original optional all-six bonus remains claimable');
 assert(missions({list,bonus:1}).includes('Bonusul opțional a fost revendicat'));
-assert(html.includes("ST_SERVER==='beta'&&typeof jeFocus==='function'&&jeFocus())return vMisFocus(m)"),
- 'Only focused BETA heroes receive the streamlined list');
+assert(html.includes("if(typeof jeFocus==='function'&&jeFocus())return vMisFocus(m)"),
+ 'Only focused heroes receive the streamlined list');
 assert(town.includes('satShowAll')&&town.includes('satVisible'),'Progressive village and show-all stay available');
-console.log('OK: next dungeon, level gap, single CTA, optional daily missions, existing bonus, progressive Sat, BETA isolation.');
+console.log('OK: next dungeon, level gap, single CTA, optional daily missions, existing bonus, progressive Sat.');
