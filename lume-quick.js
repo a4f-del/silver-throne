@@ -100,7 +100,7 @@
       if (!mine) {
         const can = lwCan(p);
         actions.push(iconButton('⚔', 'Atacă', () => lwAttack(p.id), !can.ok || !!LUME.busy,
-          can.ok ? 'Atacă satul · 1 atac' : can.why.replace(/<[^>]*>/g, '')));
+          can.ok ? 'Atacă satul · 1 atac · '+(typeof lwPvpComparison==='function'?lwPvpComparison(p,lwPvpOwnPower()):'verifică puterea adversarului') : can.why.replace(/<[^>]*>/g, '')));
         // Motivul atacului blocat rămâne în tooltip-ul pictogramei.
       }
       actions.push(iconButton('👤', 'Profil', () => lwProfile(p.id), false));
