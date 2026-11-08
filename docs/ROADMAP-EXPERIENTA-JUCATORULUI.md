@@ -95,6 +95,7 @@ Expedițiile mercenarilor sunt activități pasive, nu o a patra buclă obligato
 ## ETAPA E — ECONOMIE, CORECTITUDINE, CALITATE
 
 - [ ] **29. Protecție la ghinion în Fierărie.** Mecanism previzibil după eșecuri repetate, calibrat prin simulări; păstrăm un cost real al îmbunătățirilor.
+  - **În lucru (BETA):** șansele cresc cu 1 punct procentual după eșec, per obiect/treaptă; numărul maxim de încercări variază între 5 și 26. Garanția nu elimină costul minereului și al materialelor. Simularea probabilistică pentru +9 reduce media încercărilor de la 10,00 la aproximativ 6,84 (-31,6%), fără reducere de cost pe încercare. Test: `dev/test-beta-forge-upgrade-pity.js`; QA: `docs/BETA-FORGE-UPGRADE-PITY.md`. Live și BETA vechi neschimbate; QA mobil și persistența salvării necesare.
 - [ ] **30. Piață, Negustor, Bazar.** Rolul fiecăruia devine evident; eliminăm explicațiile și submeniurile redundante, nu funcțiile utile.
 - [ ] **31. Economia jocului și cooldown NPC de 1 oră.** Măsurăm câștigurile aur/minereu/materiale și impactul asupra progresului și prețurilor; ajustăm numai după date.
 - [ ] **32. Corectitudinea botului Premium.** Verificăm avantajul în progres și în clasamente; păstrăm personalizările cosmetice, evităm pay-to-win.
