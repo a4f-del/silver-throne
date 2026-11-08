@@ -41,11 +41,13 @@ async function tronSync0() {
     if (r.error) { TRON.err = r.error.includes('function') || r.error.includes('does not exist') ? 'Serverul nu are încă funcțiile Tronului (rulează supabase/01-throne.sql).' : r.error; return; }
     TRON.err = ''; TRON.st = r.data; TRON.off = r.data.now - Date.now();
     /* prima dată: apărarea se publică singură (altfel butonul de provocare ar rămâne blocat de „Publică-ți apărarea”) */
+    const betaNeedsPublish = tronIsBetaDuel()
+      && !!tronAutoSnapshot() && tronAutoSnapshot() !== TRON.pubSig;
     if (r.data.me && S.lvl >= TT.CFG.minLevel
-      && (tronIsBetaDuel() || !r.data.me.level)) {
+      && (betaNeedsPublish || (!tronIsBetaDuel() && !r.data.me.level))) {
       TRON.pubTryLvl = S.lvl;
       const updated = tronIsBetaDuel() ? await tronAutoPublishNow() : await tronPublish(true);
-      if (updated && (!r.data.me.level || tronIsBetaDuel())) {
+      if (updated) {
         const r2 = await tronRpc('throne_get');
         if (!r2.error) { TRON.st = r2.data; TRON.off = r2.data.now - Date.now(); }
       }
