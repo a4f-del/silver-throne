@@ -208,6 +208,21 @@ function bossMini(n) { const b = tmnBoss(n); return b ? `<span class="eb-mini" s
 .cb-head details[open]{max-width:480px}
 @media(max-width:640px){.cb-feature{grid-template-columns:1fr}.cb-feature-art{min-height:150px;max-height:165px}.cb-feature-info{padding:12px 13px}.cb-options{grid-template-columns:1fr}.cb-mini-visual{height:84px}.cb-head-title{flex-direction:column}.cb-head details{text-align:left}.cb-all-count{font-size:11px}}
 
+/* BETA · gestionarea rapida a mercenarilor la Coborare. */
+.cb-party-manage{border:1px solid #65512e;border-radius:10px;background:#101719;padding:9px 11px;display:flex;flex-direction:column;gap:7px}
+.cb-party-manage-top{display:flex;flex-wrap:wrap;align-items:center;gap:7px}
+.cb-party-manage-top>div{flex:1;min-width:155px;display:flex;flex-direction:column;gap:2px}
+.cb-party-manage-top b{font:700 13px Cinzel,Georgia,serif;color:#e9c77b}
+.cb-party-manage-top small{font-size:11px;color:var(--mute)}
+.cb-party-manage-top button,.cb-party-reserve button{padding:5px 9px;min-height:32px;font-size:12px}
+.cb-party-reserves{display:flex;flex-wrap:wrap;gap:6px}
+.cb-party-reserve{display:flex;align-items:center;gap:6px;min-width:0;border:1px solid #443b31;border-radius:8px;padding:4px 7px;background:#161b1d}
+.cb-party-reserve b{font-size:12px;color:var(--ink);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cb-party-reserve small{font-size:10px;color:var(--mute);white-space:nowrap}
+.cb-party-reserve button{margin-left:auto}
+.cb-party-reserve button:disabled{opacity:.55}
+@media(max-width:640px){.cb-party-reserves{display:grid;grid-template-columns:1fr}.cb-party-reserve{width:100%}.cb-party-reserve b{max-width:40vw}}
+
 .dg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
 .dg-card{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#101416;box-shadow:0 6px 18px #0009;transition:transform .15s,border-color .15s}
 .dg-card:hover{transform:translateY(-2px);border-color:var(--gold)}
