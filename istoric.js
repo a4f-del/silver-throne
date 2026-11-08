@@ -25,8 +25,14 @@ function bhTitle(d) {
 function bhAdd(d, res, gold) {
   if (!d || !S || d._bh) return; d._bh = 1;
   const L = d.loot || {}, items = (L.it || []).map(i => ({ n: i.name, r: i.r || 0, lg: i.lg ? 1 : 0 }));
+  // BETA: pentru diagnostic, legăm jurnalul LOCAL de ID-ul provocării Tron.
+  // Nu îl trimitem pe server și nu îl folosim la validarea victoriei.
+  const id = typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta' && d.tron && S.tron && S.tron.cur
+    ? Number(S.tron.cur.id) : NaN;
   S.bh = S.bh || [];
-  S.bh.unshift({ t: Date.now(), k: bhKind(d), n: bhTitle(d), res, g: gold != null ? gold : (L.gold || 0), o: L.ore || 0, x: res === 'win' || res === 'retreat' ? (L.xp || 0) : 0,
+  S.bh.unshift({ t: Date.now(), k: bhKind(d), n: bhTitle(d), res,
+    ...(Number.isSafeInteger(id) && id > 0 ? { cid: id } : {}),
+    g: gold != null ? gold : (L.gold || 0), o: L.ore || 0, x: res === 'win' || res === 'retreat' ? (L.xp || 0) : 0,
     m: Object.values(L.m || {}).reduce((a, b) => a + b, 0), it: res === 'lost' ? [] : items, log: d.hl || [] });
   if (S.bh.length > BHI.max) S.bh.length = BHI.max;
 }
@@ -40,12 +46,43 @@ function bhLast() {
   return `<section class="bh-last"><h2>Ultima luptă <span class="bh-res ${rc}">${rt}</span></h2><div class="mute">${tEsc(b.n)} · ${gain || 'fără pradă'}${b.it.length ? ` · obiecte: ${b.it.map(bhItem).join(', ')}` : ''}</div>`
     + `<details${b.res === 'lost' ? ' open' : ''}><summary>Jurnalul luptei</summary><div class="bh-log">${b.log.map(l => `<div${l.startsWith('—') ? ' class="bh-sep"' : ''}>${tEsc(l)}</div>`).join('')}</div></details></section>`;
 }
+/* BETA: export voluntar al jurnalului local. Este doar diagnostic, nu
+   raport autoritativ către server. Poate conține nume de personaje:
+   jucătorul alege explicit dacă îl copiază și distribuie. */
+function bhExport(i) {
+  const b = S && Array.isArray(S.bh) ? S.bh[i] : null;
+  if (!b) return '';
+  const date = Number.isFinite(b.t) ? new Date(b.t).toISOString() : 'necunoscută';
+  const id = Number.isSafeInteger(b.cid) && b.cid > 0 ? 'Provocare Tron #'+b.cid+'\n' : '';
+  const status = { win: 'Victorie', retreat: 'Retragere', lost: 'Înfrângere' }[b.res] || 'Necunoscut';
+  const lines = Array.isArray(b.log) ? b.log.slice(-BHI.lines).map(x => String(x).slice(0, 1000)) : [];
+  return 'Silver Throne BETA · jurnal local (nevalidat de server)\n'+
+    id+'Data: '+date+'\nLupta: '+String(b.n || '')+'\nRezultat local: '+status+
+    '\n---\n'+(lines.join('\n') || 'Fără jurnal.');
+}
+async function bhCopy(i, button) {
+  const content = bhExport(i);
+  if (!content) return;
+  try {
+    if (typeof navigator === 'undefined' || !navigator.clipboard ||
+        typeof navigator.clipboard.writeText !== 'function')
+      throw new Error('Clipboard indisponibil');
+    await navigator.clipboard.writeText(content);
+    if (button && button.isConnected) button.textContent = '✓ Jurnal copiat';
+  } catch (_) {
+    if (typeof window !== 'undefined' && typeof window.prompt === 'function')
+      window.prompt('Selectează și copiază jurnalul:', content);
+  }
+}
 function bhOpen() {
   const list = S.bh || [], RES = { win: ['Victorie', 'win'], retreat: ['Retragere', 'ret'], lost: ['Înfrângere', 'lost'] };
   const rows = list.map((b,i) => {
     const [rt, rc] = RES[b.res] || RES.retreat, gain = [b.g ? `+${b.g} aur` : '', b.o ? `+${b.o} minereu` : '', b.m ? `${b.m} materiale` : '', b.x ? `+${b.x} exp.` : ''].filter(Boolean).join(' · ');
     return (typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&i===0?'<div class="bh-latest-label">Ultima luptă · deschide pentru jurnal</div>':'') + `<details class="bh-r"><summary><img class="uii bh-k" src="${b.k === 'w' ? 'imagini/lume/turn.webp' : 'imagini/ui/' + (BHI.ic[b.k] || 'nav-coborare') + '.webp'}" alt=""><span class="bh-m"><b>${tEsc(b.n)}</b> <span class="bh-res ${rc}">${rt}</span><small>${bhAgo(b.t)}</small><br><small>${gain || 'fără pradă'}</small>${b.it.length ? `<br><small>Obiecte: ${b.it.map(bhItem).join(', ')}</small>` : ''}</span></summary>`
-      + `<div class="bh-log">${b.log.length ? b.log.map(l => `<div${l.startsWith('—') ? ' class="bh-sep"' : ''}>${tEsc(l)}</div>`).join('') : '<div class="mute">Fără jurnal.</div>'}</div></details>`;
+      + (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta' && b.k === 't'
+        ? '<div class="bh-copy"><button type="button" onclick="bhCopy('+i+',this)">📋 Copiază jurnalul</button>'+
+          (Number.isSafeInteger(b.cid)&&b.cid>0?'<span>Provocare #'+b.cid+'</span>':'')+'</div>' : '')+
+      `<div class="bh-log">${b.log.length ? b.log.map(l => `<div${l.startsWith('—') ? ' class="bh-sep"' : ''}>${tEsc(l)}</div>`).join('') : '<div class="mute">Fără jurnal.</div>'}</div></details>`;
   }).join('');
   mdl(`<h3>${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'Lupte · Istoric și jurnal':'Istoricul luptelor'}</h3><p class="mute">Ultimele ${BHI.max} coborâri, atacuri și provocări. Atinge una ca să-i vezi jurnalul.</p><div class="bh-l">${rows || '<p class="mute">Nu ai dat încă nicio luptă.</p>'}</div>`, 'bh');
 }
@@ -57,6 +94,7 @@ function bhOpen() {
 .bh-r{border:1px solid var(--line);border-radius:10px;background:#0e1214}.bh-r summary{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;cursor:pointer;list-style:none}.bh-r summary::-webkit-details-marker{display:none}
 .bh-k{width:30px!important;height:30px!important;flex:none}.bh-m{flex:1;min-width:0;font-size:14px}.bh-m small{color:var(--mute);margin-left:6px}.bh-m br+small{margin-left:0}
 .bh-res{font-size:11.5px;padding:1px 7px;border-radius:9px;margin-left:4px}.bh-res.win{background:#1f4a2a;color:#9fe3ad}.bh-res.ret{background:#3a3220;color:#f0d27a}.bh-res.lost{background:#4a1f1f;color:#f1a29b}
+.bh-copy{display:flex;gap:9px;align-items:center;padding:7px 11px}.bh-copy button{font-size:12px;padding:5px 10px}.bh-copy span{font-size:11px;color:var(--mute)}
 .bh-log{border-top:1px solid var(--line);padding:8px 12px;font-size:12.5px;line-height:1.45;color:#cfd3d6;max-height:260px;overflow:auto}.bh-sep{color:var(--gold2);font-weight:700;margin-top:6px}
 .bh-last details{margin-top:6px}.bh-last summary{cursor:pointer;color:var(--gold2);font-size:13.5px}.bh-last .bh-log{border:1px solid var(--line);border-radius:8px;margin-top:6px;max-height:220px}
 .bh-it{font-weight:700}.bh-it.q0{color:#d4d4d4}.bh-it.q1{color:#7fd88c}.bh-it.q2{color:#73a9ff}.bh-it.q3{color:#c590ff}.bh-it.lg{color:#ffb347}`;
