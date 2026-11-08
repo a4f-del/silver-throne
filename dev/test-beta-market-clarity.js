@@ -31,14 +31,14 @@ assert(standard.includes('<details class="pt-quick-details">'),'Long help is opt
 assert(!standard.includes('onclick="ptGuideOk('),'No forced guide acceptance');
 assert(!standard.includes('class="pt-gs"'),'No large onboarding cards for new BETA');
 assert(!standard.includes('id="real-player-bazaar"'),'Other market subviews are not loaded twice');
-api.ptTab('l');
+S.lvl=10;api.ptTab('l');
 assert.equal(S.pt,'l');assert.equal(S.vil,'p');
 let merchant=api.vPiata();
 assert(merchant.includes('id="premium-npc-merchant"'));
 assert(merchant.includes('Schimb de cristale'),'Existing three-step instructions still available on demand');
 assert(merchant.includes('Mai multe despre Negustorul'));
 assert(S.ptg.lv===1,'Unlocked tab is counted as visited without accepting a modal');
-api.ptTab('y');
+S.lvl=15;api.ptTab('y');
 let baz=api.vPiata();
 assert(baz.includes('id="real-player-bazaar"'));
 assert(baz.includes('2% taxă')&&baz.includes('5%'),'Bazar fee transparency still available');
