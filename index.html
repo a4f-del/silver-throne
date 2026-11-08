@@ -465,6 +465,10 @@ function betaFinishCompletedBattle(){
  const throne=!!d.tron,world=!!d.lume,winText=d.cm||'';
  if(throne&&S.tron&&S.tron.cur)S.tron.cur.win=true;
  leave(true);
+ // Daca lupta a fost reluata dintr-o salvare veche fara S.rt,
+ // revenim la fila modului, nu la ecranul gol de Coborare.
+ if(!S.rt&&throne)S.tab='r';
+ else if(!S.rt&&world){S.tab='m';S.mt='h'}
  if(throne)S.msg='Ai învins apărarea Tronului! Se trimite rezultatul. '+S.msg;
  else if(world&&winText)S.msg=winText+' '+S.msg;
  return true;
