@@ -81,6 +81,7 @@ function acDungeonPage(i) {
     '<span class="ac-status">'+(boss?'♛ Căpitan':canFight?'⚔ Următorul adversar':sel<p?'✓ Învins':'🔒 Urmează')+'</span></div>' +
     '<div class="ac-main-info"><h3>'+acSafe(selected)+'</h3>'+detail+'</div></div>' +
     '<div class="ac-side"><h3>'+ (canFight?'Pregătirea luptei':'Informații despre adversar') +'</h3>' +
+    (canFight&&boss&&typeof trBossPlanPanel==='function'?trBossPlanPanel(i):'') +
     (canFight&&odds!=null?'<div class="ac-odds">Șanse de câștig <strong>'+odds+'%</strong></div>':'') +
     (canFight?'<button class="p ac-primary" onclick="startD('+i+')">'+(boss?'⚔ Înfruntă căpitanul':'⚔ Luptă')+' · '+(cost?cost+' puncte':'gratuit')+'</button>':
       '<button type="button" class="ac-return-current" onclick="trSelSet('+i+','+p+')">↶ Înapoi la '+acSafe(currentName)+'</button>') +

@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="bresle.css?v=2026.11.07-1">
 <link rel="stylesheet" href="bresle-ranguri.css?v=2026.11.07-2">
-<link rel="stylesheet" href="aventura-carduri.css?v=2026.11.08-1">
+<link rel="stylesheet" href="aventura-carduri.css?v=2026.11.08-2">
 <link rel="icon" type="image/png" href="icons/favicon-64.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -213,9 +213,9 @@ main{padding:8px 24px;max-width:940px}
 <script src="fx.js?v=2026.11.07-2"></script>
 <script src="temnite.js?v=2026.11.07-18"></script>
 <script src="echipament-balance.js?v=2026.11.07-16"></script>
-<script src="trepte.js?v=2026.11.08-1"></script>
+<script src="trepte.js?v=2026.11.08-2"></script>
 <script src="turn.js?v=2026.11.07-1"></script>
-<script src="aventura-carduri.js?v=2026.11.08-2"></script>
+<script src="aventura-carduri.js?v=2026.11.08-3"></script>
 <script src="harta.js?v=2026.11.04-4"></script>
 <script src="lume.js?v=2026.11.07-18"></script>
 <script src="lume-pictat.js?v=2026.11.04-4"></script>
@@ -378,7 +378,9 @@ function dToggle(i){
  (S.deo=S.deo||{})[i]=!S.deo[i];go();
 }
 function dMk(i){const g=DG[i||0],ti=g.ev||typeof trTier!=='function'?0:trTier(i),kk=(g.ev?1.4+S.lvl*.055:g.k)*[1,1.15,1.45][ti],pk=g.ev?kk:(g.pk||g.k),p=Math.min(dPos(i,ti),g.rooms-1);
- return{one:1,dk:dKey(i,ti),tier:ti,room:p,rooms:g.rooms,k:kk,rw:(1+(pk-1)*.6)*[1,1.25,1.5][ti],bn:g.bn,di:i||0,ev:g.ev?1:0,loot:{gold:0,ore:0,xp:0,m:{}},f:null,done:false,doors:[]}}
+ const d={one:1,dk:dKey(i,ti),tier:ti,room:p,rooms:g.rooms,k:kk,rw:(1+(pk-1)*.6)*[1,1.25,1.5][ti],bn:g.bn,di:i||0,ev:g.ev?1:0,loot:{gold:0,ore:0,xp:0,m:{}},f:null,done:false,doors:[]};
+ if(ST_SERVER==='beta'&&typeof trBossPlanAttach==='function')trBossPlanAttach(d);
+ return d}
 const dCostAt=i=>{const g=DG[i||0],d=dMk(i);return g.ev?0:d.room>=d.rooms-1?2:1};
 function startD(i){const g=DG[i||0];if(ST_SERVER==='beta'&&S.adventure&&S.adventure.di!==(i||0)){S.msg='Mai întâi retrage-te din temnița curentă.';return go()}if(S.lvl<g.lv){S.msg='Cerință: nivel '+g.lv+'.';return go()}if(S.d){S.msg='Termină întâi lupta în care ești.';return go()}if(!S.fs.some(f=>f.hp>0)){S.msg='Toți luptătorii sunt căzuți. Du-te la infirmerie.';return go()}
  /* BETA, erou nou: aplică rezerva existentă înainte de cost, fără puncte gratuite. */
@@ -416,7 +418,7 @@ function door(i){const d=S.d,t=d.doors[i].t,c=dCost(d,t);S.msg='';if(c>0&&S.pts<
 function startF(b){const d=S.d,n=b?1:RI(1,2)+(S.lvl>3?1:0)+terXn(d),es=[],NM=[['Bandit','pra'],['Ghoul de mină','sng'],['Pază corupt','bli'],['Lup de peșteră','zim']];
  for(let i=0;i<n;i++)es.push({n:b?(d.bn||'Căpitanul Cenușii'):P(NM)[0],hp:0,atk:Math.round((3+S.lvl*1.1+d.room*.5)*(b?1.4:1)*(d.k||1)*ENK),def:Math.floor(S.lvl/3*Math.sqrt(d.k||1)),bl:0,st:0,b});
  es.forEach(e=>{e.dm=(NM.find(z=>z[0]==e.n)||[])[1];e.mh=e.hp=Math.round((12+5*S.lvl+d.room*3)*(e.b?2.4:1)*(d.k||1)*ENK)});if(d.em)terEm(es,d);if(typeof trStart==='function')trStart(es,d,b);
- S.fs.forEach(x=>x.cd=0);spFightStart();d.f={es,i:S.fs.findIndex(f=>f.hp>0),t:0,log:[d.ghost&&d.ghost.length>1?d.bn+' și echipa lui ('+d.ghost.slice(1).map(u=>u.n).join(', ')+') îți ies în cale.':b?(d.bn||'Căpitanul Cenușii')+' îți iese în cale.':'Inamicii apar din umbră.']};if(typeof fxCast==='function')fxCast();if(typeof vsFlash==='function')vsFlash()}   /* cardul VS: lupta-vs.js; redarea luptă cu luptă: fx.js */
+ S.fs.forEach(x=>x.cd=0);spFightStart();d.f={es,i:S.fs.findIndex(f=>f.hp>0),t:0,log:[d.ghost&&d.ghost.length>1?d.bn+' și echipa lui ('+d.ghost.slice(1).map(u=>u.n).join(', ')+') îți ies în cale.':b?(d.bn||'Căpitanul Cenușii')+' îți iese în cale.':'Inamicii apar din umbră.']};if(ST_SERVER==='beta'&&d.bossPlan&&typeof TR_PLAN!=='undefined')d.f.log.push('Postură aleasă: '+TR_PLAN[d.bossPlan].n+'.');if(typeof fxCast==='function')fxCast();if(typeof vsFlash==='function')vsFlash()}   /* cardul VS: lupta-vs.js; redarea luptă cu luptă: fx.js */
 function tgt(i){S.d.f.t=i;go()}
 /* o: {crit: lovitură critică sigură, ign: parte din apărare ignorată (0..1), n: lovitură normală}; efectele specializărilor sunt în specializari.js */
 function hit(a,e,m,L,o){o=o||{};spPre(a,o);const bo=bon(a);let dm=Math.round(atkOf(a)*m*spMul(a,e)*R(.85,1.15)),cr=!!o.crit||Math.random()<.05+(bo.crit+tr(a,'crit')+(a.h?ST().a*.8:0)+spCrit(a))/100;if(cr){dm=Math.round(dm*spCm(a));L.push('Lovitură critică!')}dm=Math.max(1,Math.round(dm-spDef(a,e,o)));if(typeof trDmg==='function')dm=trDmg(e,dm,cr,L,a);if(S.d&&S.d.tron&&S.d.ghost&&typeof tronIsBetaDuel==='function'&&tronIsBetaDuel())dm=TT.duelDamageCap(dm,e.mh||e.hp);e.hp-=dm;L.push(`${a.n} lovește ${e.n} (-${dm}).`);spAfter(a,e,dm,cr,L);return dm}

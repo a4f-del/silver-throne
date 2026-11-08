@@ -275,3 +275,14 @@ body.st-adventure .ac-scene.ac-dungeon{
  .ac-dungeon .ac-progress-top small{font-size:10px}
  .ac-dungeon .ac-return-current{min-height:36px;font-size:11px;padding:5px}
 }
+
+/* Pasul 17: alegerea unică înainte de căpitan — rânduri compacte. */
+.ac-plan{margin:5px 0 9px;padding:8px;border:1px solid #705a38;border-radius:8px;background:#100f0d88}
+.ac-plan>b{display:block;font-size:12px;color:#e8ca87;margin-bottom:6px}
+.ac-plan>b small{font-size:11px;font-weight:400;color:#c1b9aa}
+.ac-plan-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.ac-plan-choices button{min-width:0;padding:6px 7px;border:1px solid #574e41;border-radius:7px;background:#1b2024;color:#e6dcc8;text-align:left;display:flex;flex-direction:column;gap:2px;line-height:1.15;white-space:normal}
+.ac-plan-choices button strong{font-size:12px;color:#ebd3a4}
+.ac-plan-choices button small{font-size:10px;line-height:1.2;color:#bdc0bf}
+.ac-plan-choices button.on{border-color:#edbf69;background:#45341f;box-shadow:inset 0 0 0 1px #a8833c}
+@media(max-width:440px){.ac-plan{padding:6px}.ac-plan-choices button{padding:6px 5px}}
