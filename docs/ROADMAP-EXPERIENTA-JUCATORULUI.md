@@ -68,7 +68,9 @@ Expedițiile mercenarilor sunt activități pasive, nu o a patra buclă obligato
 - [ ] **20. Recompensele Turnului mai lizibile.** Praguri, record, următorul legendar și progres până la următoarea îmbunătățire — vizibile fără a consulta mai multe meniuri.
   - **În lucru (BETA):** cardul Turnului include următorul străjer și progresul spre următorul prag de Fierărie, alături de recorduri și lista de legendare deja existente. Nu apar noi ferestre, resurse sau bonusuri; QA mobil/desktop necesar.
 - [ ] **21. Măiestrie după nivelul 50.** Obiective orizontale: solo, clase, căpitani, realizări și titluri/portrete; fără nivel 100 și fără statistică permanentă care escaladează la infinit.
+  - **În lucru (BETA):** patru realizări orizontale la nivel 50, cu titluri și rame strict cosmetice, fără putere permanentă. Victorii reale la căpitani, solo și cu clase diferite, plus recordul Turnului. Test: `dev/test-beta-endgame-mastery-collections.js`; QA: `docs/BETA-ENDGAME-MASTERY-COLLECTIONS.md`.
 - [ ] **22. Colecții și seturi endgame.** Evidențiem echipamentele și legendarele deținute, seturile incomplete și obiectivele de colecție; începem cu UI, nu cu o nouă monedă.
+  - **În lucru (BETA):** trei colecții vizuale folosesc cele 10 legendare ale Turnului, cu distincția explicită între deținute, obținute cândva și lipsă; nu adăugăm set-bonusuri, monede sau statistici. QA vizual necesar.
 
 **Criteriu de ieșire etapa C:** un jucător de nivel 50 are scopuri vizibile, dar poate sări luptele deja triviale din Turn și nu trebuie să farmeze activități redundante.
 

@@ -105,12 +105,12 @@ function prDraw() {
   const traits = (f.t || []).map(x => `<span class="pr-tag" title="${tEsc(x.d || '')}">${tEsc(x.n)}</span>`).join('');
   const train = f.h ? (s => `<div class="pr-tr"><span${prTipA('Forță', f)}>Forță <b>${s.f}</b></span><span${prTipA('Rezistență', f)}>Rezistență <b>${s.r}</b></span><span${prTipA('Agilitate', f)}>Agilitate <b>${s.a}</b></span><small>din ${smax()}</small></div>`)(ST()) : '';
   const L = ['h', 'a', 'b'], R = ['w', 'j', 'r'];
-  o.innerHTML = `<div class="pr-c${dead ? ' dead' : ''}">
+  o.innerHTML = `<div class="pr-c${dead ? ' dead' : ''}${f.h&&typeof egTitleGet==='function'&&egTitleGet()?' eg-cosmetic':''}">
 <button class="pr-x" onclick="prClose()" aria-label="Închide profilul" title="Închide (Esc)">✕</button>
 <section class="pr-l">
   <div class="pr-ban">${n > 1 ? `<button class="pr-nav" onclick="prNext(-1)" aria-label="Personajul anterior">‹</button>` : ''}<h2 id="pr-n">${tEsc(f.n)}</h2>${n > 1 ? `<button class="pr-nav" onclick="prNext(1)" aria-label="Personajul următor">›</button>` : ''}</div>
   <div class="pr-lv"><span class="pr-lvn" title="Nivel">${lvl}</span><div class="pr-pg">${pg ? `<div class="pr-pgl"><span>${pg.lbl}</span></div><i class="pr-bar"><i style="width:${pg.p}%"></i></i><small>${pg.sub}</small>` : ''}</div></div>
-  <div class="pr-ti">${tEsc(prTitle(f))}${typeof roleOf === 'function' && f.c !== 'Gardian' ? ` <span class="pr-role r-${roleOf(f)}"${prTipA(roleOf(f), f)}>${roleOf(f)}</span>` : ''}</div>
+  <div class="pr-ti">${tEsc(prTitle(f))}${f.h&&typeof egTitleGet==='function'&&egTitleGet()?` <span class="eg-title-medal">${tEsc(egTitleGet())}</span>`:''}${typeof roleOf === 'function' && f.c !== 'Gardian' ? ` <span class="pr-role r-${roleOf(f)}"${prTipA(roleOf(f), f)}>${roleOf(f)}</span>` : ''}</div>
   ${traits ? `<div class="pr-tags">${traits}</div>` : ''}
   <div class="pr-st">${prStats(f)}</div>
   ${typeof setLine === 'function' ? setLine(f) : ''}
