@@ -23,7 +23,12 @@ function jeGuidePlan(){
     ?{selector:'.ac-side .ac-primary',name:'Luptă cu monstrul curent'}:null;
  }
  const action=step.action(),tab=action[1],v=action[2];
- if(S.tab!==tab)return {selector:'#nv button[onclick="tab(\''+tab+'\')"]',name:'Deschide '+action[0],nav:true};
+ if(S.tab!==tab){
+  if(tab==='e'&&typeof stCompactActive==='function'&&stCompactActive())
+   return {selector:'header .st-hero-drop:not([open]) > summary, header .st-hero-drop[open] button[onclick^="stCompactHeroGo("]',
+    name:'Erou → Echipă și echipament',nav:true};
+  return {selector:'#nv button[onclick="tab(\''+tab+'\')"]',name:'Deschide '+action[0],nav:true};
+ }
  if(tab==='a'&&(S.vil||'')!==v){
   if(!v)return {selector:'.vb-back',name:'Înapoi în Sat'};
   return {selector:'.vh-lb[data-v="'+v+'"], .vb-c[data-v="'+v+'"]',name:'Intră în '+action[0]};
