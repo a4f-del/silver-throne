@@ -77,6 +77,7 @@ Expedițiile mercenarilor sunt activități pasive, nu o a patra buclă obligato
 ## ETAPA D — LUME, PvP, TRON, BRESLE
 
 - [ ] **23. PvP lizibil și echilibrat.** Recomandări după putere; explicăm echipa limitată la 3 pentru fantoma Lumii și duelul cu eroul la Tron. Respectăm protecția începătorilor și limitele de atac.
+  - **În lucru (BETA):** comparația orientativă și limitele Lume/Tron sunt implementate; completăm cu 3 adversari atacabili ordonați după puterea fantomei Lumii, păstrând protecțiile și atacurile server-side. Test: `dev/test-beta-pvp-opponent-suggestions.js`; QA: `docs/BETA-PVP-OPPONENT-SUGGESTIONS.md`.
   - **În lucru (BETA):** am corectat comparația care folosea eroul solo în loc de echipa de trei a Lumii; explicăm riscul orientativ și păstrăm protecția, cooldownul și numărul de atacuri. Test: `dev/test-beta-pvp-throne-clarity.js`; ghid: `docs/BETA-PVP-THRONE-PRESTIGE.md`.
 - [ ] **24. Provocări Tron de prestigiu.** Istoric/sezoane/titluri și clasamente clare; nu adăugăm bonusuri de putere permanente pentru deținător.
   - **În lucru (BETA):** clasamentul arată poziția jucătorului, Sala Faimei se extinde la cerere, regulile sunt explicite despre prestigiul fără buff; controlul QA de resetare e ascuns non-adminilor. Sezonul și competiția nu se schimbă.
