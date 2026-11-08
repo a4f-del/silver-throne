@@ -7,11 +7,11 @@
    Se deschide cu prOpen(i), unde i e poziția în roster() (echipă, apoi rezervă, apoi străjeri).
    Se încarcă după echipa.js.
    ========================================================================== */
-const PR = { i: -1 };
+const PR = { i: -1, bagFilter: 'all', bagQuery: '' };
 const prF = () => roster()[PR.i];
 const prPct = v => (v > 0 ? '+' : '−') + Math.abs(v) + '%';
 
-function prOpen(i) { if (!roster()[i]) return; PR.i = i; prDraw(); }
+function prOpen(i) { if (!roster()[i]) return; PR.i = i; PR.bagFilter = 'all'; PR.bagQuery = ''; prDraw(); }
 function prClose() { PR.i = -1; document.getElementById('pr-m')?.remove(); document.removeEventListener('keydown', prKey); }
 function prKey(e) { if (e.key === 'Escape') prClose(); }
 /* acțiunile din profil lucrează pe luptătorul din profil, apoi redesenează fereastra */
@@ -86,15 +86,59 @@ function prSlot(f, k) {
   if (!it) return `<div class="pr-sl em" title="${SLN[k]}: gol">${UI(UISL[k])}<small>${SLN[k]}</small></div>`;
   return `<div class="pr-sl q${it.lg ? 'l' : it.r}"${typeof itTipA === 'function' ? itTipA(it) : ` title="${tEsc(it.name)}"`}>${iic(it)}<button class="pr-un" onclick="prUn('${k}')" title="Scoate ${tEsc(it.name)}" aria-label="Scoate ${tEsc(it.name)}">✕</button></div>`;
 }
-function prBag(f) {
+/* Filtre exclusiv de prezentare: indexul real din inventar rămâne neschimbat la equip(i). */
+const prIsBeta = () => typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta';
+const prBagMatches = it => {
+  const k = PR.bagFilter;
+  const category = k === 'all' || (k === 'w' && it.t === 'w') ||
+    (k === 'armor' && ['a','h','b'].includes(it.t)) ||
+    (k === 'accessory' && ['j','r'].includes(it.t));
+  const query = (PR.bagQuery || '').trim().toLocaleLowerCase('ro-RO');
+  return category && (!query || String(it.name || '').toLocaleLowerCase('ro-RO').includes(query));
+};
+const prEscapeAttr = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function prBagCells(f) {
   const inv = S.inv || [];
-  if (!inv.length) return '<div class="mute pr-empty">Rucsacul e gol.</div>';
-  const cells = inv.map((it, i) => {
+  const visible = inv.map((it,i) => ({it,i})).filter(({it}) => !prIsBeta() || prBagMatches(it));
+  const cells = visible.map(({it,i}) => {
     const cur = E(f)[it.t], ok = typeof wfOk !== 'function' || wfOk(f, it), up = ok && typeof bsc === 'function' && (!cur || bsc(it, f) > bsc(cur, f) * 1.02);
     return `<button class="pr-it q${it.lg ? 'l' : it.r}${up ? ' up' : ''}${ok ? '' : ' no'}" onclick="prEq(${i})"${typeof itTipA === 'function' ? itTipA(it, cur) : ` title="${tEsc(it.name)}"`} aria-label="Echipează ${tEsc(it.name)}">${iic(it)}${up ? '<b class="pr-up">▲</b>' : ''}</button>`;
   }).join('');
-  return `<div class="pr-grid">${cells}</div>`;
+  return {count:visible.length,html:cells || '<p class="pr-empty pr-bag-none">Niciun obiect găsit. Încearcă alt filtru.</p>'};
 }
+function prBag(f) {
+  const inv = S.inv || [];
+  if (!inv.length) return '<div class="mute pr-empty">Rucsacul e gol.</div>';
+  if (!prIsBeta()) {
+    // LIVE: aspectul și comportamentul original, fără filtre noi.
+    const rows = prBagCells(f);
+    return `<div class="pr-grid">${rows.html}</div>`;
+  }
+  return `<div class="pr-grid" id="pr-bag-items" role="region" aria-label="Obiectele din rucsac">${prBagCells(f).html}</div>`;
+}
+function prBagTools() {
+  if (!prIsBeta()) return '';
+  const options = [['all','Toate'],['w','Arme'],['armor','Armuri'],['accessory','Accesorii']];
+  const buttons = options.map(([k,t]) => `<button type="button" data-pr-filter="${k}" class="${PR.bagFilter === k ? 'on' : ''}" aria-pressed="${PR.bagFilter === k}" onclick="prBagFilter('${k}')">${t}</button>`).join('');
+  return `<div class="pr-bag-tools" aria-label="Filtre rucsac"><div class="pr-bag-tabs" role="group" aria-label="Tip obiect">${buttons}</div><input class="pr-bag-search" type="search" placeholder="Caută obiect…" aria-label="Caută în rucsac" value="${prEscapeAttr(PR.bagQuery)}" oninput="prBagSearch(this.value)"></div>`;
+}
+function prBagRefresh() {
+  if (!prIsBeta()) return;
+  const box = document.getElementById('pr-bag-items'), f = prF();
+  if (!box || !f) return;
+  const rows = prBagCells(f);
+  box.innerHTML = rows.html;
+  box.scrollTop = 0;
+  const count = document.getElementById('pr-bag-count');
+  if (count) count.textContent = rows.count + ' / ' + (S.inv || []).length;
+  document.querySelectorAll('#pr-m [data-pr-filter]').forEach(btn => {
+    const on = btn.getAttribute('data-pr-filter') === PR.bagFilter;
+    btn.classList.toggle('on', on);
+    btn.setAttribute('aria-pressed', String(on));
+  });
+}
+function prBagFilter(value) { if (['all','w','armor','accessory'].includes(value)) { PR.bagFilter = value; prBagRefresh(); } }
+function prBagSearch(value) { PR.bagQuery = String(value || ''); prBagRefresh(); }
 function prDraw() {
   const f = prF(); if (!f) return prClose();
   let o = document.getElementById('pr-m');
@@ -105,7 +149,7 @@ function prDraw() {
   const traits = (f.t || []).map(x => `<span class="pr-tag" title="${tEsc(x.d || '')}">${tEsc(x.n)}</span>`).join('');
   const train = f.h ? (s => `<div class="pr-tr"><span${prTipA('Forță', f)}>Forță <b>${s.f}</b></span><span${prTipA('Rezistență', f)}>Rezistență <b>${s.r}</b></span><span${prTipA('Agilitate', f)}>Agilitate <b>${s.a}</b></span><small>din ${smax()}</small></div>`)(ST()) : '';
   const L = ['h', 'a', 'b'], R = ['w', 'j', 'r'];
-  o.innerHTML = `<div class="pr-c${dead ? ' dead' : ''}${f.h&&typeof egTitleGet==='function'&&egTitleGet()?' eg-cosmetic':''}">
+  o.innerHTML = `<div class="pr-c${dead ? ' dead' : ''}${f.h&&typeof egTitleGet==='function'&&egTitleGet()?' eg-cosmetic':''}${prIsBeta() ? ' pr-beta' : ''}">
 <button class="pr-x" onclick="prClose()" aria-label="Închide profilul" title="Închide (Esc)">✕</button>
 <section class="pr-l">
   <div class="pr-ban">${n > 1 ? `<button class="pr-nav" onclick="prNext(-1)" aria-label="Personajul anterior">‹</button>` : ''}<h2 id="pr-n">${tEsc(f.n)}</h2>${n > 1 ? `<button class="pr-nav" onclick="prNext(1)" aria-label="Personajul următor">›</button>` : ''}</div>
@@ -123,7 +167,10 @@ function prDraw() {
     <div class="pr-por">${src ? `<img src="${src}" alt="${tEsc(f.n)}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'pr-av'}))">` : `<span class="pr-av">${av(f, 180)}</span>`}${dead ? '<b class="pr-dead">☠ căzut</b>' : ''}</div>
     <div class="pr-col">${R.map(k => prSlot(f, k)).join('')}</div>
   </div>
-  <div class="pr-bh"><b>Rucsac</b><span class="mute">${(S.inv || []).length} obiecte · atinge un obiect ca să-l echipezi pe ${tEsc(f.n)} · ▲ e mai bun decât ce poartă</span></div>
+  <div class="pr-bh"><b>Rucsac</b>${prIsBeta()
+    ? `<span class="pr-bag-count" id="pr-bag-count" aria-live="polite">${prBagCells(f).count} / ${(S.inv || []).length}</span><span class="mute">Atinge pentru echipare · ▲ îmbunătățire</span>`
+    : `<span class="mute">${(S.inv || []).length} obiecte · atinge un obiect ca să-l echipezi pe ${tEsc(f.n)} · ▲ e mai bun decât ce poartă</span>`}</div>
+  ${prBagTools()}
   ${prBag(f)}
 </section></div>`;
 }
@@ -182,6 +229,74 @@ const prBtn = i => `<button class="pr-open" onclick="prOpen(${i})">👤 Profil</
 .pr-empty{font-size:13.5px}
 .pr-open{width:auto}
 .tm-full .pr-open{position:absolute;top:8px;right:8px;z-index:2;min-height:0;padding:4px 10px;font-size:12.5px;background:#0b0e10cc;border:1px solid var(--gold)}
+/* BETA · Profil refăcut: portret și echipament echilibrate, rucsac independent. */
+#pr-m:has(.pr-beta){background:#03080de0;backdrop-filter:blur(7px)}
+.pr-c.pr-beta{grid-template-columns:minmax(288px,318px) minmax(0,1fr);width:min(1200px,calc(100vw - 32px));height:min(850px,calc(100dvh - 30px));max-height:calc(100dvh - 30px);border:1px solid #a88645;border-radius:16px;background:linear-gradient(140deg,#222c30,#0a1013 65%);box-shadow:0 0 0 1px #000,0 32px 90px #000f,0 0 30px #d4a95720}
+.pr-beta .pr-l{min-height:0;scrollbar-width:thin;scrollbar-color:#846c37 transparent;background:linear-gradient(165deg,#27323a,#12191d 43%,#0c1215)}
+.pr-beta .pr-ban{position:sticky;top:0;z-index:2;padding:10px 12px;background:linear-gradient(90deg,#243746,#314755 50%,#223442);border-color:#967844;box-shadow:0 4px 16px #0007}
+.pr-beta .pr-ban h2{font-size:20px;letter-spacing:.05em;color:#f8e8b6}
+.pr-beta .pr-nav{border-color:#9e874f;background:#111c22cc;color:#edd18c}
+.pr-beta .pr-lv{padding:13px 16px 5px}
+.pr-beta .pr-lvn{width:48px;height:48px;border-color:#d6b36b;border-radius:11px;background:linear-gradient(135deg,#3d311c,#161b20);box-shadow:inset 0 0 10px #e9c77b20}
+.pr-beta .pr-ti{font-size:12px;line-height:1.5;padding:6px 16px 1px}
+.pr-beta .pr-st{margin:11px 12px 0;border-radius:10px;border-color:#7c663d60}
+.pr-beta .pr-sr{grid-template-columns:23px minmax(0,1fr) auto;gap:7px;padding:7px 11px;background:#101a1e}
+.pr-beta .pr-sr:nth-child(even){background:#182328}
+.pr-beta .pr-sr:hover,.pr-beta .pr-sr:focus{background:#2b363c}
+.pr-beta .pr-sr span{font-size:13px}
+.pr-beta .pr-sr b{font-size:13px}
+.pr-beta .pr-tr,.pr-beta .pr-ab{margin-left:3px;margin-right:3px}
+.pr-beta .pr-r{display:grid;grid-template-rows:minmax(0,auto) auto auto minmax(0,1fr);gap:0;padding:13px 14px 14px;min-height:0;overflow:hidden;background:radial-gradient(ellipse at 50% 0%,#263840 0,#10191d 43%,#0b1215 100%)}
+.pr-beta .pr-doll{grid-template-columns:minmax(64px,1fr) minmax(215px,295px) minmax(64px,1fr);gap:10px;min-width:0;padding:10px 12px;min-height:0;border-color:#a88a4c88;border-radius:13px;background:radial-gradient(ellipse at 50% 45%,#314956 0,#121e24 63%,#0a1115 100%);box-shadow:inset 0 0 25px #0008}
+.pr-beta .pr-col{align-items:center;justify-content:space-evenly;gap:7px;height:100%}
+.pr-beta .pr-sl{width:58px;height:58px;border-radius:10px;box-shadow:inset 0 0 12px #000c,0 2px 10px #0005}
+.pr-beta .pr-sl .ico,.pr-beta .pr-sl .uii{width:42px;height:42px}
+.pr-beta .pr-por{width:100%;max-width:295px;max-height:295px;border-radius:12px;border-color:#bb9c64;box-shadow:0 0 0 3px #0b161b,0 8px 20px #000a}
+.pr-beta .pr-x{top:8px;right:8px;z-index:5;border-color:#b39353;background:#0b151be9}
+.pr-beta .pr-bh{align-items:center;gap:6px 10px;margin:10px 0 7px;padding:0 3px}
+.pr-beta .pr-bh b{font-size:17px}
+.pr-beta .pr-bag-count{font-size:12px;font-weight:700;white-space:nowrap;color:#e0c27c;border:1px solid #79633d;border-radius:12px;padding:2px 8px;background:#211f18}
+.pr-beta .pr-bh .mute{margin-left:auto;font-size:11px}
+.pr-bag-tools{display:flex;align-items:center;gap:9px;margin-bottom:8px;min-width:0}
+.pr-bag-tabs{display:flex;gap:4px;flex-wrap:wrap}
+.pr-bag-tabs button{min-height:0;padding:5px 10px;border:1px solid #525b56;border-radius:7px;color:#c1c8c7;background:#101a1e;font:600 12px Alegreya,Georgia,serif}
+.pr-bag-tabs button.on{color:#f8e4aa;border-color:#d7ad5e;background:linear-gradient(180deg,#524321,#262319);box-shadow:inset 0 1px #fbe5a328}
+.pr-bag-tabs button:focus-visible,.pr-bag-search:focus-visible{outline:2px solid #e5c47b;outline-offset:2px}
+.pr-bag-search{box-sizing:border-box;flex:1;min-width:110px;max-width:240px;min-height:31px;padding:5px 10px;border-radius:7px;border:1px solid #666b60;background:#0c161a;color:#f3ead7;font-size:12px}
+.pr-bag-search::placeholder{color:#9ca6a6}
+.pr-beta .pr-grid{align-content:start;grid-template-columns:repeat(auto-fill,minmax(53px,1fr));gap:7px;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#816839 #11191c;padding:7px;border:1px solid #68573577;border-radius:10px;background:linear-gradient(180deg,#080e11,#111a1e)}
+.pr-beta .pr-it{align-self:start;border-radius:9px;min-width:0;box-shadow:inset 0 0 12px #000b,0 2px 5px #0005}
+.pr-beta .pr-it:hover,.pr-beta .pr-it:focus-visible{transform:translateY(-1px);box-shadow:0 0 0 1px #d9bb74,0 0 14px #cda9514d;outline:none}
+.pr-bag-none{grid-column:1/-1;padding:15px;color:#c5c0ac;font-size:13px;text-align:center}
+@media(min-width:761px) and (max-height:760px){
+ .pr-c.pr-beta{height:calc(100dvh - 16px);max-height:calc(100dvh - 16px)}
+ .pr-beta .pr-doll{padding:7px 10px}
+ .pr-beta .pr-por{max-width:230px;max-height:230px}
+ .pr-beta .pr-sl{width:53px;height:53px}
+ .pr-beta .pr-r{padding:10px}
+}
+@media(min-width:761px) and (max-width:1080px){
+ .pr-c.pr-beta{grid-template-columns:minmax(255px,290px) minmax(0,1fr)}
+ .pr-beta .pr-doll{grid-template-columns:54px minmax(150px,1fr) 54px;padding:8px;gap:7px}
+ .pr-beta .pr-sl{width:52px;height:52px}
+ .pr-beta .pr-por{max-width:250px}
+ .pr-bag-tools{flex-wrap:wrap}
+}
+@media(max-width:760px){
+ .pr-c.pr-beta{width:100%;height:100dvh;max-height:none;display:block;overflow-y:auto;border-radius:0}
+ .pr-beta .pr-l,.pr-beta .pr-r{overflow:visible}
+ .pr-beta .pr-r{display:flex;flex-direction:column;min-height:0;padding:12px}
+ .pr-beta .pr-doll{grid-template-columns:48px minmax(0,1fr) 48px;padding:7px;gap:7px}
+ .pr-beta .pr-sl{width:48px;height:48px}
+ .pr-beta .pr-sl .ico,.pr-beta .pr-sl .uii{width:36px;height:36px}
+ .pr-beta .pr-por{max-width:270px}
+ .pr-beta .pr-bh{flex-wrap:wrap}
+ .pr-beta .pr-bh .mute{margin-left:0}
+ .pr-bag-tools{flex-wrap:wrap}
+ .pr-bag-tabs{flex:1}
+ .pr-bag-search{max-width:none;flex-basis:100%}
+ .pr-beta .pr-grid{overflow:visible;max-height:none;grid-template-columns:repeat(auto-fill,minmax(48px,1fr))}
+}
 @keyframes prIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.pr-c{animation:none}}
 @media (max-width:760px){
