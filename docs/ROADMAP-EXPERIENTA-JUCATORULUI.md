@@ -58,6 +58,7 @@ Expedițiile mercenarilor sunt activități pasive, nu o a patra buclă obligato
 ## ETAPA C — TEMNIȚE, TURN, ENDGAME
 
 - [ ] **16. Identitate tactică pentru fiecare Temniță.** Mai puțin «aceiași monștri cu statistici diferite»; 1–2 mecanici recognoscibile pentru fiecare, fără a crea alt sistem de explorare.
+  - **În lucru (BETA):** fiecare din cele 10 Temnițe are un efect tematic slab pentru monștrii obișnuiți, explicat pe card și în jurnal. Simularea de victorie include efectele. Nu atingem LIVE, PvP, Turnul, Tronul sau economia. Test: `dev/test-beta-dungeon-tactical-identities.js`; QA: `docs/BETA-DUNGEON-TACTICAL-IDENTITIES.md`. Verificarea în browser încă necesară.
 - [ ] **17. O alegere înainte de căpitan.** Opțional: siguranță, ofensivă sau pradă cu risc. O singură decizie semnificativă pe incursiune; păstrăm dificultățile Normal/Greu/Coșmar și progresul separat.
 - [ ] **18. Feedback de luptă pe toate modurile.** Verificăm portrete mari, selecție, animații și claritatea daunelor pe Temnițe, Turn, PvP și Tron; performanță și accesibilitate pe mobil.
 - [ ] **19. Turn cu puncte de pornire.** Deblocări după record (de exemplu 1/20/40/60/80), cu recompense ajustate pentru etajele sărite și fără farming suplimentar.
