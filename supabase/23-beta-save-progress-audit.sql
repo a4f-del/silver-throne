@@ -80,7 +80,7 @@ BEGIN
     v_new := NEW.game_data::jsonb;
     IF TG_OP = 'UPDATE' THEN
       v_old := OLD.game_data::jsonb;
-      IF NEW.game_data IS NOT DISTINCT FROM OLD.game_data THEN RETURN NEW; END IF;
+      IF v_new IS NOT DISTINCT FROM v_old THEN RETURN NEW; END IF;
     END IF;
 
     IF jsonb_typeof(v_new) IS DISTINCT FROM 'object' THEN
