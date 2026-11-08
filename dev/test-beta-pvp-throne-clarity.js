@@ -11,7 +11,7 @@ for(const m of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
 const segment=(s,a,b)=>{const i=s.indexOf(a),j=s.indexOf(b,i+a.length);assert(i>=0&&j>i,'Missing '+a);return s.slice(i,j)};
 const code=segment(world,'function lwMatchAdvice(p,can){','function lwSelPanel() {');
 function make(server='beta'){
- const squad=[{n:'Eroul',atk:70},{n:'Paznicul',atk:50},{n:'Arcașul',atk:40}];
+ const squad=[{n:'Eroul',atk:70},{n:'Paznicul',atk:50},{n:'Arcașul',atk:40},{n:'Vraciul',atk:40}];
  const TT={CFG:{maxUnits:3},power:a=>a.reduce((n,x)=>n+x.atk,0)};
  const fn=new Function('ST_SERVER','tronTeamUnits','TT','lwNum','tEsc',code+';return lwMatchAdvice;')(
   server,()=>squad,TT,n=>Math.round(n).toLocaleString('ro-RO'),
@@ -19,13 +19,13 @@ function make(server='beta'){
  return {fn,squad,TT};
 }
 const beta=make();
-let advice=beta.fn({power:250},{ok:true});
+let advice=beta.fn({power:270},{ok:true});
 assert(advice.includes('Adversar mai puternic'));
-assert(advice.includes('puterea ta 160'),'Uses full World team, not lone hero');
-assert(advice.includes('puterea adversarului 250'));
+assert(advice.includes('puterea ta 200'),'Uses full World team, not lone hero');
+assert(advice.includes('puterea adversarului 270'));
 assert(advice.includes('Pregătește echipamentul'));
-assert(advice.includes('maxim 3 luptători'));
-advice=beta.fn({power:140},{ok:true});
+assert(advice.includes('maxim 4 luptători'));
+advice=beta.fn({power:185},{ok:true});
 assert(advice.includes('Forțe apropiate'),'Mid-risk tier is visible');
 advice=beta.fn({power:70},{ok:true});
 assert(advice.includes('Adversar mai slab'));
@@ -64,4 +64,4 @@ assert(throne.includes('Duel')||throne.includes('duel'),'Hero-only duel preserve
 assert(throne.includes('Prestigiul vine din clasament'),'No permanent combat power offered');
 assert(throne.includes('me.can_challenge'),'Tron server eligibility retained');
 assert(html.includes('tron.js?v=2026.11.08-1')&&html.includes('lume.js?v=2026.11.08-4'));
-console.log('OK: real 3-unit World power, risk tiers without false odds, newbie/cooldown gating, personal ranking, hall and admin-tool protection, LIVE isolated.');
+console.log('OK: real 4-unit World power, risk tiers without false odds, newbie/cooldown gating, personal ranking, hall and admin-tool protection, LIVE isolated.');
