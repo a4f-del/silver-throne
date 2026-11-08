@@ -58,5 +58,5 @@ assert.equal(x.api.lwRecommendedOpponents().length,0,'No attacks means no recomm
 assert(x.api.lwRecommendedPanel().includes('Nu există momentan'));
 x.setAttacks(18);x.S.d={f:{}};
 assert.equal(x.api.lwRecommendedOpponents().length,0,'Never recommend attacks while in combat');
-assert(index.includes('lume.js?v=2026.11.08-2'),'New asset version is referenced');
+assert(index.includes('lume.js?v=2026.11.08-3'),'New asset version is referenced');
 console.log('OK: power-ranked attackable opponents, beginner/cooldown/energy/combat protection, safe HTML, LIVE isolation.');
