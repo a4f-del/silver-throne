@@ -338,11 +338,21 @@ function lwVal(k, r) {
 /* nivelul maxim (50): fum auriu în jurul portretului și o coroană deasupra (clasament și profilul din Lume) */
 const MX_CR = '<svg viewBox="-14 -13 28 22" aria-hidden="true"><defs><linearGradient id="mx-gd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1b8"/><stop offset=".5" stop-color="#f0d27a"/><stop offset="1" stop-color="#a8781c"/></linearGradient></defs><path d="M-11 5L-13-7-6-1 0-11 6-1 13-7 11 5Z" fill="url(#mx-gd)" stroke="#5c430c" stroke-width="1" stroke-linejoin="round"/><rect x="-11" y="4" width="22" height="3.6" rx="1" fill="url(#mx-gd)" stroke="#5c430c" stroke-width=".8"/><circle cx="0" cy="-11" r="1.8" fill="#ff5a5a"/><circle cx="-13" cy="-7" r="1.4" fill="#7cc8ff"/><circle cx="13" cy="-7" r="1.4" fill="#7cc8ff"/></svg>';
 const lwMaxAv = (lv, html, big) => lv >= (typeof LMAX !== 'undefined' ? LMAX : 50) ? `<span class="mx-av${big ? ' big' : ''}" title="Nivel maxim">${html}<i class="mx-s a"></i><i class="mx-s b"></i><i class="mx-s c"></i><b class="mx-cr">${MX_CR}</b></span>` : html;
+/* Pasul 33: clasamente provizorii până la validarea autoritativă.
+   Acest avertisment NU pretinde că mecanica a fost securizată. */
+function lwTrustNotice(){
+ return typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'
+  ? '<details class="lw-trust"><summary>⚠ Clasament BETA provizoriu</summary>'+
+    '<p class="mute">Nivelul și puterea sunt încă publicate inițial de client. '+
+    'Rezultatele PvP nu sunt verificate printr-un motor de luptă server-side. '+
+    'Rangurile de aici sunt pentru testare, nu pentru competiție verificată.</p></details>'
+  : '';
+}
 function vBoard() {
   const k = LUME.bk, b = LUME.board[k], me = LUME.st && LUME.st.me && LUME.st.me.user_id;
   if (!LUME.bLoad[k] && (!b || Date.now() - (LUME.bAt[k] || 0) > 60000)) lwBoard(k);
   const tabs = `<div class="tabs lw-bt">${LW.BOARD.filter(([x])=>typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||x!=='terr').map(([x, n]) => `<button${x === k ? ' class="p"' : ''} onclick="lwBk('${x}')">${n}</button>`).join('')}</div>`;
-  let h = `<section><h2>Clasament</h2>${tabs}`;
+  let h = `<section><h2>Clasament</h2>${tabs}${lwTrustNotice()}`;
   if (!b) return h + `<p class="mute">${LUME.bErr ? tEsc(LUME.bErr) : 'Se încarcă…'}</p></section>`;
   if (!b.rows.length) return h + `<p class="mute">${k === 'tron' ? 'Nu sunt încă date despre domnii la Tron.' : 'Nimeni în clasament încă.'}</p></section>`;
   const medal = r => (r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : r);
