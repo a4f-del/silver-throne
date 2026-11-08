@@ -57,6 +57,9 @@ Expedițiile mercenarilor sunt activități pasive, nu o a patra buclă obligato
 
 ## ETAPA C — TEMNIȚE, TURN, ENDGAME
 
+**Previzualizare vizuală BETA — Coborâre compactă (noiembrie 2026):** o temniță recomandată cu progres vizibil, Relicva săptămânii și Turnul în două carduri secundare, lista completă de temnițe ascunsă implicit și reguli utile într-un panou extensibil. Cheile, progresul, costurile și recompensele existente rămân intacte; LIVE nu se modifică. QA vizual mobil/desktop necesar. Test: `dev/test-beta-coborare-hub.js`. Ghid: `docs/BETA-COBORARE-SIMPLIFIED-HUB-PREVIEW.md`.
+
+
 - [ ] **16. Identitate tactică pentru fiecare Temniță.** Mai puțin «aceiași monștri cu statistici diferite»; 1–2 mecanici recognoscibile pentru fiecare, fără a crea alt sistem de explorare.
   - **În lucru (BETA):** fiecare din cele 10 Temnițe are un efect tematic slab pentru monștrii obișnuiți, explicat pe card și în jurnal. Simularea de victorie include efectele. Nu atingem LIVE, PvP, Turnul, Tronul sau economia. Test: `dev/test-beta-dungeon-tactical-identities.js`; QA: `docs/BETA-DUNGEON-TACTICAL-IDENTITIES.md`. Verificarea în browser încă necesară.
 - [ ] **17. O alegere înainte de căpitan.** Opțional: siguranță, ofensivă sau pradă cu risc. O singură decizie semnificativă pe incursiune; păstrăm dificultățile Normal/Greu/Coșmar și progresul separat.
