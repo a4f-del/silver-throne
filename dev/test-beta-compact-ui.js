@@ -26,7 +26,7 @@ const ctx = {
 };
 vm.createContext(ctx);
 vm.runInContext(js,ctx,{filename:'beta-compact-ui.js'});
-Object.assign(ctx,vm.runInContext('({stCompactActive,stCompactNav,stCompactHdr,stCompactEvent})',ctx));
+Object.assign(ctx,vm.runInContext('({stCompactActive,stCompactNav,stTronSidebarState,stCompactHdr,stCompactEvent})',ctx));
 assert(ctx.stCompactActive());
 const nav = ctx.stCompactNav();
 assert.equal((nav.match(/<button/g)||[]).length,4,'Exactly four primary destinations');
@@ -36,6 +36,36 @@ const header = ctx.stCompactHdr();
 for(const token of ['id="pp"','id="pt"','wm-open','bhOpen()','stCompactHeroGo','wf-open','guild-open',"tab('k')",'stCompactToggleAccount','btog','fxToggleInstant']) assert(header.includes(token),'Header action '+token);
 assert(ctx.stCompactEvent().includes('<details'),'Event starts collapsed');
 assert(styles.join('').includes('st-compact'),'Scoped styles');
+assert(html.includes('beta-compact-ui.js?v=2026.11.08-2'),'New compact sidebar cache-busted');
+ctx.TT={CFG:{minLevel:10}};
+ctx.TRON={st:{
+  me:{user_id:'hero-1',pending:[],can_challenge:true},
+  holder:{user_id:'hero-2',name:'OwN'},week_end:Date.now()+13*3600e3
+}};
+ctx.tronNow=()=>Date.now();
+ctx.sdT=()=> '13h';
+ctx.tEsc=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+let throneNav=ctx.stCompactNav();
+assert.equal((throneNav.match(/<button/g)||[]).length,4,'No fifth destination added');
+assert(throneNav.includes('st-tron-hot')&&throneNav.includes('OwN ține Tronul')&&throneNav.includes('Provoacă acum'),'Actionable challenger shows highlighted Throne in sidebar');
+ctx.TRON.st.me.can_challenge=false;
+throneNav=ctx.stCompactNav();
+assert(throneNav.includes('st-tron-holder')&&throneNav.includes('Se închide în 13h'),'Occupied Throne stays visible without false CTA');
+ctx.TRON.st.me.pending=[{week:5},{week:6}];
+throneNav=ctx.stCompactNav();
+assert(throneNav.includes('Premiu de revendicat')&&throneNav.includes('2 premii disponibile'),'Rewards receive priority');
+ctx.TRON.st.me.pending=[];
+ctx.TRON.st.holder={user_id:'hero-1',name:'Eroul'};
+throneNav=ctx.stCompactNav();
+assert(throneNav.includes('st-tron-king')&&throneNav.includes('Tu deții Tronul'),'Owner sees crown status');
+ctx.TRON.st.holder=null;
+throneNav=ctx.stCompactNav();
+assert(throneNav.includes('Tronul este liber'),'Vacant Throne state shown');
+ctx.TRON.st.holder={user_id:'hero-2',name:'<script>alert(1)</script>'};
+throneNav=ctx.stCompactNav();
+assert(throneNav.includes('&lt;script&gt;')&&!throneNav.includes('<script>'),'Server holder names are safely escaped');
+ctx.TRON.st=null;
+assert.equal((ctx.stCompactNav().match(/<button/g)||[]).length,4,'Unavailable server state preserves four navigation choices');
 ctx.ST_SERVER='live';
 assert(!ctx.stCompactActive(),'LIVE unchanged');
 assert(html.includes('stCompactActive()')&&html.includes('stCompactNav()')&&html.includes('stCompactEvent()'),'All navigation hooks wired');
