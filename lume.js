@@ -242,14 +242,44 @@ function lwEnBar() {
   let p = ''; for (let i = 0; i < pips; i++) p += `<i class="${i < full ? 'on' : ''}">${i === full && part > 0 ? `<b style="width:${Math.round(part * 100)}%"></b>` : ''}</i>`;
   return `<div class="lw-en" role="img" aria-label="Atacuri disponibile: ${e.n} din ${e.max}"><span class="lw-en-t">⚔ Atacuri <b>${e.n}/${e.max}</b></span><span class="lw-pips">${p}</span><small>${e.n >= e.max ? 'Bara e plină' : `Următorul peste <span data-end="${Math.round(Date.now() + e.next)}">${fmt(e.next)}</span>`}</small></div>`;
 }
+/* Pasul 23 · BETA: comparații doar orientative, nu cote de victorie.
+   Puterea este aceeași ca în instantaneul publicat în Lume (fantoma a maximum 3).
+   Regulile de atac rămân exclusiv în lwCan() / server. */
+function lwPvpOwnPower() {
+  return Math.max(1, Math.round(TT.power(tronTeamUnits())));
+}
+function lwPvpComparison(p, own) {
+  const theirs=Number(p&&p.power);
+  if(!Number.isFinite(theirs)||theirs<=0)return 'Putere necunoscută';
+  const ratio=theirs/Math.max(1,own);
+  return ratio>=1.25?'Mai puternic decât tine':ratio<=0.8?'Mai slab decât tine':'Putere apropiată de a ta';
+}
+function lwPvpSuggestions() {
+  if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||!LUME.st||!LUME.st.me)return '';
+  const me=LUME.st.me.user_id,own=lwPvpOwnPower();
+  const eligible=LUME.st.players.filter(p=>p.id!==me&&lwCan(p).ok&&
+    Number.isFinite(+p.power)&&+p.power>0);
+  eligible.sort((a,b)=>Math.abs(Math.log(a.power/own))-Math.abs(Math.log(b.power/own))||
+    String(a.id).localeCompare(String(b.id)));
+  const chosen=eligible.slice(0,3);
+  if(!chosen.length)return '<section class="lw-match"><h2>Adversari potriviți</h2>'+
+    '<p class="mute">Nu există acum adversari disponibili pentru atac. Protecția începătorilor, pauzele și bara de atacuri rămân valabile.</p></section>';
+  return '<section class="lw-match"><h2>Adversari potriviți</h2>'+
+    '<p class="mute">Cei mai apropiați de puterea echipei tale publicate ('+lwNum(own)+
+    '). Comparația nu garantează victoria.</p>'+
+    chosen.map(p=>'<div class="lw-match-row"><span><b>'+tEsc(p.name)+'</b><small>Nivel '+
+      Number(p.level)+' · '+lwNum(p.power)+' putere · '+
+      lwPvpComparison(p,own)+'</small></span><button type="button" onclick="lwShow(\''+
+      tEsc(String(p.id))+'\')">Vezi pe hartă</button></div>').join('')+'</section>';
+}
 function lwSelPanel() {
   const st = LUME.st, p = LUME.sel && st.players.find(x => x.id === LUME.sel);
   if (!p) return '<p class="mute">Atinge un sat ca să vezi cine locuiește acolo.</p>';
-  const mine = st.me && p.id === st.me.user_id, can = mine ? null : lwCan(p), myP = Math.round(TT.power(tronUnits()));
-  const cmp = mine ? '' : p.power > myP * 1.25 ? '<span class="r4">mai puternic decât tine</span>' : p.power < myP * 0.8 ? '<span class="lw-ok">mai slab decât tine</span>' : 'cam cât tine';
+  const mine = st.me && p.id === st.me.user_id, can = mine ? null : lwCan(p), myP = ST_SERVER==='beta'?lwPvpOwnPower():Math.round(TT.power(tronUnits()));
+  const cmp = mine ? '' : ST_SERVER==='beta'?tEsc(lwPvpComparison(p,myP)) : p.power > myP * 1.25 ? '<span class="r4">mai puternic decât tine</span>' : p.power < myP * 0.8 ? '<span class="lw-ok">mai slab decât tine</span>' : 'cam cât tine';
   return `<section class="lw-sel"><div class="lw-sel-h">${av({ n: p.hero && p.hero.n || p.name, c: (p.hero && p.hero.c) || 'Campion', ic: p.hero && p.hero.ic }, 56)}<div><h2>${tEsc(p.name)}${mine ? ' <span class="mute">(tu)</span>' : ''}</h2><div class="mute">${p.title ? '♛ ' + tEsc(p.title) + ' · ' : ''}${tEsc(p.stage_name)} · văzut ${lwAgo(p.seen)}</div></div></div>`
     + `<div class="lw-stats"><div><b>${p.level}</b><span>Nivel</span></div><div><b>${lwNum(p.power)}</b><span>Putere</span></div>${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'':'<div><b>'+p.territories+'</b><span>Teritorii</span></div>'}</div>`
-    + (mine ? '' : `<div class="mute">Puterea echipei lui: ${cmp} (a ta: ${lwNum(myP)}).</div>`)
+    + (mine ? '' : `<div class="mute">${ST_SERVER==='beta'?'Comparație orientativă: ':'Puterea echipei lui: '}${cmp} (a ta: ${lwNum(myP)}).${ST_SERVER==='beta'?' În Lume contează până la 3 luptători; victoria nu este garantată.':''}</div>`)
     + `<div class="row lw-act"><span class="mute">${mine ? 'Satul tău, așa cum îl văd ceilalți.' : can.ok ? 'Dacă învingi, iei prada și experiența. El nu pierde nimic.' : can.why}</span><span>${mine ? '' : `<button class="p" onclick="lwAttack('${p.id}')"${can.ok && !LUME.busy ? '' : ' disabled'}>Atacă · 1 ⚔</button> `}<button onclick="lwProfile('${p.id}')">Vezi profilul</button></span></div></section>`;
 }
 function lwLog() {
@@ -270,7 +300,7 @@ function vLume() {
   'Satele tuturor jucătorilor, în jurul Tronului de Argint. În jurul satului tău, în chenarul auriu, e <b>ținutul tău</b>: satele de jefuit și de cucerit, taberele, și locurile de interes, pe care doar tu le vezi.'}
   Acum: <b>${n}</b> ${n === 1 ? 'sat' : 'sate'} de jucători.</div>${LUME.err ? `<p class="r4">${tEsc(LUME.err)}</p>` : ''}${LUME.repErr ? `<p class="r4">Rezultatul ultimului atac nu a ajuns la server (${tEsc(LUME.repErr)}). Se retrimite automat.</p>` : ''}${lwEnBar()}${lwMap()}`;
   h += `<div class="st-lg"><span><i style="background:#f0d27a"></i>Satul tău</span><span><i style="background:#c0504a"></i>Poate fi atacat</span><span><i style="background:#7b7f82"></i>Începător (sub nivelul ${c.min_level}) sau atacat recent de tine</span><span>👑 auriu: regele săptămânii · argintiu: pe Tron acum</span><span>Satul crește cu nivelul jucătorului: palisadă la 10, zid și turn la 20, fortificații la 25, castel de la 30</span></div></section>`;
-  return h + lwSelPanel() + lwLog() + `<section><h2>Reguli</h2><div class="mute">• Bara are ${c.en_max} atacuri și se reface câte unul la ${c.en_regen_min} de minute, adică ${Math.round(24 * 60 / c.en_regen_min)} pe zi.<br>• Același jucător îl poți ataca o dată la ${c.same_h} ore. Începătorii (sub nivelul ${c.min_level}) nu pot fi atacați și nu pot ataca.<br>• Lupți cu fantoma echipei lui, cu aceleași plafoane ca la Tron. Dacă învingi, iei prada calculată de joc și experiență în plus. Apărătorul nu pierde niciodată nimic, doar află din jurnal.<br>• Satele din Lume nu se pot cuceri; teritoriile rămân în regiunea ta.</div></section>`;
+  return h + lwSelPanel() + lwPvpSuggestions() + lwLog() + `<section><h2>Reguli</h2><div class="mute">• Bara are ${c.en_max} atacuri și se reface câte unul la ${c.en_regen_min} de minute, adică ${Math.round(24 * 60 / c.en_regen_min)} pe zi.<br>• Același jucător îl poți ataca o dată la ${c.same_h} ore. Începătorii (sub nivelul ${c.min_level}) nu pot fi atacați și nu pot ataca.<br>${ST_SERVER==='beta'?'• În Lume te lupți cu fantoma publicată a echipei (maximum 3 luptători). La Tron, în BETA, te duelezi doar cu eroul; sunt două reguli diferite. Comparația de putere nu este o probabilitate de victorie.':'• Lupți cu fantoma echipei lui, cu aceleași plafoane ca la Tron.'} Dacă învingi, iei prada calculată de joc și experiență în plus. Apărătorul nu pierde niciodată nimic, doar află din jurnal.<br>• Satele din Lume nu se pot cuceri; teritoriile rămân în regiunea ta.</div></section>`;
 }
 
 /* ------------------------------------------------------------------ CLASAMENT */
@@ -405,6 +435,11 @@ if (typeof setInterval === 'function') setInterval(() => {
 .lw-act{flex-wrap:wrap;gap:8px}.lw-act>span:last-child{display:flex;gap:6px;flex-wrap:wrap}
 .lw-ok{color:#7fd88c}
 .lw-lnk{background:none!important;border:0!important;box-shadow:none!important;padding:0;color:var(--gold2);text-decoration:underline;text-underline-offset:3px;font:inherit}
+.lw-match-row{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--line);padding:9px 0}
+.lw-match-row span{display:flex;flex-direction:column;gap:4px;min-width:0}
+.lw-match-row small{color:var(--mute);font-size:12px}
+.lw-match-row button{flex:none}
+@media(max-width:520px){.lw-match-row{gap:6px}.lw-match-row button{padding:6px 9px}}
 .lw-bt{flex-wrap:wrap}
 @media (max-width:600px){.lw-bt{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}.lw-bt button{flex:none}}
 .lw-board{display:flex;flex-direction:column;gap:4px;margin-top:8px}
