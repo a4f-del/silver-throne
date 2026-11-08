@@ -55,7 +55,7 @@ assert(client.includes("p.cd && p.cd > lwNow() && !lwTestCooldownOn()"));
 assert(client.includes('cd = p.cd && p.cd > lwNow() && !lwTestCooldownOn()'));
 assert(client.includes('$'+'{lwTestCooldownPanel()}'+'$'+'{lwMap()}'));
 assert(client.includes('Consumă în continuare energie'));
-assert(html.includes('lume.js?v=2026.11.08-4'));
+assert(html.includes('lume.js?v=2026.11.08-5'));
 
 const start=client.indexOf('function lwCan(p) {');
 const end=client.indexOf('async function lwAttack(',start);
