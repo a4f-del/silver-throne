@@ -49,6 +49,7 @@ const doc={
 const win={innerWidth:390,innerHeight:740,visualViewport:null,
  events:[],addEventListener(name,fn){this.events.push(name)}};
 const ctx={ST_SERVER:server,S,document:doc,window:win,
+ stCompactActive:()=>server==='beta',
  jeFocusActive:()=>server==='beta'&&S.journeyV===1&&S.journeyUxV===2,
  jeCurrent:()=>stepData[step],jeStatus:()=>({ok:isReady}),
  go:()=>{goCount++},requestAnimationFrame:fn=>{fn();return 0}};
@@ -80,7 +81,10 @@ isReady=false;step='urme';S.tab='a';S.vil='h';
 assert(plan().selector.includes("mrRecruit('Arcaș')"),'Arcaș join receives a direct highlight');
 hasArcas=true;S.vil='a';assert(plan().selector.includes('craft()'),'forge button highlighted');
 S.forge[0]={end:Date.now()-200};assert(plan().selector.includes('collect('),'finished forge highlights Collect');
-step='otel';S.forge=[null,null,null,null];S.inv=[{t:'w',name:'Spadă'}];S.tab='e';S.vil='';
+step='otel';S.forge=[null,null,null,null];S.inv=[{t:'w',name:'Spadă'}];S.tab='a';S.vil='';
+assert(plan().selector.includes('.st-hero-drop:not([open])'),'compact BETA guide points to Erou menu when Echipă is outside navigation');
+assert(plan().name.includes('Erou → Echipă'),'guide label uses Erou submenu');
+S.tab='e';
 assert(plan().selector.includes('invF('),'if item card not in DOM highlight weapon filter');
 isReady=true;assert(plan().selector.includes('jeClaim('),'reward always has precedence');
 isReady=false;step='han';S.tab='a';S.vil='t';assert(plan().selector.includes('train('));

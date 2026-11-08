@@ -13,6 +13,21 @@
    ========================================================================== */
 const GH_TAB = { a: 'Sat', c: 'Coborâre', m: 'Hartă', r: 'Tron', e: 'Echipă' };
 const GH_MT = { h: 'Harta', l: 'Harta', b: 'Clasament', k: 'Campanie', t: 'Teritorii' };
+/* Ghidarea BETA urmeaza meniul compact, fara a schimba ghidul LIVE. */
+const ghCompact = () => typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta' &&
+  typeof stCompactActive === 'function' && stCompactActive();
+const ghTeamLabel = () => ghCompact() ? 'Erou → Echipă și echipament' : 'Echipă';
+function ghTeamNav() {
+  const selector = ghCompact()
+    ? 'header .st-hero-drop:not([open]) > summary, header .st-hero-drop[open] button[onclick^="stCompactHeroGo("]'
+    : '#nv button[onclick="tab(\'e\')"]';
+  return ghQ(selector)[0] || null;
+}
+function ghReplayTarget() {
+  return ghQ(ghCompact()
+    ? 'header .st-settings:not([open]) > summary, header .st-settings[open] button[onclick="fxToggleInstant()"]'
+    : 'header .hq[onclick^="fxToggleInstant"]');
+}
 const ghQ = s => [...document.querySelectorAll(s)].filter(e => e.offsetParent !== null || e instanceof SVGElement);
 const ghB = (s, on) => ghQ('#v button[onclick^="' + s + '"]').filter(b => !on || !b.disabled);
 
@@ -21,8 +36,10 @@ const ghB = (s, on) => ghQ('#v button[onclick^="' + s + '"]').filter(b => !on ||
 const GHID = [
   { t: 'Bine ai venit!', n: 1,
     d: 'Ești eroul unui sat. Cobori în temnițe după pradă, forjezi echipament și îți strângi o echipă. Ghidul te duce pas cu pas, în ritmul tău: urmează săgeata aurie.' },
-  { t: 'Redarea luptelor', p: { t: 'c' }, n: 1, k: () => ghQ('header .hq[onclick^="fxToggleInstant"]'),
-    d: 'În <b>Coborâre</b> te lupți cu monștri. Fiecare luptă se vede <b>lovitură cu lovitură</b>. Butonul <b>Redare</b> din bara de sus (săgeata) o pornește sau o oprește: oprită, sari direct la rezultat.<details><summary>Mai multe</summary>Prima ta luptă se vede mereu, ca să înțelegi cum merge. Butonul de lângă el pornește <b>Botul</b> (premium).</details>' },
+  { t: 'Redarea luptelor', p: { t: 'c' }, n: 1, k: ghReplayTarget,
+    d: (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta')
+      ? 'În <b>Coborâre</b>, luptele se văd lovitură cu lovitură. Apasă <b>⚙ Setări</b> în bara de sus, apoi <b>Redare lupte</b> ca să schimbi între animație și rezultat direct.<details><summary>Mai multe</summary>Prima luptă se vede mereu, ca să înțelegi cum funcționează. În același meniu găsești și <b>Botul</b> (premium).</details>'
+      : 'În <b>Coborâre</b> te lupți cu monștri. Fiecare luptă se vede <b>lovitură cu lovitură</b>. Butonul <b>Redare</b> din bara de sus (săgeata) o pornește sau o oprește: oprită, sari direct la rezultat.<details><summary>Mai multe</summary>Prima ta luptă se vede mereu, ca să înțelegi cum merge. Butonul de lângă el pornește <b>Botul</b> (premium).</details>' },
   { t: 'Prima coborâre', p: { t: 'c' }, c: () => C('l') >= 1, r: { g: 30, o: 15 },
     k: () => { if (!S.d) return (typeof dOpen === 'function' && !dOpen(0)) ? ghB('dToggle(0)') : ghB('startD(0)'); if (S.d.f) return []; const d = ghB('startD(', 1), l = ghB('leave('); return d.length ? [...d, ...l] : l; },
     d: 'Apasă <b>„Intră”</b> la <b>Mina Cenușie</b> și ia monștrii pe rând: fiecare costă 1 punct. Înaintea fiecărui pas vezi <b>șansele de câștig</b>. Când vrei să te oprești, apasă <b>„Ieși cu prada”</b>.<details><summary>Mai multe</summary>Lista se termină cu un căpitan (2 puncte, cu o abilitate specială). Locul din listă se păstrează; după căpitan, lista o ia de la capăt.</details>' },
@@ -35,7 +52,9 @@ const GHID = [
       if (!hasW) { const c = ghB('collect('); if (c.length) return c; const t = ghQ('#v .fslot [data-end], #v [data-end]'); if (t.length) return t.slice(0, 1); return ghB('craft('); }
       const m = ghQ('#lgm .ipk-c button.p'); if (m.length) return m.slice(0, 1); const w = ghQ('#v button[onclick="invPick(\'w\')"]'); return w.length ? w : ghB('invPick(').concat(ghB('equip(')).slice(0, 1);
     },
-    d: 'Când arma e gata, apasă <b>„Ridică”</b> în Topitorie. Apoi du-te în <b>Echipă</b>: la <b>Armă</b> apasă <b>„Alege”</b>, apoi <b>„Pune”</b>.' },
+    d: (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta'
+      ? 'Când arma e gata, apasă <b>„Ridică”</b> în Topitorie. Din bara de sus deschide <b>Erou → Echipă și echipament</b>, apoi pune arma pe erou.'
+      : 'Când arma e gata, apasă <b>„Ridică”</b> în Topitorie. Apoi du-te în <b>Echipă</b>: la <b>Armă</b> apasă <b>„Alege”</b>, apoi <b>„Pune”</b>.') },
   { t: 'Antrenează eroul', p: { t: 'a', v: 't' }, c: () => C('t') >= 1, r: { g: 60 }, k: () => ghB('train(', 1).slice(0, 1),
     d: 'În <b>zona de antrenament</b> transformi aurul în putere pentru erou. Antrenează o dată.<details><summary>Mai multe</summary>Forță, Rezistență și Agilitate cresc eroul (iar mercenarii își trag puterea din el). Pricepere și Negoț ajută toată echipa.</details>' },
   { t: 'Hanul', p: { t: 'a', v: 'h' }, c: () => mrHas('Războinic') && !mrAll().some(f => f.nn), r: { g: 40 },
@@ -99,7 +118,7 @@ const ghVilN = v => (Object.fromEntries(VL)[v] || v);
 function ghPath(p) {
   if (!p) return null;
   p = typeof p === 'function' ? p() : p; if (!p) return null;
-  if (S.tab !== p.t) return ghQ(`#nv button[onclick="tab('${p.t}')"]`)[0] || null;
+  if (S.tab !== p.t) return p.t === 'e' ? ghTeamNav() : ghQ(`#nv button[onclick="tab('${p.t}')"]`)[0] || null;
   if (p.v && S.vil !== p.v) return ghQ(`#v .vh-lb[data-v="${p.v}"], #v .vh-card[data-v="${p.v}"], #v .vb-c[data-v="${p.v}"]`)[0] || null;   /* pagina de start a satului sau banda din clădiri */
   if (p.m && (S.mt === 'h' || !S.mt ? 'l' : S.mt) !== p.m) return ghQ(`#v button[onclick="mtab('${p.m}')"]`)[0] || null;
   return null;
@@ -108,7 +127,7 @@ const ghThere = p => { p = typeof p === 'function' ? p() : p; return !p || (S.ta
 /* „Unde: Sat › Producție › Topitorie”, cu bucățile deja parcurse bifate */
 function ghCrumb(p) {
   p = typeof p === 'function' ? p() : p; if (!p) return '';
-  const seg = [[GH_TAB[p.t], S.tab === p.t]];
+  const seg = [[p.t === 'e' ? ghTeamLabel() : GH_TAB[p.t], S.tab === p.t]];
   if (p.v) seg.push([ghVilN(p.v), S.tab === p.t && S.vil === p.v]);
   if (p.m) seg.push([GH_MT[p.m], S.tab === p.t && (S.mt === 'h' || !S.mt ? 'l' : S.mt) === p.m]);
   let cur = true;

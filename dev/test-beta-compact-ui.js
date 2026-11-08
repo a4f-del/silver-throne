@@ -7,6 +7,9 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const js = fs.readFileSync(path.join(root, 'beta-compact-ui.js'), 'utf8');
+const guide = fs.readFileSync(path.join(root, 'ghid.js'), 'utf8');
+const heroGuide = fs.readFileSync(path.join(root, 'ghidare-erou.js'), 'utf8');
+const journey = fs.readFileSync(path.join(root, 'drumul-eroului.js'), 'utf8');
 const styles = [];
 const ctx = {
   ST_SERVER:'beta',
@@ -36,5 +39,10 @@ assert(styles.join('').includes('st-compact'),'Scoped styles');
 ctx.ST_SERVER='live';
 assert(!ctx.stCompactActive(),'LIVE unchanged');
 assert(html.includes('stCompactActive()')&&html.includes('stCompactNav()')&&html.includes('stCompactEvent()'),'All navigation hooks wired');
+assert(guide.includes('function ghTeamNav()')&&guide.includes("p.t === 'e' ? ghTeamNav()"),'Legacy BETA guide follows Erou submenu instead of missing sidebar Echipă');
+assert(guide.includes('function ghReplayTarget()')&&guide.includes('header .st-settings:not([open])'),'Legacy BETA guide follows Setări to Redare');
+assert(heroGuide.includes("tab==='e'&&typeof stCompactActive==='function'"),'New-hero guidance highlights Erou dropdown');
+assert(journey.includes('Erou → Echipă și echipament'),'Drumul Eroului instructions reflect actual menu');
+assert(html.includes('ghid.js?v=2026.11.08-2')&&html.includes('ghidare-erou.js?v=2026.11.08-2'),'Both guide scripts cache-busted');
 for(const script of html.split('<script>').slice(1).map(s=>s.split('</script>')[0])) if(script.trim()) new Function(script);
 console.log('OK: four nav entries, hero/social/account/settings actions, compact event, BETA-only scope, inline JS.');
