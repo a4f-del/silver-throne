@@ -59,7 +59,7 @@ function acDungeonPage(i) {
   const cost=dCostAt(i),odds=canFight&&typeof dOddsAt==='function'?dOddsAt(i):null;
   let detail='<div class="ac-facts">';
   if(stats)detail+='<span>❤ '+stats.hp+' viață estimată</span><span>⚔ '+stats.atk+' atac estimat</span>';
-  if(!boss&&ST_SERVER==='beta'&&typeof trMobInfo==='function'){const trait=trMobInfo(i);if(trait)detail+='<div class="ac-ability ac-mob-trait"><b>✦ Particularitatea acestei Temnițe</b><span>'+acSafe(trait)+'</span></div>';}
+  if(!boss&&typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&typeof trMobInfo==='function'){const trait=trMobInfo(i);if(trait)detail+='<div class="ac-ability ac-mob-trait"><b>✦ Particularitatea acestei Temnițe</b><span>'+acSafe(trait)+'</span></div>';}
   const counter=boss&&data&&typeof TR_C!=='undefined'&&TR_C[data.a]?TR_C[data.a]:null;
   const hasCounter=counter&&(S.fs||[]).some(f=>f.c===counter&&f.hp>0);
   if(boss&&data&&typeof TR_A!=='undefined'&&TR_A[data.a]) {
