@@ -47,7 +47,7 @@ assert(throne.includes("TRON.pubSig = sig"),'Only successful publication updates
 assert(throne.includes('TRON.pubFailAt'),'Errors back off');
 assert(throne.includes("tronIsBetaDuel() ? '' : '<button onclick="),'Manual Throne button hidden in BETA only');
 assert(throne.includes('!CONT.booted'),'Wait for a logged-in and booted account');
-assert(index.includes('tron.js?v=2026.11.08-2'));
+assert(index.includes('tron.js?v=2026.11.08-3'));
 assert(index.includes('lume.js?v=2026.11.08-5'));
 
 const testSquad=get(throne,'function tronTeamUnits() {','function tronDuelRestore()');
