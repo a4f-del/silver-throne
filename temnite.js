@@ -110,7 +110,6 @@ function tmnHubBeta(open, rec, card, shown) {
     </article>`;
   }
   return '<div class="cb-hub">'+main+
-    (typeof heroSoloControl==='function'?'<div class="cb-party-option">'+heroSoloControl()+'</div>':'')+
     '<div class="cb-options">'+relic+tower+'</div>'+
     `<details id="tmn-hub-all" class="cb-all" ontoggle="tmnHubToggle(event)" ${TMN.showAll?'open':''}>
       <summary><span><b>Toate temnițele</b><small>Alege altă temniță sau verifică ce urmează să deblochezi</small></span><span class="cb-all-count">${shown.length} disponibile în listă ▾</span></summary>
@@ -207,6 +206,26 @@ function bossMini(n) { const b = tmnBoss(n); return b ? `<span class="eb-mini" s
 .cb-head details summary{cursor:pointer;color:var(--gold2)}
 .cb-head details[open]{max-width:480px}
 @media(max-width:640px){.cb-feature{grid-template-columns:1fr}.cb-feature-art{min-height:150px;max-height:165px}.cb-feature-info{padding:12px 13px}.cb-options{grid-template-columns:1fr}.cb-mini-visual{height:84px}.cb-head-title{flex-direction:column}.cb-head details{text-align:left}.cb-all-count{font-size:11px}}
+
+/* BETA: echipa este primul control în Coborâre, înaintea temniței.
+   Regulile rămân accesibile, dar nu mai consumă spațiu permanent. */
+.cb-party-first{display:flex;align-items:flex-start;gap:9px;margin:0 0 12px;min-width:0}
+.cb-party-first .cb-party-manage{flex:1;min-width:0}
+.cb-party-rules{flex:0 0 118px;min-width:0;border:1px solid var(--line);border-radius:9px;background:#141a1c;padding:8px 9px;font-size:12px;color:var(--mute)}
+.cb-party-rules summary{color:var(--gold2);cursor:pointer;white-space:nowrap}
+.cb-party-rules[open]{flex-basis:260px}
+.cb-party-rules p{margin:9px 0 0;line-height:1.35}
+.cb-party-active{display:flex;align-items:stretch;gap:5px;flex-wrap:wrap}
+.cb-party-member{display:flex;flex-direction:column;gap:1px;padding:4px 8px;min-width:0;border:1px solid #3e443c;border-radius:7px;background:#1b2424}
+.cb-party-member b{font-size:12px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px}
+.cb-party-member small{font-size:10px;color:var(--mute)}
+.cb-member-fallen{border-color:#a14b45;background:#322021}
+@media(max-width:760px){
+ .cb-party-first{flex-direction:column;gap:7px}
+ .cb-party-first .cb-party-manage{width:100%}
+ .cb-party-rules,.cb-party-rules[open]{flex-basis:auto;width:100%}
+ .cb-party-member{flex:1 1 auto}
+}
 
 /* BETA · gestionarea rapida a mercenarilor la Coborare. */
 .cb-party-manage{border:1px solid #65512e;border-radius:10px;background:#101719;padding:9px 11px;display:flex;flex-direction:column;gap:7px}
