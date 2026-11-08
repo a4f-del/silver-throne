@@ -460,15 +460,37 @@ if (typeof setInterval === 'function') setInterval(() => {
 .lw-rk{flex:none;width:30px;text-align:center;font:700 16px Cinzel,serif;color:var(--gold2)}
 .lw-bn{flex:1;min-width:0}.lw-bn b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lw-bn small{display:block;font-size:13px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lw-bv{flex:none;text-align:right;font-weight:700;color:var(--ink)}
-.lgm-b.lwp-b{width:min(94vw,440px);text-align:left}
-.lwp-hd{display:flex;gap:14px;align-items:center;margin:4px 30px 10px 0}.lwp-hd h3{margin:0;font:700 22px Cinzel,serif;color:var(--ink)}
+/* Profilul jucatorului din harta: numai acest modal, nu restul ferestrelor. */
+.lgm-b.lwp-b{width:min(94vw,780px);max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow-y:auto;overflow-x:hidden;box-sizing:border-box;text-align:left;overscroll-behavior:contain}
+.lwp{min-width:0;max-width:100%;overflow-wrap:break-word}
+.lwp-hd{display:flex;gap:14px;align-items:center;margin:4px 30px 10px 0;min-width:0}
+.lwp-hd>div:last-child{min-width:0}
+.lwp-hd h3{margin:0;font:700 22px Cinzel,serif;color:var(--ink);overflow-wrap:anywhere}
 .lwp-t{color:var(--gold2);margin:2px 0}
-.lwp h4{font:700 14px Cinzel,serif;color:var(--gold);margin:14px 0 6px;letter-spacing:.04em}
-.lwp-u{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;padding:5px 0;border-bottom:1px solid #ffffff10}.lwp-u span:last-child{flex-basis:100%;font-size:14px}
-.lwp-g{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}.lwp-g div{padding:5px 8px;background:#0b0e10aa;border:1px solid var(--line);border-radius:4px}.lwp-g b{font:700 17px Cinzel,serif;color:var(--gold2);margin-right:6px}.lwp-g span{font-size:13px;color:var(--mute)}
+.lwp h4{font:700 14px Cinzel,serif;color:var(--gold);margin:10px 0 4px;letter-spacing:.04em}
+.lwp-u{display:grid;grid-template-columns:max-content max-content minmax(0,1fr);gap:8px;align-items:baseline;padding:4px 0;border-bottom:1px solid #ffffff10}
+.lwp-u span:last-child{font-size:14px;text-align:right;min-width:0}
+.lwp-g{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.lwp-g div{min-width:0;padding:5px 8px;background:#0b0e10aa;border:1px solid var(--line);border-radius:4px}
+.lwp-g b{font:700 17px Cinzel,serif;color:var(--gold2);margin-right:6px}
+.lwp-g span{font-size:13px;color:var(--mute)}
 .lwp-rec .row{font-size:14px;padding:3px 0}
-.lwp-seen{margin-top:12px;font-size:13px}
-.lwp-a{display:flex;gap:8px;margin:10px 0 4px}.lwp-a button{flex:1}
+.lwp-rec .row span{min-width:0;overflow-wrap:anywhere}
+.lwp-seen{margin-top:8px;font-size:13px}
+.lwp-a{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,124px),1fr));gap:8px;margin:10px 0 4px}
+.lwp-a button{width:100%;min-width:0;white-space:normal;line-height:1.25;overflow-wrap:anywhere}
+@media (max-width:640px){
+ .lgm-b.lwp-b{width:min(94vw,520px);padding:14px}
+ .lwp-g{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .lwp-u{display:flex;flex-wrap:wrap;gap:2px 8px}
+ .lwp-u span:last-child{flex-basis:100%;text-align:left}
+ .lwp-a{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:380px){
+ .lwp-hd{gap:8px}
+ .lwp-hd h3{font-size:18px}
+ .lwp-a{grid-template-columns:1fr}
+}
 @media (max-width:520px){.lw-stats b{font-size:17px}}
 `;
   st.textContent += '.lw-match{border:1px solid #8f754b;background:#171e22;padding:9px 11px;margin:10px 0;border-radius:8px}.lw-match>b{color:var(--gold2);display:block}.lw-match small{font-size:12px;color:var(--mute);display:block;margin-top:4px}.lw-match p{font-size:13px;margin:7px 0;line-height:1.4}';
