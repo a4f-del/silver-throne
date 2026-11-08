@@ -14,7 +14,7 @@ for(const [oldver,newver] of [
  ['aventura-carduri.css?v=2026.11.08-4','aventura-carduri.css?v=2026.11.08-5'],
  ['aventura-carduri.js?v=2026.11.08-5','aventura-carduri.js?v=2026.11.08-6'],
  ['temnite.js?v=2026.11.08-1','temnite.js?v=2026.11.08-3'],
- ['istoric.js?v=2026.11.04-4','istoric.js?v=2026.11.08-1']
+ ['istoric.js?v=2026.11.04-4','istoric.js?v=2026.11.08-2']
 ]){assert(index.includes(newver),'Cache not invalidated: '+newver);assert(!index.includes(oldver),'Stale asset '+oldver);}
 const betaNoCombat=between(index,"if(!d&&ST_SERVER==='beta'){","\n if(!d)return(");
 assert(!betaNoCombat.includes('bhLast'),'No battle journal panel above Coborare');
