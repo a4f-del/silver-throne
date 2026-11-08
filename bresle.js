@@ -95,6 +95,21 @@ function guildWeeklyGoal(week,key,fallback){
  return raw!=null&&Number.isSafeInteger(value)&&value>0?value:fallback;
 }
 
+/* Ultima lovitură este confirmată de guild_api, nu estimată din S.fs.
+   Valorile sunt bonusuri de contribuție, nu HP vindecat personajului. */
+function guildBossLastHit(boss){
+ const hit=boss&&boss.last_hit;
+ if(!hit||!Number.isFinite(Number(hit.damage)))return '';
+ const n=x=>Math.max(0,Math.round(Number(x)||0)).toLocaleString('ro-RO');
+ return '<details class="guild-last-hit"><summary>Detalii ultima lovitură: '+
+  n(hit.damage)+' daune</summary><p class="mute">Din formația publicată în Lume: '+
+  '⚔ Ofensivă +'+n(hit.attack_bonus)+
+  ' · 🛡 Protecție +'+n(hit.protection_bonus)+
+  ' · ✚ Vindecare +'+n(hit.healing_bonus)+
+  ' · Contraclasă: '+(hit.counter_triggered===true?'activă':'inactivă')+
+  '. Bonusurile sunt contribuții tactice la daune, nu vindecă viața eroului. '+
+  'Plafonul și viața rămasă bossului pot limita totalul.</p></details>';
+}
 function guildPaint(){
  const host=document.getElementById('guild-view');if(!host)return;
  if(GUILD.error){host.innerHTML='<p class="r4">Breslele nu sunt disponibile: '+guildEsc(GUILD.error)+'. Verifică migrarea SQL BETA.</p><button onclick="guildSync(true)">Reîncearcă</button>';return;}
@@ -136,7 +151,9 @@ function guildPaint(){
    '<div class="guild-boss"><div class="guild-boss-head"><b>Străjerul Cenușii</b><span>'+Math.max(0,2-(boss.hits_today||0))+' / 2 atacuri azi</span></div>'+
    guildBar('Viața comună',boss.hp,boss.max||1)+
    '<p>Abilitate: <b>'+guildEsc(({poison:'Otravă',storm:'Furtună',wave:'Val de forță'})[boss.ability]||'Val de forță')+'</b>. Clasa care îl contracarează: <b>'+guildEsc(boss.counter||'Vraci')+'</b>. Bonusul de contraclasă (+25% daune) se aplică dacă ai această clasă în echipa publicată din Lume (maximum 3 luptători), nu doar dacă eroul are clasa potrivită. Daunele sunt calculate pe server din acel profil. Viața se adaptează numărului de membri.</p>'+
+   '<p>Roluri în atac: <b>Războinic / Arcaș / Mag</b> pentru ofensivă, <b>Paznic / Gardian</b> pentru protecție, <b>Vraci</b> pentru vindecare. Bonusurile cresc daunele utile ale incursiunii, nu modifică HP-ul personajelor.</p>'+
    '<p>Ai provocat '+Number(boss.personal_damage||0).toLocaleString('ro-RO')+' daune săptămâna aceasta.</p>'+
+   guildBossLastHit(boss)+
    '<div class="guild-boss-actions"><button class="p" onclick="guildBoss()"'+((boss.hits_today||0)>=2||boss.hp<=0?' disabled':'')+'>⚔ Atacă · gratuit</button>'+
    '<button onclick="guildClaim(\'boss\')"'+(boss.hp>0||!self.boss_hits||claimed.boss||contributed<3?' disabled':'')+'>'+
      (claimed.boss?'Revendicat':'Premiul căpitanului · +20 însemne')+'</button></div></div>'+
