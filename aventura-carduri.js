@@ -135,7 +135,8 @@ function acFxMarkup(cast,hp) {
       '<i class="fx-hp"><i style="width:'+Math.max(0,Math.min(100,Math.round(alive/max*100)))+'%"></i></i>' +
       '<small class="fx-t">'+alive+'/'+max+'</small></div>';
   };
-  return '<div class="fx-c ac-fx-shell"><div class="ac-fx-title"><small>Silver Throne · Aventură</small><h2>'+acSafe(cast.adventureTitle||'Luptă')+'</h2></div>' +
+  const compactSquad = cast.pvp && (cast.es.length >= 4 || cast.fs.length >= 4);
+  return '<div class="fx-c ac-fx-shell'+(compactSquad?' ac-fx-squad':'')+'"><div class="ac-fx-title"><small>Silver Throne · Aventură</small><h2>'+acSafe(cast.adventureTitle||'Luptă')+'</h2></div>' +
     '<div class="ac-fx-enemies">'+cast.es.map((e,i)=>make('es',e,i)).join('')+'</div>' +
     '<div class="ac-fx-divider">⚔</div><div class="ac-fx-allies">'+cast.fs.map((f,i)=>make('fs',f,i)).join('')+'</div>' +
     '<div class="fx-log" id="fx-log" role="log" aria-live="polite" aria-atomic="false"></div><button type="button" class="fx-skip" aria-label="Sari peste redarea luptei" onclick="fxSkip()">Sari peste ›</button></div>';
