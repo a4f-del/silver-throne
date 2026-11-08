@@ -10,7 +10,7 @@ const tmn=read('temnite.js'),index=read('index.html'),tower=read('turn.js');
 new Function(tmn);
 for(const m of index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
  if(m[1].trim())new Function(m[1]);
-assert(index.includes('temnite.js?v=2026.11.08-1'),'Fresh dungeon UI loaded');
+assert(index.includes('temnite.js?v=2026.11.08-2'),'Fresh dungeon UI loaded');
 assert(index.includes("if(!d&&ST_SERVER==='beta'){"),'BETA dedicated hub path');
 assert(index.includes('ⓘ Reguli utile'),'Old wall of text goes behind details');
 assert(index.includes('vDung();'),'New hub invoked in BETA');
