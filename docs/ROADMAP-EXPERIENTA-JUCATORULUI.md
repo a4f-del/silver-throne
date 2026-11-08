@@ -77,7 +77,9 @@ Expedițiile mercenarilor sunt activități pasive, nu o a patra buclă obligato
 ## ETAPA D — LUME, PvP, TRON, BRESLE
 
 - [ ] **23. PvP lizibil și echilibrat.** Recomandări după putere; explicăm echipa limitată la 3 pentru fantoma Lumii și duelul cu eroul la Tron. Respectăm protecția începătorilor și limitele de atac.
+  - **În lucru (BETA):** am corectat comparația care folosea eroul solo în loc de echipa de trei a Lumii; explicăm riscul orientativ și păstrăm protecția, cooldownul și numărul de atacuri. Test: `dev/test-beta-pvp-throne-clarity.js`; ghid: `docs/BETA-PVP-THRONE-PRESTIGE.md`.
 - [ ] **24. Provocări Tron de prestigiu.** Istoric/sezoane/titluri și clasamente clare; nu adăugăm bonusuri de putere permanente pentru deținător.
+  - **În lucru (BETA):** clasamentul arată poziția jucătorului, Sala Faimei se extinde la cerere, regulile sunt explicite despre prestigiul fără buff; controlul QA de resetare e ascuns non-adminilor. Sezonul și competiția nu se schimbă.
 - [ ] **25. Contracte de breaslă adaptate.** Ținte săptămânale în funcție de membrii activi la începutul săptămânii; praguri care nu se schimbă în timpul săptămânii.
 - [ ] **26. Repară contraclasa bossului de breaslă.** În SQL14, bonusul folosește clasa eroului publicat; pentru eroul Campion nu valorifică Vraci/Arcaș/Paznic din echipă. Corectăm și testăm server-side, fără a permite valori arbitrare din browser.
 - [ ] **27. Bossul de breaslă — formații reale.** După fixul 26, alegerea compoziției echipei trebuie să conteze: protecție, vindecare, daune, cu calcul/validare sigură pe server.
