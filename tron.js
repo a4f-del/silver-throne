@@ -7,7 +7,7 @@
    Se încarcă după panou.js. Regulile pure sunt în tron-logic.js (ST_T).
    ========================================================================== */
 const TT = ST_T;
-const TRON = { uid: null, st: null, at: 0, off: 0, err: '', loading: false, rep: false, busy: false, pub: null, pubAt: 0, repErr: '' };
+const TRON = { uid: null, st: null, at: 0, off: 0, err: '', loading: false, rep: false, busy: false, pub: null, pubAt: 0, pubSig: '', pubFlight: null, pubTimer: null, pubFailAt: 0, pubError: '', repErr: '' };
 
 function tronInit() {
   if (typeof S === 'undefined' || !S) return;
@@ -41,9 +41,14 @@ async function tronSync0() {
     if (r.error) { TRON.err = r.error.includes('function') || r.error.includes('does not exist') ? 'Serverul nu are încă funcțiile Tronului (rulează supabase/01-throne.sql).' : r.error; return; }
     TRON.err = ''; TRON.st = r.data; TRON.off = r.data.now - Date.now();
     /* prima dată: apărarea se publică singură (altfel butonul de provocare ar rămâne blocat de „Publică-ți apărarea”) */
-    if (r.data.me && !r.data.me.level && S.lvl >= TT.CFG.minLevel) {
+    if (r.data.me && S.lvl >= TT.CFG.minLevel
+      && (tronIsBetaDuel() || !r.data.me.level)) {
       TRON.pubTryLvl = S.lvl;
-      if (await tronPublish(true)) { const r2 = await tronRpc('throne_get'); if (!r2.error) { TRON.st = r2.data; TRON.off = r2.data.now - Date.now(); } }
+      const updated = tronIsBetaDuel() ? await tronAutoPublishNow() : await tronPublish(true);
+      if (updated && (!r.data.me.level || tronIsBetaDuel())) {
+        const r2 = await tronRpc('throne_get');
+        if (!r2.error) { TRON.st = r2.data; TRON.off = r2.data.now - Date.now(); }
+      }
     }
     if (TRON.st.me && typeof TRON.st.me.title === 'string' && TRON.st.me.title) { tronInit(); S.tron.title = TRON.st.me.title; }
   } finally { TRON.at = Date.now(); TRON.loading = false; tronUi(); }
@@ -56,7 +61,9 @@ function tronSync() { if (_tronSync) return _tronSync; _tronSync = tronSync0().f
 /* LIVE pastreaza Tronul cu echipa si plafon; numai BETA foloseste duelul eroului. */
 const tronIsBetaDuel = () => typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta';
 function tronTeamUnits() {
-  return S.fs.slice(0, TT.CFG.maxUnits).map(f => { const b = bon(f); return { n: f.n, c: f.c, hp: mhp(f), atk: Math.round(atkOf(f)), def: Math.round(b.def * (1 + b.pf / 100) + tr(f, 'def')) }; });
+  // Satul BETA foloseste toata echipa activa (maxim erou + 3 mercenari).
+  // LIVE ramane la plafonul original; duelul Tronului BETA foloseste tronUnits().
+  return S.fs.slice(0, tronIsBetaDuel() ? 4 : TT.CFG.maxUnits).map(f => { const b = bon(f); return { n: f.n, c: f.c, hp: mhp(f), atk: Math.round(atkOf(f)), def: Math.round(b.def * (1 + b.pf / 100) + tr(f, 'def')) }; });
 }
 function tronUnits() {
   if (!tronIsBetaDuel()) return tronTeamUnits();
@@ -87,6 +94,52 @@ async function tronPublish(quiet) {
   return true;
 }
 
+/* BETA: publicam automat eroul la Tron cand statisticile sale se schimba
+   (echipament, nivel, trasaturi, bonusuri etc). Signature-ul e local doar
+   pentru deduplicarea apelurilor; autoritatea inca apartine backendului. */
+function tronAutoSnapshot() {
+  if (!tronIsBetaDuel() || typeof CONT === 'undefined' || !CONT.user
+    || !CONT.booted || typeof S === 'undefined' || !S || !Array.isArray(S.fs)
+    || !S.fs.length || S.lvl < TT.CFG.minLevel || S.d
+    || (S.tron && S.tron.cur)) return '';
+  const hero = S.fs.find(f => f.h) || S.fs[0];
+  return JSON.stringify({ uid: CONT.user.id, name: hero.n, level: S.lvl, units: tronUnits() });
+}
+function tronAutoPublishSoon() {
+  const sig = tronAutoSnapshot();
+  if (!sig || sig === TRON.pubSig || TRON.pubFlight || TRON.pubTimer) return;
+  // O scurta amanare combina schimbari consecutive in acelasi set de echipare.
+  TRON.pubTimer = setTimeout(() => {
+    TRON.pubTimer = null;
+    void tronAutoPublishNow();
+  }, 650);
+}
+async function tronAutoPublishNow() {
+  const sig = tronAutoSnapshot();
+  if (!sig || sig === TRON.pubSig) return true;
+  if (TRON.pubFlight) return TRON.pubFlight;
+  if (TRON.pubFailAt && Date.now() - TRON.pubFailAt < 12000) return false;
+  TRON.pubFlight = (async () => {
+    const ok = await tronPublish(true);
+    if (ok) {
+      TRON.pubSig = sig;
+      TRON.pubError = '';
+      TRON.pubFailAt = 0;
+    } else {
+      TRON.pubFailAt = Date.now();
+      TRON.pubError = 'Apărarea nu a putut fi sincronizată. Se reîncearcă automat.';
+    }
+    return ok;
+  })();
+  try { return await TRON.pubFlight; }
+  finally {
+    TRON.pubFlight = null;
+    if (tronAutoSnapshot() && tronAutoSnapshot() !== TRON.pubSig)
+      tronAutoPublishSoon();
+    tronUi();
+  }
+}
+
 /* ------------------------------------------------------------------ LUPTA */
 async function tronProvoca() {
   if (TRON.busy) return; tronInit();
@@ -95,7 +148,7 @@ async function tronProvoca() {
   if (S.tron.cur) { S.msg = 'Ai un rezultat de trimis; așteaptă o clipă.'; return go(); }
   TRON.busy = true;
   try {
-    if (!(await tronPublish(true))) { S.msg = 'Nu am putut publica apărarea ta. Verifică nivelul (minim ' + TT.CFG.minLevel + ') și conexiunea.'; return; }
+    if (!(await (tronIsBetaDuel() ? tronAutoPublishNow() : tronPublish(true)))) { S.msg = 'Nu am putut publica apărarea ta. Verifică nivelul (minim ' + TT.CFG.minLevel + ') și conexiunea.'; return; }
     const r = await tronRpc('throne_challenge_start');
     if (r.error) { S.msg = r.error; await tronSync(); return; }
     S.tron.cur = { id: r.data.id, win: false }; tronFight(r.data);
@@ -252,7 +305,7 @@ function vTron() {
   const u = TRON.pub;
   h += `<section><h2>Apărarea ta (fantoma)</h2><div class="mute">Așa te văd ceilalți când te provoacă. ${tronIsBetaDuel() ? 'Doar eroul principal te reprezintă la Tron. Statisticile lui reale nu au plafon artificial.' : 'Statisticile sunt plafonate la ce are un luptător de nivel ' + TT.CFG.ghostCapLevel + ' cu echipament Epic complet, ca diferențele mari de nivel să nu decidă totul.'} Fantoma lovește normal, fără abilități speciale.</div>` +
     (u ? `<div class="tr-units" style="margin-top:12px">${u.map(x => `<div class="un${x.capped ? ' cap' : ''}"><b>${tEsc(x.n)}</b><span class="mute">${tEsc(x.c)}</span><br>${x.hp} viață · ${x.atk} atac · ${x.def} apărare${x.capped ? ' <span class="mute">(plafonat)</span>' : ''}</div>`).join('')}</div>` : '<p class="mute">Încă nepublicată.</p>') +
-    `<div class="row"><span class="mute">${TRON.pubAt ? 'Actualizată acum ' + tronHM((Date.now() - TRON.pubAt) / 1000) : 'Se publică automat când provoci.'}</span><button onclick="tronPublish()">Actualizează apărarea</button></div></section>`;
+    `<div class="row"><span class="mute">${tronIsBetaDuel() ? (TRON.pubError ? tEsc(TRON.pubError) : TRON.pubAt ? 'Apărarea eroului se actualizează automat la schimbarea echipamentului · ultima sincronizare acum ' + tronHM((Date.now() - TRON.pubAt) / 1000) : 'Apărarea eroului se publică automat la conectare și la schimbarea echipamentului.') : (TRON.pubAt ? 'Actualizată acum ' + tronHM((Date.now() - TRON.pubAt) / 1000) : 'Se publică automat când provoci.')}</span>${tronIsBetaDuel() ? '' : '<button onclick="tronPublish()">Actualizează apărarea</button>'}</div></section>`;
   if (st.hall.length) h += `<section><details><summary style="cursor:pointer;color:var(--gold2);font-weight:700;padding:7px 0">📜 Sala Faimei · ${st.hall.length} sezoane încheiate</summary>` + st.hall.map(x => `<div class="row" style="align-items:flex-start"><span><b>Săptămâna ${x.week + 1}</b></span><span style="text-align:right">${x.top.map(t => `${t.rank === 1 ? '👑' : t.rank === 2 ? '🥈' : '🥉'} ${tEsc(t.name)} <span class="mute">(${tronHM(t.seconds)})</span>`).join('<br>')}</span></div>`).join('') + '</details></section>';
   return h;
 }
@@ -270,7 +323,8 @@ if (typeof document !== 'undefined' && typeof setInterval === 'function') {
       if (S && S.tron && S.tron.cur && !TRON.rep && (!S.d || !S.d.tron)) tronCheck();
       if (S && S.tab === 'r' && !TRON.loading && tronNeedSync()) tronSync();
       else if (!TRON.loading && TRON.st && Date.now() - TRON.at > 300000) tronSync();
-      if (TRON.st && TRON.st.me && TRON.st.me.level && S.lvl >= TT.CFG.minLevel && TRON.pubAt && Date.now() - TRON.pubAt > 600000) tronPublish(true);   /* apărarea rămâne la zi */
+      if (tronIsBetaDuel()) tronAutoPublishSoon();
+      else if (TRON.st && TRON.st.me && TRON.st.me.level && S.lvl >= TT.CFG.minLevel && TRON.pubAt && Date.now() - TRON.pubAt > 600000) tronPublish(true);   /* LIVE: mecanismul existent */
     } catch (e) { /* ignorat: se reia la următorul ciclu */ }
   }, 30000);
 }
