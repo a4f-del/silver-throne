@@ -1,4 +1,4 @@
-/* Regression: defensive item bonuses stay BETA-only and never rewrite saved items.
+/* Regression: defensive item bonuses apply and never rewrite saved items.
    Run with: node dev/test-beta-gear-balance.js */
 'use strict';
 const assert = require('node:assert/strict');
@@ -14,10 +14,9 @@ const cases = [
 ];
 for (const [type, raw, expected] of cases) {
   const it = { t: type, s: { ...raw } };
-  assert.deepEqual(stGearStats(it, 'beta'), expected, 'BETA for item ' + type);
-  assert.deepEqual(stGearStats(it, 'live'), raw, 'LIVE for item ' + type);
+  assert.deepEqual(stGearStats(it), expected, 'item ' + type);
   assert.deepEqual(it.s, raw, 'save must not be mutated for item ' + type);
 }
-assert.deepEqual(stGearStats(null, 'beta'), {});
-assert.deepEqual(stGearStats({ t:'a', s:{ hp:0, def:0 }}, 'beta'), {hp:0,def:0});
-console.log('OK — bonusuri defensive BETA, LIVE neschimbat, fără modificarea obiectelor salvate.');
+assert.deepEqual(stGearStats(null), {});
+assert.deepEqual(stGearStats({ t:'a', s:{ hp:0, def:0 }}), {hp:0,def:0});
+console.log('OK — bonusuri defensive, fără modificarea obiectelor salvate.');

@@ -145,7 +145,7 @@ function hcDone() {
   if (HC.mode === 'new' && n.length < 2) { if (m) { m.className = 'g-msg err'; m.textContent = 'Numele trebuie să aibă cel puțin 2 litere.'; } return; }
   const h = hcHero(); if (HC.mode === 'new') h.n = n; h.g = HC.g; h.ic = HC.ic; const first = !S.hc; S.hc = 1;   /* „Schimbă aspectul” nu atinge numele */
   /* Doar eroii NOI pe BETA primesc introducerile narative. Nu schimbam salvările existente. */
-  if (first && HC.mode === 'new' && typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta') {
+  if (first && HC.mode === 'new') {
     S.mrStoryV = 1;
     S.mrPresetV = 1; /* nume prestabilite: doar la crearea unui erou BETA nou */
     S.journeyV = 1;

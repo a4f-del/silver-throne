@@ -7,9 +7,9 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 const history=read('istoric.js'),game=read('index.html'),tron=read('tron.js');
 new Function(history);
-assert(game.includes('istoric.js?v=2026.11.08-2'),'New history script loaded');
-assert(history.includes("b.k === 't'"),'Export button only on BETA Tron journals');
-assert(history.includes("typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta'"),'No LIVE UI edits');
+assert(game.includes('istoric.js?v=2026.11.09-1'),'New history script loaded');
+assert(history.includes("b.k === 't'"),'Export button only on Tron journals');
+assert(!history.includes('ST_SERVER'),'No server branching left');
 assert(history.includes('Number.isSafeInteger(id)'), 'Valid challenge ID required');
 assert(history.includes('navigator.clipboard.writeText(content)'), 'User-initiated clipboard copy');
 assert(history.includes('window.prompt('), 'Manual copy fallback');
@@ -19,9 +19,9 @@ function sandbox(server='beta', withId=true){
  let modal='',copied='',prompt='';
  const navigator={clipboard:{writeText:async value=>{copied=value}}};
  const window={prompt:(label,value)=>{prompt=value}};
- const ui=new Function('S','ST_SERVER','tEsc','mdl','document','navigator','window',
+ const ui=new Function('S','tEsc','mdl','document','navigator','window',
     history+';return {bhAdd,bhExport,bhOpen,bhCopy};'
- )(S,server,x=>String(x),(body)=>{modal=body},undefined,navigator,window);
+ )(S,x=>String(x),(body)=>{modal=body},undefined,navigator,window);
  return {S,ui,navigator,window,get modal(){return modal},get copied(){return copied},get prompt(){return prompt}};
 }
 (async()=>{
@@ -63,11 +63,6 @@ function sandbox(server='beta', withId=true){
  await x.ui.bhCopy(0);
  assert(x.prompt.includes('Luptă veche'),'Copy fallback works when permissions blocked');
 
- x=sandbox('live');
- x.ui.bhAdd({tron:1,bn:'Rege',loot:{m:{}},hl:['Luptă']},'win',0);
- assert(!('cid' in x.S.bh[0]),'LIVE data format preserved');
- x.ui.bhOpen();
- assert(!x.modal.includes('Copiază jurnalul'),'LIVE interface untouched');
 
  // A real combat defeat clears the active fight and leaves win=false;
  // a completed victory is the only ordinary path that sets it to true.
@@ -86,5 +81,5 @@ function sandbox(server='beta', withId=true){
  assert.deepEqual(calls,[false],'Defeat reports loss rather than victory');
  S.d={tron:1,done:false};calls.length=0;t();assert.equal(calls.length,0,'Active battle not reported');
  S.d={tron:1,done:true};t();assert.deepEqual(calls,[true],'Completed victory reports win');
- console.log('OK: BETA journal copy/id/clipboard and defeat/ongoing/victory reporting; LIVE unchanged.');
+ console.log('OK: BETA journal copy/id/clipboard and defeat/ongoing/victory reporting.');
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -26,7 +26,4 @@ assert.equal(JSON.stringify(S),before,'niciun HP, punct sau aur schimbat in clie
 assert(schema.includes("'ability',CASE mod")&&schema.includes("'poison'")&&schema.includes("'storm'")&&schema.includes("'wave'"),
  'boss are abilitate saptamanala ca in trepte.js');
 assert(schema.includes("w.seen_at>=now()-interval '7 days'"),'HP se scaleaza dupa membrii activi');
-const live=new Function(...names,src+';return guildBossReplay;')(...Object.keys(ctx).map(n=>n==='ST_SERVER'?'live':ctx[n]));
-live({hp:30000,max:36000},{hp:25500,max:36000},4500);
-assert.equal(playing,1,'LIVE nu reda atacuri de bresle');
-console.log('OK: atac boss confirmat server, abilitate, HP comun, izolare LIVE si cast restaurat.');
+console.log('OK: atac boss confirmat server, abilitate, HP comun, cast restaurat.');

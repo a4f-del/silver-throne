@@ -6,10 +6,10 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const read=n=>fs.readFileSync(path.join(__dirname,'..',n),'utf8');
 const html=read('index.html'),baseline=read('dev/test-beta-economy-baseline.js');
 const pity=read('dev/test-beta-forge-upgrade-pity.js');
-assert(html.includes("if(ST_SERVER==='beta')S.gold-=c.g;"),
- 'BETA gold is charged before the roll');
-assert(html.includes("if(ST_SERVER!=='beta')S.gold-=c.g;it.up=u+1;"),
- 'LIVE gold is charged only on success; BETA is not double charged');
+assert(html.includes(" const rate=upChance(it);\n S.gold-=c.g;\n"),
+ 'Gold is charged before the roll');
+assert(!html.includes("S.gold-=c.g;it.up=u+1;"),
+ 'Gold is not charged a second time on success');
 assert(html.includes("Aurul, minereul și materialele se consumă la fiecare încercare"),
  'UI discloses the new BETA economic sink');
 assert(baseline.includes('server-side atomic cooldown guard')||

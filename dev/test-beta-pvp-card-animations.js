@@ -30,8 +30,6 @@ for(const kind of ['lume','tron']){
  assert.equal(api.FX.q[1].actor.side,'es');
  assert.equal(api.FX.q[1].actor.i,0,'și apărătorul PvP atacă');
  assert.equal(api.FX.q[1].fs[0].v,-17);
- const live=setup('live',kind);
- assert.equal(live.api.FX.cast.adventure,false,'LIVE nu schimbă efectele');
 }
 const api=new Function('tEsc','av','setTimeout',card+';return {acFxMarkup,acFxAnimate};')(s=>String(s),()=>'<img src="erou.png" alt="">',()=>{});
 const c={pvp:true,adventureTitle:'Duel pentru Tron',fs:[{n:'Eroul',c:'Campion',mh:200,hp:100}],es:[{n:'Regele',c:'Campion',mh:200,hp:180,img:null}]};
@@ -57,9 +55,8 @@ const hpCast={adventure:true,fs:[{hp:120,mh:120}],es:[{hp:150,mh:150}]};
 const replayHp=(server)=>new Function('ST_SERVER','FX','cast',hpFunction+';return fxStartHp(cast,2)')(server,replay,hpCast);
 assert.equal(replayHp('beta').fs[0],100,'BETA reia viața eroului după atacuri manuale');
 assert.equal(replayHp('beta').es[0],90,'BETA reia viața adversarului după atacuri manuale');
-assert.equal(replayHp('live').es[0],150,'redarea veche LIVE nu se schimbă');
 
 assert(css.includes('@keyframes acSlash'),'efectul slash există și pentru PvP');
 assert(css.includes('prefers-reduced-motion'),'animațiile respectă accesibilitatea');
 assert(fx.includes('const cardMode=!!cast.adventure'),'fereastra folosește motorul FX, nu alte daune');
-console.log('OK: BETA Lume + Tron, animații reciproce, mercenari, daune reale, LIVE neatins.');
+console.log('OK: BETA Lume + Tron, animații reciproce, mercenari, daune reale.');

@@ -51,7 +51,7 @@ const invCls = it => (it.lg ? 'rl' : 'r' + (it.r + 1));
 /* Recomandarea de clasă folosește tipul real al armei; nu schimbă
    echiparea, scorul sau statisticile. Element de ajutor, numai BETA. */
 function invClassHint(it){
- if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||!it||it.t!=='w'
+ if(!it||it.t!=='w'
    ||typeof WF==='undefined'||typeof wfOf!=='function')return '';
  const spec=WF[wfOf(it)],f=cur();
  if(!spec||!spec.c||!f)return '';

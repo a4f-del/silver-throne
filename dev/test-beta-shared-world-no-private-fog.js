@@ -24,13 +24,8 @@ const before=JSON.stringify(beta.S);
 assert.equal(vm.runInContext('tnInside(100,200)',beta.ctx),false,'No private scenery exclusion');
 assert.equal(vm.runInContext('lwTinut(LUME.st.players[0])',beta.ctx),'','No private shade, fog, boundaries or marks');
 assert.equal(JSON.stringify(beta.S),before,'Map presentation must never alter player save');
-const live=mapFor('live');
-assert.equal(vm.runInContext('tnInside(100,200)',live.ctx),true,'LIVE scenery still respects old layout');
-const old=vm.runInContext('lwTinut(LUME.st.players[0])',live.ctx);
-assert(old.includes('fill-opacity=".28"') && old.includes('private-marks'),
-  'LIVE old territory presentation is preserved');
 const npc=source.slice(source.indexOf('const WN ='));
 assert(npc.includes('world_npc_get') && npc.includes('world_npc_raid'),
  'Shared NPC functions and 1-hour BETA cooldown should remain untouched');
 assert(npc.includes('cd: 1 * 3600e3'),'1-hour cooldown preserved');
-console.log('OK: BETA shared World without private fog, no save changes, LIVE layout and shared NPC raids preserved.');
+console.log('OK: BETA shared World without private fog, no save changes, shared NPC raids preserved.');

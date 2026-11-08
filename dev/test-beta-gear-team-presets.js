@@ -59,11 +59,6 @@ S.adventure=null;S.d={f:{}};
 api.mrTeamPresetSave();
 assert(S.msg.includes('Încheie'),'No saving while in combat');
 S.d=null;
-const beforeLive=JSON.stringify(S);
-const liveApi=mk(S,'live');
-assert.equal(liveApi.mrTeamPresetPanel(),'','LIVE panel hidden');
-liveApi.mrTeamPresetUse(0);
-assert.equal(JSON.stringify(S),beforeLive,'LIVE roster untouched');
 assert(draws>=1,'Real actions trigger redraw/persistence through go()');
 assert(team.includes('mrTeamPresetPanel()'),'Preset controls are in composition tab');
 
@@ -78,7 +73,6 @@ assert(badge({t:'w',wf:'arc'}).includes('Armă pentru Arcaș · selectat Campion
 selected.c='Arcaș';
 assert(badge({t:'w',wf:'arc'}).includes('✓ Potrivit clasei Arcaș'));
 assert.equal(badge({t:'a'}),'','Armor remains universal');
-assert.equal(hint('live')({t:'w',wf:'arc'}),'','LIVE does not change');
 assert(inv.includes('${invClassHint(it)}')&&inv.includes('${invClassHint(x.it)}'),'Shows both in backpack and slot chooser');
 
 const bulkCode=slice(inv,'const invBulkSet = ()','/* ------------------------------------------------ ALEGEREA DIN SLOT');
@@ -124,6 +118,6 @@ forge.collectAll();
 assert.deepEqual(collected,[1,0],'Repeated claim cannot collect an item again');
 assert(!forge.forgeSlots().includes('Ridică tot ('),'No bulk claim when nothing ready');
 
-assert(html.includes('inventar.js?v=2026.11.08-1')&&html.includes('mercenari.js?v=2026.11.08-2')&&
+assert(html.includes('inventar.js?v=2026.11.09-1')&&html.includes('mercenari.js?v=2026.11.09-1')&&
  html.includes('echipa.js?v=2026.11.08-2'),'Scripts refreshed after this UI change');
-console.log('OK: class-specific weapons, 4 saved team presets, expedition protection, no combat mutations, safe bulk actions, LIVE isolated.');
+console.log('OK: class-specific weapons, 4 saved team presets, expedition protection, no combat mutations, safe bulk actions.');

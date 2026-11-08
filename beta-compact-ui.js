@@ -1,6 +1,5 @@
 /* Silver Throne — navigare compacta BETA, numai prezentare.
    LIVE si logica de joc raman neschimbate. */
-const stCompactActive = () => typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta';
 const stCompactAvailable = () => !(typeof adventureActive === 'function' && adventureActive());
 /* Tronul are un singur punct de acces: stânga. Starea vine din răspunsul serverului,
    nu dintr-o estimare de luptă și nu generează cereri noi la fiecare randare. */
@@ -48,11 +47,11 @@ function stCompactToggleAccount() {
   const b = document.getElementById('auth-toggle');
   if (b) b.click();
 }
-/* Setările folosesc acțiunile existente ale jocului: btog / fxToggleInstant / contOut /
-   stSwitchServer. După un toggle păstrăm deschis meniul chiar dacă go() redesenează antetul. */
+/* Setările folosesc acțiunile existente ale jocului: btog / fxToggleInstant / contOut.
+   După un toggle păstrăm deschis meniul chiar dacă go() redesenează antetul. */
 let stSettingsReopen = false;
 function stCompactSettingToggle(k) {
-  if (!stCompactActive() || !stCompactAvailable()) return;
+  if ((!stCompactAvailable())) return;
   if (k === 'fx') {
     if (typeof C === 'function' && C('w') === 0) return;
     stSettingsReopen = true;
@@ -67,7 +66,7 @@ function stCompactSettingToggle(k) {
    prima verificare; ciclul normal al jocului continuă apoi la fiecare secundă.
    Nu creează al doilea interval și nu ocolește limitele Asistentului BETA. */
 function stBotPower() {
-  if (!stCompactActive() || !stCompactAvailable() || !S.prem ||
+  if ((!stCompactAvailable()) || !S.prem ||
       typeof BT !== 'function' || typeof btog !== 'function') return;
   const wasOn = !!BT().on;
   if (!wasOn) S.bn = 0; // prima verificare nu aşteaptă temporizatorul precedent
@@ -138,9 +137,8 @@ function stCompactHdr() {
     '<button type="button" class="st-settings-link"' + act + ' onclick="tab(\'a\');vil(\'q\')">📜 Jurnal și explicații BOT</button>' +
     '<div class="st-settings-section st-settings-break"><b>⚔ Luptă</b></div>' +
     stCompactSettingRow('fx','Redare lovitură cu lovitură',fxOn || fxLock,locked || fxLock,'Pornită','Oprită') +
-    '<div class="st-settings-section st-settings-break"><b>👤 Cont și server</b><small>LIVE are sesiune și progres separate de BETA.</small></div>' +
+    '<div class="st-settings-section st-settings-break"><b>👤 Cont</b></div>' +
     '<button type="button" class="st-settings-link"' + (locked || !hasSession ? ' disabled' : '') + ' onclick="contOut()">🚪 Deconectează-te</button>' +
-    '<button type="button" class="st-settings-link st-settings-live"' + act + ' onclick="stSwitchServer(\'live\')">⚔ Treci pe LIVE</button>' +
     '</div></details>';
   stSettingsReopen = false;
   return res + '<div class="st-hquick">' + mail + fight + heroMenu + settings + '</div>';
@@ -228,7 +226,6 @@ body.st-compact .st-settings-panel>button.st-setting-option.on{border-color:#9b8
 body.st-compact .st-setting-option.on b{color:#f0d27a}
 body.st-compact .st-settings-panel>button.st-setting-option:disabled{opacity:.55;cursor:not-allowed}
 body.st-compact .st-settings-panel>button.st-settings-link{color:#d9d3bd;font-size:13px;min-height:37px}
-body.st-compact .st-settings-panel>button.st-settings-live{border:1px solid #ad8b4b;background:#2c281b;color:#f0d27a;justify-content:center;margin-top:6px}
 body.st-compact .st-settings-panel>button:focus-visible{outline:2px solid #f0d27a;outline-offset:2px}
 
 body.st-compact .st-social-link .wf-open,body.st-compact .st-social-link .guild-head{position:relative;min-height:40px;color:var(--ink);font:inherit}

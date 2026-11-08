@@ -13,7 +13,7 @@ const between=(start,end)=>{
 };
 const syncSource=between('function sync(){','const fmt=ms=>');
 const startSource=between('function startD(i){','/* după fiecare monstru învins');
-assert(startSource.includes("ST_SERVER==='beta'&&typeof jeFocus==='function'&&jeFocus()&&S.bp>0&&S.pts<MXP())sync()"),
+assert(startSource.includes("if(typeof jeFocus==='function'&&jeFocus()&&S.bp>0&&S.pts<MXP())sync()"),
  'Only new BETA heroes refill before dungeon cost');
 const now=1_000_000;
 function setup({server='beta',focused=true,pts=30,bp=120,level=1,room=0}={}){
@@ -47,13 +47,9 @@ const oldBeta=setup({pts:0,bp:120,focused:false});
 oldBeta.api(0);
 assert.equal(oldBeta.read().syncCalls,0,'Existing BETA heroes unchanged');
 assert.equal(oldBeta.read().fights,0);
-const live=setup({server:'live',pts:0,bp:120});
-live.api(0);
-assert.equal(live.read().syncCalls,0,'LIVE hero unchanged');
-assert.equal(live.read().fights,0);
 const fresh=between('function fresh(){','function load(src)');
 assert(fresh.includes('bp:120')&&fresh.includes('pts:MXP()'),'Initial 30 + reserve 120 is unchanged');
 const cost=between('const dCostAt=i=>','function startD(i)');
 assert(cost.includes('d.room>=d.rooms-1?2:1'),'Boss and normal fights retain their costs');
 assert(roadmap.includes('05. Puncte fără blocaj prematur'));
-console.log('OK: BETA tutorial refill, boss cost, exhausted reserve, no free farming, LIVE/legacy isolation.');
+console.log('OK: BETA tutorial refill, boss cost, exhausted reserve, no free farming, legacy isolation.');

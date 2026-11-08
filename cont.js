@@ -4,11 +4,10 @@
 
    Pornire (contStart, apelat la finalul scriptului din index.html):
      sesiune existentă → citește salvarea contului → pornește jocul
-     fără sesiune      → ecranul de conectare (Conectare / Cont nou / Am uitat parola)
+     fără sesiune      → ecranul de conectare (Conectare / Am uitat parola; conturile se creează prin invitație)
    Jocul e multiplayer: nu pornește fără cont.
-   Fiecare cont are propria copie locală (cheia KEY + ':' + id), deci două conturi pe același
-   dispozitiv nu se mai amestecă. În KEY a rămas doar progresul vechi, de dinainte de conturi:
-   un cont nou îl poate prelua o singură dată (ecranul „pick”).
+   Fiecare cont are propria copie locală (cheia KEY + ':beta:' + id), deci două conturi pe același
+   dispozitiv nu se amestecă. Progresul vechi LIVE (cheile KEY / KEY + ':' + id) nu se importă.
    Între copia locală și cea online câștigă cea mai nouă (câmpul S.sv, scris de save()).
    Deconectarea și schimbarea contului reîncarcă pagina: jocul pornește curat, fără date rămase în memorie.
 
@@ -18,7 +17,7 @@ const CONT = { user: null, booted: false, mode: 'in', email: '', busy: false, ti
 /* linkul din emailul de resetare aduce „type=recovery” în adresă; îl citim înainte ca Supabase să curețe adresa */
 const CONT_RECOV = typeof location !== 'undefined' && /type=recovery/.test(location.hash);
 const CONT_GONE = typeof location !== 'undefined' && /cont-sters/.test(location.hash);
-const contHere = () => location.origin + location.pathname + (ST_SERVER === 'beta' ? '?server=beta' : '');
+const contHere = () => location.origin + location.pathname;
 const cEsc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const cRead = k => { try { const o = JSON.parse(localStorage.getItem(k)); return o && o.fs ? o : null; } catch (e) { return null; } };
 
@@ -81,9 +80,9 @@ async function contStart() {
 async function contEnter(user) {
   /* Aratam progresul inaintea apelului RPC; altfel butonul parea sa nu faca nimic. */
   CONT.user = user; contShow('load');
-  /* Autorizarea BETA este verificată de proiectul BETA înainte să se citească
-     salvarea sau să pornească jocul. Interfața singură nu securizează RPC/RLS! */
-  if (ST_SERVER === 'beta') {
+  /* Autorizarea este verificată de server înainte să se citească salvarea sau să
+     pornească jocul. Interfața singură nu securizează RPC/RLS! */
+  {
     const gate = await Promise.race([
       supabaseClient.rpc('is_beta_admin'),
       new Promise((_, reject) => setTimeout(() => reject(new Error('Verificarea accesului BETA a durat prea mult. Reîncarcă pagina și încearcă din nou.')), 15000))
@@ -96,7 +95,7 @@ async function contEnter(user) {
       return contShow('in', true);
     }
   }
-  const key = KEY + (ST_SERVER === 'beta' ? ':beta' : '') + ':' + user.id;
+  const key = KEY + ':beta:' + user.id;
   let r;
   try { r = await supabaseClient.from('game_saves').select('game_data,updated_at').eq('user_id', user.id).maybeSingle(); }
   catch (e) { r = { error: e }; }
@@ -107,10 +106,7 @@ async function contEnter(user) {
     /* copia locală e mai nouă doar dacă ultima salvare online nu a mai apucat să plece (tab închis, internet căzut) */
     return contBoot(key, local && +local.sv > ct ? local : cloud);
   }
-  if (local) return contBoot(key, local);
-  const old = ST_SERVER === 'beta' ? null : cRead(KEY);   /* BETA nu importă niciodată salvarea LIVE */
-  if (old) { CONT.oldSave = old; return contShow('pick'); }
-  contBoot(key, null);
+  contBoot(key, local);   /* fără salvare: erou nou; salvările vechi LIVE nu se importă */
 }
 
 function contBoot(key, src) {
@@ -156,29 +152,16 @@ function contShow(mode, keepMsg) {
   if (mode !== CONT.mode && !keepMsg && mode !== 'retry' && mode !== 'load') CONT.msg = CONT.msg && CONT.msg.sticky ? CONT.msg : null;
   CONT.mode = mode;
   const card = document.getElementById('gate-card'), foot = document.getElementById('gate-foot');
-  const tabs = ST_SERVER === 'beta'
-    ? '<div class="g-tabs"><b>Acces exclusiv administratorilor</b></div>'
-    : `<div class="g-tabs" role="tablist"><button type="button" role="tab" aria-selected="${mode === 'in'}" class="${mode === 'in' ? 'on' : ''}" onclick="contShow('in')">Conectare</button><button type="button" role="tab" aria-selected="${mode === 'up'}" class="${mode === 'up' ? 'on' : ''}" onclick="contShow('up')">Cont nou</button></div>`;
-  const serverTabs = `<div class="g-server-picker" role="group" aria-label="Alege serverul">
-    <button type="button" class="${ST_SERVER === 'live' ? 'on' : ''}" onclick="stSwitchServer('live')"><b>⚔ LIVE</b><small>Jocul public</small></button>
-    <button type="button" class="${ST_SERVER === 'beta' ? 'on beta' : ''}" onclick="stSwitchServer('beta')" ${ST_BETA_READY ? '' : 'disabled title="Se configurează serverul BETA"'}><b>🧪 BETA</b><small>${ST_BETA_READY ? 'Doar administratori' : 'În pregătire'}</small></button>
-  </div>`;
+  const tabs = '<div class="g-tabs"><b>Acces exclusiv administratorilor</b></div>';
   let h = '', f = '';
   if (mode === 'load') h = `<div class="g-load"><span class="g-spin" aria-hidden="true"></span><span>${CONT.user ? 'Se încarcă progresul contului…' : 'Se pregătește jocul…'}</span></div>`;
   else if (mode === 'in') {
     h = tabs + `<form onsubmit="contIn(event)" novalidate>${cField('g-email', 'Email', 'email', 'username email', CONT.email, 'inputmode="email"')}${cField('g-pass', 'Parolă', 'password', 'current-password')}${cMsg()}<button class="g-go" type="submit">Conectează-te</button></form>`
       + `<button type="button" class="g-link" onclick="contShow('reset')">Am uitat parola</button>`;
-  } else if (mode === 'up' && ST_SERVER !== 'beta') {
-    h = tabs + `<form onsubmit="contUp(event)" novalidate>${cField('g-email', 'Email', 'email', 'username email', CONT.email, 'inputmode="email"')}${cField('g-pass', 'Parolă (cel puțin 6 caractere)', 'password', 'new-password', '', 'minlength="6"')}${cField('g-pass2', 'Repetă parola', 'password', 'new-password', '', 'minlength="6"')}${cMsg()}<button class="g-go" type="submit">Creează contul</button></form>`;
   } else if (mode === 'reset') {
     h = `<h2 class="g-h">Resetează parola</h2><p class="g-p">Îți trimitem pe email un link. Îl deschizi pe acest dispozitiv și alegi o parolă nouă.</p><form onsubmit="contReset(event)" novalidate>${cField('g-email', 'Email', 'email', 'username email', CONT.email, 'inputmode="email"')}${cMsg()}<button class="g-go" type="submit">Trimite linkul</button></form><button type="button" class="g-link" onclick="contShow('in')">Înapoi la conectare</button>`;
   } else if (mode === 'new') {
     h = `<h2 class="g-h">Alege o parolă nouă</h2>${CONT.user ? `<p class="g-p">Pentru contul ${cEsc(CONT.user.email)}.</p>` : ''}<form onsubmit="contNew(event)" novalidate>${cField('g-pass', 'Parola nouă (cel puțin 6 caractere)', 'password', 'new-password', '', 'minlength="6"')}${cField('g-pass2', 'Repetă parola', 'password', 'new-password', '', 'minlength="6"')}${cMsg()}<button class="g-go" type="submit">Salvează parola și intră în joc</button></form>`;
-  } else if (mode === 'pick') {
-    const g = CONT.oldSave, hero = (g.fs || []).find(x => x && x.h) || g.fs[0] || {};
-    h = `<h2 class="g-h">Contul tău e nou</h2><p class="g-p">Pe acest dispozitiv a rămas un progres mai vechi, de dinainte de conturi: <b>${cEsc(hero.n || 'Eroul')}</b>, nivel ${+g.lvl || 1}, ${+g.gold || 0} aur.</p><p class="g-p">Îl poți muta în contul ${cEsc(CONT.user.email)} sau poți începe de la zero. Se poate muta într-un singur cont.</p>`
-      + `<div class="g-two"><button class="g-go" type="button" onclick="contPick(1)">Mută progresul în cont</button><button type="button" onclick="contPick(0)">Începe de la zero</button></div>`;
-    f = `<button type="button" class="g-link" onclick="contOut()">Folosește alt cont</button>`;
   } else if (mode === 'hero') {
     h = hcCard();
   } else if (mode === 'del') {
@@ -187,8 +170,8 @@ function contShow(mode, keepMsg) {
   } else if (mode === 'retry') {
     h = `${cMsg()}<div class="g-two"><button class="g-go" type="button" onclick="${CONT.user ? 'contEnter(CONT.user)' : 'location.reload()'}">Încearcă din nou</button>${CONT.user ? '<button type="button" onclick="contOut()">Deconectează-te</button>' : ''}</div>`;
   }
-  if (mode === 'in' || mode === 'up' || mode === 'reset') f += '<div class="g-legal"><a href="confidentialitate.html">Confidențialitate</a> · <a href="sterge-cont.html">Ștergerea contului</a></div>';
-  card.innerHTML = (mode === 'in' || mode === 'up' || mode === 'reset' ? serverTabs : '') + h; foot.innerHTML = f;
+  if (mode === 'in' || mode === 'reset') f += '<div class="g-legal"><a href="confidentialitate.html">Confidențialitate</a> · <a href="sterge-cont.html">Ștergerea contului</a></div>';
+  card.innerHTML = h; foot.innerHTML = f;
   const first = card.querySelector('input:not([value]), input[value=""]') || card.querySelector('input');
   if (first && window.innerWidth > 700) setTimeout(() => first.focus(), 30);
 }
@@ -225,22 +208,6 @@ async function contIn(ev) {
     cBusy(false);
   }
 }
-async function contUp(ev) {
-  ev.preventDefault(); if (CONT.busy) return;
-  if (ST_SERVER === 'beta') return cSay('err', 'Pe BETA conturile sunt create doar de administratori, prin invitație.');
-  const email = cMail(); if (!email) return; const p1 = cVal('g-pass'), p2 = cVal('g-pass2');
-  if (p1.length < 6) return cSay('err', 'Parola trebuie să aibă cel puțin 6 caractere.');
-  if (p1 !== p2) return cSay('err', 'Parolele nu coincid.');
-  cBusy(true, 'Se creează contul…');
-  const { data, error } = await supabaseClient.auth.signUp({ email, password: p1, options: { emailRedirectTo: contHere() } }).catch(e => ({ error: e }));
-  cBusy(false);
-  if (error) return cSay('err', contErr(error));
-  /* Supabase nu spune direct că emailul e deja folosit: întoarce un utilizator fără identități */
-  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) return cSay('err', 'Există deja un cont cu acest email. Conectează-te.');
-  if (data.session) return contEnter(data.user);
-  CONT.msg = { t: 'ok', m: `Contul e creat. Ți-am trimis un email la <b>${cEsc(email)}</b>: deschide linkul din el, apoi conectează-te aici.`, sticky: 1 };
-  contShow('in', true); CONT.msg.sticky = 0;
-}
 async function contResend() {
   const email = cVal('g-email').trim() || CONT.email; if (!email) return;
   const { error } = await supabaseClient.auth.resend({ type: 'signup', email, options: { emailRedirectTo: contHere() } }).catch(e => ({ error: e }));
@@ -267,11 +234,6 @@ async function contNew(ev) {
   try { history.replaceState(null, '', contHere()); } catch (e) { /* adresa rămâne cu linkul vechi; nu contează */ }
   if (CONT.booted) return location.reload();
   contEnter(data.user || CONT.user);
-}
-function contPick(move) {
-  const g = CONT.oldSave; CONT.oldSave = null;
-  contBoot(KEY + (ST_SERVER === 'beta' ? ':beta' : '') + ':' + CONT.user.id, move ? g : null);
-  if (move && CONT.booted) { try { localStorage.removeItem(KEY); } catch (e) { /* rămâne și local; nu e grav */ } S.msg = 'Progresul de pe acest dispozitiv a fost mutat în contul tău.'; render(); }
 }
 
 /* ștergerea contului: reconfirmă parola, apoi delete_my_account() șterge totul pe server (03-cont.sql) */
@@ -327,7 +289,7 @@ function contChip() {
   t.innerHTML = '👑 Cont' + (CONT.user && CONT.err ? ' <b class="acc-dot" title="Salvarea online a eșuat">!</b>' : '');
   const st = CONT.err ? `<span class="acc-bad">Salvarea online a eșuat: ${cEsc(CONT.err)} Progresul e păstrat pe acest dispozitiv.</span> <button type="button" onclick="contPush()">Reîncearcă</button>`
     : CONT.pushing || CONT.timer ? 'Se salvează online…' : CONT.lastOk ? 'Progresul e salvat online.' : 'Se pregătește salvarea online…';
-  p.innerHTML = `<div class="acc-env">${ST_SERVER === 'beta' ? '🧪 BETA · exclusiv administratori' : '⚔ LIVE · server public'}</div><div class="acc-who">Conectat ca<b>${cEsc(CONT.user.email)}</b></div><p class="acc-st">${st}</p>${typeof nmPanel === 'function' ? nmPanel() : ''}<button type="button" class="acc-switch" onclick="stSwitchServer('${ST_SERVER === 'beta' ? 'live' : 'beta'}')" ${ST_SERVER === 'live' && !ST_BETA_READY ? 'disabled' : ''}>${ST_SERVER === 'beta' ? 'Înapoi la LIVE' : 'Intră pe BETA'}</button><button type="button" id="acc-out" onclick="contOut()">Deconectează-te</button><div class="acc-legal"><a href="confidentialitate.html" target="_blank" rel="noopener">Confidențialitate</a> · <button type="button" class="acc-del" onclick="contShow('del')">Șterge contul</button></div>`;
+  p.innerHTML = `<div class="acc-env">🧪 BETA · exclusiv administratori</div><div class="acc-who">Conectat ca<b>${cEsc(CONT.user.email)}</b></div><p class="acc-st">${st}</p>${typeof nmPanel === 'function' ? nmPanel() : ''}<button type="button" id="acc-out" onclick="contOut()">Deconectează-te</button><div class="acc-legal"><a href="confidentialitate.html" target="_blank" rel="noopener">Confidențialitate</a> · <button type="button" class="acc-del" onclick="contShow('del')">Șterge contul</button></div>`;
 }
 /* tab ascuns (telefon blocat, altă aplicație): trimitem imediat ce aștepta */
 if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && CONT.timer) contPush(); });
@@ -395,10 +357,3 @@ html.gate-on,html.gate-on body{overflow:hidden}
   document.head.appendChild(st);
 })();
 
-/* Selectorul este vizibil și pe mobil; LIVE rămâne opțiunea implicită. */
-(function () {
-  if (typeof document === 'undefined' || !document.head) return;
-  const st = document.createElement('style');
-  st.textContent = '.g-server-picker{display:flex;gap:8px;margin:0 0 18px}.g-server-picker button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;padding:11px 7px;background:#141a1e;border:1px solid #4c555a;border-radius:7px;color:#d0d8db;cursor:pointer}.g-server-picker button.on{border-color:#f0d27a;background:linear-gradient(180deg,#443823,#1c2225);color:#f0d27a}.g-server-picker button.beta{border-color:#90bbdd;background:linear-gradient(180deg,#1a3c53,#141e28);color:#b4e2ff}.g-server-picker button small{font-size:12px;color:#b8c3c7}.g-server-picker button:disabled{opacity:.46;cursor:not-allowed}.acc-env{color:#e5ca89;font-size:12px;font-weight:700;margin-bottom:8px}.acc-switch:disabled{opacity:.48}';
-  document.head.appendChild(st);
-})();

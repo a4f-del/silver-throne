@@ -9,16 +9,14 @@
 
 const TN = { s: 1.15, cx: 210, cy: 150, rx: 300, ry: 215 };
 /* Lumea BETA este comuna: fara insule vizuale private in jurul satelor. */
-function tnSharedWorld() { return typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta'; }   /* scara ținutului și zona lui (în unități ale Lumii) */
+/* scara ținutului și zona lui (în unități ale Lumii) */
 const smPush = (x, y) => [x, y];
    LW.IA = 330; LW.IB = 200;    /* satele jucătorilor mai departe unele de altele, ca fiecare ținut să încapă */
 const tnF = n => Math.round(n * 10) / 10;
 function tnMe() { const st = LUME.st; if (!st || !st.me) return null; const me = st.players.find(p => p.id === st.me.user_id); return me ? lwPos(me) : null; }
 /* zona ținutului: decorul Lumii (păduri, munți) nu se pune peste ea */
 function tnInside(x, y) {
-  if (tnSharedWorld()) return false; /* decorul comun nu lasa gol privat */
-  const m = tnMe();
-  return !!m && Math.hypot((x - m[0]) / TN.rx, (y - m[1]) / TN.ry) < 1;
+  return false;
 }
 
 /* ceața zonelor neexplorate, ca nori; „?” pe cele în care poți explora acum */
@@ -36,11 +34,7 @@ function tnFog() {
 
 function lwTinut(me) {
   try {
-    if (tnSharedWorld() || !me || !S.map || !S.ter) return '';
-    const [ox, oy] = lwPos(me), s = TN.s;
-    return `<g class="tn" transform="translate(${tnF(ox - TN.cx * s)} ${tnF(oy - TN.cy * s)}) scale(${s})">`
-      + `<ellipse cx="${TN.cx}" cy="${TN.cy + 6}" rx="${TN.rx / s}" ry="${TN.ry / s}" fill="#0e1612" fill-opacity=".28" stroke="#f0d27a" stroke-opacity=".45" stroke-width="1.6" stroke-dasharray="7 6"/>`
-      + tnFog() + terMarks() + '</g>';
+    return '';
   } catch (e) { console.error('ținut:', e); return ''; }
 }
 function tnPanel() { return S.msel ? terPanel() : ''; }
@@ -119,7 +113,7 @@ function wnPanel() {
   const v = S.wsel && wnList().find(x => x.id === S.wsel); if (!v) return '';
   const left = wnLeft(v), e = wnEff(v), gold = Math.round((60 + 30 * e) * 1.2), d = e - S.lvl;
   const risk = d >= 4 ? 'periculos' : d >= 1 ? 'greu' : d >= -3 ? 'potrivit' : 'ușor';
-  return `<section><h2>${v.n} · sat liber</h2><div class="mute">${ST_SERVER==='beta'?'Jaf disponibil o dată pe oră per sat. Intrarea costă 1 punct, iar căpitanul încă 1 (2 în total pentru o victorie). Prada și gărzile urmează nivelul tău.':'Un sat fără stăpân, vizibil tuturor jucătorilor. Fiecare îl poate jefui o dată pe oră. Prada și gărzile urmează nivelul tău.'}</div>`
+  return `<section><h2>${v.n} · sat liber</h2><div class="mute">Jaf disponibil o dată pe oră per sat. Intrarea costă 1 punct, iar căpitanul încă 1 (2 în total pentru o victorie). Prada și gărzile urmează nivelul tău.</div>`
     + `<div class="row"><span>Pradă estimată: ~${gold} aur, minereu și experiență · pentru tine: <b>${risk}</b></span>`
     + (left ? `<span class="mute">Jefuit de tine; din nou în ${sdT(left)}</span>` : `<button class="p" onclick="wnRaid('${v.id}')">Jefuiește · 1 punct</button>`) + '</div></section>';
 }

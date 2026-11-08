@@ -81,10 +81,6 @@ const r=runtime('beta',true);
 assert.equal(r.mod.fxWantPlay(true),false,'Reduced motion overrides even mandatory first animation');
 r.play();assert.equal(r.callbacks,1,'Reduced motion finishes immediately without overlay');
 assert.equal(r.appended,null);
-const live=runtime('live',true);
-assert.equal(live.mod.fxWantPlay(true),true,'LIVE first-battle behavior remains unchanged');
-live.play();assert.equal(live.attr.role,'status','Old LIVE overlay keeps its role');
-live.window.__fxSkip();live.runTimers();assert.equal(live.callbacks,1);
 
 const combatCode=between(ac,'function acCombatPage(d) {','function acFxMarkup(cast,hp) {');
 const S={fs:[{n:'Eroul',c:'Campion',hp:90}],auto:false,fl:null,rule:'weak'};
@@ -111,4 +107,4 @@ anim({classList:{contains:()=>true},querySelector(){throw Error('Layout measured
 assert(css.includes('.ac-enemy:focus-visible')&&css.includes('min-height:44px'));
 assert(fx.includes('d.one||d.tw||d.lume||d.tron'),'Same FX card applies to all 4 BETA modes');
 assert(vs.includes('S.d.one||S.d.tw'),'No duplicate VS card during BETA dungeon/Tower combat');
-console.log('OK: double skip/Escape once, keyboard focus, reduced motion, readable target/log, Tower/PvP/Tron FX and LIVE compatibility.');
+console.log('OK: double skip/Escape once, keyboard focus, reduced motion, readable target/log, Tower/PvP/Tron FX.');

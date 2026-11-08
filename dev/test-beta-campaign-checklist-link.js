@@ -9,12 +9,12 @@ const territory=read('teritorii.js'),journey=read('drumul-eroului.js'),
 for(const src of [territory,journey,story])new Function(src);
 for(const m of index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
  if(m[1].trim())new Function(m[1]);
-assert(index.includes('teritorii.js?v=2026.11.07-20'));
-assert(index.includes('poveste-misiuni.js?v=2026.11.07-11'));
-assert(index.includes('drumul-eroului.js?v=2026.11.08-5'));
+assert(index.includes('teritorii.js?v=2026.11.09-1'));
+assert(index.includes('poveste-misiuni.js?v=2026.11.09-1'));
+assert(index.includes('drumul-eroului.js?v=2026.11.09-1'));
 assert(journey.includes("cmpOpenChecklist(\\'journey\\')"),'new journey invokes focused navigation');
 assert(story.includes("cmpOpenChecklist(\\'story\\')"),'older BETA story uses same navigation');
-const start=territory.indexOf('const cmpBeta='),end=territory.indexOf('/* --------------------------------------------------------------- PREMIUM',start);
+const start=territory.indexOf('function cmpChapters(){'),end=territory.indexOf('/* --------------------------------------------------------------- PREMIUM',start);
 assert(start>=0&&end>start);
 const code=territory.slice(start,end);
 const chapters=[1,2,3,4,5,6].map((id)=>({
@@ -50,7 +50,7 @@ function setup(server='beta',done=false) {
   window:{matchMedia:()=>({matches:false})},setTimeout:(fn,ms)=>timers.push([fn,ms]),
   go};
  const api=new Function(...Object.keys(context),code+
-  '\nreturn {cmpOpenChecklist,vCamp,cmpBeta,chCur,chReady,cmpReady};'
+  '\nreturn {cmpOpenChecklist,vCamp,chCur,chReady,cmpReady};'
  )(...Object.values(context));
  return {S,api,t1,t2,t3,timers,get calls(){return calls},get lastHtml(){return lastHtml}};
 }
@@ -78,12 +78,6 @@ completed.api.cmpOpenChecklist('story');
 assert.equal(completed.S.sqCampaignOpened,1,'legacy BETA notification dismissed');
 assert.equal(completed.t2.scrolled,1,'when objectives are done, focus Claim Chapter');
 assert.equal(completed.t1.scrolled,0);
-const live=setup('live');
-const liveHtml=live.api.vCamp();
-assert(!liveHtml.includes('cmp-to-do')&&!liveHtml.includes('cmp-task'),'LIVE markup unchanged');
-live.api.cmpOpenChecklist('journey');
-assert.equal(live.calls,0,'LIVE navigation handler is gated');
-assert.equal(live.S.tab,'a');assert.equal(live.S.jeCampaignOpened,undefined);
 const paused=setup();paused.S.d={one:1};
 paused.api.cmpOpenChecklist('journey');
 assert.equal(paused.calls,0,'active dungeon cannot be interrupted');
@@ -102,4 +96,4 @@ assert(legacyStory.sqPanel().includes("cmpOpenChecklist('story')"),
  'old BETA story completion also links to same focused checklist');
 storySave.sqCampaignOpened=1;
 assert.equal(legacyStory.sqPanel(),'','old story notification no longer repeats after opening');
-console.log('OK: campaign button jumps to first task, chapter-claim fallback, brief highlight, no repeated notification, BETA/LIVE isolation.');
+console.log('OK: campaign button jumps to first task, chapter-claim fallback, brief highlight, no repeated notification.');

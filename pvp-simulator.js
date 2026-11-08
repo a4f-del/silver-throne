@@ -9,8 +9,7 @@ const SIM_PVP = {
 };
 
 function simPvpAllowed() {
-  return typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta'
-    && typeof CONT !== 'undefined' && !!CONT.user && CONT.admin === true
+  return typeof CONT !== 'undefined' && !!CONT.user && CONT.admin === true
     && typeof ADM !== 'undefined' && ADM.srv === true;
 }
 function simPvpBoundCount(n) {

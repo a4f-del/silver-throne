@@ -6,10 +6,10 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 const html=read('index.html'),dungeons=read('temnite.js');
-const i=html.indexOf('function vC(){'),j=html.indexOf('\n if(!d)return(',i);
+const i=html.indexOf('function vC(){'),j=html.indexOf('\n const f=d.f;',i);
 assert(i>=0&&j>i,'BETA Coborare page branch exists');
 const beta=html.slice(i,j);
-assert(beta.includes('if(!d&&ST_SERVER===\'beta\'){'),'BETA branch retained');
+assert(beta.includes('if(!d){'),'Coborare hub branch present');
 assert(beta.includes('class="cb-party-first"'),'Squad management wrapper is on top');
 assert(beta.includes('heroSoloControl()'),'Real roster controls rendered');
 assert(beta.includes('ⓘ Reguli utile'),'Rules remain available, but collapsible');
@@ -24,12 +24,12 @@ assert(!hub.includes('cb-party-option'),'Removed old duplicate wrapper');
 assert(dungeons.includes('.cb-party-first{display:flex'),'New compact top layout styled');
 assert(dungeons.includes('.cb-party-active{display:flex'),'Active hero/mercenary roster visible');
 assert(dungeons.includes('@media(max-width:760px)'),'Responsive placement retained');
-assert(html.includes('temnite.js?v=2026.11.08-3'),'Cache-bust updated');
+assert(html.includes('temnite.js?v=2026.11.09-1'),'Cache-bust updated');
 
-const fn=new Function('S','ST_SERVER','DG','trPage','acCombatPage','heroSoloControl','vDung','reviveAllBtn','bhLast',
+const fn=new Function('S','DG','trPage','acCombatPage','heroSoloControl','vDung','reviveAllBtn','bhLast',
  beta+' return ""; }; return vC();')(
  {d:null,fs:[{h:1,n:'Erou',hp:90}],adventure:null},
- 'beta',[],()=>'',()=>'',()=>'<div id="team">Erou singur · Readu mercenarii</div>',
+ [],()=>'',()=>'',()=>'<div id="team">Erou singur · Readu mercenarii</div>',
  ()=>'<div id="feature">Temniță recomandată</div>',()=>'',()=>'<div id="last">Ultima luptă</div>'
 );
 assert(fn.startsWith('<div class="cb-party-first">'),'Squad appears before everything else');
@@ -38,4 +38,4 @@ assert(fn.indexOf('id="team"')>=0&&fn.indexOf('id="feature"')>fn.indexOf('id="te
 assert.equal((fn.match(/id="team"/g)||[]).length,1,'Exactly one roster block');
 assert(!fn.includes('id="last"'),'Last battle stays in LUPTE, not Coborare');
 assert(!fn.includes('AVENTURILE TALE'),'No old top header');
-console.log('OK: BETA Coborare begins with one active squad manager and collapsible rules; no duplicate header, live branch retained.');
+console.log('OK: BETA Coborare begins with one active squad manager and collapsible rules; no duplicate header.');

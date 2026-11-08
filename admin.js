@@ -57,7 +57,7 @@ async function admCheck() {
   ADM.checking = 1;
   
   let srv = false;
-  if (typeof tronRpc === 'function') { const r = await tronRpc(ST_SERVER === 'beta' ? 'is_beta_admin' : 'is_admin'); srv = !r.error && r.data === true; ADM.srv = srv; }
+  if (typeof tronRpc === 'function') { const r = await tronRpc('is_beta_admin'); srv = !r.error && r.data === true; ADM.srv = srv; }
   CONT.admin = srv;
   ADM.checked = CONT.user.id; ADM.checking = 0;
   admBtn();

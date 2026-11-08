@@ -50,12 +50,11 @@ assert(old.includes("insert into world_raids (attacker, defender) values (uid, p
 assert(client.includes("tronRpc('beta_world_raid_test_mode', { p_enabled: null })"));
 assert(client.includes("tronRpc('beta_world_raid_test_mode', { p_enabled: requested })"));
 assert(client.includes('const lwTestCooldownAllowed = () =>'));
-assert(client.includes("ST_SERVER === 'beta'"));
 assert(client.includes("p.cd && p.cd > lwNow() && !lwTestCooldownOn()"));
 assert(client.includes('cd = p.cd && p.cd > lwNow() && !lwTestCooldownOn()'));
 assert(client.includes('$'+'{lwTestCooldownPanel()}'+'$'+'{lwMap()}'));
 assert(client.includes('Consumă în continuare energie'));
-assert(html.includes('lume.js?v=2026.11.08-5'));
+assert(html.includes('lume.js?v=2026.11.09-1'));
 
 const start=client.indexOf('function lwCan(p) {');
 const end=client.indexOf('async function lwAttack(',start);

@@ -20,7 +20,6 @@ function fierData(it,who,where){
   (fierMatch(it,who,where)?'':' style="display:none"');
 }
 function fierFilterPanel(shown) {
- if(ST_SERVER!=='beta')return '';
  const select=(key,options)=>'<select aria-label="Filtru '+key+
    '" onchange="fierSetFilter(\''+key+'\',this.value)">'+
    options.map(([value,label])=>'<option value="'+value+'"'+

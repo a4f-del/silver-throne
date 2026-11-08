@@ -1,4 +1,4 @@
-/* Silver Throne BETA/LIVE — test no-discard for old cloud/local saves.
+/* Silver Throne — test no-discard for old cloud/local saves.
  * node dev/test-beta-save-compatibility.js
  * Exercises real load() and save(), but only in an isolated memory store. */
 'use strict';
@@ -7,13 +7,13 @@ const source=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 const start=source.indexOf('function load(src){'),end=source.indexOf('/* rezerva de începător',start);
 assert(start>=0&&end>start,'Missing load/save source boundaries');
 const code=source.slice(start,end);
-function app(server){
+function app(){
  const storage=new Map(),queued=[];
  const localStorage={getItem:k=>storage.get(k)||null,
   setItem:(k,v)=>storage.set(k,v)};
- const fn=new Function('ST_SERVER','DG','localStorage','SKEY','mrMig','contQueue','fresh',
+ const fn=new Function('DG','localStorage','SKEY','mrMig','contQueue','fresh',
   'let S=null;'+code+';return {load,save,getState:()=>S};');
- const api=fn(server,[{n:'Mina Cenușie'},{n:'Cripta'}],localStorage,'silver-throne-test',
+ const api=fn([{n:'Mina Cenușie'},{n:'Cripta'}],localStorage,'silver-throne-test',
   ()=>{},()=>queued.push('queued'),
   ()=>({fs:[{n:'Erou',h:1,c:'Campion',hp:45}],rs:[],ui:{},pool:{t:0,c:[]},tab:'a',mat:{}}));
  return {api,storage,queued};
@@ -27,8 +27,8 @@ const fixture={
  tw:{best:40},tron:{title:'Cavaler'},guild:{tag:'QA'},
  sv:1768000000000,ui:null,tu:0
 };
-const test=server=>{
- const x=app(server),src=JSON.parse(JSON.stringify(fixture));
+const test=()=>{
+ const x=app(),src=JSON.parse(JSON.stringify(fixture));
  x.api.load(src);const state=x.api.getState();
  assert(state.ui&&typeof state.ui==='object'&&!Array.isArray(state.ui),
   'Legacy save without UI preferences must not crash boot');
@@ -44,7 +44,7 @@ const test=server=>{
  assert.deepEqual(state.guild,{tag:'QA'});
  assert.equal(state.fs[0].n,'Erou Vechi');
  assert.equal(state.rs[0].n,'Mercenar');
- assert.equal(server==='beta'?Object.keys(state.deo||{}).length:state.deo,server==='beta'?0:undefined);
+ assert.equal(Object.keys(state.deo||{}).length,0);
  x.api.save();
  assert.equal(x.queued.length,1);
  const saved=JSON.parse(x.storage.get('silver-throne-test'));
@@ -52,31 +52,31 @@ const test=server=>{
  assert.equal(saved.gold,state.gold);
  assert.equal(saved.inv[0].upFails,4);
  assert.equal(saved.rs[0].c,'Arcaș');
- const y=app(server);
+ const y=app();
  y.api.load(saved);
  assert.equal(y.api.getState().gold,175000,'Round-trip save retains gold');
  assert.equal(y.api.getState().mat.jwf0,5,'Repeated load is idempotent');
  return saved;
 };
-test('beta');test('live');
-const fromReserve=app('beta');
+test();
+const fromReserve=app();
 fromReserve.api.load({lvl:15,tab:'a',fs:[{n:'Merc 1',c:'Paznic',hp:10},
  {n:'Merc 2',c:'Mag',hp:10},{n:'Merc 3',c:'Vraci',hp:10}],
  rs:[{n:'Eroul',c:'Campion',h:1,hp:99}],ui:{q:1,p:0,s:0},mat:{}});
 const party=fromReserve.api.getState();
 assert(party.fs[0].h===1&&party.fs[0].n==='Eroul','Missing active hero restored from reserve');
 assert(party.fs.length===3&&party.rs.length===1,'Old team slot limit retained');
-const missingEq=app('live');
+const missingEq=app();
 missingEq.api.load({lvl:2,tab:'a',fs:[{n:'Eroul',c:'Campion',h:1,hp:34}],ui:{},
  mat:{},eq:{w:{name:'Sabie'}},pool:{t:0,c:[]}});
 assert.equal(missingEq.api.getState().fs[0].eq.w.name,'Sabie');
 assert.equal(missingEq.api.getState().eq,undefined,'Legacy hero gear root removed after migration');
-assert(source.includes("const key = KEY + (ST_SERVER === 'beta' ? ':beta' : '') + ':' + user.id")===false,
+assert(!source.includes("const key = KEY + ':beta:' + user.id"),
  'Account-specific save key lives in cont.js, not index');
-// Verify explicit separation of BETA and LIVE cloud/local fallback.
+// The account save key stays the BETA one, so existing testers keep their local saves.
 const account=fs.readFileSync(path.join(__dirname,'../cont.js'),'utf8');
-assert(account.includes("KEY + (ST_SERVER === 'beta' ? ':beta' : '') + ':' + user.id"),
- 'BETA and LIVE local save keys remain separated');
-assert(account.includes("ST_SERVER === 'beta' ? null : cRead(KEY)"),
- 'BETA must not import old LIVE save automatically');
-console.log('OK: LIVE/BETA legacy UI migration, intact resources/rosters/gear/pity, cloud save isolation and memory-only round-trip.');
+assert(account.includes("const key = KEY + ':beta:' + user.id"),
+ 'Existing BETA local save key is kept');
+assert(!account.includes('cRead(KEY)')&&!account.includes('oldSave'),
+ 'Old LIVE saves are never imported automatically');
+console.log('OK: legacy UI migration, intact resources/rosters/gear/pity, cloud save isolation and memory-only round-trip.');

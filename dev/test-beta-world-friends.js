@@ -57,17 +57,11 @@ function setup(server='beta'){
  assert(b.calls.some(c=>c.fn==='world_friends_request'&&c.args.p_target==='c'));
  assert(b.eval('wfProfileButton("c")').includes('Cerere trimisă'));
  b.eval('wfStart()');assert(b.heads()>0);
- const live=setup('live');
- assert.equal(live.eval('wfEnabled()'),false);
- live.eval('wfOpen();wfStart()');
- await live.eval('wfRequest("b")');
- assert(!live.calls.length,'LIVE must never request friends RPC');
- assert(!live.map.has('wf-overlay'),'LIVE no friends UI');
  assert(sql.includes('ENABLE ROW LEVEL SECURITY'));
  assert(sql.includes('REVOKE ALL ON TABLE public.world_friends'));
  assert(sql.includes('public.is_beta_admin()'));
  assert(sql.includes('LEAST(sender_id,recipient_id)')&&sql.includes('GREATEST(sender_id,recipient_id)'));
  assert(sql.includes("recipient_id=v_uid AND status='pending'"),'only recipient accepts');
  assert(sql.includes('sender_id=v_uid'), 'cancel outgoing authorization');
- console.log('OK: requests, approval, rejection, removal, escaping, LIVE isolation, SQL safety.');
+ console.log('OK: requests, approval, rejection, removal, escaping, SQL safety.');
 })().catch(e=>{console.error(e);process.exitCode=1});

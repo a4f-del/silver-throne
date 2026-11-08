@@ -53,11 +53,6 @@ locked.api.ptTab('y');
 assert(locked.api.vPiata().includes('se deschide la nivelul 15'));
 const high=create({lvl:20});high.api.ptTab('y');
 assert(high.api.vPiata().includes('id="real-player-bazaar"'),'Bazar unlock works at level 20');
-const live=create({server:'live',lvl:20});
-const liveHtml=live.api.vPiata();
-assert(liveHtml.includes('Mini-ghid'));
-assert(liveHtml.includes('onclick="ptGuideOk('),'LIVE still uses the original guide');
-assert(!liveHtml.includes('pt-quick-details')&&!liveHtml.includes('pt-rolesub'));
 const oldBeta=create({focused:false,lvl:20});
 assert(oldBeta.api.vPiata().includes('onclick="ptGuideOk('),'Old BETA hero flow unchanged');
 assert(source.includes("if (typeof window !== 'undefined')"),'Legacy building route hook retained');
@@ -67,5 +62,5 @@ assert(bazaar.includes('bazar_buy')&&bazaar.includes('bazar_list')&&bazaar.inclu
  'Bazar purchasing, listing and claim remain intact');
 assert(bazaar.includes('BZ_FEE = 0.02')&&bazaar.includes('BZ_CUT = 0.05'),
  'Listing and selling taxes remain unchanged');
-assert(index.includes('piata.js?v=2026.11.08-1'),'Updated JS cache version required');
-console.log('OK: compact 3-way market help, opt-in full guidance, price clarity, existing trade functions, LIVE/legacy isolation.');
+assert(index.includes('piata.js?v=2026.11.09-1'),'Updated JS cache version required');
+console.log('OK: compact 3-way market help, opt-in full guidance, price clarity, existing trade functions, legacy isolation.');

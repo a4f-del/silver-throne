@@ -87,7 +87,6 @@ function prSlot(f, k) {
   return `<div class="pr-sl q${it.lg ? 'l' : it.r}"${typeof itTipA === 'function' ? itTipA(it) : ` title="${tEsc(it.name)}"`}>${iic(it)}<button class="pr-un" onclick="prUn('${k}')" title="Scoate ${tEsc(it.name)}" aria-label="Scoate ${tEsc(it.name)}">✕</button></div>`;
 }
 /* Filtre exclusiv de prezentare: indexul real din inventar rămâne neschimbat la equip(i). */
-const prIsBeta = () => typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta';
 const prBagMatches = it => {
   const k = PR.bagFilter;
   const category = k === 'all' || (k === 'w' && it.t === 'w') ||
@@ -99,7 +98,7 @@ const prBagMatches = it => {
 const prEscapeAttr = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function prBagCells(f) {
   const inv = S.inv || [];
-  const visible = inv.map((it,i) => ({it,i})).filter(({it}) => !prIsBeta() || prBagMatches(it));
+  const visible = inv.map((it,i) => ({it,i})).filter(({it}) => prBagMatches(it));
   const cells = visible.map(({it,i}) => {
     const cur = E(f)[it.t], ok = typeof wfOk !== 'function' || wfOk(f, it), up = ok && typeof bsc === 'function' && (!cur || bsc(it, f) > bsc(cur, f) * 1.02);
     return `<button class="pr-it q${it.lg ? 'l' : it.r}${up ? ' up' : ''}${ok ? '' : ' no'}" onclick="prEq(${i})"${typeof itTipA === 'function' ? itTipA(it, cur) : ` title="${tEsc(it.name)}"`} aria-label="Echipează ${tEsc(it.name)}">${iic(it)}${up ? '<b class="pr-up">▲</b>' : ''}</button>`;
@@ -109,21 +108,14 @@ function prBagCells(f) {
 function prBag(f) {
   const inv = S.inv || [];
   if (!inv.length) return '<div class="mute pr-empty">Rucsacul e gol.</div>';
-  if (!prIsBeta()) {
-    // LIVE: aspectul și comportamentul original, fără filtre noi.
-    const rows = prBagCells(f);
-    return `<div class="pr-grid">${rows.html}</div>`;
-  }
   return `<div class="pr-grid" id="pr-bag-items" role="region" aria-label="Obiectele din rucsac">${prBagCells(f).html}</div>`;
 }
 function prBagTools() {
-  if (!prIsBeta()) return '';
   const options = [['all','Toate'],['w','Arme'],['armor','Armuri'],['accessory','Accesorii']];
   const buttons = options.map(([k,t]) => `<button type="button" data-pr-filter="${k}" class="${PR.bagFilter === k ? 'on' : ''}" aria-pressed="${PR.bagFilter === k}" onclick="prBagFilter('${k}')">${t}</button>`).join('');
   return `<div class="pr-bag-tools" aria-label="Filtre rucsac"><div class="pr-bag-tabs" role="group" aria-label="Tip obiect">${buttons}</div><input class="pr-bag-search" type="search" placeholder="Caută obiect…" aria-label="Caută în rucsac" value="${prEscapeAttr(PR.bagQuery)}" oninput="prBagSearch(this.value)"></div>`;
 }
 function prBagRefresh() {
-  if (!prIsBeta()) return;
   const box = document.getElementById('pr-bag-items'), f = prF();
   if (!box || !f) return;
   const rows = prBagCells(f);
@@ -149,7 +141,7 @@ function prDraw() {
   const traits = (f.t || []).map(x => `<span class="pr-tag" title="${tEsc(x.d || '')}">${tEsc(x.n)}</span>`).join('');
   const train = f.h ? (s => `<div class="pr-tr"><span${prTipA('Forță', f)}>Forță <b>${s.f}</b></span><span${prTipA('Rezistență', f)}>Rezistență <b>${s.r}</b></span><span${prTipA('Agilitate', f)}>Agilitate <b>${s.a}</b></span><small>din ${smax()}</small></div>`)(ST()) : '';
   const L = ['h', 'a', 'b'], R = ['w', 'j', 'r'];
-  o.innerHTML = `<div class="pr-c${dead ? ' dead' : ''}${f.h&&typeof egTitleGet==='function'&&egTitleGet()?' eg-cosmetic':''}${prIsBeta() ? ' pr-beta' : ''}">
+  o.innerHTML = `<div class="pr-c${dead ? ' dead' : ''}${f.h&&typeof egTitleGet==='function'&&egTitleGet()?' eg-cosmetic':''} pr-beta">
 <button class="pr-x" onclick="prClose()" aria-label="Închide profilul" title="Închide (Esc)">✕</button>
 <section class="pr-l">
   <div class="pr-ban">${n > 1 ? `<button class="pr-nav" onclick="prNext(-1)" aria-label="Personajul anterior">‹</button>` : ''}<h2 id="pr-n">${tEsc(f.n)}</h2>${n > 1 ? `<button class="pr-nav" onclick="prNext(1)" aria-label="Personajul următor">›</button>` : ''}</div>
@@ -167,9 +159,7 @@ function prDraw() {
     <div class="pr-por">${src ? `<img src="${src}" alt="${tEsc(f.n)}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'pr-av'}))">` : `<span class="pr-av">${av(f, 180)}</span>`}${dead ? '<b class="pr-dead">☠ căzut</b>' : ''}</div>
     <div class="pr-col">${R.map(k => prSlot(f, k)).join('')}</div>
   </div>
-  <div class="pr-bh"><b>Rucsac</b>${prIsBeta()
-    ? `<span class="pr-bag-count" id="pr-bag-count" aria-live="polite">${prBagCells(f).count} / ${(S.inv || []).length}</span><span class="mute">Atinge pentru echipare · ▲ îmbunătățire</span>`
-    : `<span class="mute">${(S.inv || []).length} obiecte · atinge un obiect ca să-l echipezi pe ${tEsc(f.n)} · ▲ e mai bun decât ce poartă</span>`}</div>
+  <div class="pr-bh"><b>Rucsac</b><span class="pr-bag-count" id="pr-bag-count" aria-live="polite">${prBagCells(f).count} / ${(S.inv || []).length}</span><span class="mute">Atinge pentru echipare · ▲ îmbunătățire</span></div>
   ${prBagTools()}
   ${prBag(f)}
 </section></div>`;

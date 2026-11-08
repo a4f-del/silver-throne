@@ -6,8 +6,8 @@ const fs=require('node:fs'),path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'..','profil.js'),'utf8');
 const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
 new Function(source);
-assert(html.includes('profil.js?v=2026.11.08-2'),'Browser gets the refreshed profile');
-assert(source.includes("prIsBeta() ? ' pr-beta' : ''"),'Redesign must be gated to BETA');
+assert(html.includes('profil.js?v=2026.11.09-1'),'Browser gets the refreshed profile');
+assert(source.includes("egTitleGet()?' eg-cosmetic':''} pr-beta\">"),'Redesigned profile class applied');
 for(const marker of [
   '.pr-c.pr-beta{grid-template-columns:',
   '.pr-beta .pr-doll{',
@@ -26,7 +26,7 @@ assert(source.includes("o.setAttribute('role', 'dialog')")&&source.includes("e.k
 assert(source.includes('aria-pressed=')&&source.includes('aria-live="polite"'),'Filter states and count are accessible');
 assert(!source.includes('localStorage'),'Redesign does not persist new game data');
 
-const start=source.indexOf('const prIsBeta ='),end=source.indexOf('\nfunction prDraw()',start);
+const start=source.indexOf('const prBagMatches ='),end=source.indexOf('\nfunction prDraw()',start);
 assert(start>0&&end>start,'Pure bag UI logic can be tested independently');
 const functions=source.slice(start,end);
 const inventory=[
@@ -52,9 +52,9 @@ const dom={
  querySelectorAll:q=>q==='#pr-m [data-pr-filter]'?buttons:[]
 };
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const build=(server,PR)=>new Function('ST_SERVER','PR','S','E','bsc','wfOk','iic','itTipA','tEsc','prF','document',
+const build=(server,PR)=>new Function('PR','S','E','bsc','wfOk','iic','itTipA','tEsc','prF','document',
   functions+'\nreturn {prBag,prBagCells,prBagTools,prBagFilter,prBagSearch,prEscapeAttr,prBagRefresh};'
-)(server,PR,S,()=>({}),()=>5,()=>true,it=>'<img src="item.png" alt="">',undefined,esc,()=>fighter,dom);
+)(PR,S,()=>({}),()=>5,()=>true,it=>'<img src="item.png" alt="">',undefined,esc,()=>fighter,dom);
 const api=build('beta',state);
 assert.equal(api.prBagCells(fighter).count,6,'All items remain visible by default');
 assert(api.prBag(fighter).includes('id="pr-bag-items"'),'BETA bag has its own scroll region');
@@ -82,8 +82,4 @@ assert.equal(api.prBagCells(fighter).count,6,'Unknown filter is ignored');
 state.bagQuery='"><img src=x onerror=alert(1)>';
 assert(api.prBagTools().includes('&quot;&gt;&lt;img'),'Input value is safely escaped');
 
-const live=build('live',{i:0,bagFilter:'all',bagQuery:''});
-assert.equal(live.prBagTools(),'','LIVE has no new filters');
-assert(!live.prBag(fighter).includes('id="pr-bag-items"'),'LIVE keeps its original bag markup');
-assert.equal(live.prBagCells(fighter).count,6,'LIVE inventory remains unfiltered');
-console.log('OK: BETA profile layout and filtering; original equip indices, search, empty state, LIVE unchanged.');
+console.log('OK: BETA profile layout and filtering; original equip indices, search, empty state.');

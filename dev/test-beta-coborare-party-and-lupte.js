@@ -12,13 +12,12 @@ for(const m of index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
  if(m[1].trim())new Function(m[1]);
 for(const [oldver,newver] of [
  ['aventura-carduri.css?v=2026.11.08-4','aventura-carduri.css?v=2026.11.08-5'],
- ['aventura-carduri.js?v=2026.11.08-5','aventura-carduri.js?v=2026.11.08-6'],
- ['temnite.js?v=2026.11.08-1','temnite.js?v=2026.11.08-3'],
- ['istoric.js?v=2026.11.04-4','istoric.js?v=2026.11.08-2']
+ ['aventura-carduri.js?v=2026.11.08-5','aventura-carduri.js?v=2026.11.09-1'],
+ ['temnite.js?v=2026.11.08-1','temnite.js?v=2026.11.09-1'],
+ ['istoric.js?v=2026.11.04-4','istoric.js?v=2026.11.09-1']
 ]){assert(index.includes(newver),'Cache not invalidated: '+newver);assert(!index.includes(oldver),'Stale asset '+oldver);}
-const betaNoCombat=between(index,"if(!d&&ST_SERVER==='beta'){","\n if(!d)return(");
+const betaNoCombat=between(index,"if(!d){\n  const fallen=","\n const f=d.f;");
 assert(!betaNoCombat.includes('bhLast'),'No battle journal panel above Coborare');
-assert(index.includes("if(!d)return(typeof bhLast==='function'?bhLast():''"),'LIVE history widget remains');
 assert(history.includes('function bhOpen()'));
 assert(history.includes("i===0?'<div class=\"bh-latest-label\">Ultima luptă"),'Latest fight pinned at LUPTE modal');
 
@@ -58,9 +57,6 @@ assert.equal(x.S.fs.length,before,'Never change team during active combat');
 x.S.d=null;
 x=make('beta',3);x.m.heroSolo();x.m.heroDungeonRestore();
 assert.equal(x.S.fs.length,3,'Pre-level-30 squad remains capped at 3');
-x=make('live');x.m.heroSolo();
-assert.equal(x.S.fs.length,4,'LIVE cannot mutate via BETA solo control');
-assert.equal(x.m.heroSoloControl(),'','LIVE gets no extra Coborare UI');
 
 const env={ST_SERVER:'beta',S:{fs:[{n:'Erou',c:'Campion',h:true,hp:120},{n:'Toma',c:'Paznic',hp:80},{n:'Matei',c:'Vraci',hp:70},{n:'Ilinca',c:'Arcaș',hp:90}],
  adventure:{di:0,tierLocked:false}},
@@ -104,4 +100,4 @@ assert(modal.includes('Lupte · Istoric și jurnal'),'History moved under LUPTE'
 assert(modal.includes('Ultima luptă · deschide pentru jurnal'));
 assert(modal.includes('Victorie')&&modal.includes('Atac')&&modal.includes('Eșec'),'Latest and older logs preserved');
 assert.equal((modal.match(/Tronul Cenușiu/g)||[]).length,1,'Latest fight is not duplicated');
-console.log('OK: team 1v1 ↔ 4-person, expedition limits, level caps; compact team next to Fight; logs only in LUPTE; LIVE isolated.');
+console.log('OK: team 1v1 ↔ 4-person, expedition limits, level caps; compact team next to Fight; logs only in LUPTE.');

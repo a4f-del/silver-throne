@@ -50,8 +50,7 @@ function lgAfter(a, e, dm, L) {
     a.hp = Math.min(mhp(a), a.hp + h);
     /* BETA Tron: aratam vindecarea efectiva, altfel jurnalul pare sa
        contina mai multa dauna primita decat viata cu care a pornit eroul. */
-    if (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta' &&
-        S.d && S.d.tron && S.d.ghost && a.hp > before)
+    if (S.d && S.d.tron && S.d.ghost && a.hp > before)
       L.push(a.n + ' recuperează ' + (a.hp - before) + ' viață din lovitură.');
   }
   if (x.blm && e.bl > 0) e.blm = Math.max(e.blm || 1, x.blm);
@@ -68,8 +67,7 @@ function lgRound(L) {
     if (x.regen) {
       const before = f.hp;
       f.hp = Math.min(mhp(f), f.hp + Math.max(1, Math.round(mhp(f) * x.regen)));
-      if (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta' &&
-          S.d && S.d.tron && S.d.ghost && f.hp > before)
+      if (S.d && S.d.tron && S.d.ghost && f.hp > before)
         L.push(f.n + ' regenerează ' + (f.hp - before) + ' viață.');
     }
     team = Math.max(team, x.treg || 0);

@@ -27,7 +27,7 @@ function bhAdd(d, res, gold) {
   const L = d.loot || {}, items = (L.it || []).map(i => ({ n: i.name, r: i.r || 0, lg: i.lg ? 1 : 0 }));
   // BETA: pentru diagnostic, legăm jurnalul LOCAL de ID-ul provocării Tron.
   // Nu îl trimitem pe server și nu îl folosim la validarea victoriei.
-  const id = typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta' && d.tron && S.tron && S.tron.cur
+  const id = d.tron && S.tron && S.tron.cur
     ? Number(S.tron.cur.id) : NaN;
   S.bh = S.bh || [];
   S.bh.unshift({ t: Date.now(), k: bhKind(d), n: bhTitle(d), res,
@@ -78,13 +78,13 @@ function bhOpen() {
   const list = S.bh || [], RES = { win: ['Victorie', 'win'], retreat: ['Retragere', 'ret'], lost: ['Înfrângere', 'lost'] };
   const rows = list.map((b,i) => {
     const [rt, rc] = RES[b.res] || RES.retreat, gain = [b.g ? `+${b.g} aur` : '', b.o ? `+${b.o} minereu` : '', b.m ? `${b.m} materiale` : '', b.x ? `+${b.x} exp.` : ''].filter(Boolean).join(' · ');
-    return (typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&i===0?'<div class="bh-latest-label">Ultima luptă · deschide pentru jurnal</div>':'') + `<details class="bh-r"><summary><img class="uii bh-k" src="${b.k === 'w' ? 'imagini/lume/turn.webp' : 'imagini/ui/' + (BHI.ic[b.k] || 'nav-coborare') + '.webp'}" alt=""><span class="bh-m"><b>${tEsc(b.n)}</b> <span class="bh-res ${rc}">${rt}</span><small>${bhAgo(b.t)}</small><br><small>${gain || 'fără pradă'}</small>${b.it.length ? `<br><small>Obiecte: ${b.it.map(bhItem).join(', ')}</small>` : ''}</span></summary>`
-      + (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta' && b.k === 't'
+    return (i===0?'<div class="bh-latest-label">Ultima luptă · deschide pentru jurnal</div>':'') + `<details class="bh-r"><summary><img class="uii bh-k" src="${b.k === 'w' ? 'imagini/lume/turn.webp' : 'imagini/ui/' + (BHI.ic[b.k] || 'nav-coborare') + '.webp'}" alt=""><span class="bh-m"><b>${tEsc(b.n)}</b> <span class="bh-res ${rc}">${rt}</span><small>${bhAgo(b.t)}</small><br><small>${gain || 'fără pradă'}</small>${b.it.length ? `<br><small>Obiecte: ${b.it.map(bhItem).join(', ')}</small>` : ''}</span></summary>`
+      + (b.k === 't'
         ? '<div class="bh-copy"><button type="button" onclick="bhCopy('+i+',this)">📋 Copiază jurnalul</button>'+
           (Number.isSafeInteger(b.cid)&&b.cid>0?'<span>Provocare #'+b.cid+'</span>':'')+'</div>' : '')+
       `<div class="bh-log">${b.log.length ? b.log.map(l => `<div${l.startsWith('—') ? ' class="bh-sep"' : ''}>${tEsc(l)}</div>`).join('') : '<div class="mute">Fără jurnal.</div>'}</div></details>`;
   }).join('');
-  mdl(`<h3>${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'Lupte · Istoric și jurnal':'Istoricul luptelor'}</h3><p class="mute">Ultimele ${BHI.max} coborâri, atacuri și provocări. Atinge una ca să-i vezi jurnalul.</p><div class="bh-l">${rows || '<p class="mute">Nu ai dat încă nicio luptă.</p>'}</div>`, 'bh');
+  mdl(`<h3>Lupte · Istoric și jurnal</h3><p class="mute">Ultimele ${BHI.max} coborâri, atacuri și provocări. Atinge una ca să-i vezi jurnalul.</p><div class="bh-l">${rows || '<p class="mute">Nu ai dat încă nicio luptă.</p>'}</div>`, 'bh');
 }
 (function () {
   if (typeof document === 'undefined' || !document.head) return;

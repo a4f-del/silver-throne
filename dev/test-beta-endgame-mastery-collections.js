@@ -72,16 +72,11 @@ assert.equal(api.egEndgamePanel().includes('3/10 legendare deținute'),true);
 assert(!collection.includes('bonus +'),'Collection gives no combat stats');
 assert(team.includes('egEndgamePanel()'),'Mastery view belongs to Team composition');
 assert(profile.includes('eg-title-medal')&&profile.includes('eg-cosmetic'),'Selected cosmetic title is visible on hero profile');
-assert(html.includes('endgame-ui.js?v=2026.11.08-1'),'New module loaded');
+assert(html.includes('endgame-ui.js?v=2026.11.09-1'),'New module loaded');
 assert(html.includes('egRecordBoss(d)'),'Tracking wired to real boss completion');
 assert(tower.includes('TW_LG'),'Reuses Tower legendary milestones');
 const low=init('beta',49);assert.equal(low.api.egEndgamePanel(),'');low.api.egRecordBoss({di:0,one:1});
 assert.equal(low.S.eg,undefined,'No level-49 tracking');
-const live=init('live');const snap=JSON.stringify(live.S);
-assert.equal(live.api.egEndgamePanel(),'');
-live.api.egRecordBoss({di:0,one:1});
-live.api.egTitleSelect('tower');
-assert.equal(JSON.stringify(live.S),snap,'LIVE save untouched');
 const rejected=init();for(const altered of [
  {di:0,one:0},{di:0,one:1,tw:1},{di:0,one:1,ev:1},{di:0,one:1,raid:0},
  {di:-1,one:1},{di:100,one:1}
@@ -90,4 +85,4 @@ assert.equal(rejected.S.eg,undefined,'Simulated, tower, weekly, raid, invalid bo
 const fallen=init();fallen.S.fs.push({c:'Paznic',hp:0});
 fallen.api.egRecordBoss({di:0,one:1});
 assert.equal(fallen.S.eg.solo[0],undefined,'Fallen teammate cannot falsely count as solo');
-console.log('OK: mastery 50, distinct solo/boss/classes, tower title, owned vs past collectibles, cosmetic-only, no simulation, LIVE safe.');
+console.log('OK: mastery 50, distinct solo/boss/classes, tower title, owned vs past collectibles, cosmetic-only, no simulation.');

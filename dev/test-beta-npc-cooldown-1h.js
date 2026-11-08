@@ -31,8 +31,8 @@ for(const sql of [setup,migration]){
   'Keep atomic server enforcement');
 }
 assert(!migration.includes('UPDATE public.world_npc_raids'),'Existing cooldowns stay untouched');
-assert(html.includes('tinut.js?v=2026.11.08-1'),'Browser must reload NPC script');
-assert(html.includes('ghid.js?v=2026.11.08-4'),'Browser must reload guide script');
+assert(html.includes('tinut.js?v=2026.11.09-1'),'Browser must reload NPC script');
+assert(html.includes('ghid.js?v=2026.11.09-1'),'Browser must reload guide script');
 assert(guide.includes('Poți reveni la același sat după o oră'),'Guide must show 1h');
 assert(npc.includes("'world_npc_raid'"),'Shared NPC villages still call server');
 console.log('OK: NPC cooldown is 1h, existing server timestamps respected, BETA RPC protected.');

@@ -70,7 +70,6 @@ function sdTasks() {
   if (ready) push('✔', `Forjă: ${ready} ${ready === 1 ? 'obiect gata' : 'obiecte gata'}`, 'ridică', "sdGo('a','vil','a')", true);
   if (busy.length) { const nx = Math.min(...busy.map(x => +x.end)); push('⚒', `Forjă ${busy.length}/${slots}`, `<span data-end="${nx}">${fmt(nx - now)}</span>`, "sdGo('a','vil','a')"); }
   const cp = ((S.ter && S.ter.camps) || []).filter(c => c && Number.isFinite(+c.exp));
-  if ((typeof ST_SERVER === 'undefined' || ST_SERVER !== 'beta') && cp.length) { const nx = Math.min(...cp.map(c => +c.exp)); push('⚔', `Tabere: ${cp.length}`, sdT(nx - now), "sdGo('m','mt','l')"); }
   for (const b of ((S.ter && S.ter.buf) || [])) if (b && Number.isFinite(+b.exp) && Number.isFinite(+b.v) && b.exp > now) push('✦', `+${b.v}% ${({ pd: 'atac', pf: 'apărare', ph: 'viață' })[b.k] || b.k}`, `<span data-end="${b.exp}">${fmt(b.exp - now)}</span>`, "sdGo('m','mt','l')");
   const m = dm(), dr = dmReady(), done = m.list.filter(x => x.c).length;
   if (typeof dcReady === 'function' && dcReady()) push('🎯', 'Cufărul zilnic', 'deschide', "sdGo('a','vil','x')", true);
@@ -81,10 +80,6 @@ function sdTasks() {
   else push('👑', 'Campanie încheiată', '✔', "sdGo('m','mt','k')");
   if (typeof tronRow === 'function') { const x = tronRow(); if (x) rest.push(x); }
   if (typeof lumeRow === 'function') { const x = lumeRow(); if (x) rest.push(x); }
-  if (typeof ST_SERVER==='undefined' || ST_SERVER!=='beta') {
-    const own = terOwnedV().length, debt = S.ter && S.ter.debt > 0;
-    push(debt ? '⚠' : '🚩', `Teritorii: ${own}/${S.map.vs.length}`, debt ? 'datorie' : '', "sdGo('m','mt','t')", debt);
-  }
   const CAP = 5, cut = Math.max(0, CAP - hot.length), open = !!S.sdMore;
   const shown = open ? rest : rest.slice(0, cut), more = open ? [] : rest.slice(cut);
   const toggle = more.length ? `<button class="sd-more" onclick="S.sdMore=1;go()">+${more.length} mai multe</button>` : '';

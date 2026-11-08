@@ -1,11 +1,9 @@
-/* Bonusurile vechi de apărare a satului sunt pensionate doar în BETA.
+/* Bonusurile vechi de apărare a satului sunt pensionate.
    Obiectele salvate NU sunt rescrise: efectul istoric vd se transformă în apărare
-   normală (+1 apărare la 4% vd), ca posesorii să nu piardă valoarea obiectelor.
-   Statistica LIVE și valorile existente în salvări rămân neschimbate. */
-function stVillageDefenseRetired(server) { return server === 'beta'; }
-function stGearStats(item, server) {
+   normală (+1 apărare la 4% vd), ca posesorii să nu piardă valoarea obiectelor. */
+function stGearStats(item) {
   const stats = item && item.s ? item.s : {};
-  if (!stVillageDefenseRetired(server) || !item) return stats;
+  if (!item) return stats;
   const out = { ...stats };
   if (Number.isFinite(+out.vd) && +out.vd > 0) {
     out.def = (+out.def || 0) + Math.max(1, Math.round(+out.vd / 4));
@@ -18,4 +16,4 @@ function stGearStats(item, server) {
   return out;
 }
 if (typeof module !== 'undefined' && module.exports)
-  module.exports = { stGearStats, stVillageDefenseRetired };
+  module.exports = { stGearStats };

@@ -5,7 +5,6 @@
   'use strict';
   let current = null;
   let currentAnchor = null;
-  const beta = () => typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta';
   const map = () => document.querySelector('.lw-map');
   function close() {
     document.getElementById('lw-quick-actions')?.remove();
@@ -192,7 +191,7 @@
       const match = (player.getAttribute('onclick') || '').match(/lwPick\('([^']+)'\)/);
       if (match) return {kind:'village', id:match[1], el:player};
     }
-    if (beta()) {
+    {
       const npc = el.closest('g[onclick*="wnPick"]');
       if (npc) {
         const match = (npc.getAttribute('onclick') || '').match(/wnPick\('([^']+)'\)/);
@@ -212,8 +211,7 @@
     const info = targetInfo(event.target);
     if (info) {
       event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation();
-      if (beta()) showBeta(info.kind, info.id, info.el);
-      else showLegacy(info.kind, info.id);
+      showBeta(info.kind, info.id, info.el);
     } else if (current && event.target.closest && event.target.closest('.lw-map')) close();
   }, true);
   document.addEventListener('keydown', event => {
@@ -222,8 +220,7 @@
     const info = targetInfo(event.target);
     if (!info) return;
     event.preventDefault(); event.stopImmediatePropagation();
-    if (beta()) showBeta(info.kind, info.id, info.el);
-    else showLegacy(info.kind, info.id);
+    showBeta(info.kind, info.id, info.el);
   }, true);
   // SVG viewBox is changed while dragging/zooming; close instead of leaving a menu floating in empty space.
   document.addEventListener('pointerdown', event => {

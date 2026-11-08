@@ -14,11 +14,11 @@ const FXQ = FX.q;   /* alias folosit din index.html, ca să nu depindă de ordin
 function fxCast() {
   FX.q.length = 0;
   const d = S.d, f = d && d.f; if (!f) return;
-  const esIcon = e => { if (e.b) { const b = typeof tmnBoss === 'function' ? tmnBoss(d.bn) : null; if(b)return `imagini/monstri/${b[0]}.jpg`; if(d.tw&&ST_SERVER==='beta'&&typeof twMob==='function'&&typeof monImg==='function')return monImg(twMob(d.room)); return null; } return typeof monImg === 'function' ? monImg(e.n) : null; };
+  const esIcon = e => { if (e.b) { const b = typeof tmnBoss === 'function' ? tmnBoss(d.bn) : null; if(b)return `imagini/monstri/${b[0]}.jpg`; if(d.tw&&typeof twMob==='function'&&typeof monImg==='function')return monImg(twMob(d.room)); return null; } return typeof monImg === 'function' ? monImg(e.n) : null; };
   /* viața REALĂ de la începutul acestei lupte (echipa poate intra deja rănită, fără vindecare între monștri) */
   FX.cast = {
-    adventure: typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&!!(d.one||d.tw||d.lume||d.tron),
-    pvp: typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&!!(d.lume||d.tron),
+    adventure: (!!(d.one||d.tw||d.lume||d.tron)),
+    pvp: (!!(d.lume||d.tron)),
     adventureTitle: d.lume?'Atac în Lume · '+(d.bn||'Satul adversarului'):d.tron?'Duel pentru Tron · '+(d.bn||'Apărarea Tronului'):d.tw?'Turnul · Etajul '+Math.max(1,d.room):(DG[d.di||0]||{}).n||'Temniță',
     fs: S.fs.map(x => ({ n: x.n, c: x.c, ic: x.ic, h: x.h, mh: mhp(x), hp: Math.max(0, x.hp) })),
     es: f.es.map(e => ({ n: e.n, c: e.c, ic: e.ic, b: e.b, mh: e.mh, hp: Math.max(0, e.hp), img: esIcon(e) })),
@@ -36,9 +36,7 @@ function fxPush(pre, txt, actor) {
   /* Același identificator de actor pentru erou, mercenari și fantome PvP.
      În vechea expresie mercenarii fără actor.h pierdeau animația de atac. */
   const fi=actor?S.fs.indexOf(actor):-1,ei=actor?f.es.indexOf(actor):-1;
-  const tagged=typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'
-    ? (fi>=0?{side:'fs',i:fi}:ei>=0?{side:'es',i:ei}:null)
-    : (actor ? (actor.h || !S.fs.includes(actor) ? { side: actor.h !== undefined && S.fs.includes(actor) ? 'fs' : (f.es.includes(actor) ? 'es' : null), i: S.fs.includes(actor) ? S.fs.indexOf(actor) : f.es.indexOf(actor) } : null) : null);
+  const tagged=(fi>=0?{side:'fs',i:fi}:ei>=0?{side:'es',i:ei}:null);
   FX.q.push({ fs:dFs, es:dEs, txt:txt||'', actor:tagged });
 }
 /* pentru modul manual: marchează unde începe lovitura curentă, ca să redăm doar cadrele noi */
@@ -56,8 +54,7 @@ function fxAutoRun() {
 }
 /* BETA: preferința de accesibilitate are prioritate chiar față de prima luptă. */
 const fxWantPlay = first => {
- if(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&
-    typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches)return false;
+ if(typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches)return false;
  return first||!S.fxInstant;
 };
 
@@ -69,7 +66,7 @@ function fxStartHp(cast, offset) {
   const hp={fs:cast.fs.map(x=>x.hp),es:cast.es.map(x=>x.hp)};
   /* Redări succesive în BETA: reconstruim HP din cadrele deja executate,
      ca manual → automat să nu afișeze viața de la începutul luptei. */
-  if(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&cast.adventure&&offset>0){
+  if(cast.adventure&&offset>0){
     for(const fr of FX.q.slice(0,offset)) for(const side of ['fs','es']) for(const d of fr[side]||[]){
       if(hp[side][d.i]==null||!cast[side][d.i])continue;
       hp[side][d.i]=Math.max(0,Math.min(cast[side][d.i].mh,hp[side][d.i]+d.v));

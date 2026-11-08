@@ -33,19 +33,17 @@ const twAb = n => TWR.ab[(Math.floor(n / 10) - 1) % TWR.ab.length];
    pentru etajele sărite, nici recompensele lor legendare. Costul rămâne 6p. */
 const TW_STARTS=[1,21,41,61,81];
 function twStartChoice(t){
- if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta')return 1;
  const n=Number(t.start||1);
  return TW_STARTS.includes(n)&&(n===1||(t.best||0)>=n-1)?n:1;
 }
 function twStartSet(n){
- if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta'||S.d||
+ if(S.d||
    (typeof adventureActive==='function'&&adventureActive()))return;
  const t=twSt();n=Number(n);
  if(!TW_STARTS.includes(n)||(n>1&&(t.best||0)<n-1))return;
  t.start=n;S.msg='';go();
 }
 function twStartControls(t){
- if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta')return '';
  const current=twStartChoice(t);
  const options=TW_STARTS.map(n=>
   '<option value="'+n+'"'+(n>1&&(t.best||0)<n-1?' disabled':'')+
@@ -58,7 +56,6 @@ function twStartControls(t){
 }
 /* Repere compacte deja existente în Turn, fără nouă sursă de recompense. */
 function twProgress(t){
- if(typeof ST_SERVER==='undefined'||ST_SERVER!=='beta')return '';
  const best=Math.max(0,Math.min(100,Number(t.best)||0));
  const guard=best>=100?null:Math.min(100,Math.floor(best/10)*10+10);
  const next=TWR.up.find(n=>best<n),prev=[0,...TWR.up.filter(n=>n<=best)].at(-1);
@@ -80,7 +77,7 @@ function twEnter() {
   spend(TWR.cost); t.n++;
   let di = 0; DG.forEach((g, i) => { if (!g.ev && S.lvl >= g.lv) di = i; });   /* materialele vin ca din cea mai mare temniță deschisă */
   S.d = { tw: 1, room: start-1, rooms: 9999, k: twK(start), rw: 1, bn: 'Străjerul', di, tier: 0, loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false };
-  if(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta')S.d.twStart=start;
+  S.d.twStart=start;
   S.d.doors = doors(); S.tab = 'c'; S.msg = start>1?'Începi urcarea la etajul '+start+'. Etajele sărite nu acordă pradă sau XP. Primești recompense numai pentru etajele câștigate.':'Intri în Turn. Fiecare etaj e mai greu decât cel dinainte; poți ieși oricând cu prada.'; cn('d'); go();
 }
 /* înainte de fiecare etaj (din door): dificultatea, prada și numele străjerului */
@@ -120,7 +117,7 @@ function twCard() {
   if (S.lvl < TWR.lv - 5) return '';   /* la nivelul 1 nu are rost: apare abia cu 5 niveluri înainte de deblocare */
   const t = twSt(), lock = S.lvl < TWR.lv, nx = TWR.up.find(f => t.best < f);
   return `<section class="tw-c"><div class="tw-img"><img src="imagini/lume/turn.webp" alt=""></div><div><h2>Turnul</h2>`
-    + `<div class="info"><div class="mute">Etaje tot mai grele, câte o luptă pe etaj.</div><details><summary>ⓘ Cum funcționează</summary><div class="mute">100 de etaje, un străjer la fiecare 10, cu un obiect la fiecare străjer. ${typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'?'După recorduri de 20/40/60/80 poți porni direct de la 21/41/61/81, fără pradă pentru etajele sărite.':'Fiecare intrare o ia de la etajul 1; rămâne recordul tău.'} Fără vindecare, în afară de Vraci și de un foc de tabără după fiecare străjer. Recordul deblochează treptele +6…+9 la Fierărie (etajele 10, 20, 40, 60). La etajele 20, 25, 30, 40, 50… 100 câștigi câte un legendar, prima dată când ajungi acolo.</div></details></div>`
+    + `<div class="info"><div class="mute">Etaje tot mai grele, câte o luptă pe etaj.</div><details><summary>ⓘ Cum funcționează</summary><div class="mute">100 de etaje, un străjer la fiecare 10, cu un obiect la fiecare străjer. După recorduri de 20/40/60/80 poți porni direct de la 21/41/61/81, fără pradă pentru etajele sărite. Fără vindecare, în afară de Vraci și de un foc de tabără după fiecare străjer. Recordul deblochează treptele +6…+9 la Fierărie (etajele 10, 20, 40, 60). La etajele 20, 25, 30, 40, 50… 100 câștigi câte un legendar, prima dată când ajungi acolo.</div></details></div>`
     + (lock ? `<div class="row"><span class="mute">Se deschide la nivelul ${TWR.lv}.</span></div>` :
       `<div class="tw-st"><span>Recordul tău<b>${t.best ? 'etajul ' + t.best : '—'}</b></span><span>Săptămâna asta<b>${t.wb ? 'etajul ' + t.wb : '—'}</b></span><span>Urcări azi<b>${twLeft()} / ${TWR.day}</b></span><span>Fierăria<b>până la +${twUpMax()}</b></span></div>`
       + twProgress(t) + twStartControls(t)

@@ -5,7 +5,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 for(const m of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
  if(m[1].trim())new Function(m[1]);
-const start=html.indexOf('const botFairMode=()=>'),end=html.indexOf('function vBotBeta(',start);
+const start=html.indexOf('function botTick0(){'),end=html.indexOf('function vBotBeta(',start);
 assert(start>=0&&end>start,'Bot functionality extracted');
 const source=html.slice(start,end);
 function setup(server='beta'){
@@ -20,12 +20,11 @@ function setup(server='beta'){
   bequip:()=>{calls.equip++;return eqReturn},
   bheal:()=>{calls.heal++;return healReturn}};
  const api=new Function(...Object.keys(ctx),source+
-  ';return {botFairMode,botTick0};')(...Object.values(ctx));
+  ';return {botTick0};')(...Object.values(ctx));
  return {S,calls,api,setEq:v=>eqReturn=v,setHeal:v=>healReturn=v,setAdv:v=>adv=v,
   newTick:()=>{S.bn=0}};
 }
 const beta=setup();
-assert.equal(beta.api.botFairMode(),true);
 beta.S.d={f:{es:[{hp:1}]}};
 beta.api.botTick0();
 assert.equal(beta.calls.desc,0,'Bot must not continue BETA combat');
@@ -51,12 +50,6 @@ assert.equal(beta.calls.raid,0,'BETA never automatically raids');
 beta.S.prem=0;beta.newTick();const n=beta.calls.collect;
 beta.S.forge=[{end:90000,ok:1,item:{name:'Armură'}}];beta.api.botTick0();
 assert.equal(beta.calls.collect,n,'No Premium entitlement means no assistant');
-const live=setup('live');
-assert.equal(live.api.botFairMode(),false);
-live.S.d={f:{es:[{hp:1}]}};live.api.botTick0();
-assert.equal(live.calls.desc,1,'LIVE bot combat behavior unchanged');
-live.S.d=null;live.S.bt.eq=0;live.S.bt.hl=0;live.S.bt.f=1;live.newTick();live.api.botTick0();
-assert.equal(live.calls.craft,1,'LIVE crafting bot unchanged');
 const uiStart=html.indexOf('function vBotBeta('),uiEnd=html.indexOf('function vBot()',uiStart);
 assert(uiStart>=0&&uiEnd>uiStart);
 const uiFn=new Function('S','tEsc','DEV',html.slice(uiStart,uiEnd)+';return vBotBeta;');
@@ -70,7 +63,6 @@ assert(panel.includes('Echipează automat obiectele deținute'));
 assert(panel.includes('Vindecă folosind aurul existent'));
 assert(!panel.includes('Coboară în temnițe')&&!panel.includes('Atacă sate'));
 assert(!panel.includes('Forjează iteme'),'No new-item crafting button in BETA');
-assert(html.includes("if(botFairMode())return vBotBeta(b,on,chk)"));
-assert(html.includes("if(ST_SERVER!=='beta'&&b.r&&braid())"),'LIVE original raid behavior still exists');
-assert(html.includes("if(b.d&&bdown())"),'LIVE original dungeon logic still exists');
-console.log('OK: BETA premium no automatic dungeon/craft/raid; QoL collection/equip/heal available; LIVE behavior preserved.');
+assert(html.includes(" return vBotBeta(b,on,chk);}"),'Only the comfort bot panel exists');
+for(const fn of ['bdesc','bdown','braid','bcraft'])assert(!html.includes('function '+fn+'('),'Legacy farming bot removed: '+fn);
+console.log('OK: BETA premium no automatic dungeon/craft/raid; QoL collection/equip/heal available; legacy farming bot removed.');

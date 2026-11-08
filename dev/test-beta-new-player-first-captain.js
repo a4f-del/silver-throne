@@ -46,7 +46,6 @@ assert.equal(a.calls,3);
 const resumed=make('beta',JSON.parse(JSON.stringify(S)));
 assert.equal(resumed.api.jeCurrent().id,'urme');
 assert.equal(make('beta',{journeyV:undefined}).api.jeEnabled(),false);
-assert.equal(make('live').api.jeEnabled(),false);
 assert(hero.includes('S.journeyV = 1')&&hero.includes('S.mrPrologPending = 1'));
 assert(prolog.includes('function stPrologSkip()'));
 assert(merc.includes("['Paznic', null]"));
@@ -56,4 +55,4 @@ assert(main.includes("if(!d.one||d.done)cn('l')"),
 assert(main.includes('dOneDone(d,b);return'),'Căpitanul încheie automat incursiunea');
 assert(main.includes('const DENT=2,DHEAL=2'));
 assert(1+1+1+2<=30,'Patru lupte au un cost inițial mic');
-console.log('OK: BETA primul capitan, premiu unic, următorul pas, reload, LIVE neatins.');
+console.log('OK: BETA primul capitan, premiu unic, următorul pas, reload.');

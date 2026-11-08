@@ -39,9 +39,7 @@ function vDung() {
       + `${!lock ? `<button class="p dg-enter" onclick="dToggle(${i})">Intră</button>` : ''}</div></div>`;
   };
   const shown = list.filter(([g]) => S.lvl + 10 >= g.lv);   /* ca înainte: temnițele mult peste nivel rămân ascunse */
-  if (typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta')
-    return tmnHubBeta(open, rec, card, shown);
-  return tmnEvent() + (typeof heroSoloControl==='function'?heroSoloControl():'') + `<section class="dg-sec"><h2>Temnițe</h2><div class="dg-grid">${shown.map(card).join('')}</div></section>`;
+  return tmnHubBeta(open, rec, card, shown);
 }
 /* BETA — Coborâre ca o alegere principală + două activități compacte.
    Tot conținutul vechi rămâne accesibil. Nu modifică progres/recompense. */

@@ -1,8 +1,7 @@
 /* Silver Throne · Lista de prieteni (BETA only).
    Cereri, acceptare, anulare si mesaje; fara salvare in joc si fara modificari LIVE. */
 const WFR={uid:null,items:[],requests:0,ready:false,loading:false,busy:false,last:0,error:'',timer:null};
-const wfEnabled=()=>typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&
-  typeof CONT!=='undefined'&&CONT.booted&&CONT.user&&!!CONT.user.id;
+const wfEnabled=()=>typeof CONT!=='undefined'&&CONT.booted&&CONT.user&&!!CONT.user.id;
 const wfEscape=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function wfHeader(){
  if(!wfEnabled())return '';

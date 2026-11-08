@@ -1,4 +1,4 @@
-/* BETA regression: remove legacy raids/camps, preserve shared NPC villages and LIVE.
+/* BETA regression: remove legacy raids/camps, preserve shared NPC villages.
  * Run: node dev/test-beta-retire-legacy-raids-camps.js
  * No network, SQL, account or saved game mutations.
  */
@@ -18,7 +18,6 @@ const extract=(src,begin,end)=>{
 const camps=extract(terrain,'function terCamps()','function campK(');
 const campGo=extract(terrain,'function campGo(id)','/* recompensa la căderea căpitanului');
 const raid=extract(main,'function raid(id)','function rl(d)');
-const braid=extract(main,'function braid()','function bdown(');
 const run=(src,ctx,body)=>new Function(...Object.keys(ctx),src+'\n'+body)(...Object.values(ctx));
 
 let called=0, saved={id:'old-camp',exp:Date.now()+3600000};
@@ -26,32 +25,27 @@ let state={ter:{camps:[saved],cdn:{},cslot:9},pts:50,msg:'',fs:[{hp:100}],map:{v
 let beta={S:state,TP:{camp:{slotH:3,max:4,retries:2}},
  TW:{campsForSlot:()=>{throw Error('BETA camp spawn reached');}},
  terKey:()=>'',terTaken:()=>new Set(),terInit:()=>{},go:()=>{called++;},
- cmpBeta:()=>true,Date,Math};
+ Date,Math};
 run(camps+'\n'+campGo,beta,"terCamps();campGo('old-camp')");
 assert.deepEqual(state.ter.camps,[saved],'BETA must preserve historic saved camps');
 assert.equal(called,1,'BETA camp must be blocked');
 assert.match(state.msg,/retrase/);
 
-let liveCalls=0;
-const live={...beta,S:{ter:{camps:[],cdn:{},cslot:0},map:{vs:[]},lvl:10},
- TW:{campsForSlot:()=>{liveCalls++;return []}},cmpBeta:()=>false};
-run(camps,live,'terCamps()');
-assert(liveCalls>0,'LIVE camp scheduler must still run');
 
 let raidCalls=0;
-const betaRaid={ST_SERVER:'beta',S:{msg:'',pts:20},go:()=>{raidCalls++;},
+const betaRaid={S:{msg:'',pts:20},go:()=>{raidCalls++;},
  MPV:()=>{throw Error('legacy raid map accessed')}};
 run(raid,betaRaid,'raid(1)');
 assert.equal(raidCalls,1);
 assert.match(betaRaid.S.msg,/retrase/);
-assert.equal(run(braid,{ST_SERVER:'beta',S:{pts:20}},'return braid()'),0);
-assert(terrain.includes("if (!cmpBeta()) t.camps.forEach"),'BETA camps must not draw');
-assert(terrain.includes("s.k === 'c' && !cmpBeta()"),'Saved camp selection must not display');
-assert(sidebar.includes("ST_SERVER !== 'beta') && cp.length"),'No BETA camp sidebar');
+assert(!main.includes('function braid('),'Legacy bot raids removed');
+assert(!terrain.includes("t.camps.forEach(cp =>"),'Camps must not draw');
+assert(!terrain.includes("s.k === 'c' &&"),'Saved camp selection must not display');
+assert(!sidebar.includes("Tabere: ${cp.length}"),'No camp sidebar');
 assert(guide.includes('wnPick('),'BETA tutorial must point to shared NPC');
-assert(main.includes("r:ST_SERVER==='beta'?'Jefuiește un sat NPC în Lume'"),'Daily quest remains compatible');
+assert(main.includes("r:'Jefuiește un sat NPC în Lume'"),'Daily quest remains compatible');
 assert(sharedNpc.includes('async function wnRaid(id)')&&sharedNpc.includes("'world_npc_raid'"),'Shared NPC raiding stays');
 assert(quick.includes('wnRaid(v.id)'),'Shared NPC quick action stays');
 for(const p of ['teritorii.js','ghid.js','panou.js','tinut.js','lume-quick.js'])
  new Function(read(p));
-console.log('OK: BETA legacy raid/camp disabled, saved data and LIVE safe; shared NPC villages remain.');
+console.log('OK: BETA legacy raid/camp disabled, saved data safe; shared NPC villages remain.');

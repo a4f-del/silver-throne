@@ -1,4 +1,4 @@
-/* BETA Settings uses the existing bot actions, safe account sign-out and LIVE environment switch.
+/* BETA Settings uses the existing bot actions and safe account sign-out; no server switch remains.
  * Run: node dev/test-beta-settings-bot-session.js */
 'use strict';
 const assert=require('node:assert/strict');
@@ -7,13 +7,12 @@ const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 const src=read('beta-compact-ui.js'),index=read('index.html'),account=read('cont.js'),
   server=read('servere.js'),guide=read('ghid.js');
 new Function(src);
-assert(index.includes('beta-compact-ui.js?v=2026.11.08-5'),'Settings asset is cache-busted');
-assert(index.includes('ghid.js?v=2026.11.08-4'),'Playback guide asset is cache-busted');
+assert(index.includes('beta-compact-ui.js?v=2026.11.09-1'),'Settings asset is cache-busted');
+assert(index.includes('ghid.js?v=2026.11.09-1'),'Playback guide asset is cache-busted');
 assert(guide.includes("stCompactSettingToggle(\\'fx\\')"),'Guide points to new playback control');
 assert(account.includes('async function contOut()')&&account.includes('await contPush()'),'Logout saves before signing out');
 assert(account.includes('supabaseClient.auth.signOut()'),'Logout uses existing Supabase session');
-assert(server.includes("async function stSwitchServer(next)")&&server.includes("location.assign(u.toString())"),'LIVE button uses existing environment switch');
-assert(server.includes("u.searchParams.delete('server')"),'LIVE is selected without beta query parameter');
+assert(!server.includes('stSwitchServer')&&!server.includes('ST_SERVER'),'No LIVE/BETA environment switch remains');
 assert(!src.includes("S.bt.d =")&&!src.includes("S.bt.r ="),'No competitive bot automation was added');
 
 let lastHeader='',botCalls=[],botTicks=0,fxCalls=0,available=true,firstBattle=false;
@@ -38,11 +37,11 @@ const ui=vm.runInContext('({stCompactHdr,stCompactSettingToggle,stBotPower})',ct
 const initial=ui.stCompactHdr();
 for(const label of ['Pornește BOT-ul','BOT oprit','Ridică obiectele forjate','Echipează automat',
  'Vindecă folosind aur','Jurnal și explicații BOT','Redare lovitură cu lovitură',
- 'Deconectează-te','Treci pe LIVE']) assert(initial.includes(label),'Missing Settings row '+label);
+ 'Deconectează-te']) assert(initial.includes(label),'Missing Settings row '+label);
 for(const key of ['f','eq','hl','fx']) assert(initial.includes("stCompactSettingToggle('"+key+"')"),'Option '+key);
 assert(initial.includes('onclick="stBotPower()"'),'Explicit start-stop control wired');
 assert(initial.includes("onclick=\"contOut()\""),'Logout invokes save-aware account flow');
-assert(initial.includes("onclick=\"stSwitchServer('live')\""),'LIVE uses existing switch function');
+assert(!initial.includes('stSwitchServer')&&!initial.includes('Treci pe LIVE'),'No LIVE switch in Settings');
 assert(initial.includes("onclick=\"tab('a');vil('q')\""),'Original BOT journal remains accessible');
 assert(!initial.includes("Coboară în temnițe")&&!initial.includes('Atacă sate'),'No competitive bot controls in BETA');
 ctx.S.bn=Date.now();
@@ -92,7 +91,4 @@ available=false;
 ui.stBotPower();
 assert.equal(botCalls.length,before,'Unavailable game state blocks bot start/stop');
 available=true;
-ctx.ST_SERVER='live';
-ui.stBotPower();
-assert.equal(botCalls.length,before,'LIVE never receives compact BETA BOT power actions');
-console.log('OK: real BOT power start-stop, immediate engine tick, no tick on stop, premium restriction, logout/LIVE switching.');
+console.log('OK: real BOT power start-stop, immediate engine tick, no tick on stop, premium restriction, logout.');

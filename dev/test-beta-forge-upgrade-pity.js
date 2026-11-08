@@ -59,12 +59,6 @@ beta.item.up=8;beta.item.upFails=3;beta.item.upStep=7;
 assert.equal(f.upPityFails(beta.item),0,'Old tier failures never carry over');
 beta.item.upFails=999999;beta.item.upStep=8;
 assert.equal(f.upPityFails(beta.item),25,'Corrupt counter clamped to configured maximum');
-const old=harness('live');
-old.api.upItem('i:0');
-assert.equal(old.api.upChance(old.item),10,'LIVE original upgrade odds unchanged');
-assert.equal(old.item.upFails,undefined,'No LIVE save mutation');
-assert.equal(old.S.gold,2000000,'LIVE keeps gold on failed upgrade');
-assert(!old.api.vFier().includes('Protecție BETA'));
 const legacy=harness('beta',false);
 legacy.api.upItem('i:0');
 assert.equal(legacy.api.upChance(legacy.item),10,'Older BETA heroes unchanged');
@@ -98,12 +92,10 @@ assert(beta.api.fierMatch(beta.item,'rucsac','bag'),'Item at max upgrade is find
 beta.item.up=8;
 f.FIER_FILTER.tier='zero';
 assert(!beta.api.fierMatch(beta.item,'rucsac','bag'));
-assert(!old.api.vFier().includes('Caută obiect sau personaj'),'LIVE filters hidden');
 assert(source.includes('Aurul, minereul și materialele se consumă la fiecare încercare'));
 
 // Exact expectation over Bernoulli trials, with guaranteed final attempt.
 // Expected attempts -> expected ore/material and BETA gold expenditure.
-// LIVE still charges gold only for the first success.
 function expected(base,limit){
  let survival=1,attempts=0;
  for(let i=1;i<=limit;i++){
@@ -126,4 +118,4 @@ assert(source.includes("if(ok)S.pity=0;else S.pity++"),
  'Topitorie original global crafting pity remains untouched');
 console.log('Simulare upgrade '+results.map(x=>'+'+x.tier+': '+
  x.old.toFixed(2)+' → '+x.modern.toFixed(2)+' încercări').join(' | '));
-console.log('OK: 9 upgrade tiers bounded, per-item pity, guaranteed attempts, true ore/material/gold costs, LIVE and old BETA untouched.');
+console.log('OK: 9 upgrade tiers bounded, per-item pity, guaranteed attempts, true ore/material/gold costs, old BETA untouched.');
