@@ -442,7 +442,7 @@ function enemy(){const f=S.d.f,L=[],fx0t=typeof fxSnap==='function'?fxSnap():nul
   if(spTick(e,L)){if(fx0&&typeof fxPush==='function')fxPush(fx0,L.slice(L0).join(' '),e);continue}
   if(e.st>0){e.st--;L.push(e.n+' e amețit și pierde tura.');if(fx0&&typeof fxPush==='function')fxPush(fx0,L.slice(L0).join(' '),e);continue}
   const al=S.fs.filter(x=>x.hp>0);if(!al.length)break;if(e.b&&typeof trBoss==='function'&&trBoss(e,al,L,f)){if(fx0&&typeof fxPush==='function')fxPush(fx0,L.slice(L0).join(' '),e);continue}
-  if(ST_SERVER==='beta'&&typeof trMobTurn==='function')trMobTurn(e,al,L);if(S.fs.some(x=>x.hp>0))spEnemyHit(e,S.fs.filter(x=>x.hp>0),L);if(fx0&&typeof fxPush==='function')fxPush(fx0,L.slice(L0).join(' '),e)}
+  if(ST_SERVER==='beta'&&typeof trMobTurn==='function'){trMobTurn(e,al,L);const alive=S.fs.filter(x=>x.hp>0);if(alive.length)spEnemyHit(e,alive,L);}else spEnemyHit(e,al,L);if(fx0&&typeof fxPush==='function')fxPush(fx0,L.slice(L0).join(' '),e)}
  {const fx1=typeof fxSnap==='function'?fxSnap():null,L0=L.length;if(S.fs.some(x=>x.hp>0))spRoundEnd(L);if(fx1&&typeof fxPush==='function'&&L.length>L0)fxPush(fx1,L.slice(L0).join(' '),null)}
  f.log.push(L.join(' '));
  if(!S.fs.some(x=>x.hp>0)){if(typeof bhAdd==='function'){bhPush(S.d,f);bhAdd(S.d,'lost',Math.floor(S.d.loot.gold/2))}const l=S.d.loot;S.gold+=Math.floor(l.gold/2);S.ore+=Math.floor(l.ore/2);{const h={ore:0,m:{}};for(const k in(l.m||{}))h.m[k]=Math.floor(l.m[k]/2);stash(h)}adventureClear(S.d);S.d=null;S.msg='Echipa a căzut în adânc. Ai salvat doar jumătate din pradă. Du-i la infirmerie.'}else{if(typeof trRb==='function')trRb(f,f.log);if(!f.es.some(x=>x.hp>0))win(1)}}
