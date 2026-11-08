@@ -107,6 +107,18 @@ Pentru comparație suplimentară, fără instalarea vreunei migrări:
 
 Interogarea doar pentru citire compară inițiativa alternată, daunele orientative cu `0.35×DEF` față de apărarea completă și două scenarii de abilitate Campion. Nu afișează numele sau identificatorii conturilor, nu rescrie nimic și nu confirmă că abilitatea a fost efectiv folosită. Regresie: `dev/test-beta-throne-combat-parity-gaps.js`.
 
+### Model v2, fără instalare și fără schimbarea luptelor
+
+Pentru a nu bloca progresul cu încă o migrare SQL, avem acum un al doilea diagnostic **strict read-only**, care testează toate combinațiile:
+
+- **2 inițiative:** eroul sau regele atacă primul;
+- **3 rotații:** doar lovituri normale, abilitate Campion `1.8×`, abilitate Campion `2.6×`; skill-ul este folosit la atacurile 1, 4, 7..., în conformitate cu cooldownul 2 din lupta automată;
+- **3 variații ale loviturii regelui:** `0.8×`, `1.0×`, `1.2×` din atacul său, respectând aceeași limită de 38% HP/lovitură.
+
+Rezultă **18 scenarii de audit pentru fiecare provocare**, agregate într-un singur rând pentru duelul 27 și unul pentru duelul 28.
+
+Script: [`supabase/CHECK-beta-throne-duels-27-28-scenarios-v2.sql`](https://github.com/a4f-del/silver-throne/blob/main/supabase/CHECK-beta-throne-duels-27-28-scenarios-v2.sql). Test: `node dev/test-beta-throne-duels-v2-scenarios.js` (trecut). Niciuna dintre aceste simulări nu folosește critice, sângerare, vindecare, afixe sau viața exactă la începutul luptei. **Numărul de scenarii favorabile nu reprezintă o probabilitate de victorie.** Actualele victorii și coroane rămân neschimbate.
+
 ## Test automat și ce rămâne deschis
 
 `node dev/test-beta-throne-result-claim-audit-rpc.js` — verifică static preflightul SQL, drepturile, păstrarea funcției oficiale, cele opt diagnostice și comportamentul JavaScript cu RPC simulate: noul traseu, lipsa funcției, eroare de rețea, acces refuzat și LIVE. Testul **a trecut**, dar nu execută PostgreSQL sau jocul într-un browser real.
