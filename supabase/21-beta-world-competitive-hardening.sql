@@ -29,7 +29,7 @@ ALTER TABLE public.beta_world_publish_audit ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.beta_world_result_audit ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE public.beta_world_publish_audit,
                     public.beta_world_result_audit FROM PUBLIC, anon, authenticated;
--- Retains current API and output shapes; no client-side schema change.
+-- Preserves the existing World and 1v1 Throne API shapes and saves.
 create or replace function public.world_join(p jsonb) returns jsonb language plpgsql security definer set search_path = public as $$
 declare uid uuid := auth.uid(); c record; nm text; v_derived bigint := 0; v_claimed bigint := 0;
 begin
@@ -116,15 +116,58 @@ begin
   end if;
   return jsonb_build_object('ok', true, 'win', coalesce(p_win, false));
 end $$;
+CREATE OR REPLACE FUNCTION public.throne_publish(p_name text, p_level integer, p_ghost jsonb)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare v_uid uuid := auth.uid(); u jsonb; c jsonb; v_out jsonb := '[]'::jsonb; hp numeric; atk numeric; def numeric; v_name text;
+begin
+  if v_uid is null or not public.is_beta_admin() then raise exception 'Acces BETA neautorizat'; end if;
+  perform public.throne_rollover();
+  if p_level is null or p_level < (public.throne_cfg('min_level') #>> '{}')::int then raise exception 'Nivel prea mic: minim %', public.throne_cfg('min_level') #>> '{}'; end if;
+  if p_level > 200 then raise exception 'Nivel invalid'; end if;
+  if p_ghost is null or jsonb_typeof(p_ghost -> 'units') is distinct from 'array'
+     or jsonb_array_length(p_ghost -> 'units') <> 1
+     or p_ghost ->> 'v' is distinct from '2' then
+    raise exception 'Apărare invalidă: este necesar un singur erou (versiunea 2)';
+  end if;
+  for u in select * from jsonb_array_elements(p_ghost -> 'units') loop
+    c := public.throne_cfg('cap') -> (u ->> 'c');
+    if c is null then raise exception 'Apărare invalidă'; end if;
+    begin hp := (u ->> 'hp')::numeric; atk := (u ->> 'atk')::numeric; def := (u ->> 'def')::numeric;
+    exception when others then raise exception 'Apărare invalidă'; end;
+    if hp is null or atk is null or def is null or hp <= 0 or atk < 0 or def < 0
+       or hp > 1000000 or atk > 1000000 or def > 1000000 then
+      raise exception 'Statistici nerealiste pentru fantoma Tronului (limita 1.000.000)';
+    end if;
+    v_out := v_out || jsonb_build_array(jsonb_build_object(
+      'n', left(coalesce(u ->> 'n', 'Erou'), 20), 'c', u ->> 'c',
+      'hp', greatest(1, round(hp))::int,
+      'atk', greatest(1, round(atk))::int,
+      'def', greatest(0, round(def))::int));
+  end loop;
+  v_name := coalesce(nullif(left(regexp_replace(coalesce(p_name, ''), '[<>&""]', '', 'g'), 20), ''), 'Jucător');
+  insert into public.throne_profiles (user_id, name, level, units, duel_version, updated_at)
+  values (v_uid, v_name, p_level, v_out, 2, public.throne_now())
+  on conflict (user_id) do update set name = excluded.name, level = excluded.level,
+    units = excluded.units, duel_version = excluded.duel_version, updated_at = excluded.updated_at;
+  return jsonb_build_object('ok', true, 'units', v_out);
+end $function$;
+
 REVOKE ALL ON FUNCTION public.world_join(jsonb),
  public.world_raid_finish(bigint,boolean,integer,integer)
  FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.world_join(jsonb),
  public.world_raid_finish(bigint,boolean,integer,integer) TO authenticated;
+REVOKE ALL ON FUNCTION public.throne_publish(text,integer,jsonb) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.throne_publish(text,integer,jsonb) TO authenticated;
 COMMIT;
 -- Read-only checks: both audit tables and the two RPCs must exist.
 SELECT to_regclass('public.beta_world_publish_audit') IS NOT NULL AS publish_audit_exists,
        to_regclass('public.beta_world_result_audit') IS NOT NULL AS result_audit_exists,
        to_regprocedure('public.world_join(jsonb)') IS NOT NULL AS world_join_exists,
        to_regprocedure('public.world_raid_finish(bigint,boolean,integer,integer)')
-         IS NOT NULL AS raid_finish_exists;
+         IS NOT NULL AS raid_finish_exists,
+       to_regprocedure('public.throne_publish(text,integer,jsonb)') IS NOT NULL AS throne_publish_exists;
