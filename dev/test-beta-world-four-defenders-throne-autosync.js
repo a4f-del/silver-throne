@@ -11,7 +11,7 @@ for(const marker of [
  'SQL28 (limitele per clasa)',
  'CREATE OR REPLACE FUNCTION public.world_units_ok(u jsonb)',
  'jsonb_array_length(u)>4',
- 'CASE WHEN NEW.level>=30 THEN 4 ELSE 3 END',
+ 'IF NEW.level >= 30 THEN',
  'BEFORE UPDATE OF units, level ON public.world_players',
  'beta_competitive_world_units_limits',
  'beta_world_shadow_simulation_created',
@@ -23,6 +23,12 @@ for(const marker of [
 ])assert(sql.includes(marker),'SQL30 missing: '+marker);
 for(const label of ['prereq','units','size'])assert.equal(
  (sql.match(new RegExp('\\$'+label+'\\$','g'))||[]).length,2);
+assert(sql.includes('v_max_units integer := 3;') && sql.includes('v_max_units := 4;'),
+ 'SQL30 must precompute the level-specific squad size');
+assert(sql.includes('jsonb_array_length(NEW.units) > v_max_units THEN'),
+ 'Do not use CASE ... END THEN in the PL/pgSQL trigger IF condition');
+assert(!sql.includes('CASE WHEN NEW.level>=30 THEN 4 ELSE 3 END THEN'),
+ 'Regression: avoid SQLSTATE 42601 at trigger IF');
 assert(!sql.includes('world_units_ok(p_units jsonb)'), 'Original PostgreSQL argument name u must be preserved');
 assert(!sql.includes('DROP FUNCTION public.world_units_ok'), 'Do not drop functions with dependent policies/RPCs');
 assert.equal((sql.match(/^CREATE OR REPLACE FUNCTION\b/gm)||[]).length,2);
