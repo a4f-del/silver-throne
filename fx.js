@@ -54,7 +54,12 @@ function fxAutoRun() {
   S.fl = lg.slice(-6);
   fxPlay(FX.q.slice(q0), go, first, q0);
 }
-const fxWantPlay = first => first || !S.fxInstant;
+/* BETA: preferința de accesibilitate are prioritate chiar față de prima luptă. */
+const fxWantPlay = first => {
+ if(typeof ST_SERVER!=='undefined'&&ST_SERVER==='beta'&&
+    typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches)return false;
+ return first||!S.fxInstant;
+};
 
 /* ------------------------------------------------------------------ FEREASTRA DE REDARE */
 /* Portrete mari, unul în spatele celuilalt (primul din față); bara de viață stă sub fiecare portret.
@@ -76,6 +81,7 @@ function fxPlay(frames, cb, first, offset) {
   if (!frames || !frames.length || !fxWantPlay(first) || !FX.cast) { cb(); return; }
   const cast = FX.cast, hp = fxStartHp(cast, offset || 0);
   FX.playing = true;
+  const previousFocus=typeof document!=='undefined'?document.activeElement:null;
   const m = document.createElement('div'); m.id = 'fx-m'; m.setAttribute('role', 'status'); m.setAttribute('aria-live', 'polite');
   /* mărimea portretelor: cât încape pe lățime (ambele grămezi + „VS”), cu plafon pe înălțime */
   const stackW = n => 1 + Math.max(0, n - 1) * (1 - FX_OV), avail = Math.min(innerWidth, 940) - 28 - 56 - 56;
@@ -86,11 +92,21 @@ function fxPlay(frames, cb, first, offset) {
     return `<div class="fx-r" data-s="${side}" data-i="${i}" style="width:${w}px;z-index:${20 - i}"><span class="fx-nm">${tEsc(x.n)}</span><span class="fx-av">${x.img ? `<img src="${x.img}" alt="">` : av({ n: x.n, c: x.c, ic: x.ic, h: x.h }, FZ)}</span><i class="fx-hp"><i style="width:${Math.round(hp[side][i] / x.mh * 100)}%"></i></i><small class="fx-t">${hp[side][i]}/${x.mh}</small></div>`;
   }).join('')}</div>`;
   const cardMode=!!cast.adventure&&typeof acFxMarkup==='function';
-  if(cardMode)m.classList.add('ac-fx-mode');
+  if(cardMode){
+    m.classList.add('ac-fx-mode');
+    m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');
+    m.setAttribute('aria-label','Redarea luptei');m.removeAttribute('aria-live');
+  }
   m.innerHTML=cardMode?acFxMarkup(cast,hp):`<div class="fx-c"><div class="fx-row">${stack('fs', cast.fs)}<div class="fx-vs">VS</div>${stack('es', cast.es)}</div><div class="fx-log" id="fx-log"></div><button class="fx-skip" onclick="fxSkip()">Sari peste ›</button></div>`;
   document.body.appendChild(m);
-  let n = 0, frontT = null;
-  const finish = () => { FX.playing = false; clearTimeout(frontT); m.remove(); window.__fxSkip = null; cb(); };
+  if(cardMode){const skip=m.querySelector('.fx-skip');if(skip&&typeof skip.focus==='function')skip.focus();}
+  let n = 0, frontT = null, ending=false, finished=false;
+  const finish = () => {
+    if(finished)return;finished=true;FX.playing = false;
+    clearTimeout(frontT);clearTimeout(window.__fxTimer);m.remove();window.__fxSkip = null;
+    if(cardMode&&previousFocus&&previousFocus.isConnected&&typeof previousFocus.focus==='function')previousFocus.focus();
+    cb();
+  };
   const front = (list, ms) => {   /* aduce în față luptătorii din listă [[side, i], ...] */
     m.querySelectorAll('.fx-r.front').forEach(r => r.classList.remove('front'));
     list.forEach(([sd, i]) => { const r = m.querySelector(`.fx-r[data-s="${sd}"][data-i="${i}"]`); if (r) r.classList.add('front'); });
@@ -116,12 +132,21 @@ function fxPlay(frames, cb, first, offset) {
     if (ability) { const r = act.length ? m.querySelector(`.fx-r[data-s="${act[0][0]}"][data-i="${act[0][1]}"] .fx-av`) : null; if (r) { r.classList.remove('flash'); void r.offsetWidth; r.classList.add('flash'); } }
   };
   const step1 = () => {
+    if(ending||finished)return;
     if (n >= frames.length) return finish();
     showFrame(frames[n++]);
     window.__fxTimer = setTimeout(step1, FX.delay);
   };
-  window.__fxSkip = () => { clearTimeout(window.__fxTimer); while (n < frames.length) showFrame(frames[n++]); setTimeout(finish, 260); };
-  setTimeout(step1, 120);
+  window.__fxSkip = () => {
+    if(ending||finished)return;ending=true;
+    clearTimeout(window.__fxTimer);
+    while(n<frames.length)showFrame(frames[n++]);
+    setTimeout(finish,260);
+  };
+  if(cardMode&&typeof m.addEventListener==='function')m.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){e.preventDefault();window.__fxSkip?.();}
+  });
+  setTimeout(step1,120);
 }
 function fxSkip() { if (window.__fxSkip) window.__fxSkip(); }
 function fxToggleInstant() { S.fxInstant = !S.fxInstant; go(); }
