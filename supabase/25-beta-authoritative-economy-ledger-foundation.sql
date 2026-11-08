@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS public.beta_economy_ledger (
   event_key text NOT NULL CHECK (length(event_key) BETWEEN 3 AND 120),
   source text NOT NULL CHECK (source IN (
     'migration','admin_adjustment','dungeon_verified','pvp_verified',
-    'forge_verified','market_verified','trone_verified'
+    'forge_verified','market_verified','throne_verified'
   )),
   gold_delta bigint NOT NULL DEFAULT 0,
   ore_delta bigint NOT NULL DEFAULT 0,
@@ -87,7 +87,7 @@ BEGIN
      OR p_source IS NULL
      OR p_source NOT IN (
        'migration','admin_adjustment','dungeon_verified',
-       'pvp_verified','forge_verified','market_verified','trone_verified'
+       'pvp_verified','forge_verified','market_verified','throne_verified'
      ) THEN
     RAISE EXCEPTION 'Eveniment economic invalid.';
   END IF;
@@ -114,9 +114,11 @@ BEGIN
        OR v_old.xp_delta<>v_dx THEN
       RAISE EXCEPTION 'Cheie economica refolosita cu alte valori.';
     END IF;
+    -- La retry returnam soldul CURENT, nu soldul istoric dupa acel eveniment.
     RETURN jsonb_build_object(
-      'ok',true,'already',true,'revision',v_old.revision,
-      'gold',v_old.gold_after,'ore',v_old.ore_after,'xp',v_old.xp_after);
+      'ok',true,'already',true,'revision',v_account.revision,
+      'event_revision',v_old.revision,
+      'gold',v_account.gold,'ore',v_account.ore,'xp',v_account.xp);
   END IF;
 
   -- Numeric pentru calcul sigur inainte de cast la bigint si check-urile SQL.
