@@ -80,7 +80,7 @@ const party=ui.indexOf('class="ac-party"');
 const help=ui.indexOf('class="ac-help-details"');
 assert(side>=0&&cta>side&&party>cta&&help>party,
  'Within right combat pane: fight CTA, full team, optional hints in this order');
-assert.equal((ui.match(/class="ac-ally\b/g)||[]).length,4,'All 4 active fighters are rendered');
+assert.equal((ui.match(/class="ac-ally(?: ac-fallen)?"/g)||[]).length,4,'All 4 active fighters are rendered');
 assert(ui.includes('Echipament recomandat:')&&ui.includes('100%'),'Tips and odds retained');
 assert(ui.includes('onclick="startD(0)"'),'Original fight action unchanged');
 for(const k of [
