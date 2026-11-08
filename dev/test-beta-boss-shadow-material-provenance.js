@@ -39,7 +39,7 @@ assert(!/CREATE\s+TRIGGER\b/i.test(sql),'No trigger may interrupt boss attacks')
 assert(!/\bGRANT\s+EXECUTE\b/i.test(sql),'No public RPC');
 assert(sql34.includes('CREATE TRIGGER beta_economy_guild_boss_hit_created'),'Source is SQL34');
 assert(sql37.includes('CREATE TABLE IF NOT EXISTS public.beta_forge_shadow_materials'),'Shadow only');
-assert(doc.includes('0 granturi')&&doc.includes('nu este necesar pentru instalarea SQL38'),'Manual reconcile not automatic');
+assert(doc.includes('0 granturi')&&doc.toLowerCase().replaceAll('**','').includes('nu este necesar pentru instalarea sql38'),'Manual reconcile not automatic');
 assert(roadmap.includes('SQL38'),'Roadmap documents status');
 
 // Reference-only model: ledger + server boss row -> one material; same id retry does nothing.
