@@ -140,6 +140,25 @@ Copierea este **inițiată explicit de jucător** și are fallback manual dacă 
 
 Pentru comparația în următoarele lupte trebuie urmărite în special: inițiativa, lovituri critice, sângerare și execuție, avantajele legendare și starea inițială a vieții. Înainte de activarea motorului autoritativ, aceste mecanici și echipamentul trebuie verificate independent pe server.
 
+## Jurnalul real din 8 noiembrie 2026: provocarea **27**, nu 28
+
+Jurnalul trimis de jucător a fost salvat local la **18:54:13 UTC**, la ~3 secunde după pornirea provocării **27** la **18:54:10 UTC**. Provocarea 28 a început la 19:11:47 UTC, deci jurnalul de la 18:54 **nu o poate explica** pe aceasta.
+
+- Regele OwN începe și îl lovește pe erou de trei ori: **892 + 745 + 931 = 2.568 daune raportate**.
+- Eroul răspunde cu **trei lovituri critice**, fiecare de **886 daune**. Totalul este **2.658**, suficient pentru a elimina regele cu ~2.330 HP din snapshot. Valoarea de **886** corespunde exact plafonului de 38% din viața regelui în auditul pentru provocarea 27.
+- În jurnal sunt prezente sângerarea și mesajele Campionului „Echipa prinde curaj (+15% atac)” și „Abilitățile echipei sunt gata din nou!”, dar lipsesc unele modificări pasive de viață.
+- Cele 2.568 daune primite sunt mai mari decât viața maximă de aproximativ 2.463 dedusă din snapshotul SQL31 al provocatorului (plafonul 936). **Acest lucru nu demonstrează o eroare sau fraudă**: fie viața efectivă la luptă era diferită de valoarea publicată, fie între lovituri s-a recuperat viață. Motorul permite vindecare pasivă prin efectele legendare și nu o afișa complet în jurnal.
+- De exemplu, `Lama Zorilor` poate vindeca un Campion cu 15% din daunele date; o lovitură de 886 poate restitui **133 HP** dacă există suficientă viață lipsă. `Amuleta Mareelor` poate restitui 3% viață la finalul turei. **Nu știm dacă acele obiecte erau echipate** în duelul 27.
+- Concluzie: victoria locală **27** este compatibilă cu motorul real (critice plafonate plus posibile pasive), deși simulatorul SQL32 a calculat `holder`. Pentru provocarea **28** încă lipsește jurnalul potrivit; modelul cu 18 scenarii a indicat `holder` în toate scenariile, dar nu include toate efectele reale.
+
+### Instrumentare BETA fără SQL pentru duelurile viitoare
+
+- La începutul duelului, jurnalul local consemnează **HP erou / HP maxim** și **HP rege / HP maxim**. Permite observarea diferențelor față de snapshotul publicat.
+- După victorie, jurnalul arată **HP final**.
+- În duelurile Tron BETA, pierderile de viață prin **sângerare** și vindecarea efectivă prin **furt de viață / regenerare legendară** sunt acum vizibile. Valorile afișate reflectă modificările deja aplicate de motor, fără să influențeze lupta.
+- Modificările sunt condiționate de `ST_SERVER==='beta'` și `d.tron && d.ghost`; pentru LIVE și celelalte lupte mesajele existente rămân la fel. Nu se transmit automat date către SQL și nu se schimbă rezultatele sau recompensele.
+- Test dedicat trecut: `dev/test-beta-throne-passive-healing-journal.js`. Testele sunt JavaScript cu date simulate; QA vizual într-un duel nou rămâne de efectuat.
+
 ## Test automat și ce rămâne deschis
 
 `node dev/test-beta-throne-result-claim-audit-rpc.js` — verifică static preflightul SQL, drepturile, păstrarea funcției oficiale, cele opt diagnostice și comportamentul JavaScript cu RPC simulate: noul traseu, lipsa funcției, eroare de rețea, acces refuzat și LIVE. Testul **a trecut**, dar nu execută PostgreSQL sau jocul într-un browser real.
