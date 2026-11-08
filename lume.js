@@ -255,7 +255,7 @@ function lwMatchAdvice(p,can){
    :ratio>1.25?'Pregătește echipamentul și echipa înainte să consumi un atac.'
    :ratio<0.8?'Este o potrivire favorabilă după putere, nu o victorie garantată.'
    :'Puterea este apropiată: compoziția și obiectele pot decide lupta.';
- const rule=can&&!can.ok?'Atacul este indisponibil acum: '+String(can.why||'').replace(/<[^>]*>/g,'')+'.':'Atacul consumă o încercare din bara Lumii; apărătorul nu pierde nimic.';
+ const rule=can&&!can.ok?'Atacul este indisponibil acum: '+tEsc(String(can.why||'').replace(/<[^>]*>/g,''))+'.':'Atacul consumă o încercare din bara Lumii; apărătorul nu pierde nimic.';
  return '<div class="lw-match" role="note"><b>⚔ Potrivire orientativă: '+tier+'</b>'+
   '<small>Fantoma Lumii: maxim '+(TT.CFG&&TT.CFG.maxUnits||3)+' luptători · puterea ta '+lwNum(myP)+
   (known?' · puterea adversarului '+lwNum(enemy):' · puterea adversarului indisponibilă')+'.</small>'+
