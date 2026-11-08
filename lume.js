@@ -298,9 +298,17 @@ function lwSelPanel() {
 }
 function lwLog() {
   const l = (LUME.st && LUME.st.log) || []; if (!l.length) return '';
-  return `<section><h2>Jurnalul atacurilor</h2>${l.map(x => {
+  const beta = typeof ST_SERVER !== 'undefined' && ST_SERVER === 'beta';
+  // Jurnalul competitiv si portofelul din salvare nu sunt inca aceeasi sursa.
+  const note = beta
+    ? '<p class="mute" style="font-size:13px;margin:6px 0 10px">Sumele din jurnalul BETA sunt evidența raidurilor pe server, nu plata din portofel. Până la migrarea economiei, prada din joc poate diferi.</p>'
+    : '';
+  return `<section><h2>Jurnalul atacurilor</h2>${note}${l.map(x => {
     const o = `<button class="lw-lnk" onclick="lwProfile('${x.other_id}')">${tEsc(x.other)}</button>`;
-    const t = x.att ? (x.win ? `Ai atacat satul lui ${o} și ai câștigat: +${lwNum(x.gold)} aur, +${lwNum(x.xp)} exp.` : `Ai atacat satul lui ${o} și ai pierdut.`)
+    const victory = beta
+      ? `Ai atacat satul lui ${o} și ai câștigat. Jurnal: ${lwNum(x.gold)} aur, ${lwNum(x.xp)} exp.`
+      : `Ai atacat satul lui ${o} și ai câștigat: +${lwNum(x.gold)} aur, +${lwNum(x.xp)} exp.`;
+    const t = x.att ? (x.win ? victory : `Ai atacat satul lui ${o} și ai pierdut.`)
       : (x.win ? `${o} ți-a atacat satul și a câștigat. Nu ai pierdut nimic.` : `${o} ți-a atacat satul și a fost respins.`);
     return `<div class="row"><span>${x.att ? '⚔' : '🛡'} ${t}</span><span class="mute">${lwAgo(x.t)}</span></div>`;
   }).join('')}</section>`;
