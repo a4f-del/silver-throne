@@ -93,7 +93,8 @@ BEGIN
  FOR v_round IN 1..40 LOOP
    v_rounds:=v_round;
    FOR v_phase IN 1..2 LOOP
-     v_attacker_turn := (v_phase=1)=v_attacker_first;
+     v_attacker_turn := (v_phase=1 AND v_attacker_first)
+                      OR (v_phase=2 AND NOT v_attacker_first);
      IF v_attacker_turn THEN
        FOR v_i IN 1..coalesce(array_length(a_hp,1),0) LOOP
          IF a_hp[v_i]<=0 THEN CONTINUE; END IF;
