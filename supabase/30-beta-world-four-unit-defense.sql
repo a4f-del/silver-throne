@@ -48,20 +48,23 @@ BEGIN
 END
 $prereq$;
 
+-- Atentie: world_units_ok(jsonb) a fost creat cu numele parametrului "u".
+-- CREATE OR REPLACE nu poate redenumi argumentul existent (SQLSTATE 42P13).
+-- Pastram numele "u"; NU folosim DROP FUNCTION, pentru ca are dependinte.
 -- Actualizam DOAR validatorul de echipa comun; Tronul BETA cere explicit
 -- in continuare exact UN erou in throne_publish si triggerul SQL28.
-CREATE OR REPLACE FUNCTION public.world_units_ok(p_units jsonb)
+CREATE OR REPLACE FUNCTION public.world_units_ok(u jsonb)
 RETURNS boolean
 LANGUAGE plpgsql IMMUTABLE SET search_path=''
 AS $units$
 DECLARE
  v_unit jsonb;
 BEGIN
- IF p_units IS NULL OR jsonb_typeof(p_units) IS DISTINCT FROM 'array'
-   OR jsonb_array_length(p_units)<1 OR jsonb_array_length(p_units)>4 THEN
+ IF u IS NULL OR jsonb_typeof(u) IS DISTINCT FROM 'array'
+   OR jsonb_array_length(u)<1 OR jsonb_array_length(u)>4 THEN
     RETURN false;
  END IF;
- FOR v_unit IN SELECT value FROM jsonb_array_elements(p_units) LOOP
+ FOR v_unit IN SELECT value FROM jsonb_array_elements(u) LOOP
    IF jsonb_typeof(v_unit) IS DISTINCT FROM 'object'
       OR coalesce(v_unit->>'c','') NOT IN
         ('Campion','Arcaș','Paznic','Războinic','Mag','Vraci','Gardian')
