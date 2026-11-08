@@ -78,6 +78,9 @@ function guildOpen(){
  el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');
  el.setAttribute('aria-label','Bresle');
  el.innerHTML='<div class="guild-dialog"><div class="guild-top"><h2>⚔ Bresle</h2><button onclick="guildClose()" aria-label="Închide">✕</button></div><div id="guild-view"></div></div>';
+ // Inchide doar la click direct pe fundal; interactiunile din dialog raman intacte.
+ el.addEventListener('click',e=>{if(e.target===el)guildClose();});
+ el.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();guildClose();}});
  document.body.appendChild(el);el.querySelector('button')?.focus();
  guildPaint();guildSync(true);
 }
