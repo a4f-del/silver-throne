@@ -45,7 +45,7 @@ function trMobInfo(i){
  const g=DG[i],d=g&&trDef(g.n);return d&&TR_MOB[d.a]||'';
 }
 function trMobTurn(e,al,L){
- if(ST_SERVER!=='beta'||!S.d||!S.d.one||S.d.tw||S.d.raid!=null||e.b||!TR_MOB[e.tm])return;
+ if(ST_SERVER!=='beta'||!S.d||S.d.tw||S.d.raid!=null||e.b||!TR_MOB[e.tm])return;
  e.tmc=(e.tmc||0)+1;
  switch(e.tm){
   case 'call':if(e.tmc===1){e.atk=Math.max(1,Math.round(e.atk*1.08));L.push(e.n+' se mobilizează (+8% atac).')}break;
@@ -110,12 +110,12 @@ function trStart(es, d, b) {
   if (d && d.tw && typeof twMob === 'function') { if (b) { const e = es[0]; if (e) { e.ba = twAb(d.room); e.tc = 0; if (e.ba === 'shield') e.sh = 1; if (trCtr(e.ba)) { e.ctr = 1; e.atk = Math.round(e.atk * 0.85); } } } else es.forEach(e => { e.n = twMob(d.room); }); return; }   /* Turnul */
   if (!d || d.raid != null || d.ghost) return; const g = DG[d.di || 0], D = g && trDef(g.n); if (!D) return;
   if (b) { const e = es[0]; if (e) { e.ba = D.a; e.tc = 0; if (D.a === 'shield') e.sh = 1; if (trCtr(D.a)) { e.ctr = 1; e.atk = Math.round(e.atk * 0.85); } } }   /* slăbiciunea căpitanului în fața clasei potrivite */
-  else { const nm = D.m[Math.min(d.room, D.m.length - 1)]; es.forEach(e => { e.n = nm; e.hp = e.mh = Math.max(1, Math.round(e.mh * 0.8)); e.atk = Math.round(e.atk * 0.8); if(ST_SERVER==='beta'&&d.one)e.tm=D.a; }); }   /* identitate tactică doar pe monștrii din Temnițe BETA */
+  else { const nm = D.m[Math.min(d.room, D.m.length - 1)]; es.forEach(e => { e.n = nm; e.hp = e.mh = Math.max(1, Math.round(e.mh * 0.8)); e.atk = Math.round(e.atk * 0.8); if(ST_SERVER==='beta')e.tm=D.a; }); }   /* identitate tactică doar pe monștrii din Temnițe BETA */
 }
 /* daunele primite de căpitan: scut, invulnerabilitate */
 function trDmg(e, dm, cr, L, a) {
-  if(ST_SERVER==='beta'&&S.d&&S.d.one&&!e.b&&e.tm==='shield'&&!e.tmShieldUsed){e.tmShieldUsed=1;L.push('Armura lui '+e.n+' oprește prima lovitură.');return Math.max(1,Math.round(dm*.75));}
-  if(ST_SERVER==='beta'&&S.d&&S.d.one&&!e.b&&e.tm==='invuln'&&e.tmBarrier){e.tmBarrier=0;L.push('Umbra atenuează lovitura!');return Math.max(1,Math.round(dm*.7));}
+  if(ST_SERVER==='beta'&&S.d&&!S.d.tw&&S.d.raid==null&&!e.b&&e.tm==='shield'&&!e.tmShieldUsed){e.tmShieldUsed=1;L.push('Armura lui '+e.n+' oprește prima lovitură.');return Math.max(1,Math.round(dm*.75));}
+  if(ST_SERVER==='beta'&&S.d&&!S.d.tw&&S.d.raid==null&&!e.b&&e.tm==='invuln'&&e.tmBarrier){e.tmBarrier=0;L.push('Umbra atenuează lovitura!');return Math.max(1,Math.round(dm*.7));}
   if (e.iv && !(a && a.c === 'Mag' && e.ba === 'invuln')) { L.push(`${e.n} nu poate fi rănit acum.`); return 0; }
   if (e.sh) { if (cr || (a && a.c === 'Arcaș')) { e.sh = 0; L.push(`Scutul lui ${e.n} se sparge!`); } else return Math.max(1, Math.round(dm * 0.5)); }
   return e.ctr ? Math.round(dm * 1.2) : dm;
@@ -140,7 +140,7 @@ function trBoss(e, al, L, f) {
 /* otrava și arsura pe echipă, la începutul rândului inamicilor */
 function trTeamTick(f, L) { for (const x of S.fs) if (x.hp > 0 && x.ps > 0) { x.hp -= x.psd || 1; x.ps--; L.push(`${x.n} suferă (-${x.psd || 1}).`); if (x.hp <= 0) L.push(x.n + ' cade.'); } }
 /* renașterea Tronului Cenușiu */
-function trRb(f, log) { for (const e of f.es) { if(ST_SERVER==='beta'&&S.d&&S.d.one&&!e.b&&e.tm==='rebirth'&&e.hp<=0&&!e.rb){e.rb=1;e.hp=Math.max(1,Math.round(e.mh*.12));log.push(e.n+' se ridică din cenușă cu puțină viață!');} if (e.ba === 'rebirth' && e.hp <= 0 && !e.rb) { e.rb = 1; e.hp = Math.round(e.mh / (trCtr('rebirth') ? 6 : 3)); log.push(`${e.n} se ridică din cenușă!`); } } }
+function trRb(f, log) { for (const e of f.es) { if(ST_SERVER==='beta'&&S.d&&!S.d.tw&&S.d.raid==null&&!e.b&&e.tm==='rebirth'&&e.hp<=0&&!e.rb){e.rb=1;e.hp=Math.max(1,Math.round(e.mh*.12));log.push(e.n+' se ridică din cenușă cu puțină viață!');} if (e.ba === 'rebirth' && e.hp <= 0 && !e.rb) { e.rb = 1; e.hp = Math.round(e.mh / (trCtr('rebirth') ? 6 : 3)); log.push(`${e.n} se ridică din cenușă!`); } } }
 /* după căpitan: dificultatea următoare se deblochează */
 function trWin(d) {
   if (!d || d.raid != null || d.ev || d.ghost) return; const g = DG[d.di || 0]; if (!g || g.lv < TR_T.lv) return;
