@@ -24,7 +24,7 @@ function stTronSidebarState() {
 }
 function stCompactNav() {
   const throne = stTronSidebarState();
-  return TEMA_NAV.filter(([k]) => k !== 'e').map(([k, name, icon]) => {
+  return TEMA_NAV.map(([k, name, icon]) => {
     const status = k === 'r' ? throne : null;
     const statusClass = status ? ' st-tron-' + status.kind : '';
     const label = status
