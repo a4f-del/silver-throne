@@ -1,6 +1,6 @@
 # Silver Throne BETA — Pasul 33 / SQL31: audit independent pentru duelurile Tronului
 
-**Status:** migrarea este pregătită în GitHub, **neinstalată** până când o rulezi în Supabase **Silver-Throne-Test**. Nu se rulează în LIVE. Nu schimbă verdictul duelului, punctele, apărarea, săptămâna Tronului sau recompensele.
+**Status:** SQL31 **instalat în Supabase Silver-Throne-Test**, confirmat de operator cu **8/8 verificări `true`**. QA cu provocări noi și capturi reale încă necesar. Nu se rulează în LIVE. Nu schimbă verdictul duelului, punctele, apărarea, săptămâna Tronului sau recompensele.
 
 ## De ce mai avem nevoie de pasul 33?
 
