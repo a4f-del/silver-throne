@@ -81,7 +81,7 @@ function stBotPower() {
 function stBotPowerButton(botOn, disabled, premium) {
   const title = botOn ? '■ Oprește BOT-ul' : '▶ Pornește BOT-ul';
   const state = botOn ? '🟢 BOT activ' : '⚪ BOT oprit';
-  const info = !premium ? 'Ai nevoie de Premium pentru a porni Asistentul.' :
+  const info = !premium ? 'Necesită Premium pentru a porni Asistentul.' :
     botOn ? 'Execută automat acțiunile activate, când sunt disponibile și pagina este deschisă.' :
       'Apasă Pornire pentru a executa automat acțiunile selectate.';
   return '<div class="st-bot-power-box"><div class="st-bot-power-state" role="status">' +
