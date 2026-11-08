@@ -16,8 +16,8 @@ for(const marker of [
  'ALTER TABLE public.beta_world_publish_audit ENABLE ROW LEVEL SECURITY',
  'ALTER TABLE public.beta_world_result_audit ENABLE ROW LEVEL SECURITY',
  'REVOKE ALL ON TABLE public.beta_world_publish_audit',
- 'CREATE OR REPLACE FUNCTION public.world_join(p jsonb)',
- 'CREATE OR REPLACE FUNCTION public.world_raid_finish(p_id bigint, p_win boolean, p_gold int, p_xp int)',
+ 'create or replace function public.world_join(p jsonb)',
+ 'create or replace function public.world_raid_finish(p_id bigint, p_win boolean, p_gold int, p_xp int)',
  'CREATE OR REPLACE FUNCTION public.throne_publish(',
  'public.is_beta_admin()',
  'if not world_units_ok(p->\'units\')',
@@ -39,7 +39,7 @@ for(const marker of [
  'REVOKE ALL ON FUNCTION public.throne_publish(text,integer,jsonb)',
  'GRANT EXECUTE ON FUNCTION public.throne_publish(text,integer,jsonb) TO authenticated'
 ])assert(sql.includes(marker),'Missing security guard: '+marker);
-assert.equal((sql.match(/CREATE OR REPLACE FUNCTION/g)||[]).length,3,
+assert.equal((sql.match(/create or replace function/gi)||[]).length,3,
  'Only World publish/finish and Throne publish may be replaced');
 assert.equal((sql.match(/\$\$/g)||[]).length,4,'Two World PL/pgSQL bodies complete');
 assert.equal((sql.match(/\$function\$/g)||[]).length,2,'Throne body complete');
