@@ -48,7 +48,6 @@ assert(js.includes("tronIsBetaDuel() && TRON.auditFinishRpc !== false"),'BETA on
 assert(js.includes("tronRpc('beta_throne_challenge_finish_audited', args)"),'Wrapper attempted');
 assert(js.includes("tronRpc('throne_challenge_finish', args)"),'Legacy fallback preserved');
 assert(js.includes('if (r.error && tronAuditFinishRpcMissing(r.error))'),'Fallback only for missing RPC');
-assert(!js.includes('TRON.auditFinishRpc = false;\\n        r = await tronRpc(\\'beta_'), 'No wrapper recursion');
 function harness(beta, replies) {
  const S={tron:{cur:{id:5,win:true}},tab:'r',d:null,msg:''};
  const TRON={rep:false,repErr:'',auditFinishRpc:null};
@@ -75,15 +74,17 @@ function harness(beta, replies) {
  assert.match(x.S.msg,/Tronul de Argint/);
  assert.equal(x.TRON.rep,false);
  
- x=harness(true,[{error:'PGRST202: Could not find the function public.beta_throne_challenge_finish_audited(p_id,p_win) in schema cache'},{data:{crowned:false,reason:'Protectie'}}]);
+ x=harness(true,[{error:'PGRST202: Could not find the function public.beta_throne_challenge_finish_audited(p_id,p_win) in schema cache'},{data:{crowned:false,reason:'Protectie'}},{data:{crowned:false,reason:'Pauză'}}]);
  await x.fn.tronReport({id:5,win:true});
  assert.deepEqual(x.calls.map(v=>v[0]),['beta_throne_challenge_finish_audited','throne_challenge_finish']);
  assert.equal(x.TRON.auditFinishRpc,false);
  assert.equal(x.S.tron.cur,null,'Old RPC still finishes the BETA fight');
  assert.equal(x.saved,1);
+ x.S.tron.cur={id:6,win:false};
  await x.fn.tronReport({id:6,win:false});
- // Runtime flag keeps subsequent report attempts on old RPC.
- // Since this harness has no queued third RPC, a new attempt would error.
+ assert.deepEqual(x.calls.map(v=>v[0]),[
+   'beta_throne_challenge_finish_audited','throne_challenge_finish','throne_challenge_finish'
+ ],'After a missing RPC use only the legacy finish for the rest of this page session');
 })().then(async()=>{
  let x=harness(true,[{error:'Connection reset after sending request'}]);
  await x.fn.tronReport({id:5,win:true});
