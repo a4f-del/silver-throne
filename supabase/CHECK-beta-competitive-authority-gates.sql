@@ -13,10 +13,10 @@ WITH evidence(control, exists_on_server, detail) AS (
     ('raid_energy_ledger_sql26',
       EXISTS (
         SELECT 1 FROM pg_trigger
-         WHERE tgname='beta_ledger_world_raid_energy_spend'
+         WHERE tgname='beta_economy_world_raid_started'
            AND NOT tgisinternal AND tgenabled<>'D'
       ),
-      'Eveniment consum energie: verificati in SQL26 numele triggerului si tranzactia.'),
+      'Trigger SQL26: consumul de energie incepe pe server, dar nu dovedeste victoria.'),
     ('world_simulator_sql27',
       to_regclass('public.beta_world_combat_simulations') IS NOT NULL,
       'Simulator orientativ, fara paritate sau verdict oficial.'),
