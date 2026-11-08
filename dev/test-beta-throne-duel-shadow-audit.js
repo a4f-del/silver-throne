@@ -54,7 +54,7 @@ assert(!sql.includes('reported_win=v_est'),'Estimate must never become an offici
 assert(baseline.includes('if exists (select 1 from public.throne_challenges where user_id = v_uid and not finished'),'Challenge schema has finished boolean');
 assert(baseline.includes('holder_at_start'),'Start stores a holder snapshot reference');
 assert(guards.includes("CREATE TRIGGER beta_competitive_throne_units_limits"),'SQL28 bounds remain mandatory');
-assert(tron.includes("tronRpc('throne_challenge_finish', { p_id: cur.id, p_win: !!cur.win })"),'Client currently reports result and therefore audit is needed');
+assert(tron.includes('const args = { p_id: cur.id, p_win: !!cur.win }') && tron.includes("tronRpc('throne_challenge_finish', args)") && tron.includes("tronRpc('beta_throne_challenge_finish_audited', args)"),'Client reports result through SQL33 audit wrapper with legacy fallback; passive SQL31 audit remains relevant');
 assert(index.includes('tron.js?v='),'Tron JS still loaded');
 
 const resultChecks=[
