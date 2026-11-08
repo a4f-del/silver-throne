@@ -23,6 +23,7 @@ const ctx = {
 };
 vm.createContext(ctx);
 vm.runInContext(js,ctx,{filename:'beta-compact-ui.js'});
+Object.assign(ctx,vm.runInContext('({stCompactActive,stCompactNav,stCompactHdr,stCompactEvent})',ctx));
 assert(ctx.stCompactActive());
 const nav = ctx.stCompactNav();
 assert.equal((nav.match(/<button/g)||[]).length,4,'Exactly four primary destinations');
