@@ -98,13 +98,14 @@ async function lwTestCooldownSync() {
     LUME.testCd = r.data.enabled;
     LUME.testCdReady = true;
     LUME.testCdErr = '';
-  } finally { LUME.testCdBusy = false; lwUi(); }
+  } finally { LUME.testCdBusy = false; lwUi(); lwAdmRedraw(); }
 }
+function lwAdmRedraw() { if (typeof admDraw === 'function' && typeof ADM !== 'undefined' && ADM.open) admDraw(); }
 async function lwTestCooldownToggle() {
   if (!lwTestCooldownAllowed() || !LUME.testCdReady || LUME.testCdBusy) return;
   LUME.testCdBusy = true;
   const requested = !LUME.testCd;
-  lwUi();
+  lwUi(); lwAdmRedraw();
   try {
     const r = await tronRpc('beta_world_raid_test_mode', { p_enabled: requested });
     if (r.error || !r.data || r.data.enabled !== requested) {
@@ -113,7 +114,7 @@ async function lwTestCooldownToggle() {
     }
     LUME.testCd = requested;
     LUME.testCdErr = '';
-  } finally { LUME.testCdBusy = false; lwUi(); }
+  } finally { LUME.testCdBusy = false; lwUi(); lwAdmRedraw(); }
 }
 function lwTestCooldownPanel() {
   if (!lwTestCooldownAllowed()) return '';
@@ -123,7 +124,7 @@ function lwTestCooldownPanel() {
     : enabled ? 'Activ: poți ataca din nou același sat imediat după terminarea raidului.'
     : 'Inactiv: se aplică pauza normală dintre atacurile asupra aceluiași sat.';
   return `<div class="lw-test-cd" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;margin:8px 0;border:1px solid var(--line);border-radius:6px">
-    <span style="flex:1;min-width:175px"><b>🧪 PvP fără cooldown · BETA</b><small class="mute" style="display:block">${status} Consumă în continuare energie; nu ignoră protecția începătorilor.</small>
+    <span style="flex:1;min-width:175px"><b>PvP fără cooldown</b><small class="mute" style="display:block">${status} Consumă în continuare energie; nu ignoră protecția începătorilor.</small>
     ${LUME.testCdErr ? '<small class="r4">'+tEsc(LUME.testCdErr)+'</small>' : ''}</span>
     <button type="button" onclick="lwTestCooldownToggle()" ${!LUME.testCdReady || LUME.testCdBusy ? 'disabled' : ''}>${label}</button>
   </div>`;
@@ -367,11 +368,10 @@ function lwSelPanel() {
 }
 function lwLog() {
   const l = (LUME.st && LUME.st.log) || []; if (!l.length) return '';
-  // Jurnalul competitiv si portofelul din salvare nu sunt inca aceeasi sursa.
-  const note = '<p class="mute" style="font-size:13px;margin:6px 0 10px">Sumele din jurnalul BETA sunt evidența raidurilor pe server, nu plata din portofel. Până la migrarea economiei, prada din joc poate diferi.</p>';
+  const note = '';
   return `<section><h2>Jurnalul atacurilor</h2>${note}${l.map(x => {
     const o = `<button class="lw-lnk" onclick="lwProfile('${x.other_id}')">${tEsc(x.other)}</button>`;
-    const victory = `Ai atacat satul lui ${o} și ai câștigat. Jurnal: ${lwNum(x.gold)} aur, ${lwNum(x.xp)} exp.`;
+    const victory = `Ai atacat satul lui ${o} și ai câștigat: ${lwNum(x.gold)} aur, ${lwNum(x.xp)} exp.`;
     const t = x.att ? (x.win ? victory : `Ai atacat satul lui ${o} și ai pierdut.`)
       : (x.win ? `${o} ți-a atacat satul și a câștigat. Nu ai pierdut nimic.` : `${o} ți-a atacat satul și a fost respins.`);
     return `<div class="row"><span>${x.att ? '⚔' : '🛡'} ${t}</span><span class="mute">${lwAgo(x.t)}</span></div>`;
@@ -381,10 +381,11 @@ function vLume() {
   if (!LUME.loading && (!LUME.st || Date.now() - LUME.at > 45000 || (Date.now() - LUME.at > 8000 && JSON.stringify(lwSnap()) !== LUME.pubSig))) lwSync();
   if (!LUME.st) return `<section><h2>Lumea</h2><p class="mute">${LUME.err ? tEsc(LUME.err) : 'Se încarcă harta lumii…'}</p>${LUME.err ? '<button onclick="lwSync(true)">Încearcă din nou</button>' : ''}</section>`;
   const n = LUME.st.players.length, c = lwCfg();
-  let h = `<section><h2>Harta</h2><div class="mute">Lumea este comună: satele NPC sunt vizibile tuturor, iar satele jucătorilor pot fi atacate sau vizitate prin profil. Nu există cucerire, garnizoane private sau taxe de întreținere.
-  Acum: <b>${n}</b> ${n === 1 ? 'sat' : 'sate'} de jucători.</div>${LUME.err ? `<p class="r4">${tEsc(LUME.err)}</p>` : ''}${LUME.repErr ? `<p class="r4">Rezultatul ultimului atac nu a ajuns la server (${tEsc(LUME.repErr)}). Se retrimite automat.</p>` : ''}${lwEnBar()}${lwTestCooldownPanel()}${lwMap()}`;
-  h += `<div class="st-lg"><span><i style="background:#f0d27a"></i>Satul tău</span><span><i style="background:#c0504a"></i>Poate fi atacat</span><span><i style="background:#7b7f82"></i>Începător (sub nivelul ${c.min_level}) sau atacat recent de tine</span><span>👑 auriu: regele săptămânii · argintiu: pe Tron acum</span><span>Satul crește cu nivelul jucătorului: palisadă la 10, zid și turn la 20, fortificații la 25, castel de la 30</span></div></section>`;
-  return h + lwSelPanel() + lwRecommendedPanel() + lwLog() + `<section><h2>Reguli</h2><div class="mute">• Bara are ${c.en_max} atacuri și se reface câte unul la ${c.en_regen_min} de minute, adică ${Math.round(24 * 60 / c.en_regen_min)} pe zi.<br>• Același jucător îl poți ataca o dată la ${c.same_h} ore. Începătorii (sub nivelul ${c.min_level}) nu pot fi atacați și nu pot ataca.<br>• Lupți cu fantoma de maximum 4 luptători publicată în Lume (eroul și până la 3 mercenari). Tronul are duel separat doar între eroi. Puterea este un reper, nu o șansă exactă; dacă învingi, primești pradă și experiență, iar apărătorul nu pierde nimic.<br>• Satele din Lume nu se pot cuceri; teritoriile rămân în regiunea ta.</div></section>`;
+  const err = `${LUME.err ? `<p class="r4">${tEsc(LUME.err)}</p>` : ''}${LUME.repErr ? `<p class="r4">Rezultatul ultimului atac nu a ajuns la server (${tEsc(LUME.repErr)}). Se retrimite automat.</p>` : ''}`;
+  /* harta întâi; explicațiile stau în „Legendă” și „Reguli”, deschise doar la cerere */
+  let h = `<section class="lw-main"><div class="lw-head"><h2>Harta</h2><span class="mute lw-count"><b>${n}</b> ${n === 1 ? 'sat' : 'sate'} de jucători</span></div>${err}${lwEnBar()}${lwMap()}`;
+  h += `<details class="lw-more"><summary>Legendă</summary><div class="st-lg"><span><i style="background:#f0d27a"></i>Satul tău</span><span><i style="background:#c0504a"></i>Poate fi atacat</span><span><i style="background:#7b7f82"></i>Începător (sub nivelul ${c.min_level}) sau atacat recent de tine</span><span>👑 auriu: regele săptămânii · argintiu: pe Tron acum</span><span>Satul crește cu nivelul jucătorului: palisadă la 10, zid și turn la 20, fortificații la 25, castel de la 30</span></div></details></section>`;
+  return h + lwSelPanel() + lwRecommendedPanel() + lwLog() + `<section><details class="lw-more"><summary>Reguli</summary><div class="mute">• Lumea este comună: satele NPC sunt vizibile tuturor, iar satele jucătorilor pot fi atacate sau vizitate prin profil. Nu există cucerire, garnizoane private sau taxe de întreținere.<br>• Bara are ${c.en_max} atacuri și se reface câte unul la ${c.en_regen_min} de minute, adică ${Math.round(24 * 60 / c.en_regen_min)} pe zi.<br>• Același jucător îl poți ataca o dată la ${c.same_h} ore. Începătorii (sub nivelul ${c.min_level}) nu pot fi atacați și nu pot ataca.<br>• Lupți cu fantoma de maximum 4 luptători publicată în Lume (eroul și până la 3 mercenari). Tronul are duel separat doar între eroi. Puterea este un reper, nu o șansă exactă; dacă învingi, primești pradă și experiență, iar apărătorul nu pierde nimic.<br>• Satele din Lume nu se pot cuceri; teritoriile rămân în regiunea ta.</div></details></section>`;
 }
 
 /* ------------------------------------------------------------------ CLASAMENT */
@@ -416,6 +417,8 @@ function vBoard() {
   if (!b) return h + `<p class="mute">${LUME.bErr ? tEsc(LUME.bErr) : 'Se încarcă…'}</p></section>`;
   if (!b.rows.length) return h + `<p class="mute">${k === 'tron' ? 'Nu sunt încă date despre domnii la Tron.' : 'Nimeni în clasament încă.'}</p></section>`;
   const medal = r => (r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : r);
+  const mine = b.rows.find(r => r.id === me);
+  if (mine && mine.rank > 6) h += `<div class="lw-jump"><button type="button" onclick="document.querySelector('.lw-br.me')?.scrollIntoView({behavior:'smooth',block:'center'})">⤓ Locul meu · ${mine.rank}</button></div>`;
   h += `<div class="lw-board">${b.rows.map(r => `<button class="lw-br${r.id === me ? ' me' : ''}" onclick="lwProfile('${r.id}')"><span class="lw-rk">${medal(r.rank)}</span>${lwMaxAv(r.level, av({ n: r.name, c: (r.hero && r.hero.c) || 'Campion', ic: r.hero && r.hero.ic }, 36))}<span class="lw-bn"><b>${tEsc(r.name)}${r.id === me ? ' <span class="mute">(tu)</span>' : ''}</b><small>${r.title ? '♛ ' + tEsc(r.title) + ' · ' : ''}${tEsc(r.stage_name)}${k !== 'level' ? ' · nivel ' + r.level : ''}</small></span><span class="lw-bv">${lwVal(k, r)}</span></button>`).join('')}</div>`;
   if (b.me && !b.rows.some(r => r.id === me)) h += `<div class="lw-br me static"><span class="lw-rk">${b.me.rank}</span><span class="lw-bn"><b>Tu</b><small>din ${b.total}</small></span><span class="lw-bv">${lwVal(k, b.me)}</span></div>`;
   return h + `<div class="mute" style="margin-top:8px">${b.total > 50 ? `Primii 50 din ${b.total} de jucători.` : `Toți cei ${b.total} ${b.total === 1 ? 'jucător' : 'jucători'}.`} Puterea e suma echipei active: viață + 6 × atac + 10 × apărare. Datele se actualizează când fiecare jucător intră în joc.</div></section>`;
@@ -564,5 +567,17 @@ if (typeof setInterval === 'function') setInterval(() => {
 @media (max-width:520px){.lw-stats b{font-size:17px}}
 `;
   st.textContent += '.lw-match{border:1px solid #8f754b;background:#171e22;padding:9px 11px;margin:10px 0;border-radius:8px}.lw-match>b{color:var(--gold2);display:block}.lw-match small{font-size:12px;color:var(--mute);display:block;margin-top:4px}.lw-match p{font-size:13px;margin:7px 0;line-height:1.4}';
+  document.head.appendChild(st);
+})();
+
+/* Harta: titlu și numărul de sate pe un rând; Legendă și Reguli pliate */
+(function () {
+  if (typeof document === 'undefined' || !document.head) return;
+  const st = document.createElement('style');
+  st.textContent = `.lw-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}.lw-head h2{margin-bottom:6px}.lw-count{font-size:13.5px}
+.lw-more{margin-top:8px}.lw-more>summary{cursor:pointer;color:var(--gold2,#f0d27a);font-weight:700;font-size:14px;padding:4px 0;list-style-position:inside}
+.lw-more>.st-lg,.lw-more>.mute{margin-top:6px}
+.lw-jump{display:flex;justify-content:flex-end;margin:0 0 8px}.lw-jump button{width:auto;min-height:0;padding:5px 12px;font-size:13px}
+section>.lw-more:first-child{margin-top:0}`;
   document.head.appendChild(st);
 })();

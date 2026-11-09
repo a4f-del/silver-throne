@@ -112,6 +112,7 @@ function admDo(k, v) {
 function admDraw() {
   let o = document.getElementById('adm-p');
   if (!ADM.open) { if (o) o.remove(); return; }
+  if (typeof lwTestCooldownSync === 'function' && typeof LUME !== 'undefined' && !LUME.testCdLoaded) void lwTestCooldownSync();
   if (!o) { o = document.createElement('div'); o.id = 'adm-p'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-label', 'Panou de administrator'); document.body.appendChild(o); }
   const b = (k, v, t, c) => `<button${c ? ` class="${c}"` : ''} onclick="admDo('${k}',${v === undefined ? 'undefined' : JSON.stringify(v)})">${t}</button>`;
   const who = typeof CONT !== 'undefined' && CONT.admin ? (ADM.srv ? 'cont de administrator (serverul acceptă valorile)' : 'administrator după email · rulează 06-admin.sql ca serverul să accepte aurul mare') : (typeof TW !== 'undefined' && !TW.CFG.prod ? 'mod de test (prod: false)' : 'local, ?dev=1');
@@ -125,6 +126,7 @@ function admDraw() {
 <div class="adm-g"><span>Nivel · ${S.lvl}</span><div class="adm-bs">${b('lvl', 1, '+1')}${b('lvl', 5, '+5')}${b('lvl', 10, '+10')}<input id="adm-lv" type="number" min="1" max="50" placeholder="nivel" aria-label="Nivel">${b('setlvl', 0, 'Setează')}</div></div>
 <div class="adm-g"><span>Echipă</span><div class="adm-bs">${b('heal', 0, 'Vindecă tot')}${b('scars', 0, 'Șterge cicatricile')}${b('fame', 50, '+50 faimă')}${b('fame', 1000, 'Rang maxim')}</div></div>
 ${typeof simPvpAdminHtml==='function'?simPvpAdminHtml():''}
+${typeof lwTestCooldownPanel==='function'&&lwTestCooldownAllowed()?`<div class="adm-g"><span>Lumea</span><div class="adm-bs" style="display:block">${lwTestCooldownPanel()}</div></div>`:''}
 <div class="adm-g"><span>Timp</span><div class="adm-bs">${b('forge', 0, 'Termină forja')}${b('exp', 0, 'Termină expedițiile')}${b('daily', 0, 'Cufăr zilnic din nou')}</div></div>
 ${admGenHtml()}
 <div class="adm-g"><span>Premium</span><div class="adm-bs">${b('prem', 0, 'Premium: ' + (S.prem ? 'pornit' : 'oprit'))}</div></div>

@@ -317,7 +317,7 @@ function vTron() {
   const left = st.week_end - tronNow(), me = st.me, ho = st.holder, low = S.lvl < TT.CFG.minLevel;
   if (low) { me.can_challenge = false; me.reason = 'Nivel minim ' + TT.CFG.minLevel + ' (ai ' + S.lvl + ')'; }
   const cd = me.cooldown_until - tronNow(), busy = S.d || TRON.busy || (S.tron && S.tron.cur);
-  let h = `<section class="tr-hero"><div class="th-t"><h2>♛ Tronul de Argint</h2><div class="mute">${rules}</div><p style="margin:12px 0 0">Săptămâna <b>${st.week + 1}</b> se închide în <b>${tronHM(left / 1000)}</b><br><span class="mute">${st.participants} ${st.participants === 1 ? 'participant' : 'participanți'} săptămâna aceasta</span></p><button style="margin-top:10px" onclick="tronSync()">Actualizează</button></div>${tronRing(left)}</section>`;
+  let h = `<section class="tr-hero"><div class="th-t"><h2>♛ Tronul de Argint</h2><details class="tr-rules"><summary>Cum funcționează Tronul</summary><div class="mute">${rules}</div></details><p style="margin:12px 0 0">Săptămâna <b>${st.week + 1}</b> se închide în <b>${tronHM(left / 1000)}</b><br><span class="mute">${st.participants} ${st.participants === 1 ? 'participant' : 'participanți'} săptămâna aceasta</span></p><button style="margin-top:10px" onclick="tronSync()">Actualizează</button></div>${tronRing(left)}</section>`;
   const initial = ho ? tEsc(String(ho.name || '?').trim().charAt(0).toUpperCase() || '?') : '?', prot = ho ? ho.protect_until - tronNow() : 0;
   h += `<section class="tr-seatsec" style="border-left-color:var(--ember)"><div class="tr-seat"><div class="tr-av${ho ? '' : ' empty'}">${initial}</div><div class="ts-m"><h2>${ho ? '👑 ' + tEsc(ho.name) : 'Tronul e gol'}</h2>`;
   h += ho ? `<div class="mute">Nivel ${ho.level} · ține Tronul de ${tronHM((tronNow() - ho.since) / 1000)}${prot > 0 ? ` · protejat încă <span data-end="${ho.protect_until - TRON.off}">${fmt(prot)}</span>` : ''}</div>` : '<div class="mute">Îl apără Garda Regală. Cine o învinge devine rege.</div>';
@@ -361,3 +361,11 @@ if (typeof document !== 'undefined' && typeof setInterval === 'function') {
     } catch (e) { /* ignorat: se reia la următorul ciclu */ }
   }, 30000);
 }
+(function () {
+  if (typeof document === 'undefined' || !document.head) return;
+  const st = document.createElement('style');
+  st.textContent = `.tr-rules>summary{cursor:pointer;color:var(--gold2,#f0d27a);font-weight:700;font-size:14px;padding:2px 0 4px}.tr-rules>.mute{margin:4px 0 2px}
+.tr-ring .tx small{line-height:1.15;max-width:78%}
+@media (max-width:600px){.tr-ring .tx b{font-size:20px}.tr-ring .tx small{font-size:11px}}`;
+  document.head.appendChild(st);
+})();

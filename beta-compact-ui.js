@@ -21,6 +21,14 @@ function stTronSidebarState() {
   return {kind:canChallenge?'hot':'holder',line:'👑 '+name+' ține Tronul',
     detail:canChallenge?'⚔ Provoacă acum':(time?'Se închide în '+time:'Vezi deținătorul')};
 }
+/* pe telefon, sumele mari se scriu scurt (250k, 52,0M) ca să încapă bara de sus */
+function stShortNum(n) {
+  n = +n || 0;
+  if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace('.', ',') + 'M';
+  if (n >= 1e4) return Math.floor(n / 1e3) + 'k';
+  if (n >= 1e3) return (Math.floor(n / 100) / 10).toFixed(1).replace('.', ',').replace(',0', '') + 'k';
+  return String(n);
+}
 function stCompactNav() {
   const throne = stTronSidebarState();
   return TEMA_NAV.map(([k, name, icon]) => {
@@ -33,7 +41,15 @@ function stCompactNav() {
       : '<span>' + name + navBadge(k) + '</span>';
     return '<button class="' + (temaOn(k) ? 'on' : '') + (k === 'r' ? ' tr st-tron-nav' + statusClass : '') +
       '" onclick="tab(\'' + k + '\')"><span class="ni">' + icon + '</span>' + label + '</button>';
-  }).join('');
+  }).join('') + stNavSocial();
+}
+/* sub meniul principal (doar pe ecran lat): Clasament, Breaslă, Prieteni — înainte erau ascunse în meniul eroului */
+function stNavSocial() {
+  const k = typeof S !== 'undefined' && S && S.tab === 'k';
+  const cl = '<button class="st-ns' + (k ? ' on' : '') + '" onclick="tab(\'k\')"><span class="st-ns-i">🏆</span>Clasament</button>';
+  const gu = typeof guildEnabled === 'function' && guildEnabled() ? '<button class="st-ns" onclick="guildOpen()"><span class="st-ns-i">⚔</span>Breaslă</button>' : '';
+  const fr = typeof wfEnabled === 'function' && wfEnabled() ? '<button class="st-ns" onclick="wfOpen()"><span class="st-ns-i">🤝</span>Prieteni' + (typeof WFR !== 'undefined' && WFR.requests ? ' <b class="st-ns-b">' + WFR.requests + '</b>' : '') + '</button>' : '';
+  return '<div class="st-nav-sec" role="group" aria-label="Comunitate">' + cl + gu + fr + '</div>';
 }
 function stCompactHeroGo(t) {
   if (!stCompactAvailable()) return;
@@ -107,8 +123,8 @@ function stCompactHdr() {
   const act = locked ? ' disabled' : '';
   const res = '<div class="st-hres">' +
     '<span class="st-res" title="Puncte de aventură">' + IC.p + '<b id="pp">' + S.pts + '/' + MXP() + '</b><small id="pt">' + (S.bp > 0 ? 'rezervă +' + S.bp : 'Puncte') + '</small></span>' +
-    '<span class="st-res" title="Aur">' + IC.g + '<b>' + S.gold + '</b></span>' +
-    '<span class="st-res" title="Minereu">' + IC.o + '<b>' + S.ore + '</b></span></div>';
+    '<span class="st-res" title="Aur: ' + S.gold + '">' + IC.g + '<b class="st-full">' + S.gold + '</b><b class="st-short">' + stShortNum(S.gold) + '</b></span>' +
+    '<span class="st-res" title="Minereu: ' + S.ore + '">' + IC.o + '<b class="st-full">' + S.ore + '</b><b class="st-short">' + stShortNum(S.ore) + '</b></span></div>';
   const mail = locked ? '' : (typeof wmHeader === 'function' ? wmHeader() : '');
   const fight = '<button class="st-icon-action" type="button" onclick="bhOpen()" title="Istoricul luptelor" aria-label="Lupte"' + act + '>⚔</button>';
   const heroMenu = '<details class="st-drop st-hero-drop"><summary title="Erou și echipă" aria-label="Meniu erou">' +
@@ -118,6 +134,7 @@ function stCompactHdr() {
     '<button onclick="stCompactHeroGo(\'eq\')" ' + act + '>⚔ Echipă și echipament</button>' +
     '<button onclick="stCompactHeroGo(\'inv\')" ' + act + '>🎒 Inventar</button>' +
     (locked ? '' :
+      '<button class="st-only-phone" onclick="bhOpen()">⚔ Istoricul luptelor</button>' +
       '<button onclick="tab(\'k\')">🏆 Clasament</button>' +
       (typeof wfHeader === 'function' ? '<div class="st-social-link">' + wfHeader() + '</div>' : '') +
       (typeof guildHeader === 'function' ? '<div class="st-social-link">' + guildHeader() + '</div>' : '') +
@@ -127,7 +144,7 @@ function stCompactHdr() {
   const botsDisabled = locked || !S.prem;
   const settings = '<details class="st-drop st-settings"' + (stSettingsReopen ? ' open' : '') +
     '><summary title="Setări" aria-label="Setări">⚙</summary>' +
-    '<div class="st-drop-panel st-settings-panel"><div class="st-drop-head"><b>Setări</b><small>🧪 Server BETA</small></div>' +
+    '<div class="st-drop-panel st-settings-panel"><div class="st-drop-head"><b>Setări</b></div>' +
     '<div class="st-settings-section"><b>🤖 Asistent Premium</b>' +
     '<small>Doar confort: nu pornește temnițe, raiduri sau forjări noi.</small></div>' +
     stBotPowerButton(botOn,botsDisabled,!!S.prem) +
@@ -276,4 +293,22 @@ body.st-compact .st-event-detail small{display:block;font-size:12px;color:var(--
 body.st-adventure.st-compact .st-hquick{display:none!important}
 `;
   document.head.appendChild(css);
+})();
+(function () {
+  if (typeof document === 'undefined' || !document.head) return;
+  const st = document.createElement('style');
+  st.textContent = `.st-nav-sec{display:none}.st-short{display:none}
+@media (min-width:521px){.st-only-phone{display:none!important}}
+@media (max-width:520px){body.st-compact .st-res .st-full{display:none}body.st-compact .st-res .st-short{display:inline}body.st-compact .st-res #pt{display:none}
+body.st-compact .st-hres{gap:0;flex:0 1 auto;min-width:0;border:1px solid var(--line);border-radius:8px;background:#10171a;padding:0 2px}body.st-compact .st-hquick{gap:4px;flex:none;margin-left:auto}
+body.st-compact .st-res{gap:2px;padding:5px 4px;border:0;background:transparent}body.st-compact .st-res svg{width:16px;height:16px}body.st-compact .st-res b{font-size:12.5px}
+body.st-compact .st-hquick .st-icon-action{display:none}
+body.st-compact .st-icon-action,body.st-compact .st-drop>summary,body.st-compact .st-hquick .wm-open{min-width:34px;height:34px;padding:4px 6px}}
+@media (min-width:960px){body.st-compact nav .st-nav-sec{display:flex;flex-direction:column;gap:4px;margin-top:10px;padding-top:10px;border-top:1px solid #ffffff14}
+body.st-compact nav button.st-ns{display:flex;align-items:center;gap:10px;min-height:0;padding:7px 12px;font:600 14px Alegreya,Georgia,serif;color:var(--mute);background:transparent;border:1px solid transparent;border-radius:8px;box-shadow:none;text-align:left}
+body.st-compact nav button.st-ns:hover{color:var(--ink);border-color:var(--line);background:#ffffff08;transform:none}
+body.st-compact nav button.st-ns.on{color:var(--gold2,#f0d27a);border-color:#f0d27a55;background:#f0d27a10}
+.st-ns-i{width:22px;text-align:center;font-size:15px}.st-ns-b{margin-left:auto;min-width:18px;padding:0 5px;border-radius:9px;background:#c0504a;color:#fff;font-size:11px;text-align:center}}
+@media (max-width:380px){body.st-compact .st-res svg{width:14px;height:14px}body.st-compact .st-res b{font-size:12px}body.st-compact .st-res{padding:5px 3px}body.st-compact .st-hquick .wm-open,body.st-compact .st-drop>summary{min-width:30px;padding:4px 5px}}`;
+  document.head.appendChild(st);
 })();
