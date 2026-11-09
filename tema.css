@@ -82,12 +82,12 @@ nav button.tr .ni { font-size: 24px; text-shadow: 0 0 14px #f0d27a99; }
 }
 
 /* ----------------------------------------------------------------- notificări */
-.msg { position: fixed !important; top: calc(var(--hh) + 14px); left: calc(50% + 105px); transform: translateX(-50%); z-index: 30; width: max-content; max-width: min(640px, calc(100vw - 32px)); margin: 0 !important; padding: 13px 20px; border-radius: 12px; font-size: 17px; cursor: pointer; box-shadow: 0 12px 34px #000e, 0 0 0 1px #000, 0 0 24px #d99a3a33; animation: toastIn .3s cubic-bezier(.2, .9, .3, 1.15) both; }
+.msg { position: fixed !important; bottom: 22px; top: auto; left: calc(50% + 105px); transform: translateX(-50%); z-index: 30; width: max-content; max-width: min(620px, calc(100vw - 32px)); margin: 0 !important; padding: 11px 18px; border-radius: 12px; font-size: 15.5px; line-height: 1.4; cursor: pointer; box-shadow: 0 12px 34px #000e, 0 0 0 1px #000, 0 0 24px #d99a3a33; animation: toastIn .3s cubic-bezier(.2, .9, .3, 1.15) both; }
 .msg.again { animation: none; }
 .msg.out { animation: toastOut .4s ease forwards; pointer-events: none; }
-@keyframes toastIn { from { opacity: 0; transform: translate(-50%, -16px); } to { opacity: 1; transform: translate(-50%, 0); } }
-@keyframes toastOut { to { opacity: 0; transform: translate(-50%, -12px); } }
-@media (max-width: 959px) { .msg { left: 50%; top: 108px; } }
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, 16px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes toastOut { to { opacity: 0; transform: translate(-50%, 12px); } }
+@media (max-width: 959px) { .msg { left: 50%; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); font-size: 14.5px; } body.st-adventure .msg { bottom: 18px; } }
 
 /* tranziție la schimbarea filei */
 #v.tfade>* { animation: tFade .32s ease both; }

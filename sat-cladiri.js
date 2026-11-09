@@ -11,25 +11,28 @@
    Coordonatele sunt în pixelii imaginii satului (1152×928), ca SAT_Z din sat.js.
    ========================================================================== */
 const SAT2 = {
-  ready: false,                     /* devine true când imagini/sat2/ e publicat */
+  ready: true,                      /* imaginile din imagini/sat2/ sunt publicate */
   base: 'imagini/sat2/',
   /* parcelele: centrul bazei clădirii (x, y) și lățimea desenului, în pixeli 1152×928 */
+  /* parcelele din fundal: x = mijlocul, y = vârful din față al parcelei (baza desenului), w = lățimea desenului (px, 1152×928) */
   plots: {
-    a: { file: 'topitorie',  x: 338, y: 352, w: 300 },   /* sus-stânga */
-    d: { file: 'depozit',    x: 597, y: 300, w: 270 },   /* sus-centru */
-    p: { file: 'piata',      x: 845, y: 362, w: 290 },   /* sus-dreapta */
-    i: { file: 'infirmerie', x: 228, y: 512, w: 300 },   /* mijloc-stânga */
-    h: { file: 'han',        x: 938, y: 536, w: 320 },   /* mijloc-dreapta */
-    t: { file: 'antrenament',x: 338, y: 680, w: 300 }    /* jos-stânga */
+    a: { file: 'topitorie',   x: 352, y: 394, w: 272 },   /* sus-stânga */
+    d: { file: 'depozit',     x: 597, y: 324, w: 232 },   /* sus-centru */
+    p: { file: 'piata',       x: 840, y: 400, w: 272 },   /* sus-dreapta */
+    i: { file: 'infirmerie',  x: 228, y: 548, w: 252 },   /* mijloc-stânga */
+    h: { file: 'han',         x: 930, y: 566, w: 262 },   /* mijloc-dreapta */
+    t: { file: 'antrenament', x: 368, y: 730, w: 292 }    /* jos-stânga */
   },
+  /* câte aspecte există deja ca imagine pentru fiecare clădire (lipsă → cel mai mare disponibil; 0 → parcelă goală) */
+  have: { topitorie: 5, depozit: 1, piata: 0, infirmerie: 5, han: 5, antrenament: 0 },
   /* clădirile fără niveluri: un singur aspect */
   fixed: { p: 1, t: 1 },
   /* obiecte mici, fără parcelă (steagul); Negustorul face parte din Piață */
   props: {
-    g: { file: null,       x: 640, y: 760, w: 60 }      /* steagul se desenează în culoarea satului */
+    g: { file: null, x: 706, y: 712, w: 60 }      /* steagul, lângă poartă, în culoarea satului */
   },
   /* zona notițelor (Misiuni) e avizierul pictat din centru */
-  board: { x: 640, y: 420 },
+  board: { x: 638, y: 438 },
   W: 1152, H: 928
 };
 const satArtTier = (k) => {
@@ -38,9 +41,9 @@ const satArtTier = (k) => {
   const map = { a: 'f', h: 'b', i: 'i', d: 'd' }[k];
   return typeof ST_ART !== 'undefined' && map ? ST_ART.tier(lv, map) : Math.min(5, Math.max(0, lv ? 1 : 0));
 };
-const satArtSrc = (k, tier) => SAT2.plots[k] && tier > 0 ? SAT2.base + SAT2.plots[k].file + '-' + tier + '.webp' : null;
+const satArtSrc = (k, tier) => { const c = SAT2.plots[k]; if (!c || tier < 1) return null; const t = Math.min(tier, SAT2.have[c.file] || 0); return t > 0 ? SAT2.base + c.file + '-' + t + '.webp' : null; };
 /* zona clicabilă: un dreptunghi în jurul desenului (lățime w, înălțime ~0,85·w deasupra bazei) */
-function satArtZone(c) { const w = c.w, h = Math.round(w * 0.86), x0 = c.x - w / 2, y0 = c.y - h + w * 0.12; return [[x0, y0, x0 + w, y0, x0 + w, c.y + w * 0.14, x0, c.y + w * 0.14], [c.x, Math.max(14, y0 + 6)]]; }
+function satArtZone(c) { const w = c.w, h = Math.round(w * 0.86), x0 = c.x - w / 2, y0 = c.y - h; return [[x0, y0, x0 + w, y0, x0 + w, c.y, x0, c.y], [c.x, Math.max(14, y0 + 10)]]; }
 
 /* ultimul aspect văzut pentru fiecare clădire → animația „a crescut” doar o dată */
 function satArtSeen(k, tier) {
@@ -61,7 +64,7 @@ function satSprites() {
     const c = SAT2.plots[k], tier = satArtTier(k), src = satArtSrc(k, tier);
     if (!src) continue;                                   /* nivel 0: parcela rămâne goală */
     const grew = !SAT2.fixed[k] && satArtSeen(k, tier);
-    const left = (c.x - c.w / 2) / SAT2.W * 100, width = c.w / SAT2.W * 100, bottom = (1 - c.y / SAT2.H) * 100 - c.w * 0.14 / SAT2.H * 100;
+    const left = (c.x - c.w / 2) / SAT2.W * 100, width = c.w / SAT2.W * 100, bottom = (1 - c.y / SAT2.H) * 100;
     h += `<img class="vh-b${grew ? ' vh-grew' : ''}" data-b="${k}" src="${src}" alt="" loading="eager" decoding="async" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%;bottom:${bottom.toFixed(2)}%;z-index:${Math.round(c.y)}">`;
   }
   for (const k in SAT2.props) {

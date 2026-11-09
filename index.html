@@ -189,7 +189,7 @@ main{padding:8px 24px;max-width:940px}
 .st-wv{animation:st-wv 5s linear infinite}
 @media (prefers-reduced-motion:reduce){.st-sk,.st-fl,.st-rt,.st-wv{animation:none}}
 </style>
-<link rel="stylesheet" href="tema.css?v=2026.10.30-3">
+<link rel="stylesheet" href="tema.css?v=2026.11.09-1">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="servere.js?v=2026.11.09-1"></script>
 <script src="world-data.js?v=2026.11.04-4"></script>
@@ -210,7 +210,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="tron.js?v=2026.11.09-4"></script>
 <script src="lume-art.js?v=2026.11.04-4"></script>
 <script src="sat.js?v=2026.11.09-1"></script>
-<script src="sat-cladiri.js?v=2026.11.09-1"></script>
+<script src="sat-cladiri.js?v=2026.11.09-2"></script>
 <script src="lupta-vs.js?v=2026.11.09-1"></script>
 <script src="fx.js?v=2026.11.09-3"></script>
 <script src="fx-plus.js?v=2026.11.09-1"></script>
@@ -224,7 +224,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="lume.js?v=2026.11.09-5"></script>
 <script src="lume-pictat.js?v=2026.11.09-1"></script>
 <script src="tinut.js?v=2026.11.09-1"></script>
-<script src="tema.js?v=2026.11.04-4"></script>
+<script src="tema.js?v=2026.11.09-1"></script>
 <script src="ritm.js?v=2026.11.06-1"></script>
 <script src="echipa.js?v=2026.11.09-2"></script>
 <script src="erou.js?v=2026.11.09-1"></script>
@@ -657,8 +657,8 @@ const SH=[['w','Armurierul'],['a','Fierarul de armuri'],['h','Coifarul'],['b','C
 function shop(){const s=S.shop||(S.shop={t:0,w:[],a:[],j:[]});if(Date.now()>s.t||!s.w.length||!s.h){for(const [k] of SH){s[k]=[];for(let i=0;i<3;i++)s[k].push(mkItem(k,Math.max(1,S.lvl+RI(-1,1)),P([0,1,1,1,2,2,3])))}s.t=Date.now()+12e5}return s}
 function buy(k,i){const s=shop(),it=s[k][i],c=ip(it);if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;s[k].splice(i,1);S.inv.push(it);S.msg='Ai cumpărat '+it.name+'.'}go()}
 function reshop(){const c=15*S.lvl;if(S.gold<c)S.msg='Îți trebuie '+c+' aur.';else{S.gold-=c;S.shop.t=0;S.msg='Negustorii au adus marfă nouă.'}go()}
-function vP(){const s=shop();return SH.map(([k,n])=>`<section><h2>${n}</h2>${s[k].length?s[k].map((it,i)=>`<div class="row"><span class="ic-n"${itTipA(it)}>${iname(it)}</span><button class="p" onclick="buy('${k}',${i})">${ip(it)} aur</button></div>`).join(''):'<p class="mute">Stoc epuizat.</p>'}</section>`).join('')+`<div class="row"><span class="mute">Marfa se schimbă la 20 de minute</span><button onclick="reshop()">${15*S.lvl} aur</button></div>`}
-function vD(){const rows=[['ore','Minereu',S.ore],...AFM.map(k=>[k,MA[k],MT()[k]||0])];return`<section><h2>Depozit</h2><div class="mute">Capacitate: ${cap()} din fiecare material. O poți mări la Curte. Dezmembrarea îi dă înapoi materialele afixelor.</div>${rows.map(([k,n,v])=>`<div class="row"><span>${n}<br><span class="mute">${MU[k]}</span></span><span><b>${v}</b>/${cap()}</span></div>${bar(v,cap())}`).join('')}${[1,2,3].map(r=>`<div class="row"><span>${MA[RM[r]]}<br><span class="mute">raritate ${RAR[r].n}</span></span><span>${QN.map((n,q)=>`${n} <b>${MT()[RM[r]+q]||0}</b>`).join(' · ')}</span></div>`).join('')}</section>`}
+function vP(){const s=shop();return '<div class="pt-g">'+SH.map(([k,n])=>`<section><h2>${n}</h2>${s[k].length?s[k].map((it,i)=>`<div class="row"><span class="ic-n"${itTipA(it)}>${iname(it)}</span><button class="p" onclick="buy('${k}',${i})">${ip(it)} aur</button></div>`).join(''):'<p class="mute">Stoc epuizat.</p>'}</section>`).join('')+'</div>'+`<div class="row"><span class="mute">Marfa se schimbă la 20 de minute</span><button onclick="reshop()">${15*S.lvl} aur</button></div>`}
+function vD(){const rows=[['ore','Minereu',S.ore],...AFM.map(k=>[k,MA[k],MT()[k]||0])];return`<section><h2>Depozit</h2><div class="mute">Capacitate: ${cap()} din fiecare material. O poți mări la Curte. Dezmembrarea îi dă înapoi materialele afixelor.</div><div class="dz-g">${rows.map(([k,n,v])=>`<div class="dz-m"><div class="row"><span>${n}<br><span class="mute">${MU[k]}</span></span><span><b>${v}</b>/${cap()}</span></div>${bar(v,cap())}</div>`).join('')}</div><div class="dz-g dz-q">${[1,2,3].map(r=>`<div class="dz-m"><div class="row"><span>${MA[RM[r]]}<br><span class="mute">raritate ${RAR[r].n}</span></span><span>${QN.map((n,q)=>`${n} <b>${MT()[RM[r]+q]||0}</b>`).join(' · ')}</span></div></div>`).join('')}</div></section>`}
 const VL=[['a','Topitorie'],['p','Piață'],['l','Negustor'],['h','Han'],['i','Infirmerie'],['t','Antrenament'],['x','Misiuni'],['d','Depozit'],['z','Apărare'],['g','Steag'],['q','Bot']];
 function vil(k){S.vil=k;S.msg='';go()}
 /* Satul: fără S.vil = pagina de start cu clădirile (sat.js); altfel banda „‹ Sat” + clădirea */
@@ -1041,6 +1041,32 @@ body.st-adventure .hs .hm{cursor:default}
 .mis-focus .mis-more summary{cursor:pointer;font-weight:700;color:var(--gold2);padding:4px 0}
 .mis-focus .mis-more .row{margin-top:9px}
 @media(max-width:520px){.mis-focus .mis-more{padding:7px}}
+</style>
+<style>
+/* Piață și Depozit pe ecran lat: grilă, nu o coloană lungă */
+.dz-g{display:grid;grid-template-columns:1fr;gap:0 18px}
+.dz-m .row{margin-bottom:2px}.dz-m .bar{margin-bottom:10px}
+@media (min-width:960px){
+ .dz-g{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px 18px}
+ .dz-g.dz-q{margin-top:8px;padding-top:8px;border-top:1px solid #ffffff14}
+ .dz-m{padding:6px 10px 2px;border:1px solid #ffffff10;border-radius:8px;background:#ffffff05}
+ .pt-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;align-items:start}
+ .pt-g>section{margin:0}
+ .pt-g>section .row{gap:8px;flex-wrap:nowrap;align-items:center}
+ .pt-g>section .row .ic-n{flex:1;min-width:0;font-size:14.5px;line-height:1.3}
+ .pt-g>section .row button{flex:none;white-space:nowrap}
+ .dz-m .row{flex-wrap:nowrap;align-items:flex-start}.dz-m .row>span:last-child{white-space:nowrap}
+ .dz-q .dz-m .row{flex-wrap:wrap}
+ /* Hanul: mercenarii pe două coloane */
+ .mr-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start}
+ .mr-list>*{margin:0!important}
+ /* Topitoria: formularul în stânga, sloturile și clădirea în dreapta */
+ #v:has(> .fk-tabs){display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-auto-flow:row dense;gap:0 14px;align-items:start}
+ #v:has(> .fk-tabs)>*{grid-column:1/-1}
+ #v:has(> .fk-tabs)>section:nth-of-type(2){grid-column:1;grid-row:span 2}
+ #v:has(> .fk-tabs)>section:nth-of-type(1),#v:has(> .fk-tabs)>section.mr-bl{grid-column:2}
+ #v:has(> .fk-tabs)>section:nth-of-type(1) .slots,#v:has(> .fk-tabs)>section:nth-of-type(1)>div:not(.mute){grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 </style>
 <!-- săgeata ghidului e în ghid.js -->
 </body>
