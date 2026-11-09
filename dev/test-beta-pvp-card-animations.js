@@ -7,7 +7,7 @@ const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 const fx=read('fx.js'),card=read('aventura-carduri.js'),css=read('aventura-carduri.css'),main=read('index.html'),world=read('lume.js'),throne=read('tron.js');
 assert(world.includes('lume: 1'),'PvP Lume are marcator propriu');
 assert(throne.includes('tron: 1'),'PvP Tron are marcator propriu');
-assert(fx.includes('d.one||d.tw||d.lume||d.tron'),'ambelor tipuri PvP li se aplică animațiile în BETA');
+assert(fx.includes('adventure: true,'),'toate luptele (inclusiv PvP) folosesc redarea cu carduri');
 const fxHead=fx.slice(fx.indexOf('const FX ='),fx.indexOf('/* pentru modul manual:'));
 function setup(server,kind,playerUnits=2){
  const fs=[{n:'Eroul',h:1,c:'Campion',hp:120},...(playerUnits>1?[{n:'Arcașul',c:'Arcaș',hp:90}]:[])];

@@ -59,7 +59,7 @@ assert(!boss.includes('ac-return-current'));
 assert(steps.includes("function trSelSet(i, k)"),'button uses existing preview selector');
 assert(steps.includes("if(S.adventure&&typeof acDungeonPage"),
  'special dungeon page is used inside an adventure');
-assert(html.includes('aventura-carduri.css?v=2026.11.08-5')&&
+assert(html.includes('aventura-carduri.css?v=2026.11.09-5')&&
  html.includes('aventura-carduri.js?v=2026.11.09-1')&&
  html.includes('ghidare-erou.js?v=2026.11.08-3'),
  'updated UI assets are loaded without stale caching');

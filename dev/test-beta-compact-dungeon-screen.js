@@ -9,7 +9,7 @@ const css=read('aventura-carduri.css'),src=read('aventura-carduri.js'),
 new Function(src);new Function(steps);
 for(const m of index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
  if(m[1].trim())new Function(m[1]);
-assert(index.includes('aventura-carduri.css?v=2026.11.08-5'),'CSS version refresh');
+assert(index.includes('aventura-carduri.css?v=2026.11.09-5'),'CSS version refresh');
 assert(index.includes('aventura-carduri.js?v=2026.11.09-1'),'JS version refresh');
 const env={
  ST_SERVER:'beta',
