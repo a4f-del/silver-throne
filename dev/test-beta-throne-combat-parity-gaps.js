@@ -26,7 +26,7 @@ assert(sql32.includes("v_h_atk::numeric-v_a_def::numeric*0.35"),
  'SQL32 reduces king damage by only 35% of challenger DEF');
 assert(sql32.includes("v_a_atk::numeric-v_h_def::numeric*0.35"),
  'SQL32 likewise simplifies attack against king');
-assert(special.includes('raw - bon(u).def * (1 + bon(u).pf / 100) - tr(u, \'def\')'),
+assert(special.includes("bon(u).def * (1 + bon(u).pf / 100) + tr(u, 'def')")&&special.includes('Math.round(raw - df)'),
  'Real king attack subtracts effective defender DEF, not 35%');
 assert(special.includes("hit(a, e, spOn(a, 'due', 3) ? 2.6 : 1.8, L)"),
  'Real Campion special is 1.8 or 2.6 times attack');

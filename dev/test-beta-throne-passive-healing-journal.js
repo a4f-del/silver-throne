@@ -13,7 +13,7 @@ for(const m of index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
  if(m[1].trim())new Function(m[1]);
 new Function(tron);
 assert(index.includes('legendare.js?v=2026.11.09-1'),'Legendary script cache refreshed');
-assert(index.includes('tron.js?v=2026.11.09-4'),'Tron script cache refreshed');
+assert(index.includes('tron.js?v=2026.11.09-7'),'Tron script cache refreshed');
 const section=(s,start,end)=>{
  const a=s.indexOf(start),b=s.indexOf(end,a+start.length);
  assert(a>=0&&b>a,'Missing section '+start);return s.slice(a,b);

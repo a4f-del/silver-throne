@@ -177,10 +177,13 @@ async function lwAttack(id) {
 }
 function lwFight(data) {
   if (typeof cn === 'function') cn('a');   /* misiunea zilnică „Atacă jucători în Lume” */
-  const g = (data.units || []).map(u => TT.throneDuelUnit(u));
+  const g = (data.units || []).map(u => TT.throneDuelUnit(u, undefined, data.level));
   const d = { room: 1, rooms: 1, k: 1, rw: 0, bn: data.name, di: 0, raid: -4, rn: 'satul lui ' + data.name, lbl: 'Atac', lume: 1, dlv: data.level, vsh: data.hero || null,
     rf: 1, fx: 1, loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false, em: { ghost: 1 }, ghost: g };
-  S.d = d; startF(true); terFrom(); S.tab = 'c'; S.msg = 'Ataci satul lui ' + data.name + '. Apărarea lui e o fantomă a echipei sale.';
+  S.d = d; startF(true);
+  /* inițiativa se trage la sorți, ca la Tron: apărătorul poate lovi primul, deci atacul nu mai e avantajat din start */
+  if (d.f) { d.defFirst = Math.random() < 0.5; d.f.log.push(d.defFirst ? 'Inițiativa: apărătorul lovește primul!' : 'Inițiativa: tu lovești primul!'); if (d.defFirst) enemy(); }
+  terFrom(); S.tab = 'c'; S.msg = 'Ataci satul lui ' + data.name + '. Apărarea lui e o fantomă a echipei sale.';
   if (S.auto !== false) { if (typeof fxAutoRun === 'function') fxAutoRun(); else autoRun(); return; } go();
 }
 /* victorie (apelat din terRl): prada o calculează jocul, ca la un raid pe un sat-bot de nivelul apărătorului.

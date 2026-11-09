@@ -37,7 +37,7 @@ assert(!/\b(?:DELETE FROM|TRUNCATE TABLE|DROP TABLE)\b/i.test(sql),'No reset');
 assert(!/CREATE OR REPLACE FUNCTION public\.(?:world_join|world_raid_start|world_raid_finish|throne_publish)\b/i.test(sql),'Do not override production RPCs');
 assert(!/\b(?:INSERT INTO|UPDATE)\s+public\.(?:world_raids|wallet|game_saves|throne_profiles)\b/i.test(sql));
 assert(throne.includes('S.fs.slice(0, 4)'),'Full active party');
-assert(world.includes('map(u => TT.throneDuelUnit(u))'),'World does not impose level-40 cap');
+assert(world.includes('map(u => TT.throneDuelUnit(u, undefined, data.level))'),'World does not impose level-40 cap (level only scales the ghost multiplier)');
 assert(world.includes('lwAutoPublishSoon()'),'World republish scheduling');
 assert(index.includes("if(typeof tronAutoPublishSoon==='function')tronAutoPublishSoon()"));
 assert(index.includes("if(typeof lwAutoPublishSoon==='function')lwAutoPublishSoon()"));
@@ -47,10 +47,10 @@ assert(throne.includes("TRON.pubSig = sig"),'Only successful publication updates
 assert(throne.includes('TRON.pubFailAt'),'Errors back off');
 assert(!throne.includes('onclick="tronPublish()"'),'No manual Throne publish button');
 assert(throne.includes('!CONT.booted'),'Wait for a logged-in and booted account');
-assert(index.includes('tron.js?v=2026.11.09-4'));
-assert(index.includes('lume.js?v=2026.11.09-5'));
+assert(index.includes('tron.js?v=2026.11.09-7'));
+assert(index.includes('lume.js?v=2026.11.09-7'));
 
-const testSquad=get(throne,'function tronTeamUnits() {','function tronDuelRestore()');
+const testSquad=get(throne,'function tronUnitOf(f) {','function tronDuelRestore()');
 const makeSquad=()=>new Function('S','TT','bon','mhp','atkOf','tr',
  testSquad+';return {tronTeamUnits,tronUnits};')(
  {fs:[

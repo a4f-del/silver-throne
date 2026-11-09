@@ -36,8 +36,8 @@ assert(game.includes("function auto1(){")&&game.includes("if(!(a.cd>0))"),'Auto 
 assert(spec.includes("return a.c === 'Vraci' ? 1 : 2"),'Champion base cooldown=2');
 assert(spec.includes("hit(a, e, spOn(a, 'due', 3) ? 2.6 : 1.8, L)"),
  'Actual Champion ability multipliers 1.8 and 2.6');
-assert(spec.includes('e.atk * R(0.8, 1.2)'),'King attack variance');
-assert(spec.includes("raw - bon(u).def * (1 + bon(u).pf / 100) - tr(u, 'def')"),
+assert(spec.includes('e.atk * (o.m || 1) * R(0.8, 1.2)'),'King attack variance (×ability multiplier)');
+assert(spec.includes("bon(u).def * (1 + bon(u).pf / 100) + tr(u, 'def')")&&spec.includes('Math.round(raw - df)'),
  'Full effective defense subtracts against enemy attacks');
 assert(tron.includes("Math.round(b.def * (1 + b.pf / 100) + tr(f, 'def'))"),
  'Snapshot DEF represents effective hero DEF');

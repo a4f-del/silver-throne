@@ -23,7 +23,10 @@
     cooldownS: 120,             /* pauză între două provocări ale aceluiași jucător (secunde) */
     dailyCap: 10,               /* provocări pe zi (zi = ora României); provocarea e GRATUITĂ, fără puncte */
     duelHitCapPct: 0.38,         /* BETA PvP: nicio lovitura individuala nu depaseste 38% din viata maxima a tintei */
-    ghostAtkMult: 1.62,         /* fantoma lovește doar normal, fără abilități și critice; multiplicatorii compensează (calibrat în dev/calibrate-ghost.js) */
+    ghostAtkMult: 1.62,         /* apărări vechi (fără critice în instantaneu): fantoma lovește doar normal, multiplicatorul compensează */
+    ghostAtkMultCrit: 1.03,     /* apărări noi: fantoma are criticele și abilitățile clasei; multiplicatorul compensează doar specializările */
+    ghostAtkMultCritPerLvl: 0.001, /* … care cresc cu nivelul: 1,05 la nivelul 20, 1,08 la 50 (calibrat prin simulare „în oglindă” cu motorul real: aceeași echipă contra propriei apărări, ~50%) */
+    ghostCritMax: 75,           /* plafon de siguranță pentru șansa de critic din instantaneu (%) */
     ghostHpMult: 1,
     guardK: 2.75,               /* dificultatea Gărzii Regale (Tron gol): multiplicator peste k(nivel). Calibrat în dev/calibrate-guard.js: la nivelul minim un jucător slab câștigă ~85–90%, unul bine echipat ~100% */
     prize: { king: 1.5, k2: 1, k3: 0.6, part: 0.25 },    /* × n, unde n = 2 + nivel ÷ 5 (cât cere un afix la o forjare) */
@@ -93,13 +96,23 @@
   };
   /* Duel la Tron: fără plafon pe viață/atac/apărare; păstrăm multiplicatorul
      de atac al fantomei până la calibrarea separată a duelurilor 1v1. */
-  T.throneDuelUnit = function (u, cfg) {
+  T.throneDuelUnit = function (u, cfg, lvl) {
     cfg = cfg || T.CFG;
+    const crit = T.ghostCrit(u, cfg);
     const hp = Math.max(1, Math.round(fin(u.hp, 1) * (cfg.ghostHpMult || 1)));
-    const atk = Math.max(1, Math.round(fin(u.atk, 1) * cfg.ghostAtkMult));
+    const atk = Math.max(1, Math.round(fin(u.atk, 1) * (crit ? T.ghostAtkMultCritFor(cfg, lvl) : cfg.ghostAtkMult)));
     const def = Math.max(0, Math.round(fin(u.def, 0)));
-    return { n: String(u.n || 'Erou').slice(0, 20), c: u.c, hp, atk, def };
+    const out = { n: String(u.n || 'Erou').slice(0, 20), c: u.c, hp, atk, def };
+    if (crit) { out.cr = crit.cr; out.cm = crit.cm; }
+    return out;
   };
+  /* criticele dintr-un instantaneu nou (null la apărările vechi, care păstrează vechiul multiplicator) */
+  T.ghostCrit = function (u, cfg) {
+    cfg = cfg || T.CFG;
+    if (!u || u.cr == null || !Number.isFinite(+u.cr)) return null;
+    return { cr: Math.max(0, Math.min(cfg.ghostCritMax || 75, Math.round(+u.cr))), cm: Math.max(1.5, Math.min(2.5, fin(u.cm, 1.5))) };
+  };
+  T.ghostAtkMultCritFor = (cfg, lvl) => { cfg = cfg || T.CFG; const L = Math.max(1, Math.min(50, fin(lvl, 20))); return fin(cfg.ghostAtkMultCrit, 1.03) + fin(cfg.ghostAtkMultCritPerLvl, 0) * L; };
   /* Duel BETA intre eroi: opreste one-shot-urile cauzate de multiplicatori,
      abilitati si lovituri critice. Folosit simetric pentru atacator si rege.
      Nu se aplica Gărzii Regale, Lumii sau LIVE. */
