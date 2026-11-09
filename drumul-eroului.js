@@ -4,7 +4,7 @@
 const JE_STEPS = [
  {id:'poarta',title:'Cenușa de la poartă',icon:'🛡️',
   say:'„Nu lăsăm satul singur. Hai să aflăm ce se ascunde sub deal.” — Paznicul',
-  help:'Primește-l pe Paznic, apoi intră în Mina Cenușie din Coborâre. Numele lui poate fi schimbat ulterior din Erou → Cont și profil. Învinge pe rând cei trei monștri și Căpitanul Cenușii. După victorie revii automat și primești prada. Dacă te retragi mai devreme, progresul în mină se păstrează, dar jurământul se încheie după căpitan.',
+  help:'Primește-l pe Paznic, apoi intră în Mina Cenușie din Aventură. Numele lui poate fi schimbat ulterior din Erou → Cont și profil. Învinge pe rând cei trei monștri și Căpitanul Cenușii. După victorie revii automat și primești prada. Dacă te retragi mai devreme, progresul în mină se păstrează, dar jurământul se încheie după căpitan.',
   reward:{g:50,o:15},parts:[['Paznicul s-a alăturat',()=>jeHas('Paznic')],['Ai învins primul căpitan',()=>jeCount('bs')>=1]],
   action:()=>!jeHas('Paznic')?['Han','a','h']:['Mina Cenușie','c','']},
  {id:'urme',title:'Urmele din cenușă',icon:'🏹',
@@ -138,7 +138,7 @@ function jeNextAdventurePanel(){
   +'<p class="je-next-note">'+message+'</p>'
   +'<p class="je-next-note">'+helper+'</p>'
   +'<button class="p" onclick="jeGoNextAdventure()">'+
-    (ready?'Deschide Coborâre':'Continuă în Coborâre')+'</button></section>';
+    (ready?'Deschide Aventură':'Continuă în Aventură')+'</button></section>';
 }
 function jeGoNextAdventure(){
  if(!jeFocus()||S.d||jeCurrent())return;
@@ -148,11 +148,11 @@ function jeGoNextAdventure(){
 const JE_MILESTONES=[
  {lv:5,title:'Lumea s-a deschis',where:'Hartă → Lumea',
   why:'Poți descoperi alți jucători și satele din Lume. Nu este necesar să ataci pentru a continua.'},
- {lv:8,title:'Catacombele Uitate',where:'Coborâre → Catacombele Uitate',
+ {lv:8,title:'Catacombele Uitate',where:'Aventură → Catacombele Uitate',
   why:'Ai deblocat o nouă temniță, cu un căpitan și pradă de nivel mai mare.'},
  {lv:15,title:'Bazarul',where:'Sat → Piață → Bazar',
   why:'Poți tranzacționa obiecte eligibile cu alți jucători. Echipamentul legendar rămâne legat de cont.'},
- {lv:20,title:'Turnul',where:'Coborâre → Turn',
+ {lv:20,title:'Turnul',where:'Aventură → Turn',
   why:'Se deschide provocarea de endgame cu etaje și străjeri. Nu înlocuiește progresul din Temnițe.'},
  {lv:30,title:'Al patrulea loc în echipă',where:'Erou → Echipă și echipament',
   why:'Poți folosi încă un luptător în Temnițe; la Tron și în fantoma Lumii se păstrează limita proprie.'}

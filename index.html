@@ -195,15 +195,15 @@ main{padding:8px 24px;max-width:940px}
 <script src="world-data.js?v=2026.11.04-4"></script>
 <script src="tron-logic.js?v=2026.11.07-5"></script>
 <script src="cladiri-art.js?v=2026.11.04-4"></script>
-<script src="teritorii.js?v=2026.11.09-1"></script>
+<script src="teritorii.js?v=2026.11.09-6"></script>
 <script src="inventar.js?v=2026.11.09-1"></script>
 <script src="panou.js?v=2026.11.09-1"></script>
-<script src="ghid.js?v=2026.11.09-1"></script>
+<script src="ghid.js?v=2026.11.09-6"></script>
 <script src="mercenari.js?v=2026.11.09-1"></script>
 <script src="mercenari-poveste.js?v=2026.11.09-1"></script>
 <script src="prolog.js?v=2026.11.09-1"></script>
 <script src="poveste-misiuni.js?v=2026.11.09-1"></script>
-<script src="drumul-eroului.js?v=2026.11.09-2"></script>
+<script src="drumul-eroului.js?v=2026.11.09-6"></script>
 <script src="prima-recompensa.js?v=2026.11.07-1"></script>
 <script src="ghidare-erou.js?v=2026.11.08-3"></script>
 <script src="specializari.js?v=2026.11.09-1"></script>
@@ -219,14 +219,14 @@ main{padding:8px 24px;max-width:940px}
 <script src="echipament-balance.js?v=2026.11.09-1"></script>
 <script src="trepte.js?v=2026.11.09-1"></script>
 <script src="turn.js?v=2026.11.09-1"></script>
-<script src="aventura-carduri.js?v=2026.11.09-1"></script>
+<script src="aventura-carduri.js?v=2026.11.09-6"></script>
 <script src="harta.js?v=2026.11.04-4"></script>
 <script src="lume.js?v=2026.11.09-5"></script>
 <script src="lume-pictat.js?v=2026.11.09-1"></script>
 <script src="tinut.js?v=2026.11.09-1"></script>
-<script src="tema.js?v=2026.11.09-1"></script>
+<script src="tema.js?v=2026.11.09-6"></script>
 <script src="ritm.js?v=2026.11.06-1"></script>
-<script src="echipa.js?v=2026.11.09-2"></script>
+<script src="echipa.js?v=2026.11.09-6"></script>
 <script src="erou.js?v=2026.11.09-1"></script>
 <script src="cont.js?v=2026.11.09-1"></script>
 <script src="istoric.js?v=2026.11.09-1"></script>
@@ -396,7 +396,7 @@ function startD(i){const g=DG[i||0];if(S.adventure&&S.adventure.di!==(i||0)){S.m
  if(!S.adventure)S.adventure={di:i||0};S.adventure.tierLocked=true;S.d=d;S.fl=null;S.msg='';if(d.room===0)cn('d');S.tab='c';startF(boss);go();   /* cardul VS apare o clipă înainte ca lupta să se rezolve */
  if(S.auto!==false)setTimeout(()=>{if(S.d===d&&S.d.f){if(typeof fxAutoRun==='function')fxAutoRun();else autoRun()}},650)}
 /* după fiecare monstru învins: prada se încasează, lista avansează (după căpitan o ia de la capăt) */
-function dOneDone(d,b){const band=typeof trBand==='function'?trBand():'',m=S.msg+band;(S.dp=S.dp||{})[d.dk]=b?0:d.room+1;if(b&&typeof egRecordBoss==='function')egRecordBoss(d);if(b)adventureClear(d);leave();S.msg=(b?(d.cm?d.cm+' ':'')+(`Ai învins căpitanul! ${DG[d.di].n} este încheiată. Ai revenit automat în Coborâre, cu prada câștigată. Următoarea incursiune începe de la primul monstru. `):`${m} `)+S.msg;go()}
+function dOneDone(d,b){const band=typeof trBand==='function'?trBand():'',m=S.msg+band;(S.dp=S.dp||{})[d.dk]=b?0:d.room+1;if(b&&typeof egRecordBoss==='function')egRecordBoss(d);if(b)adventureClear(d);leave();S.msg=(b?(d.cm?d.cm+' ':'')+(`Ai învins căpitanul! ${DG[d.di].n} este încheiată. Ai revenit automat în Aventură, cu prada câștigată. Următoarea incursiune începe de la primul monstru. `):`${m} `)+S.msg;go()}
 /* o singură cameră înainte (luptă, comoară sau foc de tabără); ultima e căpitanul */
 function doors(){const d=S.d;if(d.tw)return[{t:(d.room+1)%10===0?'b':'l'}];return d.room==d.rooms-1?[{t:'b'}]:[{t:'l'}]}   /* pașii: doar lupte, fără comori sau foc de tabără (trepte.js) */
 /* costul unei camere: 1 punct, căpitanul 2 (la raiduri 1); evenimentul cu chei e gratuit */
@@ -561,7 +561,7 @@ function heroSolo(){
  if(!others.length){S.msg='Eroul este deja singur. Poți intra în temniță.';return go();}
  S.fs=[hero];S.rs.push(...others);S.sel=0;
  S.msg='Eroul merge singur. '+others.length+' '+(others.length===1?'mercenar a trecut':'mercenari au trecut')+
-   ' în rezervă. Îi poți readuce direct din Coborâre.';
+   ' în rezervă. Îi poți readuce direct din Aventură.';
  go();
 }
 function toBench(i){if(S.d)S.msg='Nu poți schimba echipa în timpul coborârii.';else if(S.fs[i].h)S.msg='Eroul rămâne mereu în echipă.';else if(S.fs.length<2)S.msg='Eroul rămâne în echipă, chiar și singur.';else{S.rs.push(S.fs.splice(i,1)[0]);S.msg=''}go()}

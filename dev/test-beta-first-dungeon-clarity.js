@@ -52,7 +52,7 @@ assert(boss.includes('Progres 4 / 4'),'boss is final step');
 assert(boss.includes('Ultimul adversar: căpitanul'));
 assert(boss.includes('Înfruntă căpitanul'));
 assert(boss.includes('Invocă un șobolan'),'unique captain ability still shown');
-assert(boss.includes('revii automat în Coborâre și primești prada'),
+assert(boss.includes('revii automat în Aventură și primești prada'),
  'post-boss navigation and loot clearly explained');
 assert(boss.includes('onclick="startD(0)"'));
 assert(!boss.includes('ac-return-current'));
@@ -60,7 +60,7 @@ assert(steps.includes("function trSelSet(i, k)"),'button uses existing preview s
 assert(steps.includes("if(S.adventure&&typeof acDungeonPage"),
  'special dungeon page is used inside an adventure');
 assert(html.includes('aventura-carduri.css?v=2026.11.09-5')&&
- html.includes('aventura-carduri.js?v=2026.11.09-1')&&
+ html.includes('aventura-carduri.js?v=2026.11.09-6')&&
  html.includes('ghidare-erou.js?v=2026.11.08-3'),
  'updated UI assets are loaded without stale caching');
 assert(guide.includes("document.querySelector('.ac-return-current')"),
@@ -81,7 +81,7 @@ function finish(server){
 const betaFinish=finish('beta');
 assert.equal(betaFinish.closed,1,'boss closes the dungeon adventure');
 assert.equal(betaFinish.state.dp['0_0'],0,'next run starts from first monster');
-assert(betaFinish.state.msg.includes('Ai revenit automat în Coborâre')&&
+assert(betaFinish.state.msg.includes('Ai revenit automat în Aventură')&&
  betaFinish.state.msg.includes('Pradă: 42 aur'),'after-boss message and loot visible');
 assert(css.includes('.ac-dungeon .ac-progress-top{'),'new step status stays compact');
 assert(css.includes('.ac-dungeon .ac-return-current{'),'return button is visible in small screens');

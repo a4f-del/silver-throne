@@ -8,7 +8,7 @@ const src=read('beta-compact-ui.js'),index=read('index.html'),account=read('cont
   server=read('servere.js'),guide=read('ghid.js');
 new Function(src);
 assert(index.includes('beta-compact-ui.js?v=2026.11.09-5'),'Settings asset is cache-busted');
-assert(index.includes('ghid.js?v=2026.11.09-1'),'Playback guide asset is cache-busted');
+assert(index.includes('ghid.js?v=2026.11.09-6'),'Playback guide asset is cache-busted');
 assert(guide.includes("stCompactSettingToggle(\\'fx\\')"),'Guide points to new playback control');
 assert(account.includes('async function contOut()')&&account.includes('await contPush()'),'Logout saves before signing out');
 assert(account.includes('supabaseClient.auth.signOut()'),'Logout uses existing Supabase session');

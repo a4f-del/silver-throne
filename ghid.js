@@ -11,7 +11,7 @@
    Pasul curent e S.tu (−1 = ghid închis); sfaturile văzute: S.ghs; S.ghOff = fără sfaturi.
    Se încarcă înaintea scriptului din pagină.
    ========================================================================== */
-const GH_TAB = { a: 'Sat', c: 'Coborâre', m: 'Hartă', r: 'Tron', e: 'Echipă' };
+const GH_TAB = { a: 'Sat', c: 'Aventură', m: 'Hartă', r: 'Tron', e: 'Echipă' };
 const GH_MT = { h: 'Harta', l: 'Harta', b: 'Clasament', k: 'Campanie', t: 'Teritorii' };
 /* Ghidarea BETA urmeaza meniul compact, fara a schimba ghidul LIVE. */
 const ghCompact = () => true;
@@ -34,7 +34,7 @@ const GHID = [
   { t: 'Bine ai venit!', n: 1,
     d: 'Ești eroul unui sat. Cobori în temnițe după pradă, forjezi echipament și îți strângi o echipă. Ghidul te duce pas cu pas, în ritmul tău: urmează săgeata aurie.' },
   { t: 'Redarea luptelor', p: { t: 'c' }, n: 1, k: ghReplayTarget,
-    d: ('În <b>Coborâre</b>, luptele se văd lovitură cu lovitură. Apasă <b>⚙ Setări</b> în bara de sus, apoi <b>Redare lupte</b> ca să schimbi între animație și rezultat direct.<details><summary>Mai multe</summary>Prima luptă se vede mereu, ca să înțelegi cum funcționează. În același meniu găsești și <b>Botul</b> (premium).</details>') },
+    d: ('În <b>Aventură</b>, luptele se văd lovitură cu lovitură. Apasă <b>⚙ Setări</b> în bara de sus, apoi <b>Redare lupte</b> ca să schimbi între animație și rezultat direct.<details><summary>Mai multe</summary>Prima luptă se vede mereu, ca să înțelegi cum funcționează. În același meniu găsești și <b>Botul</b> (premium).</details>') },
   { t: 'Prima coborâre', p: { t: 'c' }, c: () => C('l') >= 1, r: { g: 30, o: 15 },
     k: () => { if (!S.d) return (typeof dOpen === 'function' && !dOpen(0)) ? ghB('dToggle(0)') : ghB('startD(0)'); if (S.d.f) return []; const d = ghB('startD(', 1), l = ghB('leave('); return d.length ? [...d, ...l] : l; },
     d: 'Apasă <b>„Intră”</b> la <b>Mina Cenușie</b> și ia monștrii pe rând: fiecare costă 1 punct. Înaintea fiecărui pas vezi <b>șansele de câștig</b>. Când vrei să te oprești, apasă <b>„Ieși cu prada”</b>.<details><summary>Mai multe</summary>Lista se termină cu un căpitan (2 puncte, cu o abilitate specială). Locul din listă se păstrează; după căpitan, lista o ia de la capăt.</details>' },
@@ -89,7 +89,7 @@ function ghHints() {
     d: 'Ai ajuns la nivelul 5. În <b>Hartă › Lumea</b> vezi satele celorlalți jucători și îi poți ataca. Atacurile au bara lor (18 pe zi), <b>nu costă puncte</b>, iar cel atacat nu pierde nimic. În <b>Clasament</b> vezi cine e cel mai puternic.' });
   /* fiecare temniță nouă */
   DG.forEach((g, i) => { if (i > 0 && !g.ev && g.lv > 1) L.push({ k: 'dg' + i, when: () => S.lvl >= g.lv, p: { t: 'c' }, done: () => S.tab === 'c', t: 'Temniță nouă: ' + g.n,
-    d: `La nivelul ${g.lv} s-a deschis <b>${g.n}</b>, în Coborâre: ${g.rooms} camere, căpitanul ${g.bn}${g.rm >= 2 ? ' și materiale mai rare' : ''}. Lupte mai grele, pradă mai bună.` }); });
+    d: `La nivelul ${g.lv} s-a deschis <b>${g.n}</b>, în Aventură: ${g.rooms} camere, căpitanul ${g.bn}${g.rm >= 2 ? ' și materiale mai rare' : ''}. Lupte mai grele, pradă mai bună.` }); });
   L.push({ k: 'tron', when: () => S.lvl >= 10, p: { t: 'r' }, done: () => S.tab === 'r', t: 'Tronul de Argint',
     d: 'De la nivelul 10 poți lupta pentru <b>Tron</b>. Învingi fantoma regelui (sau Garda Regală, dacă Tronul e gol) și devii rege. Cine îl ține cel mai mult într-o săptămână primește titlul și materiale rare. Provocările sunt gratuite.' });
   L.push({ k: 'lv10', when: () => S.lvl > 10, t: 'Ai trecut de nivelul 10',
@@ -194,7 +194,7 @@ function tuH() {
 }
 
 /* ------------------------------------------------------------------ CE POȚI FACE ACUM */
-/* doar acțiunile disponibile ACUM și fără puncte; apare în Sat și Coborâre când nu mai ai puncte */
+/* doar acțiunile disponibile ACUM și fără puncte; apare în Sat și Aventură când nu mai ai puncte */
 function ghIdle() {
   try {
     if (!S || S.d || !(S.tab === 'a' || S.tab === 'c') || S.pts >= 1 || ghActive()) return '';

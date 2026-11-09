@@ -20,7 +20,7 @@ const tLvl = v => Math.max(1, S.lvl + v.dl);
 const MXP = () => Math.min(70, MAXP0 + 6 * Math.floor(Math.min(typeof S !== 'undefined' && S ? S.lvl : 1, 50) / 10) + terB('pts'));
 
 /* ----------------------------------------------------- ÎNTOARCERE DUPĂ LUPTĂ ----
-   Luptele pornite de pe hartă (raid, cucerire, tabără, fortăreață, Tron) se afișează în fila Coborâre. terFrom() reține
+   Luptele pornite de pe hartă (raid, cucerire, tabără, fortăreață, Tron) se afișează în fila Aventură. terFrom() reține
    de unde a pornit lupta, iar go() te readuce acolo când lupta s-a încheiat (ieșire cu prada, înfrângere sau fugă).
    Botul (S.ib) nu schimbă navigarea. */
 function terFrom() { if (!S.ib && (S.tab === 'm' || S.tab === 'r')) S.rt = { t: S.tab, mt: S.mt || 'h' }; }

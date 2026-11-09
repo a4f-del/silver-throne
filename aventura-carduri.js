@@ -86,7 +86,7 @@ function acDungeonPage(i) {
       '<button type="button" class="ac-return-current" onclick="trSelSet('+i+','+p+')">↶ Înapoi la '+acSafe(currentName)+'</button>') +
     acParty()+'<details class="ac-help-details"><summary>ⓘ Sfaturi și echipament</summary>'+
     '<p class="ac-hint">'+(canFight?
-      (boss?'Ultima luptă! După victorie revii automat în Coborâre și primești prada.':
+      (boss?'Ultima luptă! După victorie revii automat în Aventură și primești prada.':
         'Apasă Luptă pentru a învinge acest monstru. Următorul se deblochează după victorie.'):
       (sel<p?'Acest monstru a fost deja învins.':'Acest adversar nu poate fi atacat încă.')+
         ' Selectează adversarul curent pentru a continua.')+'</p>' +
