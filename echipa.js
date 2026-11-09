@@ -131,7 +131,7 @@ function tmChar(inv) {
   let h = `<div class="tm-char"><section class="tm-left tm-left2">${tmFull(f, sub, i)}`;
   h += `<div class="tm-hpbar"><span>${c.hp <= 0 ? '☠ căzut' : Math.round(c.hp) + ' / ' + c.max + ' viață'}</span><i class="bar${c.hp <= 0 ? ' e' : ''}"><i style="width:${c.p}%"></i></i></div>`;
   h += `<div class="tm-stats"><div><b>${c.max}</b><span>Viață</span></div><div><b>${Math.round(atkOf(f))}</b><span>Atac</span></div><div><b>${tmDef(f)}</b><span>Apărare</span></div></div>${extra ? `<div class="chips">${extra}</div>` : ''}`;
-  h += `<div class="tm-sp"><b>${tEsc(CL[f.c].sp)}</b> <span class="mute">${tEsc(CL[f.c].d)}; se reîncarcă după ${cd} ${cd === 1 ? 'tură' : 'ture'}.</span></div>${typeof spPanel === 'function' ? spPanel(f) : ''}${hero}${xp}<div class="tm-act">${typeof teamCtl === 'function' ? teamCtl(f) : ''}${deadAll().length > 1 || (deadAll().length === 1 && c.hp > 0) ? reviveAllBtn() : ''}${rv}${hurt && !S.d ? `<button onclick="heal()">Vindecă răniții · ${healCost} aur</button>` : ''}${tmSkin(f)}</div></section>`;
+  h += `<div class="tm-sp"><b>${tEsc(CL[f.c].sp)}</b> <span class="mute">${tEsc(CL[f.c].d)}; se reîncarcă după ${cd} ${cd === 1 ? 'tură' : 'ture'}.</span></div>${typeof spPanel === 'function' ? spPanel(f) : ''}${hero}${xp}<div class="tm-act">${typeof teamCtl === 'function' ? teamCtl(f) : ''}${rv}${tmSkin(f)}</div></section>`;
   h += `<div class="tm-right"><section class="tm-eq"><h2>Echipament · ${tEsc(f.n)}</h2>${vSlots()}</section>${inv || ''}</div></div>`;
   return h;
 }
@@ -163,7 +163,10 @@ function vEquipTop(inv, pre) {
   if (wide && tmTab === 'inv') tmTab = 'eq';
   const n = (S.inv || []).length, f = cur();
   const tabs = [['eq', 'Echipament'], ...(wide ? [] : [['inv', `Rucsac${n ? ' · ' + n : ''}`]]), ['co', 'Compoziție și presetări']];
-  const bar = `<div class="tm-tabs" role="tablist">${tabs.map(([k, t]) => `<button role="tab" aria-selected="${tmTab === k}" class="${tmTab === k ? 'on' : ''}" onclick="tmTabSet('${k}')">${t}</button>`).join('')}</div>`;
+  /* îngrijirea echipei stă mereu la vedere, în bara de file: nu mai cauți „Ridică toți căzuții” în josul coloanei */
+  const hurt = !S.d && [...S.fs, ...S.rs].some(x => x.hp > 0 && x.hp < mhp(x)), healCost = Math.round(6 * S.lvl * Math.pow(.96, BL().i));
+  const care = (typeof reviveAllBtn === 'function' ? reviveAllBtn('d tm-care-b') : '') + (hurt ? `<button class="tm-care-b" onclick="heal()">✚ Vindecă răniții · ${healCost} aur</button>` : '');
+  const bar = `<div class="tm-tabs" role="tablist">${tabs.map(([k, t]) => `<button role="tab" aria-selected="${tmTab === k}" class="${tmTab === k ? 'on' : ''}" onclick="tmTabSet('${k}')">${t}</button>`).join('')}${care ? `<span class="tm-care">${care}</span>` : ''}</div>`;
   let body;
   if (tmTab === 'co') body = tmSynergy() + (typeof mrTeamPresetPanel==='function'?mrTeamPresetPanel():'') + (typeof egEndgamePanel==='function'?egEndgamePanel():'') + (pre || '');
   else if (tmTab === 'inv') body = `<div class="tm-for mute">Echipezi pe <b>${tEsc(f.n)}</b> · alege altul din cardurile de sus.</div><div class="tm-right">${inv || ''}</div>`;
@@ -345,6 +348,12 @@ function temaHdr() {
   const st = document.createElement('style');
   st.textContent = `.tm-tabs{display:flex;gap:4px;margin:0 0 12px;padding:4px;border:1px solid var(--line);border-radius:10px;background:#0b0e10;overflow-x:auto;scrollbar-width:none}
 .tm-tabs button{flex:0 0 auto;width:auto;min-height:0;padding:7px 12px;font:700 13.5px Cinzel,serif;border:0;border-radius:7px;background:transparent;color:var(--mute);box-shadow:none;white-space:nowrap}
+.tm-care{display:flex;gap:6px;margin-left:auto;align-items:center}
+.tm-tabs .tm-care .tm-care-b{flex:0 0 auto;padding:6px 12px;font:700 13px Cinzel,serif;border-radius:7px;box-shadow:none;color:#f6ead0;border:1px solid #f0d27a55;background:linear-gradient(180deg,#2a3a2a,#18241a)}
+.tm-tabs .tm-care .tm-care-b.d{background:linear-gradient(180deg,#6a2018,#3e120d);border-color:#e8837b88;animation:tmCare 1.8s ease-in-out infinite}
+@keyframes tmCare{50%{box-shadow:0 0 12px #e8837b88}}
+@media (prefers-reduced-motion:reduce){.tm-tabs .tm-care .tm-care-b.d{animation:none}}
+@media (max-width:959px){.tm-tabs{flex-wrap:wrap}.tm-care{margin-left:0;width:100%}.tm-tabs .tm-care .tm-care-b{flex:1 1 auto;white-space:normal}}
 .tm-tabs button:hover{color:var(--ink);transform:none}.tm-tabs button.on{background:linear-gradient(180deg,#3a2e12,#241c0b);color:var(--gold2,#f0d27a);box-shadow:inset 0 0 0 1px #f0d27a55}
 .tm-for{font-size:13.5px;margin:0 0 8px}
 @media (max-width:959px){.tm-tabs button{flex:1 0 auto}}

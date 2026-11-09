@@ -15,7 +15,7 @@ const ctx = {
   ST_SERVER:'beta',
   document:{head:{appendChild(x){styles.push(x.textContent)}},createElement(){return {textContent:''}},getElementById(){return null}},
   S:{tab:'c',fs:[{h:true,n:'Eroul'}],lvl:50,xp:20,pts:10,bp:0,gold:1234,ore:567,bt:{on:false,f:1,eq:1,hl:1},prem:true,fxInstant:false,d:null},
-  TEMA_NAV:[['a','Sat','🏠'],['c','Coborâre','⚔'],['m','Hartă','🗺'],['r','Tron','♛'],['e','Echipă','👥']],
+  TEMA_NAV:[['a','Sat','🏠'],['c','Aventură','⚔'],['m','Hartă','🗺'],['r','Tron','♛'],['e','Echipă','👥']],
   temaOn:k=>k==='c',navBadge:k=>k==='e'?'<b class="nb">2</b>':'',
   IC:{p:'⚡',g:'🪙',o:'⛏'},need:()=>100,av:()=>'<span>portret</span>',tEsc:x=>x,MXP:()=>60,
   wmHeader:()=>'<button id="wm-open">✉</button>',wfHeader:()=>'<button id="wf-open">Prieteni</button>',
@@ -30,7 +30,7 @@ Object.assign(ctx,vm.runInContext('({stCompactNav,stTronSidebarState,stCompactHd
 const nav = ctx.stCompactNav();
 assert.equal((nav.split('<div class="st-nav-sec"')[0].match(/<button/g)||[]).length,5,'Five permanent navigation destinations');
 assert(nav.includes('st-nav-sec')&&nav.includes("tab('k')"),'Rankings link sits below the main destinations');
-for(const t of ['Sat','Coborâre','Hartă','Tron','Echipă']) assert(nav.includes(t),t);
+for(const t of ['Sat','Aventură','Hartă','Tron','Echipă']) assert(nav.includes(t),t);
 assert(nav.includes('onclick="tab(\'e\')"'),'Team is accessible directly from the sidebar');
 const header = ctx.stCompactHdr();
 assert(header.includes('Pornește BOT-ul')&&header.includes('onclick="stBotPower()"'),'BOT has a visible real start button in Settings');
@@ -72,6 +72,6 @@ assert(guide.includes('function ghTeamNav()')&&guide.includes("p.t === 'e' ? ghT
 assert(guide.includes('function ghReplayTarget()')&&guide.includes('header .st-settings:not([open])')&&guide.includes('stCompactSettingToggle('),'Legacy BETA guide follows Setări to playback control');
 assert(!heroGuide.includes("tab==='e'&&typeof stCompactActive==='function'")&&heroGuide.includes("return {selector:'#nv button"),'New-hero guidance highlights Echipă in sidebar');
 assert(journey.includes('deschide Echipă din bara din stânga'),'Drumul Eroului instructions reflect restored sidebar');
-assert(html.includes('ghid.js?v=2026.11.09-1')&&html.includes('ghidare-erou.js?v=2026.11.08-3'),'Both guide scripts cache-busted');
+assert(html.includes('ghid.js?v=2026.11.09-6')&&html.includes('ghidare-erou.js?v=2026.11.08-3'),'Both guide scripts cache-busted');
 for(const script of html.split('<script>').slice(1).map(s=>s.split('</script>')[0])) if(script.trim()) new Function(script);
 console.log('OK: five nav entries, BOT controls, existing logout, guide and BETA scope, inline JS.');

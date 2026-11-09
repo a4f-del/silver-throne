@@ -9,9 +9,9 @@ const territory=read('teritorii.js'),journey=read('drumul-eroului.js'),
 for(const src of [territory,journey,story])new Function(src);
 for(const m of index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
  if(m[1].trim())new Function(m[1]);
-assert(index.includes('teritorii.js?v=2026.11.09-1'));
+assert(index.includes('teritorii.js?v=2026.11.09-6'));
 assert(index.includes('poveste-misiuni.js?v=2026.11.09-1'));
-assert(index.includes('drumul-eroului.js?v=2026.11.09-2'));
+assert(index.includes('drumul-eroului.js?v=2026.11.09-6'));
 assert(journey.includes("cmpOpenChecklist(\\'journey\\')"),'new journey invokes focused navigation');
 assert(story.includes("cmpOpenChecklist(\\'story\\')"),'older BETA story uses same navigation');
 const start=territory.indexOf('function cmpChapters(){'),end=territory.indexOf('/* --------------------------------------------------------------- PREMIUM',start);

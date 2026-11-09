@@ -69,7 +69,7 @@ S.tab='e';assert(plan().selector.includes("tab('a')"),'wrong screen indicates Sa
 S.tab='a';S.vil='p';assert(plan().selector.includes('.vb-c[data-v="h"]'),'correct screen indicates building switch');
 S.vil='h';assert(plan().selector.includes('mrRecruit'),'inside Han indicates the actual action');
 hasPaznic=true;S.tab='a';S.vil='';
-assert(plan().selector.includes("tab('c')"),'after Paznic show Coborâre nav');
+assert(plan().selector.includes("tab('c')"),'after Paznic show Aventură nav');
 S.tab='c';assert(plan().selector.includes('dToggle(0)'),'on dungeon list indicate Mina entry');
 S.adventure={di:0};assert(plan().selector.includes('.ac-primary'),'inside dungeon indicate Fight button');
 S.d={one:1,tw:false,f:{es:[{hp:45}]}};
@@ -110,4 +110,4 @@ api.jeGuideDecorate();assert.equal(arrow.style.display,'none','no BETA overlay o
 server='beta';S.journeyUxV=undefined;assert.equal(plan(),null,'existing BETA saves are excluded');
 assert(src.includes('prefers-reduced-motion:reduce'),'respects reduced motion');
 assert(src.includes('pointer-events:none'),'arrow never steals clicks');
-console.log('OK: single target, Sat/Han/Coborâre/Dungeon/forge/equip, skip modals, mobile placement, hide/show, LIVE isolation.');
+console.log('OK: single target, Sat/Han/Aventură/Dungeon/forge/equip, skip modals, mobile placement, hide/show, LIVE isolation.');
