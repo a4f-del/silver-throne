@@ -24,7 +24,7 @@ const SAT2 = {
     t: { file: 'antrenament', x: 368, y: 730, w: 292 }    /* jos-stânga */
   },
   /* câte aspecte există deja ca imagine pentru fiecare clădire (lipsă → cel mai mare disponibil; 0 → parcelă goală) */
-  have: { topitorie: 5, depozit: 1, piata: 0, infirmerie: 5, han: 5, antrenament: 0 },
+  have: { topitorie: 5, depozit: 5, piata: 1, infirmerie: 5, han: 5, antrenament: 1 },
   /* clădirile fără niveluri: un singur aspect */
   fixed: { p: 1, t: 1 },
   /* obiecte mici, fără parcelă (steagul); Negustorul face parte din Piață */
