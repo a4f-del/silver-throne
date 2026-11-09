@@ -320,3 +320,41 @@ g += `<rect class="lt-beam"
 `;
   document.head.appendChild(st);
 })();
+
+/* ------------------------------------------------------------------ LUMINĂ ȘI ÎNCADRARE
+   1) Lumină caldă în jurul Tronului și margini mai întunecate: câmpia nu mai pare un covor plat.
+      Se adaugă o singură dată peste terenul din cache (nu schimbă poziții sau clicuri).
+   2) La prima deschidere, harta încadrează satul tău ȘI Tronul, nu doar satul. */
+LWA.defs += `<radialGradient id="lw-sun" gradientUnits="userSpaceOnUse" cx="0" cy="20" r="1150">
+<stop offset="0" stop-color="#f6dc8e" stop-opacity=".20"/><stop offset=".35" stop-color="#d9c27a" stop-opacity=".09"/><stop offset="1" stop-color="#d9c27a" stop-opacity="0"/></radialGradient>
+<radialGradient id="lw-edge" gradientUnits="userSpaceOnUse" cx="0" cy="20" r="2200">
+<stop offset=".45" stop-color="#03080a" stop-opacity="0"/><stop offset="1" stop-color="#03080a" stop-opacity=".55"/></radialGradient>`;
+(function () {
+  if (typeof lwTerrain !== 'function') return;
+  const base = lwTerrain;
+  lwTerrain = function (ps, F) {
+    const t = base(ps, F);
+    if (t && !t.lit) {
+      const box = `x="${lpF(F.x - 600)}" y="${lpF(F.y - 600)}" width="${lpF(F.w + 1200)}" height="${lpF(F.h + 1200)}" pointer-events="none"`;
+      t.low += `<rect ${box} fill="url(#lw-sun)" style="mix-blend-mode:soft-light"/><rect ${box} fill="url(#lw-sun)"/><rect ${box} fill="url(#lw-edge)"/>`;
+      t.lit = true;
+    }
+    return t;
+  };
+})();
+(function () {
+  if (typeof lwCenter !== 'function') return;
+  const base = lwCenter;
+  /* folosită doar la prima încadrare (din lwMap); „Arată pe hartă” rămâne centrarea strânsă pe sat */
+  window.lwCenterHome = function (p) {
+    if (!p || !LUME.full) return base(p);
+    const [x, y] = lwPos(p), F = LUME.full, half = LWP.TW * 0.6;
+    const x0 = Math.min(x - 170, -half), x1 = Math.max(x + 170, half);
+    const y0 = Math.min(y - 170, 20 - 260), y1 = Math.max(y + 130, 20 + 170);
+    const ar = F.w / F.h;
+    let w = Math.max(lwNarrow() ? 520 : 820, x1 - x0, (y1 - y0) * ar);
+    if (w > F.w * 0.92) return base(p);            /* satul e departe de Tron: rămâne centrarea pe sat */
+    const h = w / ar, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    LUME.cam = lwClamp({ x: cx - w / 2, y: cy - h / 2, w, h });
+  };
+})();

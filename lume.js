@@ -295,7 +295,7 @@ function lwMap() {
   if (w / h < 1.6) { const nw = h * 1.6; x0 -= (nw - w) / 2; w = nw; } else { const nh = w / 1.6; y0 -= (nh - h) / 2; h = nh; }
   LUME.full = { x: x0, y: y0, w, h };
   if (LUME.cam) LUME.cam = lwClamp(LUME.cam);
-  else if (!LUME.camInit && meId && (w > 1300 || (lwNarrow() && w > 600))) lwCenter(ps.find(p => p.id === meId));
+  else if (!LUME.camInit && meId && (w > 1300 || (lwNarrow() && w > 600))) (typeof lwCenterHome === 'function' ? lwCenterHome : lwCenter)(ps.find(p => p.id === meId));
   LUME.camInit = true;
   const K = lwKings(ps), T = lwTerrain(ps, LUME.full);
   /* ordinea de desen: de sus în jos (cele din spate întâi); Tronul la locul lui; satul selectat ultimul */
