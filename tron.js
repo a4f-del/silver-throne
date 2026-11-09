@@ -75,15 +75,22 @@ let _tronSync = null;
 function tronSync() { if (_tronSync) return _tronSync; _tronSync = tronSync0().finally(() => { _tronSync = null; }); return _tronSync; }
 
 /* Tronul folosește duelul eroului; satul (Lumea) folosește echipa activă. */
+/* instantaneul unui luptător pentru apărare: viață, atac, apărare și, de acum, criticele lui reale
+   (cr = șansa de critic în %, cm = multiplicatorul criticului), ca fantoma să lovească la fel ca jucătorul */
+function tronUnitOf(f) {
+  const b = bon(f);
+  const cr = Math.round(5 + b.crit + tr(f, 'crit') + (f.h && typeof ST === 'function' ? ST().a * 0.8 : 0) + (typeof spCrit === 'function' ? spCrit(f) : 0));
+  const cm = typeof spCm === 'function' ? Math.round(spCm(f) * 100) / 100 : 1.5;
+  return { n: f.n, c: f.c, hp: mhp(f), atk: Math.round(atkOf(f)), def: Math.round(b.def * (1 + b.pf / 100) + tr(f, 'def')), cr: Math.max(0, Math.min(100, cr)), cm };
+}
 function tronTeamUnits() {
   // Satul foloseste toata echipa activa (maxim erou + 3 mercenari); duelul Tronului foloseste tronUnits().
-  return S.fs.slice(0, 4).map(f => { const b = bon(f); return { n: f.n, c: f.c, hp: mhp(f), atk: Math.round(atkOf(f)), def: Math.round(b.def * (1 + b.pf / 100) + tr(f, 'def')) }; });
+  return S.fs.slice(0, 4).map(tronUnitOf);
 }
 function tronUnits() {
   const f = S.fs.find(u => u.h) || S.fs[0];
   if (!f) return [];
-  const b = bon(f);
-  return [{ n: f.n, c: f.c, hp: mhp(f), atk: Math.round(atkOf(f)), def: Math.round(b.def * (1 + b.pf / 100) + tr(f, 'def')) }];
+  return [tronUnitOf(f)];
 }
 function tronDuelRestore() {
   const t = S && S.tron;
@@ -185,7 +192,7 @@ async function tronProvoca() {
 function tronFight(data) {
   if (typeof cn === 'function') cn('n');   /* misiunea zilnică „Provoacă regele Tronului” */
   const d = { room: 1, rooms: 1, k: 1, rw: 0, bn: 'Fantomă', di: 0, raid: -3, rn: 'Tronul de Argint', lbl: 'Tron', tron: 1, rf: 1, fx: 1, loot: { gold: 0, ore: 0, xp: 0, m: {} }, f: null, done: false };
-  if (data.ghost && data.ghost.units) { d.ghost = (data.ghost.units.slice(0, 1).map(u => TT.throneDuelUnit(u))); d.bn = data.holder_name || 'Regele'; d.em = { ghost: 1 }; }
+  if (data.ghost && data.ghost.units) { d.ghost = (data.ghost.units.slice(0, 1).map(u => TT.throneDuelUnit(u, undefined, data.ghost.level || data.holder_level || S.lvl))); d.bn = data.holder_name || 'Regele'; d.em = { ghost: 1 }; }
   else { d.k = TW.kb(S.lvl) * TT.CFG.guardK; d.bn = 'Garda Regală'; d.em = { nm: ['Garda Regală'], hm: 1, am: 1, dm: 1 }; }
   /* Motorul folosește S.fs în luptă: izolăm eroul și salvăm echipa pentru restaurare sigură. */
     tronInit(); S.tron.duelParty = S.fs.slice();
@@ -232,7 +239,7 @@ async function tronBetaResetProtection() {
 /* unitățile fantomei înlocuiesc inamicii generați (apelat din terEm) */
 function tronGhostUnits(es, d) {
   es.length = 0;
-  d.ghost.forEach((u, i) => es.push({ n: u.n, c: u.c, ic: i === 0 && d.vsh ? d.vsh.ic : undefined, hp: u.hp, mh: u.hp, atk: u.atk, def: u.def, bl: 0, st: 0, b: i === 0 }));
+  d.ghost.forEach((u, i) => es.push({ n: u.n, c: u.c, ic: i === 0 && d.vsh ? d.vsh.ic : undefined, hp: u.hp, mh: u.hp, atk: u.atk, def: u.def, gcr: u.cr, gcm: u.cm, bl: 0, st: 0, b: i === 0 }));
 }
 /* victorie: fără pradă și fără să numere la misiunile zilnice (luptele cu fantome sunt gratuite, deci nu pot fi exploatate) */
 function tronWin(d) {

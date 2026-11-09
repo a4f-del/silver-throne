@@ -14,7 +14,7 @@ const body=client.slice(begin,end);
 assert(!body.includes('if (!published') && !body.includes('tronPublish('), 'Challenge cannot be gated on publishing');
 assert(body.includes("tronRpc('throne_challenge_start')"),'Backend decides whether challenger is allowed');
 assert(body.includes('TRON.pubError'), 'Server errors exposed when publish fails');
-assert(index.includes('tron.js?v=2026.11.09-4'), 'Client cache must be refreshed');
+assert(index.includes('tron.js?v=2026.11.09-7'), 'Client cache must be refreshed');
 
 async function attempt(server,publishOk,rpcError=null) {
  const TRON={busy:false,pubError:'Statistici respinse'};

@@ -136,11 +136,16 @@ function spTick(e, L) {
   if (e.po > 0) { e.hp -= spTick0(); e.po--; if (e.hp <= 0) { L.push(e.n + ' cade otrăvit.'); return true; } }
   return false;
 }
-function spEnemyHit(e, al, L) {
+function spEnemyHit(e, al, L, o) {
+  o = o || {};
   const pzs = al.filter(x => x.c === 'Paznic'), pz = pzs.find(x => spOn(x, 'scu', 1)) || pzs[0];
-  let t = pz && Math.random() < (spOn(pz, 'scu', 1) ? 0.7 : 0.5) ? pz : P(al);
-  const raw = Math.round(e.atk * R(0.8, 1.2) * (e.bu > 0 && spTeam('pir', 4) ? 0.8 : 1));
-  const dmOn = u => { let d = Math.max(1, raw - bon(u).def * (1 + bon(u).pf / 100) - tr(u, 'def') - (spX(u).dfb > 0 ? 5 : 0)); if (spOn(u, 'scu', 2)) d = Math.max(1, Math.round(d * 0.7)); return d; };
+  /* PvP (Lume/Tron): fantoma își alege ținta ca jucătorul — întâi pe cel mai slab rămas în viață — nu la întâmplare */
+  const pvp = !!(S.d && S.d.ghost);
+  let t = o.t ? o.t : pz && Math.random() < (spOn(pz, 'scu', 1) ? 0.7 : 0.5) ? pz : pvp ? al.reduce((m, x) => (x.hp < m.hp ? x : m), al[0]) : P(al);
+  let raw = Math.round(e.atk * (o.m || 1) * R(0.8, 1.2) * (e.bu > 0 && spTeam('pir', 4) ? 0.8 : 1));
+  /* fantoma PvP lovește critic ca jucătorul pe care îl copiază (cr/cm din instantaneul apărării) */
+  if (e.gcr > 0 && Math.random() * 100 < e.gcr) { raw = Math.round(raw * (e.gcm || 1.5)); L.push('Lovitură critică!'); }
+  const dmOn = u => { const df = (bon(u).def * (1 + bon(u).pf / 100) + tr(u, 'def') + (spX(u).dfb > 0 ? 5 : 0)) * (1 - (o.ign || 0)); let d = pvp ? pvpArmor(raw, df) : Math.max(1, Math.round(raw - df)); if (spOn(u, 'scu', 2)) d = Math.max(1, Math.round(d * 0.7)); return d; };
   let dm = dmOn(t);
   if (typeof lgHit === 'function') dm = lgHit(t, e, dm, L);   /* legendare: ferire, daune reduse */
   const sh = spX(t).sh || 0; if (sh > 0) { const a = Math.min(sh, dm); spX(t).sh = sh - a; dm -= a; if (a) L.push(`Scutul lui ${t.n} oprește ${a}.`); }
@@ -286,3 +291,35 @@ const spNeedN = () => [...S.fs, ...(S.rs || [])].filter(spNeed).length;
 `;
   document.head.appendChild(st);
 })();
+
+/* PvP: Paznicul apărătorului atrage loviturile atacatorului la fel cum Paznicul tău atrage loviturile fantomei (50%) */
+function pvpTaunt(e, al) {
+  const pz = al.find(x => x.c === 'Paznic' && x.hp > 0);
+  return pz && pz !== e && Math.random() < 0.5 ? pz : e;
+}
+
+/* PvP: tura unei fantome cu instantaneu nou (are gcr). Folosește abilitatea clasei la fel de des ca un jucător
+   (Vraci la 2 ture, ceilalți la 3), fără specializări — ca apărarea să nu mai fie un sac de box. */
+function ghostTurn(e, al, f, L) {
+  const cd = e.gcd || 0;
+  if (cd > 0) { e.gcd = cd - 1; return spEnemyHit(e, al, L); }
+  e.gcd = e.c === 'Vraci' ? 1 : 2;
+  const mates = f.es.filter(x => x.hp > 0);
+  if (e.c === 'Vraci') {
+    const t = mates.sort((x, y) => x.hp / x.mh - y.hp / y.mh)[0];
+    if (t && t.hp < t.mh) {
+      const h = Math.round(e.atk / ((typeof TT !== 'undefined' && TT.ghostAtkMultCritFor) ? TT.ghostAtkMultCritFor(undefined, S.d && S.d.dlv) : 1) * 2.2);
+      const v = Math.min(h, t.mh - t.hp); t.hp += v; L.push(`${e.n} vindecă ${t.n} (+${v}).`); return;
+    }
+    return spEnemyHit(e, al, L);
+  }
+  if (e.c === 'Paznic') { al.slice().forEach(t => { if (t.hp > 0) spEnemyHit(e, al.filter(x => x.hp > 0), L, { t, m: 0.8 }); }); return; }
+  if (e.c === 'Mag') return spEnemyHit(e, al, L, { m: 1.4, ign: 1 });
+  if (e.c === 'Campion') return spEnemyHit(e, al, L, { m: 1.8 });
+  if (e.c === 'Războinic') return spEnemyHit(e, al, L, { m: 1.6 });   /* Spargere (amețirea nu se aplică luptătorilor tăi; daunele o compensează) */
+  return spEnemyHit(e, al, L, { m: 1.3 });   /* Arcaș: săgeată zimțată (sângerarea nu se aplică luptătorilor tăi) */
+}
+
+/* PvP: apărarea reduce procentual, nu scade fix — atac²/(atac+apărare). La apărare egală cu atacul trece jumătate;
+   nicio lovitură nu se mai oprește la −1, iar luptele nu se mai decid pe muchie. Aceeași formulă pentru ambele părți. */
+function pvpArmor(raw, def) { raw = Math.max(0, raw); def = Math.max(0, def || 0); return Math.max(1, Math.round(raw * raw / (raw + def || 1))); }
