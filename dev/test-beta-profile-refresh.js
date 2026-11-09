@@ -6,7 +6,7 @@ const fs=require('node:fs'),path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'..','profil.js'),'utf8');
 const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
 new Function(source);
-assert(html.includes('profil.js?v=2026.11.09-1'),'Browser gets the refreshed profile');
+assert(html.includes('profil.js?v=2026.11.09-2'),'Browser gets the refreshed profile');
 assert(source.includes("egTitleGet()?' eg-cosmetic':''} pr-beta\">"),'Redesigned profile class applied');
 for(const marker of [
   '.pr-c.pr-beta{grid-template-columns:',
@@ -77,6 +77,12 @@ api.prBagSearch('obiect inexistent');
 assert(box.innerHTML.includes('Niciun obiect găsit'),'Empty filter shows useful empty state');
 api.prBagSearch('');
 assert.equal(api.prBagCells(fighter).count,6,'Clearing search restores inventory');
+api.prBagFilter('h');
+assert.equal(api.prBagCells(fighter).count,1,'Slot filter shows only that slot (helm)');
+assert(api.prBagCells(fighter).html.includes('prEq(4)'),'Slot filter keeps the real inventory index');
+api.prBagFilter('all');
+assert(source.includes("bagOpen: false")&&source.includes('function prPick(k)')&&source.includes('pr-bag-closed'),'Bag is hidden until a slot is picked or the bag is opened');
+assert(source.includes("event.stopPropagation();prUn("),'Unequip button does not also open the slot picker');
 api.prBagFilter('invalid');
 assert.equal(api.prBagCells(fighter).count,6,'Unknown filter is ignored');
 state.bagQuery='"><img src=x onerror=alert(1)>';
