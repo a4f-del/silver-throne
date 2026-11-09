@@ -13,7 +13,7 @@
 const SAT2 = {
   ready: true,                      /* imaginile din imagini/sat2/ sunt publicate */
   base: 'imagini/sat2/',
-  fondV: 2,                         /* fundalurile fără parcele pictate */
+  fondV: 3,                         /* fundalurile fără parcele pictate */
   /* parcelele: centrul locului de construcție (cx, cy) și lățimea desenului (w), în pixeli 1152×928.
      Fundalurile nu mai au parcele pictate; fiecare clădire își aduce propriul teren izometric, așa că unghiul e mereu corect.
      Pozițiile țin clădirile în interiorul zidului (antrenamentul nu mai calcă peste palisadă). */
@@ -27,6 +27,19 @@ const SAT2 = {
   },
   /* terenul izometric din desen: de la centrul lui până la vârful din față ≈ 0,30·w */
   tileK: 0.30,
+  /* fundalurile late (16:9, 1600×893): curte ovală mult mai largă, clădirile răsfirate în jurul focului */
+  wide: true,
+  wideW: 1600, wideH: 893,
+  widePlots: {
+    a: { file: 'topitorie',   cx: 480,  cy: 330, w: 236 },
+    d: { file: 'depozit',     cx: 720,  cy: 292, w: 214 },
+    p: { file: 'piata',       cx: 1060, cy: 318, w: 236 },
+    h: { file: 'han',         cx: 1262, cy: 418, w: 214 },
+    i: { file: 'infirmerie',  cx: 360,  cy: 462, w: 214 },
+    t: { file: 'antrenament', cx: 1098, cy: 552, w: 196 }
+  },
+  wideProps: { g: { file: null, x: 650, y: 540, w: 60 } },
+  wideBoard: { x: 868, y: 404 },
   /* câte aspecte există deja ca imagine pentru fiecare clădire (lipsă → cel mai mare disponibil; 0 → parcelă goală) */
   have: { topitorie: 5, depozit: 5, piata: 1, infirmerie: 5, han: 5, antrenament: 1 },
   /* clădirile fără niveluri: un singur aspect */
@@ -85,11 +98,19 @@ function satSprites() {
   return `<div class="vh-sprites" aria-hidden="true">${pl}${h}</div>`;
 }
 
+/* comută pe fundalurile late: aceleași clădiri, alte coordonate; sat.js citește SAT_W/SAT_H */
+function satWideOn() {
+  if (!SAT2.wide || SAT2._wideSet) return;
+  SAT2._wideSet = 1; SAT2.W = SAT2.wideW; SAT2.H = SAT2.wideH;
+  SAT2.plots = SAT2.widePlots; SAT2.props = SAT2.wideProps; SAT2.board = SAT2.wideBoard;
+  if (typeof SAT_W !== 'undefined') { SAT_W = SAT2.W; SAT_H = SAT2.H; }
+}
 (function () {
   if (typeof vHub !== 'function' || typeof SAT_Z === 'undefined') return;
   const base = vHub;
   window.vHub = function () {
     if (!SAT2.ready) return base();
+    satWideOn();
     /* zonele clicabile urmăresc desenele noi */
     for (const k in SAT2.plots) if (k in SAT_Z) {
       const c = SAT2.plots[k];
@@ -100,9 +121,11 @@ function satSprites() {
     }
     for (const k in SAT2.props) { const c = SAT2.props[k]; if (k in SAT_Z) SAT_Z[k] = satArtZone({ x: c.x, y: c.y, w: Math.max(90, c.w) }); }
     if ('x' in SAT_Z) SAT_Z.x = satArtZone({ x: SAT2.board.x, y: SAT2.board.y, w: 110 });
-    const n = typeof satImgN === 'function' ? satImgN() : 1, fond = SAT2.base + 'fond-' + n + '.webp?v=' + SAT2.fondV;
+    const n = typeof satImgN === 'function' ? satImgN() : 1, fond = SAT2.base + (SAT2.wide ? 'fondL-' : 'fond-') + n + '.webp?v=' + SAT2.fondV;
     let html = base();
-    html = html.replace(/imagini\/sat\/sat-\d\.jpg/g, fond).replace('<svg viewBox="0 0 1152 928"', satSprites() + '<svg viewBox="0 0 1152 928"');
+    const vb = `<svg viewBox="0 0 ${SAT2.W} ${SAT2.H}"`;
+    html = html.replace(/imagini\/sat\/sat-\d\.jpg/g, fond).replace('width="1152" height="928"', `width="${SAT2.W}" height="${SAT2.H}"`)
+      .replace(/<svg viewBox="0 0 \d+ \d+"/, satSprites() + vb).replace('<div class="vh-map">', `<div class="vh-map${SAT2.wide ? ' vh-wide' : ''}">`);
     return html;
   };
 })();
@@ -111,6 +134,10 @@ function satSprites() {
   if (typeof document === 'undefined' || !document.head) return;
   const st = document.createElement('style');
   st.textContent = `.vh-sprites{position:absolute;inset:0;pointer-events:none;z-index:1}
+.vh-fit-layout .vh-map.vh-wide{aspect-ratio:1600/893}
+@media (min-width:1400px){main#v:has(.vh-map.vh-wide){max-width:min(1560px,100%)}}
+@media (max-width:959px){.vh-fit-layout:has(.vh-map.vh-wide){overflow-x:auto;overflow-y:hidden;justify-content:flex-start;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+ .vh-fit-layout .vh-map.vh-wide{width:max(100%,min(820px,200vw))!important;max-width:none!important;flex:0 0 auto}}
 .vh-map>svg{z-index:3}.vh-map>.vh-lb{z-index:4}
 .vh-map .vh-sprites .vh-b{position:absolute;height:auto!important;max-width:none!important;max-height:none!important;display:block;filter:drop-shadow(0 10px 8px #0008);transform-origin:50% 92%;transition:filter .2s}
 .vh-map:has(.vh-z.on) .vh-b{filter:drop-shadow(0 10px 8px #0008) brightness(.88)}

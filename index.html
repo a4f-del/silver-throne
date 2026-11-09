@@ -209,8 +209,8 @@ main{padding:8px 24px;max-width:940px}
 <script src="specializari.js?v=2026.11.09-7"></script>
 <script src="tron.js?v=2026.11.09-7"></script>
 <script src="lume-art.js?v=2026.11.04-4"></script>
-<script src="sat.js?v=2026.11.09-1"></script>
-<script src="sat-cladiri.js?v=2026.11.09-4"></script>
+<script src="sat.js?v=2026.11.09-9"></script>
+<script src="sat-cladiri.js?v=2026.11.09-9"></script>
 <script src="lupta-vs.js?v=2026.11.09-1"></script>
 <script src="fx.js?v=2026.11.09-8"></script>
 <script src="fx-plus.js?v=2026.11.09-1"></script>
@@ -237,7 +237,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="admin.js?v=2026.11.09-3"></script>
 <script src="recompense.js?v=2026.11.04-5"></script>
 <script src="seturi.js?v=2026.11.04-5"></script>
-<script src="legendare.js?v=2026.11.09-1"></script>
+<script src="legendare.js?v=2026.11.09-9"></script>
 <script src="endgame-ui.js?v=2026.11.09-1"></script>
 <script src="fierarie-filtre.js?v=2026.11.09-1"></script>
 <script src="profil.js?v=2026.11.09-2"></script>
@@ -608,7 +608,7 @@ const BFILE={f:'topitorie',i:'infirmerie',b:'han',d:'depozit',z:'zid'},BGL={f:'�
 const MISS=new Set();
 function imgMiss(el){let u=el.currentSrc||el.src||'';try{u=decodeURI(new URL(u,location.href).pathname).replace(/^\//,'')}catch(e){}if(!u)return;const c=el.closest&&el.closest('.pcard,.ico,.lgm-st');if(c)c.classList.add('miss');if(!MISS.has(u)){MISS.add(u);console.error('Imagine lipsă sau imposibil de încărcat: '+u)}missShow()}
 function missShow(){let b=q('#miss');if(!b){b=document.createElement('div');b.id='miss';b.setAttribute('role','alert');document.body.appendChild(b)}b.innerHTML='<b>Lipsesc din folderul publicat:</b><br>'+[...MISS].join('<br>')+'<button onclick="this.parentNode.remove()" aria-label="Închide">✕</button>'}
-const LG={runic:{n:'Sabia Runelor',t:'w',wf:'sab',fx:'runic',img:'imagini/arma-legendara.png',ico:'imagini/arma-legendara-icon.png'},
+const LG={runic:{n:'Sabia Runelor',t:'w',wf:'sab',fx:'runic',img:'imagini/legendare/runic.webp',ico:'imagini/legendare/runic-ico.webp'},
  gheata:{n:'Spada mare de gheață',t:'w',wf:'sab',fx:'gheata',d:'15% șansă să înghețe ținta, care pierde o tură',img:'imagini/arme/spada-epic.webp',ico:'imagini/arme/spada-epic.webp'}};
 function mkLegendary(id,l){const d=LG[id];if(!d)return null;const it=mkItem(d.t,Math.max(1,l||S.lvl),3,null,null,2,d.wf);it.lg=id;it.name=d.n;it.m=[];it.s.dmg=Math.round(it.s.dmg*1.35);it.s.crit+=8;it.s.pd+=6;return it}
 const lgPt='<i class="pt a"></i><i class="pt b"></i><i class="pt c"></i><i class="pt d"></i><i class="pt e"></i><i class="pt f"></i>';

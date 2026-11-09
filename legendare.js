@@ -86,6 +86,6 @@ if (typeof window !== 'undefined') { if (document.readyState === 'complete') lgH
   if (typeof document === 'undefined' || !document.head) return;
   const st = document.createElement('style');
   st.textContent = Object.entries(LGX).map(([id, d]) => `[data-fx=${id}]{--c1:${d.c[0]};--c2:${d.c[1]}}`).join('\n')
-    + `\n.lgi[src*="legendare/"]{object-fit:cover;border-radius:4px}`;
+    + `\n.lgi[src*="legendare/"]{object-fit:contain;border-radius:4px}`;
   document.head.appendChild(st);
 })();
