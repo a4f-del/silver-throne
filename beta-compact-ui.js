@@ -47,7 +47,7 @@ function stCompactNav() {
 function stNavSocial() {
   const k = typeof S !== 'undefined' && S && S.tab === 'k';
   const cl = '<button class="st-ns' + (k ? ' on' : '') + '" onclick="tab(\'k\')"><span class="st-ns-i">🏆</span>Clasament</button>';
-  const gu = typeof guildEnabled === 'function' && guildEnabled() ? '<button class="st-ns" onclick="guildOpen()"><span class="st-ns-i">⚔</span>Breaslă</button>' : '';
+  const gu = typeof guildEnabled === 'function' && guildEnabled() ? '<button class="st-ns st-ns-guild" onclick="guildOpen()"><span class="st-ns-i">⚔</span>Breaslă' + (typeof GCH !== 'undefined' && GCH.unread ? ' <b class="st-ns-b" title="Mesaje noi în chatul breslei">' + (GCH.unread > 99 ? '99+' : GCH.unread) + '</b>' : '') + '</button>' : '';
   const fr = typeof wfEnabled === 'function' && wfEnabled() ? '<button class="st-ns" onclick="wfOpen()"><span class="st-ns-i">🤝</span>Prieteni' + (typeof WFR !== 'undefined' && WFR.requests ? ' <b class="st-ns-b">' + WFR.requests + '</b>' : '') + '</button>' : '';
   return '<div class="st-nav-sec" role="group" aria-label="Comunitate">' + cl + gu + fr + '</div>';
 }
