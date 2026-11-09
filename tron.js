@@ -33,22 +33,37 @@ const tronPend = () => !!(TRON.st && TRON.st.me && TRON.st.me.pending && TRON.st
 const tronNow = () => Date.now() + (TRON.off || 0);                       /* ceasul serverului, estimat */
 function tronUi() { try { if (S.tab === 'r' || S.tab === 'a') render(); else if (typeof hdr === 'function') hdr(); } catch (e) { /* interfața se reîncarcă la următoarea acțiune */ } }
 
+/* răspuns incomplet de la server (versiune SQL veche, eroare parțială): completăm valorile lipsă ca ecranul să nu cadă */
+function tronNorm(d) {
+  if (!d || typeof d !== 'object') return null;
+  const now = Date.now();
+  d.now = +d.now || now; d.week = +d.week || 0; d.week_end = +d.week_end || now + 864e5;
+  d.participants = +d.participants || 0;
+  d.ranking = Array.isArray(d.ranking) ? d.ranking : []; d.hall = Array.isArray(d.hall) ? d.hall : []; d.units = Array.isArray(d.units) ? d.units : [];
+  d.hall.forEach(x => { if (!Array.isArray(x.top)) x.top = []; });
+  const me = d.me && typeof d.me === 'object' ? d.me : (d.me = {});
+  me.pending = Array.isArray(me.pending) ? me.pending : [];
+  me.cooldown_until = +me.cooldown_until || 0; me.challenges_today = +me.challenges_today || 0;
+  me.daily_cap = Math.max(0, +me.daily_cap || 0); me.reason = me.reason || '';
+  if (d.holder && typeof d.holder === 'object') { d.holder.protect_until = +d.holder.protect_until || 0; d.holder.since = +d.holder.since || now; }
+  return d;
+}
 async function tronSync0() {
   TRON.loading = true;
   try {
     if (!(await tronUid())) { TRON.st = null; TRON.err = 'Conectează-te la cont ca să participi la Tron.'; return; }
     const r = await tronRpc('throne_get');
     if (r.error) { TRON.err = r.error.includes('function') || r.error.includes('does not exist') ? 'Serverul nu are încă funcțiile Tronului (rulează supabase/01-throne.sql).' : r.error; return; }
-    TRON.err = ''; TRON.st = r.data; TRON.off = r.data.now - Date.now();
+    TRON.err = ''; TRON.st = tronNorm(r.data); if (!TRON.st) { TRON.err = 'Serverul a trimis un răspuns gol pentru Tron.'; return; } TRON.off = TRON.st.now - Date.now();
     /* prima dată: apărarea se publică singură (altfel butonul de provocare ar rămâne blocat de „Publică-ți apărarea”) */
     const betaNeedsPublish = (!!tronAutoSnapshot()) && tronAutoSnapshot() !== TRON.pubSig;
-    if (r.data.me && S.lvl >= TT.CFG.minLevel
+    if (r.data.me && r.data.me.user_id && S.lvl >= TT.CFG.minLevel
       && betaNeedsPublish) {
       TRON.pubTryLvl = S.lvl;
       const updated = (await tronAutoPublishNow());
       if (updated) {
         const r2 = await tronRpc('throne_get');
-        if (!r2.error) { TRON.st = r2.data; TRON.off = r2.data.now - Date.now(); }
+        if (!r2.error && tronNorm(r2.data)) { TRON.st = r2.data; TRON.off = r2.data.now - Date.now(); }
       }
     }
     if (TRON.st.me && typeof TRON.st.me.title === 'string' && TRON.st.me.title) { tronInit(); S.tron.title = TRON.st.me.title; }
@@ -91,7 +106,7 @@ async function tronPublish(quiet) {
     if (!quiet) { S.msg = 'Nu am putut publica apărarea: ' + r.error; go(); }
     return false;
   }
-  TRON.pub = r.data.units.map((u, i) => Object.assign({}, u, { capped: !!(local[i] && (local[i].hp > u.hp || local[i].atk > u.atk || local[i].def > u.def)) })); TRON.pubAt = Date.now();
+  TRON.pub = ((r.data && Array.isArray(r.data.units)) ? r.data.units : []).map((u, i) => Object.assign({}, u, { capped: !!(local[i] && (local[i].hp > u.hp || local[i].atk > u.atk || local[i].def > u.def)) })); TRON.pubAt = Date.now();
   if (!quiet) { S.msg = 'Apărarea ta a fost actualizată.'; await tronSync(); go(); }
   return true;
 }
@@ -321,7 +336,7 @@ function vTron() {
   const initial = ho ? tEsc(String(ho.name || '?').trim().charAt(0).toUpperCase() || '?') : '?', prot = ho ? ho.protect_until - tronNow() : 0;
   h += `<section class="tr-seatsec" style="border-left-color:var(--ember)"><div class="tr-seat"><div class="tr-av${ho ? '' : ' empty'}">${initial}</div><div class="ts-m"><h2>${ho ? '👑 ' + tEsc(ho.name) : 'Tronul e gol'}</h2>`;
   h += ho ? `<div class="mute">Nivel ${ho.level} · ține Tronul de ${tronHM((tronNow() - ho.since) / 1000)}${prot > 0 ? ` · protejat încă <span data-end="${ho.protect_until - TRON.off}">${fmt(prot)}</span>` : ''}</div>` : '<div class="mute">Îl apără Garda Regală. Cine o învinge devine rege.</div>';
-  h += `</div></div><div class="tr-cta"><span>${me.can_challenge ? 'Poți provoca acum.' : `<span class="r4">${tEsc(me.reason || 'Indisponibil')}</span>${/Pauză/.test(me.reason || '') && cd > 0 ? ` <span data-end="${me.cooldown_until - TRON.off}">${fmt(cd)}</span>` : ''}`}<span class="tr-pips" title="Provocări azi: ${me.challenges_today}/${me.daily_cap}">${Array.from({ length: me.daily_cap }, (_, i) => `<i class="${i < me.challenges_today ? 'on' : ''}"></i>`).join('')}</span><span class="mute">Provocări azi: ${me.challenges_today}/${me.daily_cap}</span></span><button class="p big" onclick="tronProvoca()"${me.can_challenge && !busy ? '' : ' disabled'}>Provoacă (gratuit)</button></div>`;
+  h += `</div></div><div class="tr-cta"><span>${me.can_challenge ? 'Poți provoca acum.' : `<span class="r4">${tEsc(me.reason || 'Indisponibil')}</span>${/Pauză/.test(me.reason || '') && cd > 0 ? ` <span data-end="${me.cooldown_until - TRON.off}">${fmt(cd)}</span>` : ''}`}${me.daily_cap ? `<span class="tr-pips" title="Provocări azi: ${me.challenges_today}/${me.daily_cap}">${Array.from({ length: me.daily_cap }, (_, i) => `<i class="${i < me.challenges_today ? 'on' : ''}"></i>`).join('')}</span><span class="mute">Provocări azi: ${me.challenges_today}/${me.daily_cap}</span>` : ''}</span><button class="p big" onclick="tronProvoca()"${me.can_challenge && !busy ? '' : ' disabled'}>Provoacă (gratuit)</button></div>`;
   if (typeof DEV==='function' && DEV() && ho && prot > 0) {
     h += '<div class="row"><span class="mute">🧪 Instrument de test BETA</span><button type="button" class="p" onclick="tronBetaResetProtection()">Resetează protecția regelui</button></div>';
   }

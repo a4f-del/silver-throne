@@ -68,11 +68,21 @@ function jeStatus(step){
 }
 function jeNavigate(){
  const s=jeCurrent();if(!s||S.d)return;
- const [,t,v]=s.action();S.tab=t;
+ const [,t,v]=s.action();
+ /* deja pe pagina țintă: nu mai redesenăm degeaba, ci arătăm butonul principal de acolo */
+ const here=S.tab===t&&(t!=='a'||(S.vil||'')===(v||''))&&(t!=='m'||(S.mt||'l')===(v||'l'));
+ if(here&&typeof document!=='undefined'){
+  const btn=[...document.querySelectorAll('#v button.p')].find(b=>!b.closest('.je-card')&&!b.disabled&&b.offsetParent);
+  if(btn){btn.scrollIntoView({behavior:'smooth',block:'center'});btn.classList.remove('je-pulse');void btn.offsetWidth;btn.classList.add('je-pulse');setTimeout(()=>btn.classList.remove('je-pulse'),2600);try{btn.focus({preventScroll:true})}catch(e){}return;}
+ }
+ S.tab=t;
  if(t==='a')S.vil=v;
  if(t==='m')S.mt=v;
  S.msg='';go();
 }
+(function(){if(typeof document==='undefined'||!document.head)return;const st=document.createElement('style');
+st.textContent='.je-pulse{animation:jePulse .85s ease-in-out 3;outline:2px solid #f2c14e;outline-offset:3px}@keyframes jePulse{0%,100%{box-shadow:0 0 0 0 #f2c14e00}50%{box-shadow:0 0 0 8px #f2c14e55}}@media (prefers-reduced-motion:reduce){.je-pulse{animation:none}}';
+document.head.appendChild(st);})();
 function jeClaim(id){
  if(!jeReady()||S.d)return;
  const s=jeCurrent();

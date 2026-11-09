@@ -32,12 +32,22 @@ function fxPush(pre, txt, actor) {
   const dFs = S.fs.map((x, i) => x.hp - (pre.fs[i] || 0)).map((v, i) => v ? { i, v, mh: mhp(S.fs[i]) } : null).filter(Boolean);
   const dEs = f.es.map((e, i) => e.hp - (pre.es[i] || 0)).map((v, i) => v ? { i, v, mh: f.es[i].mh } : null).filter(Boolean);
   if (!dFs.length && !dEs.length && !(txt && txt.trim())) return;
-  if (FX.cast && f.es.length > FX.cast.es.length) for (let i = FX.cast.es.length; i < f.es.length; i++) FX.cast.es.push({ n: f.es[i].n, mh: f.es[i].mh, hp: f.es[i].mh, img: null });   /* ajutoare chemate în luptă, apărute după începutul redării */
+  if (FX.cast && f.es.length > FX.cast.es.length) for (let i = FX.cast.es.length; i < f.es.length; i++) FX.cast.es.push({ n: f.es[i].n, mh: f.es[i].mh, hp: f.es[i].mh, img: fxSummonImg(f.es[i]) });   /* ajutoare chemate în luptă, apărute după începutul redării */
   /* Același identificator de actor pentru erou, mercenari și fantome PvP.
      În vechea expresie mercenarii fără actor.h pierdeau animația de atac. */
   const fi=actor?S.fs.indexOf(actor):-1,ei=actor?f.es.indexOf(actor):-1;
   const tagged=(fi>=0?{side:'fs',i:fi}:ei>=0?{side:'es',i:ei}:null);
   FX.q.push({ fs:dFs, es:dEs, txt:txt||'', actor:tagged });
+}
+/* ajutoarele chemate în luptă nu au portret propriu: luăm un monstru potrivit, altfel portretul celui care le-a chemat */
+function fxSummonImg(e) {
+  const n = String(e && e.n || '').toLowerCase();
+  if (/min[ăa]/.test(n)) return 'imagini/monstri/miner-blestemat.jpg';
+  if (/schelet|oase/.test(n)) return 'imagini/monstri/schelet.jpg';
+  if (/lup|hait/.test(n)) return 'imagini/monstri/lup-fioros.jpg';
+  if (/înecat|inecat/.test(n)) return 'imagini/monstri/inecat.jpg';
+  const boss = FX.cast && FX.cast.es.find(x => x.b && x.img);
+  return boss ? boss.img : 'imagini/monstri/paza-corupta.jpg';
 }
 /* pentru modul manual: marchează unde începe lovitura curentă, ca să redăm doar cadrele noi */
 let FX_MARK = 0, FX_FIRST = false;
@@ -127,10 +137,12 @@ function fxPlay(frames, cb, first, offset) {
       if (hp[side][d.i] <= 0) r.classList.add('down');
     }
     if (ability) { const r = act.length ? m.querySelector(`.fx-r[data-s="${act[0][0]}"][data-i="${act[0][1]}"] .fx-av`) : null; if (r) { r.classList.remove('flash'); void r.offsetWidth; r.classList.add('flash'); } }
+
+    if (typeof fxPlusFrame === 'function') try { fxPlusFrame(m, fr, { crit, ability, cast, hp, cardMode, act }); } catch (e) { /* efectele sunt doar vizuale */ }
   };
   const step1 = () => {
     if(ending||finished)return;
-    if (n >= frames.length) return finish();
+    if (n >= frames.length) { const wait = typeof fxPlusEnd === 'function' ? fxPlusEnd(m, cast, hp) : 0; if (wait > 0) { ending = true; window.__fxTimer = setTimeout(finish, wait); return; } return finish(); }
     showFrame(frames[n++]);
     window.__fxTimer = setTimeout(step1, FX.delay);
   };
@@ -138,11 +150,13 @@ function fxPlay(frames, cb, first, offset) {
     if(ending||finished)return;ending=true;
     clearTimeout(window.__fxTimer);
     while(n<frames.length)showFrame(frames[n++]);
-    setTimeout(finish,260);
+    const wait=typeof fxPlusEnd==='function'?fxPlusEnd(m,cast,hp,true):0;
+    setTimeout(finish,Math.max(260,wait));
   };
   if(cardMode&&typeof m.addEventListener==='function')m.addEventListener('keydown',e=>{
     if(e.key==='Escape'){e.preventDefault();window.__fxSkip?.();}
   });
+  if (typeof fxPlusMount === 'function') try { fxPlusMount(m, cardMode); } catch (e) { /* fără comenzi în plus */ }
   setTimeout(step1,120);
 }
 function fxSkip() { if (window.__fxSkip) window.__fxSkip(); }

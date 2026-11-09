@@ -21,6 +21,15 @@ const LUME = { st: null, at: 0, off: 0, err: '', loading: false, busy: false, re
   testCd: false, testCdLoaded: false, testCdReady: false, testCdBusy: false, testCdErr: '', pubTimer: null };
 
 const lwNow = () => Date.now() + (LUME.off || 0);
+/* răspuns incomplet de la server: completăm ce lipsește ca Harta să nu cadă */
+function lwNorm(d) {
+  if (!d || typeof d !== 'object') return null;
+  d.now = +d.now || Date.now();
+  d.players = Array.isArray(d.players) ? d.players.filter(p => p && p.id != null && Number.isFinite(+p.x) && Number.isFinite(+p.y)) : [];
+  d.log = Array.isArray(d.log) ? d.log : [];
+  if (d.me && typeof d.me === 'object') { d.me.en = +d.me.en || 0; d.me.en_at = +d.me.en_at || d.now; } else d.me = null;
+  return d;
+}
 const lwCfg = () => (LUME.st && LUME.st.cfg) || LW.CFG;
 const lwF = n => Math.round(n * 10) / 10;
 const lwNum = n => Math.round(+n || 0).toLocaleString('ro-RO');
@@ -52,7 +61,7 @@ async function lwSync0(force) {
       if (!r.error) { LUME.pubSig = sig; LUME.pubAt = Date.now(); }
     } else r = await tronRpc('world_get');
     if (r.error) { LUME.err = /Could not find the function|does not exist|schema cache/i.test(r.error) ? 'Serverul nu are încă Lumea: rulează supabase/02-lume.sql în Supabase.' : r.error; return; }
-    LUME.err = ''; LUME.st = r.data; LUME.off = r.data.now - Date.now(); LUME.terr = null;
+    if (!lwNorm(r.data)) { LUME.err = 'Serverul a trimis un răspuns gol pentru Lume.'; return; } LUME.err = ''; LUME.st = r.data; LUME.off = r.data.now - Date.now(); LUME.terr = null;
     if (lwTestCooldownAllowed() && !LUME.testCdLoaded) void lwTestCooldownSync();
   } catch (e) { LUME.err = String((e && e.message) || e); }
   finally { LUME.at = Date.now(); LUME.loading = false; if (!LUME.err) lwAutoPublishSoon(); lwUi(); }

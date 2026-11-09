@@ -68,6 +68,7 @@ function stCompactToggleAccount() {
 let stSettingsReopen = false;
 function stCompactSettingToggle(k) {
   if ((!stCompactAvailable())) return;
+  if (k === 'sfx') { stSettingsReopen = true; if (typeof sfxToggle === 'function') sfxToggle(); return; }
   if (k === 'fx') {
     if (typeof C === 'function' && C('w') === 0) return;
     stSettingsReopen = true;
@@ -154,6 +155,7 @@ function stCompactHdr() {
     '<button type="button" class="st-settings-link"' + act + ' onclick="tab(\'a\');vil(\'q\')">📜 Jurnal și explicații BOT</button>' +
     '<div class="st-settings-section st-settings-break"><b>⚔ Luptă</b></div>' +
     stCompactSettingRow('fx','Redare lovitură cu lovitură',fxOn || fxLock,locked || fxLock,'Pornită','Oprită') +
+    (typeof sfxToggle === 'function' ? stCompactSettingRow('sfx','Sunete în luptă',!S.sfxOff,locked,'Pornite','Oprite') : '') +
     '<div class="st-settings-section st-settings-break"><b>👤 Cont</b></div>' +
     '<button type="button" class="st-settings-link"' + (locked || !hasSession ? ' disabled' : '') + ' onclick="contOut()">🚪 Deconectează-te</button>' +
     '</div></details>';
