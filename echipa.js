@@ -35,7 +35,7 @@ function tmBigCard(f, i) {
   const sel = f === cur(), c = tmHp(f), dead = c.hp <= 0, src = tmFullSrc(f), role = roleOf(f);
   const rank = f.h ? '' : RK[f.rk || 0], spec = f.sp && typeof spDef0 === 'function' && spDef0(f) ? spDef0(f).n : '';
   const eq = SL.map(k => { const it = E(f)[k]; return `<span class="tm-eqi${it ? '' : ' em'}" title="${it ? tEsc(it.name) : SLN[k] + ': gol'}">${it ? iic(it) : UI(UISL[k])}</span>`; }).join('');
-  return `<button class="tm-big${sel ? ' sel' : ''}${dead ? ' dead' : ''}" onclick="sel(${i})" ondblclick="if(typeof prOpen==='function')prOpen(${i})" title="Dublu clic: profilul" aria-pressed="${sel}">`
+  return `<button class="tm-big${sel ? ' sel' : ''}${dead ? ' dead' : ''}" onclick="sel(${i})" ondblclick="if(typeof prOpen==='function')prOpen(${i})" title="${tEsc(f.n)} · ${tmRoleTip(f)} Dublu clic: profilul" aria-pressed="${sel}">`
     + `<span class="tm-big-role r-${role}">${role}</span>`
     + `<span class="tm-big-av">${src ? `<img src="${src}" alt="" onerror="this.style.display='none'">` : av(f, 96)}${dead ? '<b class="sk">☠</b>' : ''}</span>`
     + `<span class="tm-big-n">${tEsc(f.n)}</span><span class="tm-big-k mute">${[rank, spec].filter(Boolean).join(' · ') || tEsc(f.c)}</span>`
@@ -87,8 +87,8 @@ function tmResPanel() {
 function tmStrip() {
   const ro = roster(), nfs = S.fs.length, rest = ro.slice(nfs);
   const squad = `<div class="tm-squad" role="group" aria-label="Echipa activă">${ro.slice(0, nfs).map((f, i) => tmBigCard(f, i)).join('')}</div>`;
-  if (!rest.length) { tmRO = false; return squad; }
-  return squad + `<div class="tm-res">${tmResBtn(rest)}${tmRO ? tmResPanel() : ''}</div>`;
+  if (!rest.length) { tmRO = false; return `<div class="tm-top">${squad}</div>`; }
+  return `<div class="tm-top">${squad}<div class="tm-res">${tmResBtn(rest)}${tmRO ? tmResPanel() : ''}</div></div>`;
 }
 
 /* ----------------------------------------------------- luptătorul selectat */
@@ -168,8 +168,20 @@ function vEquipTop(inv, pre) {
   if (tmTab === 'co') body = tmSynergy() + (typeof mrTeamPresetPanel==='function'?mrTeamPresetPanel():'') + (typeof egEndgamePanel==='function'?egEndgamePanel():'') + (pre || '');
   else if (tmTab === 'inv') body = `<div class="tm-for mute">Echipezi pe <b>${tEsc(f.n)}</b> · alege altul din cardurile de sus.</div><div class="tm-right">${inv || ''}</div>`;
   else body = tmChar(wide ? inv : '');
+  setTimeout(tmFit, 0);
   return tmStrip() + bar + body;
 }
+/* pe ecran lat, pagina Echipă încape în fereastră: coloanele primesc înălțimea rămasă și se derulează fiecare în parte */
+const TM_FIT_MQ = '(min-width:1200px) and (min-height:640px)';
+function tmFit() {
+  if (typeof document === 'undefined') return;
+  const c = document.querySelector('.tm-char');
+  if (!c) return;
+  if (typeof matchMedia !== 'function' || !matchMedia(TM_FIT_MQ).matches) { c.style.removeProperty('--tm-h'); return; }
+  const top = c.getBoundingClientRect().top + (window.scrollY || 0);
+  c.style.setProperty('--tm-h', Math.max(400, Math.floor(window.innerHeight - top - 24)) + 'px');
+}
+if (typeof window !== 'undefined' && window.addEventListener) window.addEventListener('resize', () => tmFit());
 
 /* ----------------------------------------------------------------- bara de sus */
 function hdrSel(i) { if(typeof adventureActive==='function'&&adventureActive())return; S.sel = i; S.tab = 'e'; S.msg = ''; go(); }
@@ -338,5 +350,59 @@ function temaHdr() {
 @media (max-width:959px){.tm-tabs button{flex:1 0 auto}}
 @media (max-width:520px){.tm-squad{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px}.tm-big{padding:24px 4px 8px}.tm-big-av{width:56px;height:56px}.tm-big-n{font-size:12.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tm-big-k{font-size:10.5px}.tm-big-eq,.tm-big-tip{display:none}.tm-big-role{top:5px;left:5px;font-size:9.5px;padding:1px 6px}}
 @media (max-width:859px){.tm-full{aspect-ratio:auto!important;height:200px}.tm-full>img{object-position:center 18%}}`;
+  document.head.appendChild(st);
+})();
+
+/* Echipă pe ecran lat (≥1200px): totul încape în fereastră, fără derularea paginii.
+   Sus: echipa pe un rând de carduri compacte + rezerva; jos: trei coloane (luptătorul, echipamentul, rucsacul). */
+(function () {
+  if (typeof document === 'undefined' || !document.head) return;
+  const st = document.createElement('style');
+  st.textContent = `.tm-eqi{overflow:hidden}.tm-eqi .ico{width:20px!important;height:20px!important;margin:0!important;font-size:13px;box-shadow:none}.tm-eqi .ico img{width:100%;height:100%;object-fit:contain}.tm-eqi .ico::before,.tm-eqi .ico::after,.tm-eqi .rn{display:none!important}
+@media (min-width:1200px) and (min-height:640px){
+main#v:has(.tm-char){max-width:min(1480px,100%)}
+.tm-top{display:flex;align-items:stretch;gap:10px;margin:0 0 10px}
+.tm-top .tm-squad{flex:1;min-width:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin:0}
+.tm-big{display:grid;grid-template-columns:54px minmax(0,1fr) auto;grid-template-areas:"av n role" "av k hpn" "av hp hp";column-gap:10px;row-gap:3px;align-items:center;padding:8px 12px 9px 9px;text-align:left;border-radius:11px;background:linear-gradient(180deg,#141a1d,#0d1113)}
+.tm-big:hover:not(.sel){border-color:#8f7630;transform:none}
+.tm-big.sel{background:linear-gradient(180deg,#2a2312,#120f08)}
+.tm-big-av{grid-area:av;width:54px;height:54px;box-shadow:0 0 0 2px #0b0e10,0 0 0 3px var(--gold,#c9a54a)}
+.tm-big.sel .tm-big-av{box-shadow:0 0 0 2px #0b0e10,0 0 0 3px var(--gold2,#f0d27a),0 0 12px #f0d27a55}
+.tm-big-role{grid-area:role;position:static;justify-self:end;font-size:9.5px;padding:1px 7px}
+.tm-big-n{grid-area:n;margin:0;font-size:15px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm-big-k{grid-area:k;font-size:12px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm-big-hpn{grid-area:hpn;justify-self:end;font-size:11.5px;white-space:nowrap}
+.tm-big-hp{grid-area:hp;margin:2px 0 0;height:6px}
+.tm-big-eq,.tm-big-tip{display:none}
+.tm-top .tm-res{position:relative;flex:none;margin:0;display:flex}
+.tm-top .tm-rb{flex-direction:column;justify-content:center;gap:5px;min-width:150px;padding:8px 14px;border-radius:11px}
+.tm-top .tm-rb-t{align-items:center;text-align:center}.tm-top .tm-rb-t small{max-width:130px;white-space:normal;line-height:1.25}
+.tm-top .tm-rb-ch{position:absolute;bottom:4px;right:8px}
+.tm-top .tm-rp{position:absolute;z-index:30;top:calc(100% + 6px);right:0;width:min(780px,calc(100vw - 340px));max-height:min(520px,70vh);overflow:auto;margin:0;box-shadow:0 18px 40px #000c}
+.tm-tabs{margin:0 0 10px}
+.tm-char{grid-template-columns:290px minmax(0,1fr)!important;gap:12px;margin:0;height:var(--tm-h,auto);align-items:stretch}
+.tm-char>section,.tm-char>div{min-height:0}
+.tm-left,.tm-left2{position:static!important;height:100%;max-height:none!important;overflow-y:auto;padding:12px 14px!important}
+.tm-left .tm-full{aspect-ratio:auto!important;height:clamp(170px,calc(var(--tm-h,600px) * .34),250px);margin:0 0 8px}
+.tm-left .tm-hpbar{margin:4px 0 0}
+.tm-left .tm-stats{margin:8px 0 4px}
+.tm-right{display:grid!important;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px!important;height:100%;min-height:0}
+.tm-right>section{height:100%;min-height:0;overflow-y:auto;padding:12px 14px}
+.tm-right>section>h2{position:sticky;top:-12px;z-index:2;margin:-12px -14px 10px;padding:12px 14px 8px;background:linear-gradient(180deg,#141a1d 80%,#141a1d00)}
+.tm-right .slotgrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px}
+.tm-right .scard{padding:8px 10px}.tm-right .scard .ic-n{font-size:13.5px}.tm-right .scard .ic-a{flex-wrap:nowrap}.tm-right .scard .ic-a button{white-space:nowrap}
+.tm-right .igrid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.tm-left,.tm-right>section,.tm-top .tm-rp{scrollbar-width:thin;scrollbar-color:#5a4a22 transparent}
+.tm-left::-webkit-scrollbar,.tm-right>section::-webkit-scrollbar{width:8px}
+.tm-left::-webkit-scrollbar-thumb,.tm-right>section::-webkit-scrollbar-thumb{background:#5a4a22;border-radius:4px}
+}
+@media (min-width:1200px) and (min-height:640px) and (max-width:1399px){
+.tm-char{grid-template-columns:250px minmax(0,1fr)!important}
+.tm-right{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.tm-right .slotgrid{grid-template-columns:1fr!important}
+.tm-top .tm-squad{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.tm-big{grid-template-columns:46px minmax(0,1fr) auto;grid-template-areas:"av n n" "av role hpn" "av hp hp";column-gap:8px}
+.tm-big-av{width:46px;height:46px}.tm-big-k{display:none}.tm-big-role{justify-self:start}
+}`;
   document.head.appendChild(st);
 })();

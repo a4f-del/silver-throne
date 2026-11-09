@@ -17,7 +17,7 @@ assert(!block.includes('if (!published'),'No client-side publish requirement rem
 assert(block.includes("'throne_challenge_start'"),'Server remains authoritative for challenge access');
 assert(block.includes("'Tron: ' + r.error"),'Server refusal is displayed');
 assert(js.includes("TRON.pubError = 'Sincronizarea apărării: ' + r.error"),'Auto-publication error recorded');
-assert(index.includes('tron.js?v=2026.11.09-1'),'Updated asset cache');
+assert(index.includes('tron.js?v=2026.11.09-3'),'Updated asset cache');
 assert(!/CREATE OR REPLACE FUNCTION public\.throne_/.test(js),'Client fix cannot change server functions');
 
 function session({beta=true,publish=false,error=null,healthy=true}={}){

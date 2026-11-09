@@ -52,9 +52,10 @@ assert(client.includes("tronRpc('beta_world_raid_test_mode', { p_enabled: reques
 assert(client.includes('const lwTestCooldownAllowed = () =>'));
 assert(client.includes("p.cd && p.cd > lwNow() && !lwTestCooldownOn()"));
 assert(client.includes('cd = p.cd && p.cd > lwNow() && !lwTestCooldownOn()'));
-assert(client.includes('$'+'{lwTestCooldownPanel()}'+'$'+'{lwMap()}'));
+assert(!client.includes('$'+'{lwTestCooldownPanel()}'+'$'+'{lwMap()}'),'Test toggle no longer sits above the map');
+assert(read('admin.js').includes('lwTestCooldownPanel()'),'Test toggle lives in the admin panel');
 assert(client.includes('Consumă în continuare energie'));
-assert(html.includes('lume.js?v=2026.11.09-1'));
+assert(html.includes('lume.js?v=2026.11.09-3'));
 
 const start=client.indexOf('function lwCan(p) {');
 const end=client.indexOf('async function lwAttack(',start);

@@ -28,7 +28,8 @@ vm.createContext(ctx);
 vm.runInContext(js,ctx,{filename:'beta-compact-ui.js'});
 Object.assign(ctx,vm.runInContext('({stCompactNav,stTronSidebarState,stCompactHdr,stCompactEvent,stCompactSettingToggle})',ctx));
 const nav = ctx.stCompactNav();
-assert.equal((nav.match(/<button/g)||[]).length,5,'Five permanent navigation destinations');
+assert.equal((nav.split('<div class="st-nav-sec"')[0].match(/<button/g)||[]).length,5,'Five permanent navigation destinations');
+assert(nav.includes('st-nav-sec')&&nav.includes("tab('k')"),'Rankings link sits below the main destinations');
 for(const t of ['Sat','Coborâre','Hartă','Tron','Echipă']) assert(nav.includes(t),t);
 assert(nav.includes('onclick="tab(\'e\')"'),'Team is accessible directly from the sidebar');
 const header = ctx.stCompactHdr();
@@ -36,7 +37,7 @@ assert(header.includes('Pornește BOT-ul')&&header.includes('onclick="stBotPower
 for(const token of ['id="pp"','id="pt"','wm-open','bhOpen()','stCompactHeroGo','wf-open','guild-open',"tab('k')",'stCompactToggleAccount','stCompactSettingToggle','contOut()','Jurnal și explicații BOT','Ridică obiectele forjate','Echipează automat','Vindecă folosind aur']) assert(header.includes(token),'Header action '+token);
 assert(ctx.stCompactEvent().includes('<details'),'Event starts collapsed');
 assert(styles.join('').includes('st-compact'),'Scoped styles');
-assert(html.includes('beta-compact-ui.js?v=2026.11.09-1'),'New compact sidebar cache-busted');
+assert(html.includes('beta-compact-ui.js?v=2026.11.09-3'),'New compact sidebar cache-busted');
 ctx.TT={CFG:{minLevel:10}};
 ctx.TRON={st:{
   me:{user_id:'hero-1',pending:[],can_challenge:true},
@@ -46,7 +47,7 @@ ctx.tronNow=()=>Date.now();
 ctx.sdT=()=> '13h';
 ctx.tEsc=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 let throneNav=ctx.stCompactNav();
-assert.equal((throneNav.match(/<button/g)||[]).length,5,'Tron remains highlighted alongside Echipă');
+assert.equal((throneNav.split('<div class="st-nav-sec"')[0].match(/<button/g)||[]).length,5,'Tron remains highlighted alongside Echipă');
 assert(throneNav.includes('st-tron-hot')&&throneNav.includes('OwN ține Tronul')&&throneNav.includes('Provoacă acum'),'Actionable challenger shows highlighted Throne in sidebar');
 ctx.TRON.st.me.can_challenge=false;
 throneNav=ctx.stCompactNav();
@@ -65,7 +66,7 @@ ctx.TRON.st.holder={user_id:'hero-2',name:'<script>alert(1)</script>'};
 throneNav=ctx.stCompactNav();
 assert(throneNav.includes('&lt;script&gt;')&&!throneNav.includes('<script>'),'Server holder names are safely escaped');
 ctx.TRON.st=null;
-assert.equal((ctx.stCompactNav().match(/<button/g)||[]).length,5,'Unavailable server state preserves five navigation choices');
+assert.equal((ctx.stCompactNav().split('<div class="st-nav-sec"')[0].match(/<button/g)||[]).length,5,'Unavailable server state preserves five navigation choices');
 assert(html.includes('stCompactHdr()')&&html.includes('stCompactNav()')&&html.includes('stCompactEvent()'),'All navigation hooks wired');
 assert(guide.includes('function ghTeamNav()')&&guide.includes("p.t === 'e' ? ghTeamNav()")&&guide.includes('#nv button[onclick="tab('),'Legacy BETA guide points directly to restored Echipă sidebar button');
 assert(guide.includes('function ghReplayTarget()')&&guide.includes('header .st-settings:not([open])')&&guide.includes('stCompactSettingToggle('),'Legacy BETA guide follows Setări to playback control');
