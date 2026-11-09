@@ -11,7 +11,7 @@ new Function(ac);new Function(tmn);new Function(history);
 for(const m of index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
  if(m[1].trim())new Function(m[1]);
 for(const [oldver,newver] of [
- ['aventura-carduri.css?v=2026.11.08-4','aventura-carduri.css?v=2026.11.08-5'],
+ ['aventura-carduri.css?v=2026.11.08-4','aventura-carduri.css?v=2026.11.09-5'],
  ['aventura-carduri.js?v=2026.11.08-5','aventura-carduri.js?v=2026.11.09-1'],
  ['temnite.js?v=2026.11.08-1','temnite.js?v=2026.11.09-1'],
  ['istoric.js?v=2026.11.04-4','istoric.js?v=2026.11.09-1']

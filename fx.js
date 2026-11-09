@@ -17,7 +17,7 @@ function fxCast() {
   const esIcon = e => { if (e.b) { const b = typeof tmnBoss === 'function' ? tmnBoss(d.bn) : null; if(b)return `imagini/monstri/${b[0]}.jpg`; if(d.tw&&typeof twMob==='function'&&typeof monImg==='function')return monImg(twMob(d.room)); return null; } return typeof monImg === 'function' ? monImg(e.n) : null; };
   /* viața REALĂ de la începutul acestei lupte (echipa poate intra deja rănită, fără vindecare între monștri) */
   FX.cast = {
-    adventure: (!!(d.one||d.tw||d.lume||d.tron)),
+    adventure: true,   /* aceeași redare cu carduri în toate luptele: temnițe, turn, căpitani, Lume, Tron */
     pvp: (!!(d.lume||d.tron)),
     adventureTitle: d.lume?'Atac în Lume · '+(d.bn||'Satul adversarului'):d.tron?'Duel pentru Tron · '+(d.bn||'Apărarea Tronului'):d.tw?'Turnul · Etajul '+Math.max(1,d.room):(DG[d.di||0]||{}).n||'Temniță',
     fs: S.fs.map(x => ({ n: x.n, c: x.c, ic: x.ic, h: x.h, mh: mhp(x), hp: Math.max(0, x.hp) })),

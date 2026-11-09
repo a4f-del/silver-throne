@@ -105,6 +105,6 @@ const anim=new Function('matchMedia',ac.slice(ac.indexOf('function acFxAnimate(m
 anim({classList:{contains:()=>true},querySelector(){throw Error('Layout measured in reduced-motion mode');}},
  {fs:[],es:[],actor:null});
 assert(css.includes('.ac-enemy:focus-visible')&&css.includes('min-height:44px'));
-assert(fx.includes('d.one||d.tw||d.lume||d.tron'),'Same FX card applies to all 4 BETA modes');
+assert(fx.includes('adventure: true,'),'Same FX card applies to every fight');
 assert(vs.includes('S.d.one||S.d.tw'),'No duplicate VS card during BETA dungeon/Tower combat');
 console.log('OK: double skip/Escape once, keyboard focus, reduced motion, readable target/log, Tower/PvP/Tron FX.');

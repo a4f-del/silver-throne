@@ -45,7 +45,7 @@ const markers=[
  'flex-wrap:wrap'
 ];
 for(const marker of markers)assert(css.includes(marker),'Missing compact style: '+marker);
-assert(html.includes('aventura-carduri.css?v=2026.11.08-5'),'CSS cache invalidated');
+assert(html.includes('aventura-carduri.css?v=2026.11.09-5'),'CSS cache invalidated');
 assert(html.includes('aventura-carduri.js?v=2026.11.09-1'),'JS cache invalidated');
 assert(fx.includes("const cardMode=!!cast.adventure&&typeof acFxMarkup==='function'"),'BETA cinematic path kept');
 assert(js.includes('function acFxAnimate(modal,frame)'), 'Animation intact');
