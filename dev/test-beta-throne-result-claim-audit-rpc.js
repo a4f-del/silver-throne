@@ -39,7 +39,7 @@ const checks=[
 ];
 for(const k of checks)assert(sql.includes('AS '+k),'Missing SQL diagnostic: '+k);
 assert.equal(checks.length,8);
-assert(index.includes('tron.js?v=2026.11.09-3'),'New JS version must be visible in BETA');
+assert(index.includes('tron.js?v=2026.11.09-4'),'New JS version must be visible in BETA');
 const begin=tron.indexOf('function tronAuditFinishRpcMissing(error) {');
 const end=tron.indexOf('/* ------------------------------------------------------------------ PREMII */',begin);
 assert(begin>=0&&end>begin,'Audited report code exists');

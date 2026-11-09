@@ -25,7 +25,7 @@ async function wmSync(force){
   if(r.error){WM.err=wmErr(r.error);WM.ready=false;}
   else{
    WM.messages=Array.isArray(r.data?.messages)?r.data.messages:[];
-   WM.unread=Math.max(0,+r.data.unread||0);WM.err='';WM.ready=true;
+   WM.unread=Math.max(0,+(r.data&&r.data.unread)||0);WM.err='';WM.ready=true;
   }
   WM.last=Date.now();wmBadge();
   if(document.getElementById('wm-inbox'))wmRenderInbox();

@@ -91,5 +91,5 @@ assert(!preview.includes('Pregătire: '),'Preview cannot trigger preparation');
 assert(css.includes('.ac-counter')&&css.includes('.ac-prep'),'Compact styles present');
 assert(html.includes('aventura-carduri.js?v=2026.11.09-1')&&
  html.includes('aventura-carduri.css?v=2026.11.08-5')&&
- html.includes('drumul-eroului.js?v=2026.11.09-1'),'New assets bust browser cache');
+ html.includes('drumul-eroului.js?v=2026.11.09-2'),'New assets bust browser cache');
 console.log('OK: milestones 5/8/15/20/30, one CTA, no cascades/repeats, combat/modal isolation, captain counters, 42% odds and BETA-only.');
