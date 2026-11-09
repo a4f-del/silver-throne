@@ -133,7 +133,7 @@ function acFxMarkup(cast,hp) {
     return '<div class="fx-r ac-fx-card'+(enemy?' ac-fx-enemy':' ac-fx-ally')+'" data-s="'+side+'" data-i="'+i+'">' +
       '<div class="fx-av ac-fx-art">'+art+'</div><b class="ac-fx-name">'+acSafe(x.n)+'</b>' +
       '<i class="fx-hp"><i style="width:'+Math.max(0,Math.min(100,Math.round(alive/max*100)))+'%"></i></i>' +
-      '<small class="fx-t">'+alive+'/'+max+'</small></div>';
+      '<small class="fx-t">'+Math.round(alive)+'/'+Math.round(max)+'</small></div>';
   };
   const compactSquad = cast.pvp && (cast.es.length >= 4 || cast.fs.length >= 4);
   return '<div class="fx-c ac-fx-shell'+(compactSquad?' ac-fx-squad':'')+'"><div class="ac-fx-title"><small>Silver Throne · Aventură</small><h2>'+acSafe(cast.adventureTitle||'Luptă')+'</h2></div>' +

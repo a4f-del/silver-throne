@@ -212,14 +212,14 @@ main{padding:8px 24px;max-width:940px}
 <script src="sat.js?v=2026.11.09-1"></script>
 <script src="sat-cladiri.js?v=2026.11.09-4"></script>
 <script src="lupta-vs.js?v=2026.11.09-1"></script>
-<script src="fx.js?v=2026.11.09-4"></script>
+<script src="fx.js?v=2026.11.09-8"></script>
 <script src="fx-plus.js?v=2026.11.09-1"></script>
 <script src="sunete.js?v=2026.11.09-1"></script>
 <script src="temnite.js?v=2026.11.09-1"></script>
 <script src="echipament-balance.js?v=2026.11.09-1"></script>
 <script src="trepte.js?v=2026.11.09-1"></script>
 <script src="turn.js?v=2026.11.09-1"></script>
-<script src="aventura-carduri.js?v=2026.11.09-6"></script>
+<script src="aventura-carduri.js?v=2026.11.09-8"></script>
 <script src="harta.js?v=2026.11.04-4"></script>
 <script src="lume.js?v=2026.11.09-7"></script>
 <script src="lume-pictat.js?v=2026.11.09-1"></script>
@@ -287,7 +287,7 @@ const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':
 const BL=()=>{const b=S.bl||(S.bl={f:0,i:0,b:0});if(b.d==null)b.d=0;if(b.z==null)b.z=0;return b},rp=c=>Math.round(c.p*Math.pow(.97,BL().b)),ST=()=>S.st||(S.st={f:0,r:0,a:0,p:0,n:0}),E=f=>f.eq||(f.eq={w:null,a:null}),roster=()=>[...S.fs,...S.rs,...(S.gd||[])],cur=()=>{const r=roster();return r[S.sel]||r[0]};
 function bon(f){const b={dmg:0,def:0,hp:0,bleed:0,crit:0,loot:0,heal:0,vd:0,pd:0,ph:0,pf:0};if(f){for(const k of SL){const it=E(f)[k];if(it){const st=stGearStats(it);for(const x in b)b[x]+=st[x]||0}}tBuf(b);const w=E(f).w,wt=WF[wfOf(w)];if(wt&&wt.c===f.c)b.dmg+=Math.round(w.s.dmg*.3)}   /* arma potrivită clasei: +30% din atacul ei */
  /* apărarea mercenarului nu trece de 95% din a eroului */
- if(isM(f)){const h=heroOf();if(h){const hb=bon(h),hd=hb.def*(1+hb.pf/100)+tr(h,'def'),md=b.def*(1+b.pf/100)+tr(f,'def');if(md>MCAP*hd)b.def=Math.max(0,(MCAP*hd-tr(f,'def'))/(1+b.pf/100))}}return b}
+ if(isM(f)){const h=heroOf();if(h){const hb=bon(h),hd=hb.def*(1+hb.pf/100)+tr(h,'def'),md=b.def*(1+b.pf/100)+tr(f,'def');if(md>MCAP*hd)b.def=Math.max(0,Math.floor((MCAP*hd-tr(f,'def'))/(1+b.pf/100)))}}return b}
 /* cicatricile: la ridicare, −3 / −3 / −2 / −2 / −1 viață după rang (eroul −2), cel mult 15% din viața de bază; se vindecă la Infirmerie */
 const SCR=[3,3,2,2,1],scL=f=>f.scl!=null?f.scl:3*(f.sc||0);
 function scHit(f){const lo=f.h?2:SCR[Math.min(4,f.rk||0)],cap=Math.round(.15*mhp0(f));f.sc=(f.sc||0)+1;f.scLast=Math.max(0,Math.min(lo,cap-scL(f)));f.scl=scL(f)+f.scLast}
@@ -433,7 +433,7 @@ function step(k){const f=S.d.f,a=S.fs[f.i],L=[],al=f.es.filter(e=>e.hp>0),cd=a.c
  if(k=='n'){hit(a,e,1,L,{n:1});if(RI(1,100)<=bon(a).bleed&&e.hp>0){e.bl=Math.max(e.bl||0,3);L.push(e.n+' sângerează.')}{const w=E(a).w;if(w&&w.lg==='gheata'&&e.hp>0&&Math.random()<.15){e.st=Math.max(e.st||0,1);L.push(e.n+' îngheață.')}}spNormal(a,e,L)}
  else spSpecial(a,e,al,L);
  if(fx0&&typeof fxPush==='function')fxPush(fx0,L.join(' '),a);
- f.log.push(L.join(' '));if(typeof trRb==='function')trRb(f,f.log);
+ f.log.push(typeof fxInt==='function'?fxInt(L.join(' ')):L.join(' '));if(typeof trRb==='function')trRb(f,f.log);
  if(!f.es.some(x=>x.hp>0))return win(1);
  let n=f.i+1;while(n<S.fs.length&&S.fs[n].hp<=0)n++;
  if(n<S.fs.length)f.i=n;else{enemy();if(S.d&&S.d.f)f.i=S.fs.findIndex(x=>x.hp>0)}
@@ -443,16 +443,16 @@ function enemy(){const f=S.d.f,L=[],fx0t=typeof fxSnap==='function'?fxSnap():nul
  if(fx0t&&typeof fxPush==='function'&&L.length)fxPush(fx0t,L.join(' '),null);
  for(const e of f.es){if(e.hp<=0)continue;
   const L0=L.length,fx0=typeof fxSnap==='function'?fxSnap():null;
-  if(e.bl>0){const bleed=(2+Math.floor(S.lvl/2))*(e.blm||1);e.hp-=bleed;e.bl--;
+  if(e.bl>0){const bleed=Math.round((2+Math.floor(S.lvl/2))*(e.blm||1));e.hp-=bleed;e.bl--;
    if(S.d&&S.d.tron&&S.d.ghost)
-     L.push(e.n+' pierde '+(Math.round(bleed*100)/100)+' viață din sângerare.');
+     L.push(e.n+' pierde '+bleed+' viață din sângerare.');
    if(e.hp<=0){L.push(e.n+' sângerează până cade.');if(fx0&&typeof fxPush==='function')fxPush(fx0,L.slice(L0).join(' '),e);continue}}
   if(spTick(e,L)){if(fx0&&typeof fxPush==='function')fxPush(fx0,L.slice(L0).join(' '),e);continue}
   if(e.st>0){e.st--;L.push(e.n+' e amețit și pierde tura.');if(fx0&&typeof fxPush==='function')fxPush(fx0,L.slice(L0).join(' '),e);continue}
   const al=S.fs.filter(x=>x.hp>0);if(!al.length)break;if(e.b&&typeof trBoss==='function'&&trBoss(e,al,L,f)){if(fx0&&typeof fxPush==='function')fxPush(fx0,L.slice(L0).join(' '),e);continue}
   if(typeof trMobTurn==='function')trMobTurn(e,al,L);if(S.fs.some(x=>x.hp>0)){if(e.gcr!=null&&typeof ghostTurn==='function')ghostTurn(e,S.fs.filter(x=>x.hp>0),f,L);else spEnemyHit(e,S.fs.filter(x=>x.hp>0),L)}if(fx0&&typeof fxPush==='function')fxPush(fx0,L.slice(L0).join(' '),e)}
  {const fx1=typeof fxSnap==='function'?fxSnap():null,L0=L.length;if(S.fs.some(x=>x.hp>0))spRoundEnd(L);if(fx1&&typeof fxPush==='function'&&L.length>L0)fxPush(fx1,L.slice(L0).join(' '),null)}
- f.log.push(L.join(' '));
+ f.log.push(typeof fxInt==='function'?fxInt(L.join(' ')):L.join(' '));
  if(!S.fs.some(x=>x.hp>0)){if(typeof bhAdd==='function'){bhPush(S.d,f);bhAdd(S.d,'lost',Math.floor(S.d.loot.gold/2))}const l=S.d.loot;S.gold+=Math.floor(l.gold/2);S.ore+=Math.floor(l.ore/2);{const h={ore:0,m:{}};for(const k in(l.m||{}))h.m[k]=Math.floor(l.m[k]/2);stash(h)}adventureClear(S.d);S.d=null;S.msg='Echipa a căzut în adânc. Ai salvat doar jumătate din pradă. Du-i la infirmerie.'}else{if(typeof trRb==='function')trRb(f,f.log);if(!f.es.some(x=>x.hp>0))win(1)}}
 function win(q){
  if(S.d&&S.d.tron&&S.d.ghost&&S.d.f){

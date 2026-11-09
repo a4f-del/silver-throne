@@ -27,6 +27,8 @@ function fxCast() {
 /* instantaneu, înainte de fiecare lovitură */
 function fxSnap() { const d = S.d, f = d && d.f; return { fs: S.fs.map(x => x.hp), es: f ? f.es.map(e => e.hp) : [] }; }
 /* după lovitură: dacă s-a schimbat ceva (sau avem o replică de arătat), adaugă un cadru */
+/* textele de luptă arată doar numere întregi (ex. „-56.14” → „-56”) */
+const fxInt = t => String(t).replace(/(\d+)\.\d+/g, (m, a, i, all) => (/[\d.]/.test(all[i + m.length] || '') ? m : String(Math.round(parseFloat(m)))));
 function fxPush(pre, txt, actor) {
   const d = S.d, f = d && d.f; if (!f || !pre) return;
   const dFs = S.fs.map((x, i) => x.hp - (pre.fs[i] || 0)).map((v, i) => v ? { i, v, mh: mhp(S.fs[i]) } : null).filter(Boolean);
@@ -37,7 +39,7 @@ function fxPush(pre, txt, actor) {
      În vechea expresie mercenarii fără actor.h pierdeau animația de atac. */
   const fi=actor?S.fs.indexOf(actor):-1,ei=actor?f.es.indexOf(actor):-1;
   const tagged=(fi>=0?{side:'fs',i:fi}:ei>=0?{side:'es',i:ei}:null);
-  FX.q.push({ fs:dFs, es:dEs, txt:txt||'', actor:tagged });
+  FX.q.push({ fs:dFs, es:dEs, txt:fxInt(txt||''), actor:tagged });
 }
 /* ajutoarele chemate în luptă nu au portret propriu: luăm un monstru potrivit, altfel portretul celui care le-a chemat */
 function fxSummonImg(e) {
@@ -130,8 +132,8 @@ function fxPlay(frames, cb, first, offset) {
       const r = m.querySelector(`.fx-r[data-s="${side}"][data-i="${d.i}"]`); if (!r) continue;
       const bar = r.querySelector('.fx-hp i'), txt = r.querySelector('.fx-t'), av0 = r.querySelector('.fx-av');
       if (bar) bar.style.width = Math.round(hp[side][d.i] / cast[side][d.i].mh * 100) + '%';
-      if (txt) txt.textContent = `${hp[side][d.i]}/${cast[side][d.i].mh}`;
-      const num = document.createElement('span'); num.className = 'fx-num ' + (d.v < 0 ? (crit ? 'crit' : 'dmg') : 'heal'); num.textContent = (d.v > 0 ? '+' : '') + d.v; r.appendChild(num);
+      if (txt) txt.textContent = `${Math.round(hp[side][d.i])}/${Math.round(cast[side][d.i].mh)}`;
+      const num = document.createElement('span'); num.className = 'fx-num ' + (d.v < 0 ? (crit ? 'crit' : 'dmg') : 'heal'); num.textContent = (d.v > 0 ? '+' : '') + Math.round(d.v); r.appendChild(num);
       setTimeout(() => num.remove(), 1000);
       if (crit && d.v < 0 && av0) { av0.classList.remove('shake'); void av0.offsetWidth; av0.classList.add('shake'); }
       if (hp[side][d.i] <= 0) r.classList.add('down');
