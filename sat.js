@@ -46,7 +46,7 @@ function satExploreButton(){
 }
 
 /* zonele din imaginile satului (imagini/sat/sat-1…3.jpg, 1152×928, aceeași așezare pe toate stadiile): poligonul pe care apeși și locul etichetei */
-const SAT_W = 1152, SAT_H = 928;
+let SAT_W = 1152, SAT_H = 928;   /* sat-cladiri.js le schimbă la 1600×893 când folosește fundalurile late */
 const SAT_Z = {
   a: [[45, 255, 360, 255, 365, 500, 45, 500], [200, 262]],
   p: [[390, 210, 565, 210, 565, 365, 390, 365], [478, 212]],
@@ -255,8 +255,12 @@ function satFitViewport() {
   const map = layout.querySelector('.vh-map');
   if (!map) return;
   map.style.removeProperty('width');
-  if (window.innerWidth < 960) return; // pe mobil scena rămâne întreagă, cu scroll dacă e nevoie
-  const freeHeight = Math.floor(window.innerHeight - map.getBoundingClientRect().top - 24);
+  if (window.innerWidth < 960) {   // pe mobil scena rămâne întreagă, cu scroll dacă e nevoie
+    /* satul lat: pe telefon îl arătăm mai mare, cu derulare laterală, pornind centrat pe curte */
+    if (map.classList && map.classList.contains('vh-wide') && layout.scrollWidth > layout.clientWidth && !layout.dataset.c) { layout.dataset.c = 1; layout.scrollLeft = (layout.scrollWidth - layout.clientWidth) / 2; }
+    return;
+  }
+  const freeHeight = Math.floor(window.innerHeight - map.getBoundingClientRect().top - (map.classList && map.classList.contains('vh-wide') ? 46 : 24));
   const availableWidth = layout.clientWidth;
   const mapWidth = Math.floor(Math.min(availableWidth - 2, freeHeight * SAT_W / SAT_H));
   if (freeHeight < 310 || mapWidth < 360) return; // fereastra prea mică: scroll normal, fără decupare

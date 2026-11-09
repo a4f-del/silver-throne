@@ -7,7 +7,7 @@ const path = require('node:path');
 const src = fs.readFileSync(path.join(__dirname, '..', 'sat.js'), 'utf8');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 new Function(src);
-assert(html.includes('sat.js?v=2026.11.09-1'),'Updated Sat asset busts browser cache');
+assert(html.includes('sat.js?v=2026.11.09-9'),'Updated Sat asset busts browser cache');
 assert(src.includes('vh-fit-page') && src.includes('vh-fit-layout') && !src.includes('vh-fit-side'),'BETA has one centered map without the former right column');
 assert(!src.includes('ST_SERVER'),'Single village layout, no server branching');
 assert(src.includes('aspect-ratio:1152/928') && src.includes('object-fit:contain'),'Village image keeps original ratio without cropping');
