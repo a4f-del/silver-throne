@@ -43,3 +43,9 @@ assert(html.includes(':Math.max(1,Math.round(dm-spDef(a,e,o)))'),'PvE keeps flat
 for(const m of ["'cr', least(75, greatest(0,","'cm', least(2.5, greatest(1.5,","else '{}'::jsonb end","GRANT EXECUTE ON FUNCTION public.throne_publish(text,integer,jsonb) TO authenticated"])assert(sql.includes(m),'SQL43 '+m);
 assert(!/\b(DROP|TRUNCATE|DELETE FROM)\b/i.test(sql));
 console.log('OK: PvP fairness — crit-aware ghosts with class abilities, PvP armor, coin-flip initiative, symmetric targeting.');
+// numere întregi în lupte (fără „-56.1399”)
+{const fx=read('fx.js');const fxInt=new Function(fx.match(/const fxInt[^\n]*/)[0]+';return fxInt')();
+assert.equal(fxInt('A lovește B (-56.139999999999986). +12.5'),'A lovește B (-56). +13');
+assert(html.includes("const bleed=Math.round("),'bleed ticks are whole numbers');
+assert(fx.includes('Math.round(hp[side][d.i])'),'HP labels are whole numbers');}
+console.log('OK: whole numbers in combat text.');

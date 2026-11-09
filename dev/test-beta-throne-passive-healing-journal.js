@@ -60,8 +60,8 @@ assert(onStart.includes('if (d.ghost && d.f)'),'Guarded to ghost duel');
 const enemy=section(index,'function enemy(){','\nfunction win(');
 assert(enemy.includes("if(S.d&&S.d.tron&&S.d.ghost)"),
   'Bleeding damage disclosed only in Tron duels');
-assert(enemy.includes("const bleed=(2+Math.floor(S.lvl/2))*(e.blm||1);e.hp-=bleed;e.bl--;"),
- 'Existing bleed tick damage and timing retained');
+assert(enemy.includes("const bleed=Math.round((2+Math.floor(S.lvl/2))*(e.blm||1));e.hp-=bleed;e.bl--;"),
+ 'Bleed tick damage (whole numbers) and timing retained');
 const win=section(index,'function win(q){','\nfunction flee()');
 assert(win.includes('HP la victorie: erou'),'Combat end has final HP');
 assert(win.indexOf('HP la victorie') < win.indexOf("bhPush(S.d,S.d.f)"),
