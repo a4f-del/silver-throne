@@ -210,7 +210,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="tron.js?v=2026.11.09-4"></script>
 <script src="lume-art.js?v=2026.11.04-4"></script>
 <script src="sat.js?v=2026.11.09-1"></script>
-<script src="sat-cladiri.js?v=2026.11.09-3"></script>
+<script src="sat-cladiri.js?v=2026.11.09-4"></script>
 <script src="lupta-vs.js?v=2026.11.09-1"></script>
 <script src="fx.js?v=2026.11.09-3"></script>
 <script src="fx-plus.js?v=2026.11.09-1"></script>
@@ -240,7 +240,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="legendare.js?v=2026.11.09-1"></script>
 <script src="endgame-ui.js?v=2026.11.09-1"></script>
 <script src="fierarie-filtre.js?v=2026.11.09-1"></script>
-<script src="profil.js?v=2026.11.09-1"></script>
+<script src="profil.js?v=2026.11.09-2"></script>
 <script src="lume-quick.js?v=2026.11.09-1"></script>
 <script src="world-mail.js?v=2026.11.09-2"></script>
 <script src="world-friends.js?v=2026.11.09-1"></script>
@@ -1066,6 +1066,31 @@ body.st-adventure .hs .hm{cursor:default}
  #v:has(> .fk-tabs)>section:nth-of-type(2){grid-column:1;grid-row:span 2}
  #v:has(> .fk-tabs)>section:nth-of-type(1),#v:has(> .fk-tabs)>section.mr-bl{grid-column:2}
  #v:has(> .fk-tabs)>section:nth-of-type(1) .slots,#v:has(> .fk-tabs)>section:nth-of-type(1)>div:not(.mute){grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+/* Clădirile satului pe ecran mare (1080p): totul încape fără derulare.
+   Pagina se lățește, conținutul clădirii stă în stânga, iar panoul „Clădirea: …” (și ce urmează) într-o coloană în dreapta. */
+@media (min-width:1400px) and (min-height:700px){
+ main#v:has(> .vb){max-width:min(1500px,100%)}
+ #v:has(> .vb):has(> section.mr-bl):not(:has(> .fk-tabs)){display:grid;grid-template-columns:minmax(0,1fr) 360px;grid-auto-flow:row dense;gap:0 14px;align-items:start}
+ #v:has(> .vb):has(> section.mr-bl):not(:has(> .fk-tabs))>*{grid-column:1/-1}
+ #v:has(> .vb):has(> section.mr-bl):not(:has(> .fk-tabs))>section:not(.mr-bl):first-of-type{grid-column:1;grid-row:span 4}
+ #v:has(> .vb):has(> section.mr-bl):not(:has(> .fk-tabs))>section.mr-bl,
+ #v:has(> .vb):has(> section.mr-bl):not(:has(> .fk-tabs))>section.mr-bl~section{grid-column:2}
+ #v>section.mr-bl~section, #v>section.mr-bl{margin-top:0}
+ /* Topitoria: formular | sloturi | clădirea */
+ #v:has(> .fk-tabs){grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) 340px}
+ #v:has(> .fk-tabs)>section.mr-bl{grid-column:3;grid-row:span 2}
+ #v:has(> .fk-tabs)>section:nth-of-type(2) .row{padding-block:6px}
+ /* Depozitul: carduri compacte, câte patru pe rând */
+ .dz-g{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:6px 10px}
+ .dz-m{padding:5px 10px 4px}
+ .dz-m .row{font-size:15px;line-height:1.25}
+ .dz-m .row .mute{font-size:12.5px}
+ .dz-m .bar{margin:4px 0 2px!important;height:5px}
+ .dz-g.dz-q{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .dz-q .dz-m .row>span:last-child{white-space:normal;font-size:13.5px}
+ #v:has(> .vb)>section{padding-block:14px}
+ #v:has(> .vb) h2{margin-bottom:8px}
 }
 </style>
 <!-- săgeata ghidului e în ghid.js -->

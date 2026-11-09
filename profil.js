@@ -7,11 +7,11 @@
    Se deschide cu prOpen(i), unde i e poziția în roster() (echipă, apoi rezervă, apoi străjeri).
    Se încarcă după echipa.js.
    ========================================================================== */
-const PR = { i: -1, bagFilter: 'all', bagQuery: '' };
+const PR = { i: -1, bagFilter: 'all', bagQuery: '', bagOpen: false };
 const prF = () => roster()[PR.i];
 const prPct = v => (v > 0 ? '+' : '−') + Math.abs(v) + '%';
 
-function prOpen(i) { if (!roster()[i]) return; PR.i = i; PR.bagFilter = 'all'; PR.bagQuery = ''; prDraw(); }
+function prOpen(i) { if (!roster()[i]) return; PR.i = i; PR.bagFilter = 'all'; PR.bagQuery = ''; PR.bagOpen = false; prDraw(); }
 function prClose() { PR.i = -1; document.getElementById('pr-m')?.remove(); document.removeEventListener('keydown', prKey); }
 function prKey(e) { if (e.key === 'Escape') prClose(); }
 /* acțiunile din profil lucrează pe luptătorul din profil, apoi redesenează fereastra */
@@ -83,24 +83,30 @@ function prStats(f) {
 }
 function prSlot(f, k) {
   const it = E(f)[k];
-  if (!it) return `<div class="pr-sl em" title="${SLN[k]}: gol">${UI(UISL[k])}<small>${SLN[k]}</small></div>`;
-  return `<div class="pr-sl q${it.lg ? 'l' : it.r}"${typeof itTipA === 'function' ? itTipA(it) : ` title="${tEsc(it.name)}"`}>${iic(it)}<button class="pr-un" onclick="prUn('${k}')" title="Scoate ${tEsc(it.name)}" aria-label="Scoate ${tEsc(it.name)}">✕</button></div>`;
+  const on = PR.bagOpen && PR.bagFilter === k ? ' on' : '', pick = `onclick="prPick('${k}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();prPick('${k}')}"`;
+  if (!it) return `<div class="pr-sl em${on}" ${pick} title="${SLN[k]}: gol · apasă ca să alegi" aria-label="${SLN[k]}: gol, alege un obiect">${UI(UISL[k])}<small>${SLN[k]}</small></div>`;
+  return `<div class="pr-sl q${it.lg ? 'l' : it.r}${on}" ${pick}${typeof itTipA === 'function' ? itTipA(it) : ` title="${tEsc(it.name)}"`}>${iic(it)}<button class="pr-un" onclick="event.stopPropagation();prUn('${k}')" title="Scoate ${tEsc(it.name)}" aria-label="Scoate ${tEsc(it.name)}">✕</button></div>`;
 }
 /* Filtre exclusiv de prezentare: indexul real din inventar rămâne neschimbat la equip(i). */
 const prBagMatches = it => {
   const k = PR.bagFilter;
   const category = k === 'all' || (k === 'w' && it.t === 'w') ||
     (k === 'armor' && ['a','h','b'].includes(it.t)) ||
-    (k === 'accessory' && ['j','r'].includes(it.t));
+    (k === 'accessory' && ['j','r'].includes(it.t)) ||
+    (['a','h','b','j','r'].includes(k) && it.t === k);
   const query = (PR.bagQuery || '').trim().toLocaleLowerCase('ro-RO');
   return category && (!query || String(it.name || '').toLocaleLowerCase('ro-RO').includes(query));
 };
 const prEscapeAttr = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function prBagCells(f) {
   const inv = S.inv || [];
-  const visible = inv.map((it,i) => ({it,i})).filter(({it}) => prBagMatches(it));
-  const cells = visible.map(({it,i}) => {
-    const cur = E(f)[it.t], ok = typeof wfOk !== 'function' || wfOk(f, it), up = ok && typeof bsc === 'function' && (!cur || bsc(it, f) > bsc(cur, f) * 1.02);
+  const visible = inv.map((it,i) => ({it,i})).filter(({it}) => prBagMatches(it)).map(o => {
+    const cur = E(f)[o.it.t], ok = typeof wfOk !== 'function' || wfOk(f, o.it), sc = typeof bsc === 'function' ? bsc(o.it, f) : 0;
+    return Object.assign(o, { cur, ok, sc, up: ok && typeof bsc === 'function' && (!cur || sc > bsc(cur, f) * 1.02) });
+  });
+  /* ordinea afișată: întâi îmbunătățirile, apoi ce se potrivește, cele mai bune primele (indexul real rămâne neschimbat) */
+  visible.sort((x, y) => (y.up - x.up) || (y.ok - x.ok) || (y.sc - x.sc));
+  const cells = visible.map(({it,i,cur,ok,up}) => {
     return `<button class="pr-it q${it.lg ? 'l' : it.r}${up ? ' up' : ''}${ok ? '' : ' no'}" onclick="prEq(${i})"${typeof itTipA === 'function' ? itTipA(it, cur) : ` title="${tEsc(it.name)}"`} aria-label="Echipează ${tEsc(it.name)}">${iic(it)}${up ? '<b class="pr-up">▲</b>' : ''}</button>`;
   }).join('');
   return {count:visible.length,html:cells || '<p class="pr-empty pr-bag-none">Niciun obiect găsit. Încearcă alt filtru.</p>'};
@@ -110,8 +116,9 @@ function prBag(f) {
   if (!inv.length) return '<div class="mute pr-empty">Rucsacul e gol.</div>';
   return `<div class="pr-grid" id="pr-bag-items" role="region" aria-label="Obiectele din rucsac">${prBagCells(f).html}</div>`;
 }
+const PR_SLOTS = [['all','Toate'],['w','Arme'],['a','Armuri'],['h','Coifuri'],['b','Cizme'],['j','Bijuterii'],['r','Relicve']];
 function prBagTools() {
-  const options = [['all','Toate'],['w','Arme'],['armor','Armuri'],['accessory','Accesorii']];
+  const options = PR_SLOTS;
   const buttons = options.map(([k,t]) => `<button type="button" data-pr-filter="${k}" class="${PR.bagFilter === k ? 'on' : ''}" aria-pressed="${PR.bagFilter === k}" onclick="prBagFilter('${k}')">${t}</button>`).join('');
   return `<div class="pr-bag-tools" aria-label="Filtre rucsac"><div class="pr-bag-tabs" role="group" aria-label="Tip obiect">${buttons}</div><input class="pr-bag-search" type="search" placeholder="Caută obiect…" aria-label="Caută în rucsac" value="${prEscapeAttr(PR.bagQuery)}" oninput="prBagSearch(this.value)"></div>`;
 }
@@ -129,7 +136,12 @@ function prBagRefresh() {
     btn.setAttribute('aria-pressed', String(on));
   });
 }
-function prBagFilter(value) { if (['all','w','armor','accessory'].includes(value)) { PR.bagFilter = value; prBagRefresh(); } }
+function prBagFilter(value) { if (['all','w','armor','accessory','a','h','b','j','r'].includes(value)) { PR.bagFilter = value; prBagRefresh(); document.querySelectorAll('#pr-m .pr-sl').forEach(el => el.classList.toggle('on', el.getAttribute('onclick') === `prPick('${value}')`)); const t = document.getElementById('pr-bag-t'); if (t) t.textContent = prBagTitle(); } }
+/* rucsacul e ascuns până alegi un slot (sau îl deschizi): fișa rămâne curată */
+const prBagTitle = () => { const o = PR_SLOTS.find(x => x[0] === PR.bagFilter); return o && PR.bagFilter !== 'all' ? o[1] : 'Tot rucsacul'; };
+function prPick(k) { if (PR.bagOpen && PR.bagFilter === k) { PR.bagOpen = false; } else { PR.bagOpen = true; PR.bagFilter = k; PR.bagQuery = ''; } prDraw(); }
+function prBagToggle(open) { PR.bagOpen = open; if (open && !PR.bagFilter) PR.bagFilter = 'all'; prDraw(); }
+function prUpCount(f) { return (S.inv || []).filter(it => { const cur = E(f)[it.t]; return (typeof wfOk !== 'function' || wfOk(f, it)) && typeof bsc === 'function' && (!cur || bsc(it, f) > bsc(cur, f) * 1.02); }).length; }
 function prBagSearch(value) { PR.bagQuery = String(value || ''); prBagRefresh(); }
 function prDraw() {
   const f = prF(); if (!f) return prClose();
@@ -153,15 +165,15 @@ function prDraw() {
   ${train}
   <div class="pr-ab"><b>${tEsc(cls.sp)}</b> <span>${tEsc(cls.d)}</span>${spec ? `<div><b>${tEsc(spec.n)}</b> <span>${tEsc(spec.r || '')}</span></div>` : ''}</div>
 </section>
-<section class="pr-r">
+<section class="pr-r${PR.bagOpen ? '' : ' closed'}">
   <div class="pr-doll">
     <div class="pr-col">${L.map(k => prSlot(f, k)).join('')}</div>
     <div class="pr-por">${src ? `<img src="${src}" alt="${tEsc(f.n)}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'pr-av'}))">` : `<span class="pr-av">${av(f, 180)}</span>`}${dead ? '<b class="pr-dead">☠ căzut</b>' : ''}</div>
     <div class="pr-col">${R.map(k => prSlot(f, k)).join('')}</div>
   </div>
-  <div class="pr-bh"><b>Rucsac</b><span class="pr-bag-count" id="pr-bag-count" aria-live="polite">${prBagCells(f).count} / ${(S.inv || []).length}</span><span class="mute">Atinge pentru echipare · ▲ îmbunătățire</span></div>
+  ${PR.bagOpen ? `<div class="pr-bh"><b>Rucsac</b><span class="pr-bag-sub" id="pr-bag-t">${prBagTitle()}</span><span class="pr-bag-count" id="pr-bag-count" aria-live="polite">${prBagCells(f).count} / ${(S.inv || []).length}</span><span class="mute">Atinge pentru echipare · ▲ îmbunătățire</span><button class="pr-bag-hide" onclick="prBagToggle(false)">Ascunde</button></div>
   ${prBagTools()}
-  ${prBag(f)}
+  ${prBag(f)}` : (u => `<div class="pr-bag-closed"><span class="mute">Apasă pe un slot ca să vezi doar ce se potrivește acolo, cele mai bune primele.</span><button onclick="prBagToggle(true)">🎒 Rucsac · ${(S.inv || []).length} obiecte${u ? ` · <b class="pr-upc">▲ ${u}</b>` : ''}</button></div>`)(prUpCount(f))}
 </section></div>`;
 }
 
@@ -287,6 +299,25 @@ const prBtn = i => `<button class="pr-open" onclick="prOpen(${i})">👤 Profil</
  .pr-bag-search{max-width:none;flex-basis:100%}
  .pr-beta .pr-grid{overflow:visible;max-height:none;grid-template-columns:repeat(auto-fill,minmax(48px,1fr))}
 }
+.pr-beta .pr-grid{grid-template-columns:repeat(auto-fill,58px);grid-auto-rows:58px;justify-content:start}
+.pr-beta .pr-it{width:58px;height:58px;aspect-ratio:auto}
+.pr-beta .pr-it .ico,.pr-beta .pr-it .uii{width:40px;height:40px}
+.pr-beta .pr-sl{cursor:pointer;transition:transform .12s,box-shadow .12s}
+.pr-beta .pr-sl:hover{transform:translateY(-1px);box-shadow:0 0 0 1px #d9bb74,0 0 14px #cda9514d}
+.pr-beta .pr-sl.on{box-shadow:0 0 0 2px #f0d27a,0 0 18px #f0d27a88}
+.pr-beta .pr-r.closed{grid-template-rows:minmax(0,1fr) auto}
+.pr-beta .pr-r.closed .pr-doll{height:100%}
+.pr-beta .pr-r.closed .pr-por{max-width:440px;max-height:min(440px,62dvh)}
+.pr-beta .pr-r.closed .pr-sl{width:70px;height:70px}
+.pr-beta .pr-r.closed .pr-sl .ico,.pr-beta .pr-r.closed .pr-sl .uii{width:50px;height:50px}
+.pr-beta .pr-r.closed .pr-doll{grid-template-columns:minmax(76px,1fr) minmax(240px,440px) minmax(76px,1fr)}
+.pr-bag-closed{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding:10px 12px;border:1px solid #68573577;border-radius:10px;background:#0b1417}
+.pr-bag-closed .mute{font-size:13px}
+.pr-bag-closed button{flex:none;min-height:0;padding:8px 14px;font:700 14px Cinzel,Georgia,serif}
+.pr-upc{color:#7fd88c}
+.pr-bag-sub{font:700 13px Cinzel,serif;color:#e8d6a6}
+.pr-bag-hide{margin-left:6px;min-height:0;padding:4px 10px;font-size:12px}
+@media(max-width:760px){.pr-bag-closed{flex-direction:column;align-items:stretch}.pr-beta .pr-grid{grid-template-columns:repeat(auto-fill,52px);grid-auto-rows:52px}.pr-beta .pr-it{width:52px;height:52px}.pr-beta .pr-r.closed .pr-sl{width:54px;height:54px}.pr-beta .pr-r.closed .pr-doll{grid-template-columns:58px minmax(0,1fr) 58px}}
 @keyframes prIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.pr-c{animation:none}}
 @media (max-width:760px){
