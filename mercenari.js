@@ -13,7 +13,8 @@ const MR = {
   order: [['Paznic', null], ['Arcaș', null], ['Războinic', 'Hanul'], ['Vraci', () => C('bs') >= 1], ['Mag', () => S.lvl >= 5]],
   hint: { 'Războinic': 'Se alătură la pasul „Hanul” din ghid.', 'Vraci': 'Se alătură după ce termini prima temniță cu căpitan.', 'Mag': 'Se alătură la nivelul 5, când se deschide Lumea.' },
   rol: { 'Războinic': 'luptător echilibrat, lovește greu și poate ameți', 'Arcaș': 'atac mare de la distanță, provoacă sângerare', 'Paznic': 'atrage loviturile și apără echipa', 'Mag': 'cel mai mare atac, ignoră apărarea', 'Vraci': 'vindecă echipa în luptă' },
-  sug: { 'Războinic': ['Radu', 'Bogdan', 'Mircea'], 'Arcaș': ['Ilinca', 'Lia', 'Anca'], 'Paznic': ['Toma', 'Petru', 'Costea'], 'Mag': ['Ioana', 'Dana', 'Sorin'], 'Vraci': ['Matei', 'Vlad', 'Dragoș'] }
+  fem: { 'Arcaș': 1, 'Mag': 1, 'Vraci': 1 },   /* portretele noi: arcașă, magă, vindecătoare */
+  sug: { 'Războinic': ['Radu', 'Bogdan', 'Mircea'], 'Arcaș': ['Ilinca', 'Lia', 'Anca'], 'Paznic': ['Toma', 'Petru', 'Costea'], 'Mag': ['Ioana', 'Dana', 'Irina'], 'Vraci': ['Sânziana', 'Ileana', 'Maria'] }
 };
 const mrAll = () => [...S.fs, ...S.rs];
 const mrHas = c => mrAll().some(f => !f.h && f.c === c);
@@ -130,7 +131,7 @@ function mrPost() {
     const gift = S.giftL ? `<div class="mr-gift"><b>Și un cadou de început</b>, pus deja pe cei care au nevoie de el:<ul>${S.giftL.map(n => `<li>${tEsc(n)}</li>`).join('')}</ul></div>` : '';
     const m = document.createElement('div'); m.id = 'mr-m'; m.dataset.c = key; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-labelledby', 'mr-t');
     m.innerHTML = `<div class="mr-c${fs.length > 1 ? ' mr-many' : ''}"><div class="mr-k">${fs.length > 1 ? 'Noi tovarăși' : 'Un nou tovarăș'}</div><div class="mr-row">${one}</div>${gift}`
-      + `<button class="p" onclick="mrName()">${fs.length > 1 ? 'Primește-i în echipă' : 'Primește-l în echipă'}</button><p class="mute mr-f">Mercenarii rămân cu tine pentru totdeauna și cresc în rang luptând.</p></div>`;
+      + `<button class="p" onclick="mrName()">${fs.length > 1 ? 'Primește-i în echipă' : (MR.fem[fs[0].c] ? 'Primește-o în echipă' : 'Primește-l în echipă')}</button><p class="mute mr-f">Mercenarii rămân cu tine pentru totdeauna și cresc în rang luptând.</p></div>`;
     document.body.appendChild(m); setTimeout(() => { const i = document.getElementById('mr-in-0'); if (i) { i.focus(); i.select(); } }, 60);
   } catch (e) { /* numirea nu blochează jocul */ }
 }
@@ -396,7 +397,7 @@ function mxClaim(c) {
 function mxRow(f) {
   if (f.h || !S.rs.includes(f)) return '';
   if (mxDone(f)) return `<div class="mx-r"><span class="r4">S-a întors din expediție.</span><button class="p" onclick="mxClaim('${f.c}')">Primește prada</button></div>`;
-  if (mxBusy(f)) { const o = mxOf(f); return `<div class="mx-r mute">În expediție: ${MX.T[o.k][0].toLowerCase()} · se întoarce în <span data-end="${o.end}">${fmt(o.end - Date.now())}</span></div>`; }
+  if (mxBusy(f)) { const o = mxOf(f); return `<div class="mx-r mute">În expediție: ${MX.T[o.k][0].toLowerCase()} · se întoarce în <span data-end="${o.end}">${fmt(o.end - Date.now())}</span>${typeof rnRushBtn === 'function' ? rnRushBtn('x', f.c, o.end) : ''}</div>`; }
   return `<div class="mx-r"><span class="mute">Trimite în expediție:</span>${Object.entries(MX.T).map(([k, t]) => `<button onclick="mxSend('${f.c}','${k}')" title="${t[0]}: aur, +${t[2]} faimă${t[3] ? ', materiale' : ''}${t[4] ? ', șansă la obiect' : ''}">${t[1]} ${t[1] === 1 ? 'oră' : 'ore'}</button>`).join('')}</div>`;
 }
 

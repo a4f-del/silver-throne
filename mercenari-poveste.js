@@ -12,9 +12,9 @@ const MR_STORY = {
   'Arcaș': {
     title: 'Urmele din cenușă', place: 'Ieșirea din Mina Cenușie · prima expediție',
     clue: 'După prima întoarcere din mină, cineva urmărește aceleași urme.',
-    prose: 'Te întorci din prima coborâre când o săgeată se înfige în lemnul de lângă potecă. Din pădure iese un arcaș care urmărea creaturile ieșite din mină. A văzut că ai avut curajul să cobori acolo.',
+    prose: 'Te întorci din prima coborâre când o săgeată se înfige în lemnul de lângă potecă. Din pădure iese o arcașă care urmărea creaturile ieșite din mină. A văzut că ai avut curajul să cobori acolo.',
     quote: '„Singur vei rata câteva umbre. Dacă îmi dai un loc lângă foc, eu nu le voi rata.”',
-    action: 'Primește-l pe Arcaș'
+    action: 'Primește-o pe arcașă'
   },
   'Războinic': {
     title: 'Sabia fără stăpân', place: 'Hanul · după prima expediție și antrenament',
@@ -25,17 +25,17 @@ const MR_STORY = {
   },
   'Vraci': {
     title: 'Mâinile care vindecă', place: 'Drumul de întoarcere · după primul căpitan',
-    clue: 'După primul căpitan învins, un vindecător îngrijește supraviețuitorii.',
-    prose: 'După căderea primului căpitan, găsești lângă drum un vraci care bandajează răniții. Nu întreabă câți dușmani ai ucis, ci câți oameni ai adus înapoi din întuneric.',
+    clue: 'După primul căpitan învins, o vindecătoare îngrijește supraviețuitorii.',
+    prose: 'După căderea primului căpitan, găsești lângă drum o tânără vindecătoare care bandajează răniții. Nu întreabă câți dușmani ai ucis, ci câți oameni ai adus înapoi din întuneric.',
     quote: '„O sabie câștigă o clipă. Cineva trebuie să-i țină în viață pe cei care vor lupta mâine.”',
-    action: 'Primește-l pe Vraci'
+    action: 'Primește-o pe vindecătoare'
   },
   'Mag': {
     title: 'Cunoașterea interzisă', place: 'Hotarul Lumii · nivelul 5',
-    clue: 'Când Lumea se deschide, un străin caută urma Tronului de Argint.',
-    prose: 'Dincolo de hotarele satului, pe harta proaspăt deschisă, apare un călător cu semne argintii pe mantie. Privește ținuturile ca și cum ar recunoaște un desen foarte vechi.',
+    clue: 'Când Lumea se deschide, o străină caută urma Tronului de Argint.',
+    prose: 'Dincolo de hotarele satului, pe harta proaspăt deschisă, apare o călătoare cu semne argintii pe mantie. Privește ținuturile ca și cum ar recunoaște un desen foarte vechi.',
     quote: '„Tronul de Argint nu este doar o coroană. Vino cu mine și îți voi arăta de ce se tem regii de el.”',
-    action: 'Primește-l pe Mag'
+    action: 'Primește-o pe magă'
   }
 };
 function mrStoryEnabled() { return typeof S !== 'undefined' && S && S.mrStoryV === 1; }

@@ -25,7 +25,7 @@ function create({beta=true,newHero=true,heroName='Eroul'}={}) {
  return {S,api,get goCalls(){return goCalls}};
 }
 const named=create();
-const names=[['Paznic','Toma'],['Arcaș','Ilinca'],['Războinic','Radu'],['Vraci','Matei'],['Mag','Ioana']];
+const names=[['Paznic','Toma'],['Arcaș','Ilinca'],['Războinic','Radu'],['Vraci','Sânziana'],['Mag','Ioana']];
 for(const [c,n] of names){
  named.S.mrOff.push(c);
  named.api.mrRecruit(c);

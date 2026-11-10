@@ -100,7 +100,7 @@ function tmPortrait(f) {
 /* portretul întreg al luptătorului ales (eroul: portretul ales sau skinul; mercenarii: portretul clasei) */
 function tmFullSrc(f) {
   if (f.h) { if (typeof skinOn === 'function' && skinOn(f) && typeof HS !== 'undefined') return HS.umbra.av; return typeof heroId === 'function' && f.ic ? `imagini/eroi/${heroId(f.ic)}.jpg` : null; }
-  return typeof MPIC !== 'undefined' && MPIC[f.c] ? `imagini/mercenari/${MPIC[f.c]}.jpg` : null;
+  return typeof MPIC !== 'undefined' && MPIC[f.c] ? (typeof mpic === 'function' ? mpic(f) : `imagini/mercenari/${MPIC[f.c]}.jpg`) : null;
 }
 function tmFull(f, sub, i) {
   const src = tmFullSrc(f);
@@ -109,13 +109,20 @@ function tmFull(f, sub, i) {
 }
 /* butoanele de skin ale eroului (înainte stăteau sub portretul mare) */
 function tmSkin(f) {
-  if (!f.h) return '';
+  if (!f.h) return tmMSkin(f);
   const look = typeof hcEdit === 'function' ? `<button class="${f.ic ? '' : 'p'}" onclick="hcEdit()">${f.ic ? 'Schimbă aspectul' : 'Alege-ți portretul'}</button>` : '';
   return look + tmSkin0(f);
 }
 function tmSkin0(f) {
   if (skinOn(f)) return `<button onclick="skinView()">Portret mare</button><button onclick="skinSet('clasic')">Skin clasic</button>`;
-  return S.prem ? `<button onclick="skinView()">Portret mare</button><button class="p" onclick="skinSet('umbra')">Skin Umbra Runelor</button>` : `<button onclick="skinView()">Skin premium</button>`;
+  return S.prem || (typeof rnOwn === 'function' && rnOwn('umbra')) ? `<button onclick="skinView()">Portret mare</button><button class="p" onclick="skinSet('umbra')">Skin Umbra Runelor</button>` : `<button onclick="skinView()">Skin premium</button>`;
+}
+/* skinul premium al mercenarului: comutare (Premium) sau previzualizare */
+function tmMSkin(f) {
+  if (typeof MSK === 'undefined' || !MSK[f.c]) return '';
+  const c = f.c.replace(/'/g, "\\'");
+  if (mskOn(f)) return `<button onclick="mskView('${c}')">Portret premium</button><button onclick="mskSet('${c}','clasic')">Skin clasic</button>`;
+  return S.prem || (typeof rnOwn === 'function' && rnOwn(f.c)) ? `<button class="p" onclick="mskSet('${c}','p')">Skin ${MSK[f.c]}</button>` : `<button onclick="mskView('${c}')">Skin premium</button>`;
 }
 const tmDef = f => bon(f).def + tr(f, 'def');
 function tmChar(inv) {

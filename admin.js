@@ -99,7 +99,7 @@ function admDo(k, v) {
     case 'exp': if (S.mx) for (const c in S.mx) S.mx[c].end = Date.now() - 1; m = 'Expedițiile s-au întors'; break;
     case 'daily': if (S.dc && typeof dcYest === 'function') S.dc.day = dcYest(); m = 'Cufărul zilnic se poate deschide din nou'; break;
     case 'lg': S.inv.push(mkLegendary('runic', S.lvl)); m = 'Armă legendară adăugată în rucsac'; break;
-    case 'prem': S.prem = !S.prem; m = 'Premium ' + (S.prem ? 'pornit' : 'oprit'); break;
+    case 'prem': if (typeof RN !== 'undefined' && RN.ok) { S.premT = !S.premT; rnApply(); m = 'Premium de test ' + (S.premT ? 'pornit' : 'oprit') + (S.prem && !S.premT ? ' (abonamentul cu Rune e încă activ)' : ''); } else { S.prem = !S.prem; m = 'Premium ' + (S.prem ? 'pornit' : 'oprit'); } break;
     case 'slots': opt('slots', v); m = `${v} sloturi de forjă`; break;
     case 'tu': opt('tu'); m = 'Ghidul a fost repornit'; break;
     case 'reset': opt('reset'); ADM.m = S.cf && S.cf.k === 'reset' ? 'Apasă din nou în 4 secunde ca să ștergi tot.' : 'Jocul a fost resetat.'; admDraw(); return;
@@ -130,6 +130,7 @@ ${typeof lwTestCooldownPanel==='function'&&lwTestCooldownAllowed()?`<div class="
 <div class="adm-g"><span>Timp</span><div class="adm-bs">${b('forge', 0, 'Termină forja')}${b('exp', 0, 'Termină expedițiile')}${b('daily', 0, 'Cufăr zilnic din nou')}</div></div>
 ${admGenHtml()}
 <div class="adm-g"><span>Premium</span><div class="adm-bs">${b('prem', 0, 'Premium: ' + (S.prem ? 'pornit' : 'oprit'))}</div></div>
+${typeof rnAdminHtml === 'function' ? rnAdminHtml() : ''}
 <div class="adm-g"><span>Forjă</span><div class="adm-bs">${[4, 6, 8].map(n => b('slots', n, n + ' sloturi', n == S.slots ? 'p' : '')).join('')}</div></div>
 <div class="adm-g"><span>Joc</span><div class="adm-bs">${b('tu', 0, 'Repornește ghidul')}${b('reset', 0, 'Resetează jocul', 'd')}</div></div>`;
 }
