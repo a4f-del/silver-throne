@@ -7,7 +7,7 @@ const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
 const src=read('beta-compact-ui.js'),index=read('index.html'),account=read('cont.js'),
   server=read('servere.js'),guide=read('ghid.js');
 new Function(src);
-assert(index.includes('beta-compact-ui.js?v=2026.11.10-1'),'Settings asset is cache-busted');
+assert(index.includes('beta-compact-ui.js?v=2026.11.10-2'),'Settings asset is cache-busted');
 assert(index.includes('ghid.js?v=2026.11.09-6'),'Playback guide asset is cache-busted');
 assert(guide.includes("stCompactSettingToggle(\\'fx\\')"),'Guide points to new playback control');
 assert(account.includes('async function contOut()')&&account.includes('await contPush()'),'Logout saves before signing out');

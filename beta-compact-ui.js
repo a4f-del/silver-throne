@@ -75,7 +75,7 @@ function stCompactSettingToggle(k) {
     fxToggleInstant();
     return;
   }
-  if (!['on','f','eq','hl'].includes(k) || !S.prem) return;
+  if (!['on','f','eq','hl','lv'].includes(k) || !S.prem) return;
   stSettingsReopen = true;
   btog(k);
 }
@@ -147,11 +147,12 @@ function stCompactHdr() {
     '><summary title="Setări" aria-label="Setări">⚙</summary>' +
     '<div class="st-drop-panel st-settings-panel"><div class="st-drop-head"><b>Setări</b></div>' +
     '<div class="st-settings-section"><b>🤖 Asistent Premium</b>' +
-    '<small>Doar confort: nu pornește temnițe, raiduri sau forjări noi.</small></div>' +
+    '<small>Nu pornește raiduri sau forjări noi. Temnițe doar cu „Fă nivel singur”.</small></div>' +
     stBotPowerButton(botOn,botsDisabled,!!S.prem) +
     stCompactSettingRow('f','Ridică obiectele forjate',!!bot.f,botsDisabled,'Activat','Dezactivat') +
     stCompactSettingRow('eq','Echipează automat',!!bot.eq,botsDisabled,'Activat','Dezactivat') +
     stCompactSettingRow('hl','Vindecă folosind aur',!!bot.hl,botsDisabled,'Activat','Dezactivat') +
+    stCompactSettingRow('lv','Fă nivel singur (temnițe)',!!bot.lv,botsDisabled,'Activat','Dezactivat') +
     '<button type="button" class="st-settings-link"' + act + ' onclick="tab(\'a\');vil(\'q\')">📜 Jurnal și explicații BOT</button>' +
     '<div class="st-settings-section st-settings-break"><b>⚔ Luptă</b></div>' +
     stCompactSettingRow('fx','Redare lovitură cu lovitură',fxOn || fxLock,locked || fxLock,'Pornită','Oprită') +
