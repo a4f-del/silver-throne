@@ -33,11 +33,11 @@ assert(nav.includes('st-nav-sec')&&nav.includes("tab('k')"),'Rankings link sits 
 for(const t of ['Sat','Aventură','Hartă','Tron','Echipă']) assert(nav.includes(t),t);
 assert(nav.includes('onclick="tab(\'e\')"'),'Team is accessible directly from the sidebar');
 const header = ctx.stCompactHdr();
-assert(header.includes('Pornește BOT-ul')&&header.includes('onclick="stBotPower()"'),'BOT has a visible real start button in Settings');
+assert(header.includes('Pornește BOT-ul')&&header.includes('onclick="stBotPower()"')&&header.includes('st-bot-pill'),'BOT start/stop button sits in the top bar');
 for(const token of ['id="pp"','id="pt"','wm-open','bhOpen()','stCompactHeroGo','wf-open','guild-open',"tab('k')",'stCompactToggleAccount','stCompactSettingToggle','contOut()','Jurnal și explicații BOT','Ridică obiectele forjate','Echipează automat','Vindecă folosind aur']) assert(header.includes(token),'Header action '+token);
 assert(ctx.stCompactEvent().includes('<details'),'Event starts collapsed');
 assert(styles.join('').includes('st-compact'),'Scoped styles');
-assert(html.includes('beta-compact-ui.js?v=2026.11.10-2'),'New compact sidebar cache-busted');
+assert(html.includes('beta-compact-ui.js?v=2026.11.10-3'),'New compact sidebar cache-busted');
 ctx.TT={CFG:{minLevel:10}};
 ctx.TRON={st:{
   me:{user_id:'hero-1',pending:[],can_challenge:true},
