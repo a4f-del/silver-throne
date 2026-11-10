@@ -67,6 +67,8 @@ function stCompactToggleAccount() {
    După un toggle păstrăm deschis meniul chiar dacă go() redesenează antetul. */
 let stSettingsReopen = false;
 function stCompactSettingToggle(k) {
+  /* opțiunile botului se pot schimba și în timpul aventurii */
+  if (['f','eq','hl','lv'].includes(k)) { if (!S.prem || typeof btog !== 'function') return; stSettingsReopen = true; btog(k); return; }
   if ((!stCompactAvailable())) return;
   if (k === 'sfx') { stSettingsReopen = true; if (typeof sfxToggle === 'function') sfxToggle(); return; }
   if (k === 'fx') {
@@ -82,29 +84,33 @@ function stCompactSettingToggle(k) {
 /* Buton de alimentare real: btog salvează modificarea, iar botTick execută imediat
    prima verificare; ciclul normal al jocului continuă apoi la fiecare secundă.
    Nu creează al doilea interval și nu ocolește limitele Asistentului BETA. */
+/* Butonul 🤖 din bara de sus: merge oricând, inclusiv în aventură și peste redarea luptei
+   (atunci apare și butonul plutitor #st-bot-fab). Oprirea e imediată: botul nu mai ia nicio
+   decizie nouă; lupta deja pornită se termină normal. */
 function stBotPower() {
-  if ((!stCompactAvailable()) || !S.prem ||
-      typeof BT !== 'function' || typeof btog !== 'function') return;
+  if (!S.prem || typeof BT !== 'function' || typeof btog !== 'function') return;
   const wasOn = !!BT().on;
   if (!wasOn) S.bn = 0; // prima verificare nu aşteaptă temporizatorul precedent
-  stSettingsReopen = true;
-  btog('on'); // go() persistă setarea şi redesenează meniul
-  if (!wasOn && BT().on && typeof botTick === 'function') {
-    stSettingsReopen = true;
-    try { botTick(); } finally { stSettingsReopen = false; }
-  }
+  btog('on'); // go() persistă setarea şi redesenează antetul
+  if (!wasOn && BT().on && typeof botTick === 'function') botTick();
+  if (wasOn && typeof toast === 'function') toast('Botul s-a oprit.');
+  stBotFab();
 }
-function stBotPowerButton(botOn, disabled, premium) {
-  const title = botOn ? '■ Oprește BOT-ul' : '▶ Pornește BOT-ul';
-  const state = botOn ? '🟢 BOT activ' : '⚪ BOT oprit';
-  const info = !premium ? 'Necesită Premium pentru a porni Asistentul.' :
-    botOn ? 'Execută automat acțiunile activate, când sunt disponibile și pagina este deschisă.' :
-      'Apasă Pornire pentru a executa automat acțiunile selectate.';
-  return '<div class="st-bot-power-box"><div class="st-bot-power-state" role="status">' +
-    state + '</div><button type="button" class="st-bot-power' + (botOn ? ' running' : '') +
-    '" onclick="stBotPower()" aria-pressed="' + botOn + '"' +
-    (disabled ? ' disabled' : '') + '>' + title +
-    '</button><small>' + info + '</small></div>';
+/* fără Premium: duce la pagina Bot (explicații), dacă nu ești în aventură */
+function stBotInfo() { if (stCompactAvailable() && typeof tab === 'function') { tab('a'); if (typeof vil === 'function') vil('q'); } }
+function stBotPill(botOn) {
+  if (!S.prem) return '<button type="button" class="st-bot-pill lock" onclick="stBotInfo()" title="Botul necesită Premium" aria-label="Bot (Premium)">🤖<b>Bot</b><small>premium</small></button>';
+  const t = botOn ? 'Oprește BOT-ul' : 'Pornește BOT-ul';
+  return '<button type="button" class="st-bot-pill' + (botOn ? ' on' : '') + '" onclick="stBotPower()" aria-pressed="' + botOn + '" title="' + t + '" aria-label="' + t + '"><i class="st-bot-dot"></i>🤖<b>Bot</b><small>' + (botOn ? 'pornit' : 'oprit') + '</small></button>';
+}
+/* butonul plutitor de oprire: deasupra redării luptei, cât timp botul luptă în aventură */
+function stBotFab() {
+  if (typeof document === 'undefined' || !document.body || !document.getElementById) return;
+  const show = !!(S && S.prem && S.bt && S.bt.on && typeof adventureActive === 'function' && adventureActive());
+  let el = document.getElementById('st-bot-fab');
+  if (!show) { if (el && el.remove) el.remove(); return; }
+  if (!el) { el = document.createElement('button'); el.id = 'st-bot-fab'; el.type = 'button'; el.setAttribute('onclick', 'stBotPower()'); document.body.appendChild(el); }
+  el.innerHTML = '<i class="st-bot-dot"></i>🤖 Bot pornit · <b>■ Oprește</b>';
 }
 function stCompactSettingRow(k, label, value, disabled, activeLabel, inactiveLabel) {
   return '<button type="button" class="st-setting-option' + (value ? ' on' : '') +
@@ -142,13 +148,12 @@ function stCompactHdr() {
       '<button onclick="stCompactToggleAccount()">👑 Cont și profil</button>') +
     '</div></details>';
   const hasSession = typeof CONT !== 'undefined' && !!(CONT.booted && CONT.user);
-  const botsDisabled = locked || !S.prem;
+  const botsDisabled = !S.prem;
   const settings = '<details class="st-drop st-settings"' + (stSettingsReopen ? ' open' : '') +
     '><summary title="Setări" aria-label="Setări">⚙</summary>' +
     '<div class="st-drop-panel st-settings-panel"><div class="st-drop-head"><b>Setări</b></div>' +
     '<div class="st-settings-section"><b>🤖 Asistent Premium</b>' +
-    '<small>Nu pornește raiduri sau forjări noi. Temnițe doar cu „Fă nivel singur”.</small></div>' +
-    stBotPowerButton(botOn,botsDisabled,!!S.prem) +
+    '<small>' + (S.prem ? 'Pornești și oprești botul din butonul 🤖 Bot din bara de sus. Aici alegi ce face.' : 'Necesită Premium pentru a porni Asistentul.') + '</small></div>' +
     stCompactSettingRow('f','Ridică obiectele forjate',!!bot.f,botsDisabled,'Activat','Dezactivat') +
     stCompactSettingRow('eq','Echipează automat',!!bot.eq,botsDisabled,'Activat','Dezactivat') +
     stCompactSettingRow('hl','Vindecă folosind aur',!!bot.hl,botsDisabled,'Activat','Dezactivat') +
@@ -161,7 +166,8 @@ function stCompactHdr() {
     '<button type="button" class="st-settings-link"' + (locked || !hasSession ? ' disabled' : '') + ' onclick="contOut()">🚪 Deconectează-te</button>' +
     '</div></details>';
   stSettingsReopen = false;
-  return res + '<div class="st-hquick">' + mail + fight + heroMenu + settings + '</div>';
+  if (typeof setTimeout === 'function') setTimeout(stBotFab, 0);
+  return res + stBotPill(botOn) + '<div class="st-hquick">' + mail + fight + heroMenu + settings + '</div>';
 }
 /* Evenimentele raman vizibile, dar explicatiile nu imping aventura sub fold. */
 function stCompactEvent() {
@@ -294,6 +300,18 @@ body.st-compact .st-event-detail small{display:block;font-size:12px;color:var(--
  body.st-compact .st-event>summary{font-size:12px;padding:8px 10px}
 }
 body.st-adventure.st-compact .st-hquick{display:none!important}
+.st-bot-pill{display:inline-flex;align-items:center;gap:5px;height:38px;padding:4px 10px;border:1px solid var(--line);border-radius:8px;background:#10171a;color:inherit;font:inherit;cursor:pointer;flex:none;margin-left:auto}
+.st-bot-pill b{font-size:13px}.st-bot-pill small{font-size:11px;opacity:.75}
+.st-bot-pill.on{border-color:#5fbf6a;background:#13261a;box-shadow:0 0 10px #5fbf6a55}
+.st-bot-pill.lock{opacity:.7}
+.st-bot-dot{width:8px;height:8px;border-radius:50%;background:#7a8288;display:inline-block}
+.st-bot-pill.on .st-bot-dot,#st-bot-fab .st-bot-dot{background:#6ee07a;box-shadow:0 0 6px #6ee07a;animation:stBotBlink 1.4s ease-in-out infinite}
+@keyframes stBotBlink{50%{opacity:.35}}
+#st-bot-fab{position:fixed;right:14px;bottom:14px;z-index:24500;display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:22px;border:1px solid #6ee07a;background:#0d1a12ee;color:#e8f5e9;font:inherit;font-size:14px;cursor:pointer;box-shadow:0 4px 18px #000c}
+#st-bot-fab b{color:#ffb4a8}
+@media(max-width:959px){#st-bot-fab{bottom:78px}}
+@media(max-width:590px){.st-bot-pill{height:34px;padding:4px 7px}.st-bot-pill b,.st-bot-pill small{display:none}}
+@media(prefers-reduced-motion:reduce){.st-bot-dot{animation:none!important}}
 `;
   document.head.appendChild(css);
 })();
