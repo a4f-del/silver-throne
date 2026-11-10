@@ -37,7 +37,7 @@ assert(header.includes('Pornește BOT-ul')&&header.includes('onclick="stBotPower
 for(const token of ['id="pp"','id="pt"','wm-open','bhOpen()','stCompactHeroGo','wf-open','guild-open',"tab('k')",'stCompactToggleAccount','stCompactSettingToggle','contOut()','Jurnal și explicații BOT','Ridică obiectele forjate','Echipează automat','Vindecă folosind aur']) assert(header.includes(token),'Header action '+token);
 assert(ctx.stCompactEvent().includes('<details'),'Event starts collapsed');
 assert(styles.join('').includes('st-compact'),'Scoped styles');
-assert(html.includes('beta-compact-ui.js?v=2026.11.10-1'),'New compact sidebar cache-busted');
+assert(html.includes('beta-compact-ui.js?v=2026.11.10-2'),'New compact sidebar cache-busted');
 ctx.TT={CFG:{minLevel:10}};
 ctx.TRON={st:{
   me:{user_id:'hero-1',pending:[],can_challenge:true},

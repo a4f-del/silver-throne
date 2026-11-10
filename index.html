@@ -256,7 +256,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="bresle-ranguri.js?v=2026.11.07-2"></script>
 <script src="bresle-cosmetice.js?v=2026.11.08-1"></script>
 <script src="breasla-chat.js?v=2026.11.09-1"></script>
-<script src="beta-compact-ui.js?v=2026.11.10-1"></script>
+<script src="beta-compact-ui.js?v=2026.11.10-2"></script>
 <script src="runes.js?v=2026.11.10-1"></script>
 </head>
 <body>
@@ -836,18 +836,33 @@ function btog(k){const b=BT();b[k]=b[k]?0:1;go()}
 function bval(k,v){BT()[k]=k=='ft'?v:+v;go()}
 function bsc(it,f){const s=stGearStats(it),w={dmg:3,def:3,hp:1,heal:1,crit:2,bleed:1,pd:6,ph:6,pf:6,loot:.5,vd:0};if(f.c=='Vraci'){w.heal=6;w.dmg=2}if(f.c=='Paznic'){w.def=6;w.hp=2;w.pf=10;w.ph=8;w.dmg=1;w.pd=2}if(f.c=='Gardian')w.vd=(0);let t=0;for(const k in w)t+=(s[k]||0)*w[k];return t}
 function bequip(){for(const f of[...S.fs,...(S.gd||[])])for(let i=0;i<S.inv.length;i++){const it=S.inv[i],c=E(f)[it.t];if(!c||bsc(it,f)>bsc(c,f)*1.02){const e=E(f);S.inv.splice(i,1);if(c)S.inv.push(c);e[it.t]=it;bl('Echipat '+it.name+' pe '+f.n);go();return 1}}return 0}
+/* „Fă nivel singur”: luptă în cea mai grea temniță deblocată în care șansele pentru monstrul următor sunt de cel puțin BLV.min%,
+   cât timp sunt puncte; înainte ridică/vindecă echipa cu aur. Nu intră în evenimente, Turn, raiduri sau Lume. */
+const BLV={min:65};
+function blWait(k,m){if(S.blw!==k){S.blw=k;bl(m)}return 0}
+function blevel(){
+ if(S.fs.some(f=>f.hp<=0)||hpp()<.6){if(bheal())return 1;return blWait('hp','Nivel: aștept aur ca să vindec echipa')}
+ let pick=-1,odds=0;
+ for(let i=DG.length-1;i>=0;i--){const g=DG[i];if(g.ev||S.lvl<g.lv)continue;const o=typeof dOddsAt==='function'?dOddsAt(i):100;if(o!=null&&o>=BLV.min){pick=i;odds=o;break}}
+ if(pick<0)return blWait('odds','Nivel: șanse prea mici peste tot; echipează-te mai bine');
+ if(S.adventure&&S.adventure.di!==pick){adventureClear({one:1,di:S.adventure.di});bl('Nivel: schimb temnița în '+DG[pick].n);return 1}
+ const c=dCostAt(pick);if(S.pts<c)return blWait('pts','Nivel: aștept puncte ('+S.pts+'/'+c+')');
+ S.blw='';S.blT=Date.now();const d=dMk(pick);bl('Nivel: '+DG[pick].n+(d.room>=d.rooms-1?' · căpitanul':' · pasul '+(d.room+1))+' ('+odds+'%)');startD(pick);return 1}
 function bheal(){const a=S.fs,d=a.findIndex(f=>f.hp<=0),rc=Math.round(15*S.lvl*Math.pow(.96,BL().i)),hc=Math.round(6*S.lvl*Math.pow(.96,BL().i));if(d>=0&&S.gold>=rc){revive(d);bl('Ridicat: '+a[d].n);return 1}if(a.some(f=>f.hp>0&&f.hp<mhp(f)*.9)&&S.gold>=hc){heal();bl('Vindecare echipă');return 1}return 0}
 /* BETA: botul Premium numai pentru confort, nu farming automat.
    Temnițele, raidurile și forjările noi rămân acțiuni manuale. */
 function botTick0(){const b=BT(),n=Date.now();if(!b.on||!S.prem||n-(S.bn||0)<1500)return;S.bn=n;
-  if(S.d||adventureActive())return;
+  if(typeof FX!=='undefined'&&FX.playing)return;   /* așteaptă să se termine redarea luptei */
+  if(S.d){if(b.lv&&S.d.one&&!S.d.tw&&S.d.f&&n-(S.blT||0)>2500){S.blT=n;autoRun()}return}   /* lupta pornită de bot, cu redarea automată oprită */
+  if(adventureActive()&&!b.lv)return;
   if(b.f)for(let i=0;i<S.forge.length;i++){
    const slot=S.forge[i];
    if(slot&&n>=slot.end){collect(i);bl(slot.ok?'Forjat: '+slot.item.name:'Forjare eșuată');return}
   }
   if(b.eq&&bequip())return;
   if(b.hl&&bheal())return;
-  return; /* nici bdesc, bdown, braid, bcraft */
+  if(b.lv&&blevel())return;
+  return; /* nici raiduri, nici forjări noi */
  }
 function vBotBeta(b,on,chk){
  const controls=S.prem
@@ -856,14 +871,16 @@ function vBotBeta(b,on,chk){
     (b.on?'Oprește':'Pornește')+'</button></div>'
   : '<p class="mute">Disponibil doar cu Premium.</p>'+
     (DEV()?'<button class="p" onclick="opt(&#39;prem&#39;)">Activează Premium (test)</button>':'');
- return '<section><h2>Asistent Premium · doar confort</h2>'+
-  '<div class="mute">Automatizează operații când pagina este deschisă, '+
-  'dar nu pornește Temnițe, raiduri sau forjări noi. Nu produce experiență ori '+
-  'recompense de luptă. Toate activitățile de progres rămân manuale.</div>'+
+ return '<section><h2>Asistent Premium</h2>'+
+  '<div class="mute">Lucrează cât timp pagina e deschisă. Nu pornește raiduri, Turnul, '+
+  'Lumea sau forjări noi. Temnițele le face doar dacă pornești „Fă nivel singur”.</div>'+
   controls+'</section><section><h2>Acțiuni de confort</h2>'+
   chk('f','Ridică obiectele deja forjate')+
   chk('eq','Echipează automat obiectele deținute')+
   chk('hl','Vindecă folosind aurul existent')+
+  '</section><section><h2>Progres</h2>'+
+  chk('lv','Fă nivel singur: luptă în cea mai grea temniță cu șanse de cel puțin '+(typeof BLV!=='undefined'?BLV.min:65)+'%, cât timp ai puncte')+
+  '<div class="mute">Înainte de fiecare luptă ridică și vindecă echipa cu aur. Se oprește singur când nu mai are puncte sau șanse bune.</div>'+
   '</section><section><h2>Jurnal</h2>'+
   ((S.bg||[]).map(x=>'<div class="mute">'+tEsc(x)+'</div>').join('')||
    '<p class="mute">Nimic încă.</p>')+'</section>';
