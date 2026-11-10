@@ -125,7 +125,7 @@ function stCompactHdr() {
   const res = '<div class="st-hres">' +
     '<span class="st-res" title="Puncte de aventură">' + IC.p + '<b id="pp">' + S.pts + '/' + MXP() + '</b><small id="pt">' + (S.bp > 0 ? 'rezervă +' + S.bp : 'Puncte') + '</small></span>' +
     '<span class="st-res" title="Aur: ' + S.gold + '">' + IC.g + '<b class="st-full">' + S.gold + '</b><b class="st-short">' + stShortNum(S.gold) + '</b></span>' +
-    '<span class="st-res" title="Minereu: ' + S.ore + '">' + IC.o + '<b class="st-full">' + S.ore + '</b><b class="st-short">' + stShortNum(S.ore) + '</b></span></div>';
+    '<span class="st-res" title="Minereu: ' + S.ore + '">' + IC.o + '<b class="st-full">' + S.ore + '</b><b class="st-short">' + stShortNum(S.ore) + '</b></span>' + (typeof rnChip === 'function' ? rnChip() : '') + '</div>';
   const mail = locked ? '' : (typeof wmHeader === 'function' ? wmHeader() : '');
   const fight = '<button class="st-icon-action" type="button" onclick="bhOpen()" title="Istoricul luptelor" aria-label="Lupte"' + act + '>⚔</button>';
   const heroMenu = '<details class="st-drop st-hero-drop"><summary title="Erou și echipă" aria-label="Meniu erou">' +

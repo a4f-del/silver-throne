@@ -145,6 +145,14 @@ main{padding:8px 24px;max-width:940px}
 
 .pcard::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse 88% 92% at 50% 48%,transparent 64%,rgba(3,6,9,.65) 100%)}
 @supports not (aspect-ratio:1){.pcard{height:0;padding-bottom:149%}}
+.avw.msk{box-shadow:0 0 0 2px #e8c66a,0 0 12px rgba(232,198,106,.55)}
+.msk-v{position:relative;width:min(100%,420px);aspect-ratio:1;margin:8px auto;border:1px solid var(--gold);border-radius:12px;overflow:hidden;box-shadow:0 0 28px rgba(232,198,106,.35)}
+.msk-v img{width:100%;height:100%;object-fit:cover;display:block}
+.msk-shine{position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,240,200,.28) 50%,transparent 65%);background-size:250% 100%;animation:mskSh 3.6s ease-in-out infinite;pointer-events:none}
+@keyframes mskSh{0%{background-position:120% 0}60%,100%{background-position:-120% 0}}
+@media (prefers-reduced-motion:reduce){.msk-shine{animation:none}}
+.msk-cap{position:absolute;left:0;right:0;bottom:0;padding:22px 12px 10px;background:linear-gradient(transparent,rgba(5,8,11,.92));text-align:center}
+.msk-cap b{display:block;color:#f3d98a;font-size:1.1em}.msk-cap small{color:#cbbf9f}
 .pcard.miss::before,.ico.miss::before{outline:0}
 .pcard.miss{outline:2px solid var(--blood)}
 .ico.lg.miss{border-color:var(--blood)}
@@ -199,8 +207,8 @@ main{padding:8px 24px;max-width:940px}
 <script src="inventar.js?v=2026.11.09-1"></script>
 <script src="panou.js?v=2026.11.09-1"></script>
 <script src="ghid.js?v=2026.11.09-6"></script>
-<script src="mercenari.js?v=2026.11.09-1"></script>
-<script src="mercenari-poveste.js?v=2026.11.09-1"></script>
+<script src="mercenari.js?v=2026.11.10-1"></script>
+<script src="mercenari-poveste.js?v=2026.11.10-1"></script>
 <script src="prolog.js?v=2026.11.09-1"></script>
 <script src="poveste-misiuni.js?v=2026.11.09-1"></script>
 <script src="drumul-eroului.js?v=2026.11.09-6"></script>
@@ -224,9 +232,9 @@ main{padding:8px 24px;max-width:940px}
 <script src="lume.js?v=2026.11.09-7"></script>
 <script src="lume-pictat.js?v=2026.11.09-1"></script>
 <script src="tinut.js?v=2026.11.09-1"></script>
-<script src="tema.js?v=2026.11.09-6"></script>
+<script src="tema.js?v=2026.11.10-1"></script>
 <script src="ritm.js?v=2026.11.06-1"></script>
-<script src="echipa.js?v=2026.11.09-6"></script>
+<script src="echipa.js?v=2026.11.10-1"></script>
 <script src="erou.js?v=2026.11.09-1"></script>
 <script src="cont.js?v=2026.11.09-1"></script>
 <script src="istoric.js?v=2026.11.09-1"></script>
@@ -234,7 +242,7 @@ main{padding:8px 24px;max-width:940px}
 <script src="bazar.js?v=2026.11.04-5"></script>
 <script src="piata.js?v=2026.11.09-1"></script>
 <script src="pvp-simulator.js?v=2026.11.09-1"></script>
-<script src="admin.js?v=2026.11.09-3"></script>
+<script src="admin.js?v=2026.11.10-1"></script>
 <script src="recompense.js?v=2026.11.04-5"></script>
 <script src="seturi.js?v=2026.11.04-5"></script>
 <script src="legendare.js?v=2026.11.09-9"></script>
@@ -248,7 +256,8 @@ main{padding:8px 24px;max-width:940px}
 <script src="bresle-ranguri.js?v=2026.11.07-2"></script>
 <script src="bresle-cosmetice.js?v=2026.11.08-1"></script>
 <script src="breasla-chat.js?v=2026.11.09-1"></script>
-<script src="beta-compact-ui.js?v=2026.11.09-5"></script>
+<script src="beta-compact-ui.js?v=2026.11.10-1"></script>
+<script src="runes.js?v=2026.11.10-1"></script>
 </head>
 <body>
 <header><h1><img class="hd-tron" src="imagini/logo-tron.webp" alt="" width="34" height="40"><span class="hd-nm">Silver Throne</span></h1><div class="hs" id="hs"></div></header>
@@ -339,7 +348,7 @@ function mkItem(t,l,r,pi,si,q,wf){const m=RAR[r].m*(1+.1*(q||0)),s={dmg:0,def:0,
 }
 function desc(it){const L={dmg:'atac',def:'apărare',hp:'viață',bleed:'% sângerare',crit:'% critic',loot:'% aur',heal:'% vindecare',vd:'% apărarea satului',pd:'% atac',ph:'% viață',pf:'% apărare'},o=[];const stats=stGearStats(it);for(const k in stats)if(stats[k] && k!=='vd')o.push('+'+stats[k]+(k[0]=='d'||k=='hp'?' ':' ')+L[k]);return o.join(', ')}
 const iname=it=>`${iic(it)}<span class="${it.lg?'rl':'r'+(it.r+1)}">${it.name}</span> <span class="mute">(niv. ${it.l}, ${it.lg?'Legendar':RAR[it.r].n}${it.q?', '+QN[it.q]:''})</span>`;
-function chance(l,r,q){const d=l-S.lvl;let b=d>0?Math.max(10,40-5*(d-1)):d==0?55:70;const sk=25*(1-Math.pow(.97,ST().p)),cap=[75,70,65,55][r];return Math.max(5,Math.min(95,Math.min(cap,b-RAR[r].pen+sk)-(r?q||0:0)*6+S.pity*5))}
+function chance(l,r,q){const d=l-S.lvl;let b=d>0?Math.max(10,40-5*(d-1)):d==0?55:70;const sk=25*(1-Math.pow(.97,ST().p)),cap=[75,70,65,55][r];return Math.max(5,Math.min(95,Math.min(cap,b-RAR[r].pen+sk)-(r?q||0:0)*6+S.pity*5+(typeof rnPact=='function'?rnPact():0)))}
 const cost=(l,r)=>Math.round(RAR[r].cost*(1+l*.3));
 function craft(){const u=S.ui,nn=nd(u),i=S.forge.findIndex(x=>!x);S.msg='';
  if(i<0)S.msg='Toate sloturile sunt ocupate.';else if(u.r==3&&(S.frag||0)<FE)S.msg=`Pentru un Epic îți trebuie ${FE} fragmente epice (ai ${S.frag||0}).`;else if(Object.keys(nn).some(k=>have(k)<nn[k]))S.msg='Nu ai destule materiale.';
@@ -587,7 +596,7 @@ const AG={'Campion':'M10 32L10 16 18 24 24 12 30 24 38 16 38 32z','Războinic':'
 /* Imagini avatar: AV['Campion']={s:'data:image/webp;base64,...' (static),a:'data:image/webp;base64,...' (animat, doar premium)} */
 const AV={};
 const MPIC={'Războinic':'razboinic','Arcaș':'arcas','Paznic':'paznic','Mag':'mag','Vraci':'vraci'},AVF={'Campion':'campion','Arcaș':'arcasa','Paznic':'paznic','Războinic':'razboinic','Mag':'mag','Vraci':'vraci','Gardian':'gardian'};
-function av(f,z){z=z||44;if(f&&f.ic&&typeof heroAv==='function'&&!(f.h&&skinOn(f)))return heroAv(f,z);const i=AV[f.c];if(i&&(S.prem&&i.a?i.a:i.s))return av0(f,z);return`<span class="avw" style="width:${z}px;height:${z}px">${av0(f,z)}<img src="${skinOn(f)?HS.umbra.av:MPIC[f.c]?'imagini/mercenari/'+MPIC[f.c]+'.jpg':'imagini/'+(f.h?'erou':(AVF[f.c]||'erou'))+'.jpeg'}" loading="lazy" alt="" onerror="${skinOn(f)?'imgMiss(this)':"this.style.display='none'"}"></span>`}
+function av(f,z){z=z||44;if(f&&f.ic&&typeof heroAv==='function'&&!(f.h&&skinOn(f)))return heroAv(f,z);const i=AV[f.c];if(i&&(S.prem&&i.a?i.a:i.s))return av0(f,z);return`<span class="avw${typeof mskOn=='function'&&mskOn(f)?' msk':''}" style="width:${z}px;height:${z}px">${av0(f,z)}<img src="${skinOn(f)?HS.umbra.av:MPIC[f.c]?(typeof mpic=='function'?mpic(f):'imagini/mercenari/'+MPIC[f.c]+'.jpg'):'imagini/'+(f.h?'erou':(AVF[f.c]||'erou'))+'.jpeg'}" loading="lazy" alt="" onerror="${skinOn(f)?'imgMiss(this)':"this.style.display='none'"}"></span>`}
 const IC={g:'<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#d9a82e" stroke="#7a5a10" stroke-width="2"/><circle cx="16" cy="16" r="8.5" fill="none" stroke="#fff1b8" stroke-width="1.6"/></svg>',o:'<svg viewBox="0 0 32 32"><path d="M16 3l11 8-4 17H9L5 11z" fill="#8c98a0" stroke="#3a444a" stroke-width="2" stroke-linejoin="round"/><path d="M16 3l-4 25M16 3l4 25M5 11h22" stroke="#d7dee2" stroke-width="1" fill="none"/></svg>',p:'<svg viewBox="0 0 32 32"><path d="M18 2L6 18h8l-2 12 14-18h-8z" fill="#e0953f" stroke="#7a4310" stroke-width="2" stroke-linejoin="round"/></svg>'};
 /* iconițele pictate ale interfeței (imagini/ui/): resursele din bara de sus și tipurile de obiecte */
 const UI=n=>`<img class="uii" src="imagini/ui/${n}.webp" alt="" loading="lazy" decoding="async">`,UISL={w:'slot-arma',a:'slot-armura',h:'slot-coif',b:'slot-cizme',j:'slot-bijuterie',r:'slot-relicva'};
@@ -621,11 +630,17 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
 document.addEventListener('keydown',e=>{if(e.key=='Escape')lgClose();const t=e.target;if((e.key=='Enter'||e.key==' ')&&t.classList&&t.classList.contains('lg')&&t.classList.contains('ico')){e.preventDefault();lgPick(t)}});
 /* ===== Erou premium: card cinematic 2D (imagine statică + straturi de lumină) ===== */
 const HS={umbra:{n:'Umbra Runelor',img:'imagini/erou-premium.jpg',bg:'imagini/erou-premium-bg.jpg',av:'imagini/erou-premium-avatar.jpg'}};
-const skinOn=f=>!!(f&&f.h&&S.prem&&S.skin!='clasic');
+const skinOn=f=>!!(f&&f.h&&(S.prem||typeof rnOwn=='function'&&rnOwn('umbra'))&&S.skin!='clasic');
 function pcard(k,big){const d=HS[k];return`<div class="pcard${big?' big':''}"><div class="pc-bg" style="background-image:url(${d.bg})"></div><div class="pc-fig"><img src="${d.img}" alt="${d.n}" onerror="imgMiss(this)"><i class="pc-g eyes"></i><i class="pc-g rune"></i><i class="pc-g blade"></i><i class="pc-g tl"></i><i class="pc-g tr"></i></div><canvas class="pc-cv" aria-hidden="true"></canvas><i class="pc-shine"></i><div class="pc-cap"><b>${d.n}</b><small>Skin premium</small></div></div>`}
-function portrait(f){if(!f.h)return'';if(skinOn(f))return pcard('umbra')+'<div class="row" style="justify-content:center"><button onclick="skinView()">Ecran complet</button> <button onclick="skinSet(\'clasic\')">Skin clasic</button></div>';return portrait0(f)+'<div class="row" style="justify-content:center">'+(S.prem?'<button class="p" onclick="skinSet(\'umbra\')">Echipează skinul Umbra Runelor</button>':'<button onclick="skinView()">Previzualizează skinul premium</button>')+'</div>'}
+function portrait(f){if(!f.h)return'';if(skinOn(f))return pcard('umbra')+'<div class="row" style="justify-content:center"><button onclick="skinView()">Ecran complet</button> <button onclick="skinSet(\'clasic\')">Skin clasic</button></div>';return portrait0(f)+'<div class="row" style="justify-content:center">'+(S.prem||typeof rnOwn=='function'&&rnOwn('umbra')?'<button class="p" onclick="skinSet(\'umbra\')">Echipează skinul Umbra Runelor</button>':'<button onclick="skinView()">Previzualizează skinul premium</button>')+'</div>'}
 function skinSet(v){S.skin=v;go()}
-function skinView(){mdl(pcard('umbra',1)+`<div class="mute" style="text-align:center;margin-top:8px">${S.prem?'Skin premium activ':'Previzualizare · disponibil cu Premium'}</div>`,'pv')}
+/* skinuri premium pentru mercenari (imagini/mercenari/<clasă>-p.jpg); implicit pornite cu Premium */
+const MSK={'Războinic':'Flacăra Vulcanului','Arcaș':'Săgeata Lunii','Paznic':'Scutul Zorilor','Mag':'Steaua Abisului','Vraci':'Floarea Vieții'};
+const mskOn=f=>!!(f&&!f.h&&(S.prem||typeof rnOwn=='function'&&rnOwn(f.c))&&MPIC[f.c]&&MSK[f.c]&&(S.mskin||{})[f.c]!='clasic');
+const mpic=f=>'imagini/mercenari/'+MPIC[f.c]+(mskOn(f)?'-p':'')+'.jpg';
+function mskSet(c,v){S.mskin=S.mskin||{};S.mskin[c]=v;go()}
+function mskView(c){if(!MSK[c])return;mdl(`<div class="msk-v"><img src="imagini/mercenari/${MPIC[c]}-p.jpg" alt="${MSK[c]}" onerror="imgMiss(this)"><i class="msk-shine"></i><div class="msk-cap"><b>${MSK[c]}</b><small>Skin premium · ${c}</small></div></div><div class="mute" style="text-align:center;margin-top:8px">${S.prem?'Skin premium al mercenarului':'Previzualizare · disponibil cu Premium'}</div>${typeof rnSkinBuyBtn=='function'?rnSkinBuyBtn(c):''}`,'pv')}
+function skinView(){mdl(pcard('umbra',1)+`<div class="mute" style="text-align:center;margin-top:8px">${S.prem||typeof rnOwn=='function'&&rnOwn('umbra')?'Skin premium activ':'Previzualizare · disponibil cu Premium'}</div>${typeof rnSkinBuyBtn=='function'?rnSkinBuyBtn('umbra'):''}`,'pv')}
 /* motor de particule: o singură buclă, pornită doar când există carduri vizibile */
 const RDM=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
 let fxL=[],fxRaf=0,fxLast=0;
@@ -927,7 +942,7 @@ function vA0(){const u=S.ui,lv=[];if(((pls(u)[u.p||0])||{}).lv>u.l)u.p=0;if(SF[u
  <div class="row"><label>Raritate</label><select onchange="ui('r',this.value)">${RAR.map((r,i)=>`<option value="${i}"${i==u.r?' selected':''}>${r.n}${i==3?` · ${FE} fragmente epice (ai ${S.frag||0})`:''}</option>`).join('')}</select></div>${u.r==3?`<div class="mute" style="margin:-4px 0 6px">Epicele se forjează doar cu ${FE} fragmente epice, găsite la căpitanii temnițelor sau din dezmembrarea altor Epice. Fragmentele se consumă doar dacă forjarea reușește.</div>`:''}
  ${u.r>=1?`<div class="row"><label>Prefix</label><select onchange="ui('p',this.value)">${pls(u).map((x,i)=>(x.lv||1)>u.l?'':`<option value="${i}"${i==u.p?' selected':''}>${x.n} (${ad(x)})</option>`).join('')}</select></div>`:''}${u.r>=2?`<div class="row"><label>Sufix</label><select onchange="ui('s',this.value)">${SF.map((x,i)=>(x.lv||1)>u.l?'':`<option value="${i}"${i==u.s?' selected':''}>${x.n} (${ad(x)})</option>`).join('')}</select></div>`:''}${u.r>=1?`<div class="row"><label>Calitate cristal</label><select onchange="ui('q',this.value)">${QN.map((n,q)=>`<option value="${q}"${q==u.q?' selected':''}>${n} (${have(RM[u.r]+q)})</option>`).join('')}</select></div>`:''}<div class="row"><span>Șansă de reușită</span><b>${Math.round(chance(u.l,u.r,u.q)*10)/10}%</b></div>
  <div class="mute">Necesar: ${nh(u)}</div><div class="row"><span>Durată</span><span>${fmt(fDur(u))}</span></div>
- ${S.pity?`<div class="mute">Bonus după ${S.pity} eșec${S.pity>1?'uri':''}: +${S.pity*5}% la următoarea forjare, până la prima reușită</div>`:''}
+ ${typeof rnPactLine=='function'?rnPactLine():''}${S.pity?`<div class="mute">Bonus după ${S.pity} eșec${S.pity>1?'uri':''}: +${S.pity*5}% la următoarea forjare, până la prima reușită</div>`:''}
  <div class="row"><span></span><button class="p" onclick="craft()">Forjează</button></div></section>`;return h}
 /* Fierăria (de la nivelul 15): îmbunătățirea unui obiect de la +1 la +5. Fiecare treaptă +8% la atributele pozitive.
    Minereul și materialul se consumă mereu; aurul doar la reușită. +4 și +5 vor cere etaje din Turn, când va exista. */

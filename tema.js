@@ -53,7 +53,7 @@ function forgeSlots() {
   const now = Date.now(); let h = '', ready = 0;
   for (let i = 0; i < S.slots; i++) { const s = S.forge[i];
     if (!s) h += '<div class="fslot"><span class="fi">⚒</span><b>Slot liber</b><span class="mute">Alege tipul și apasă Forjează</span></div>';
-    else if (now < s.end) h += `<div class="fslot busy"><span class="fi">🔥</span><b>${s.label}</b><span class="fti" data-end="${s.end}">${fmt(s.end - now)}</span></div>`;
+    else if (now < s.end) h += `<div class="fslot busy"><span class="fi">🔥</span><b>${s.label}</b><span class="fti" data-end="${s.end}">${fmt(s.end - now)}</span>${typeof rnRushBtn === 'function' ? rnRushBtn('f', i, s.end) : ''}</div>`;
     else { ready++; h += `<div class="fslot rdy"><span class="fi">✔</span><b>${s.label}</b><button class="p" onclick="collect(${i})">Ridică</button></div>`; } }
   return (ready >= 2 ? `<button class="fgrid-all" onclick="collectAll()">Ridică tot (${ready})</button>` : '') + '<div class="fgrid">' + h + '</div>';
 }
