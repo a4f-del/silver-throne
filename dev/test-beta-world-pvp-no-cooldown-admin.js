@@ -55,7 +55,7 @@ assert(client.includes('cd = p.cd && p.cd > lwNow() && !lwTestCooldownOn()'));
 assert(!client.includes('$'+'{lwTestCooldownPanel()}'+'$'+'{lwMap()}'),'Test toggle no longer sits above the map');
 assert(read('admin.js').includes('lwTestCooldownPanel()'),'Test toggle lives in the admin panel');
 assert(client.includes('Consumă în continuare energie'));
-assert(html.includes('lume.js?v=2026.11.09-7'));
+assert(html.includes('lume.js?v=2026.11.14-1'));
 
 const start=client.indexOf('function lwCan(p) {');
 const end=client.indexOf('async function lwAttack(',start);

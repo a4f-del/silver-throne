@@ -62,5 +62,5 @@ assert(!throne.includes('tronIsBetaDuel'),'Hero duel is the only Throne mode');
 assert(throne.includes('Duel')||throne.includes('duel'),'Hero-only duel preserved');
 assert(throne.includes('Prestigiul vine din clasament'),'No permanent combat power offered');
 assert(throne.includes('me.can_challenge'),'Tron server eligibility retained');
-assert(html.includes('tron.js?v=2026.11.09-7')&&html.includes('lume.js?v=2026.11.09-7'));
+assert(html.includes('tron.js?v=2026.11.09-7')&&html.includes('lume.js?v=2026.11.14-1'));
 console.log('OK: real 4-unit World power, risk tiers without false odds, newbie/cooldown gating, personal ranking, hall and admin-tool protection.');
