@@ -48,7 +48,7 @@ assert(throne.includes('TRON.pubFailAt'),'Errors back off');
 assert(!throne.includes('onclick="tronPublish()"'),'No manual Throne publish button');
 assert(throne.includes('!CONT.booted'),'Wait for a logged-in and booted account');
 assert(index.includes('tron.js?v=2026.11.09-7'));
-assert(index.includes('lume.js?v=2026.11.09-7'));
+assert(index.includes('lume.js?v=2026.11.14-1'));
 
 const testSquad=get(throne,'function tronUnitOf(f) {','function tronDuelRestore()');
 const makeSquad=()=>new Function('S','TT','bon','mhp','atkOf','tr',

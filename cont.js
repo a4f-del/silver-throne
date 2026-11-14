@@ -41,14 +41,51 @@ function contQueue() {
   if (!CONT.user || !CONT.booted) return;
   clearTimeout(CONT.timer); CONT.timer = setTimeout(contPush, 1200);
 }
+/* corecțiile serverului (save_game): aplicăm valorile acceptate, păstrând ce s-a schimbat în joc cât timp se aștepta răspunsul */
+function contApplyFix(d, sent) {
+  if (!d || !d.fixed || !d.fix || !S) return;
+  const f = d.fix, what = [];
+  if (f.gold != null) { S.gold = Math.max(0, f.gold + (Math.floor(S.gold || 0) - Math.floor(sent.gold || 0))); what.push('aurul'); }
+  if (f.ore != null) S.ore = Math.max(0, f.ore + (Math.floor(S.ore || 0) - Math.floor(sent.ore || 0)));
+  if (f.mat && typeof f.mat === 'object') {
+    const cur = S.mat || {}, nm = {}, ks = new Set([...Object.keys(f.mat), ...Object.keys(cur), ...Object.keys(sent.mat || {})]);
+    for (const k of ks) { const v = Math.max(0, (f.mat[k] || 0) + ((cur[k] || 0) - ((sent.mat || {})[k] || 0))); if (v > 0) nm[k] = v; }
+    S.mat = nm;
+  }
+  if (f.lvl != null) { S.lvl = f.lvl; S.xp = f.xp || 0; what.push('nivelul'); }
+  if (f.pts != null) S.pts = Math.min(S.pts, f.pts);
+  if (f.bp != null) { S.bp = Math.min(S.bp || 0, f.bp); what.push('punctele'); }
+  if (f.st && typeof f.st === 'object') { const st = S.st || (S.st = {}); for (const k in f.st) st[k] = Math.min(st[k] || 0, f.st[k]); }
+  if (d.data) {
+    if (Array.isArray(d.data.inv)) S.inv = d.data.inv;
+    for (const side of ['fs', 'rs']) {
+      const a = d.data[side], b = S[side];
+      if (Array.isArray(a) && Array.isArray(b) && a.length === b.length) a.forEach((x, i) => { if (x && b[i] && x.eq) b[i].eq = x.eq; });
+    }
+    what.push('obiectele');
+  }
+  if (what.length) S.msg = 'Serverul a corectat ' + what.join(', ') + ': unele câștiguri nu erau posibile în timpul scurs.';
+  try { localStorage.setItem(SKEY, JSON.stringify(S)); } catch (e) { /* copia locală se rescrie la următoarea salvare */ }
+  if (typeof go === 'function') go();
+}
 async function contPush() {
   clearTimeout(CONT.timer); CONT.timer = null;
   if (!CONT.user || !S) return true;
   if (CONT.pushing) { CONT.again = true; return false; }
   CONT.pushing = true; let ok = false;
   try {
-    const { error } = await supabaseClient.from('game_saves').upsert({ user_id: CONT.user.id, game_data: S, updated_at: new Date().toISOString() });
-    if (error) throw error;
+    /* SQL46: salvarea trece prin serverul care o verifică (save_game); fără SQL46 rămâne scrierea directă de până acum */
+    if (!CONT.noRpc) {
+      const sent = { gold: S.gold, ore: S.ore, mat: { ...(S.mat || {}) }, lvl: S.lvl, xp: S.xp };
+      const r = await supabaseClient.rpc('save_game', { p_data: S });
+      if (r.error && /Could not find the function|schema cache|does not exist/i.test(r.error.message || '')) CONT.noRpc = true;
+      else if (r.error) throw r.error;
+      else { CONT.saveRpc = true; contApplyFix(r.data, sent); }
+    }
+    if (CONT.noRpc) {
+      const { error } = await supabaseClient.from('game_saves').upsert({ user_id: CONT.user.id, game_data: S, updated_at: new Date().toISOString() });
+      if (error) throw error;
+    }
     ok = true; CONT.lastOk = Date.now(); CONT.err = '';
   } catch (e) { CONT.err = contErr(e); console.error('Eroare la salvarea online:', e); }
   CONT.pushing = false; contChip();
@@ -80,18 +117,15 @@ async function contStart() {
 async function contEnter(user) {
   /* Aratam progresul inaintea apelului RPC; altfel butonul parea sa nu faca nimic. */
   CONT.user = user; contShow('load');
-  /* Autorizarea este verificată de server înainte să se citească salvarea sau să
-     pornească jocul. Interfața singură nu securizează RPC/RLS! */
+  /* Orice cont confirmat poate juca; serverul blochează doar conturile din public.st_bans (SQL45). */
   {
     const gate = await Promise.race([
-      supabaseClient.rpc('is_beta_admin'),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Verificarea accesului BETA a durat prea mult. Reîncarcă pagina și încearcă din nou.')), 15000))
+      supabaseClient.rpc('st_can_play'),
+      new Promise(res => setTimeout(() => res({ error: { message: 'timeout' } }), 15000))
     ]).catch(e => ({ error: e }));
-    if (gate.error || gate.data !== true) {
-      const m = gate.error ? 'Nu am putut verifica accesul BETA: ' + contErr(gate.error) : 'Acces BETA restricționat. Doar administratorii aprobați pot intra.';
+    if (!gate.error && gate.data === false) {
       await supabaseClient.auth.signOut().catch(() => {});
-      CONT.user = null;
-      CONT.msg = { t: 'err', m };
+      CONT.user = null; CONT.msg = { t: 'err', m: 'Acest cont este suspendat. Scrie-ne dacă crezi că e o greșeală.' };
       return contShow('in', true);
     }
   }
@@ -152,12 +186,14 @@ function contShow(mode, keepMsg) {
   if (mode !== CONT.mode && !keepMsg && mode !== 'retry' && mode !== 'load') CONT.msg = CONT.msg && CONT.msg.sticky ? CONT.msg : null;
   CONT.mode = mode;
   const card = document.getElementById('gate-card'), foot = document.getElementById('gate-foot');
-  const tabs = '<div class="g-tabs"><b>Acces exclusiv administratorilor</b></div>';
+  const tabs = `<div class="g-tabs" role="tablist"><button type="button" role="tab" aria-selected="${mode === 'in'}" class="${mode === 'in' ? 'on' : ''}" onclick="contShow('in')">Conectare</button><button type="button" role="tab" aria-selected="${mode === 'up'}" class="${mode === 'up' ? 'on' : ''}" onclick="contShow('up')">Cont nou</button></div>`;
   let h = '', f = '';
   if (mode === 'load') h = `<div class="g-load"><span class="g-spin" aria-hidden="true"></span><span>${CONT.user ? 'Se încarcă progresul contului…' : 'Se pregătește jocul…'}</span></div>`;
   else if (mode === 'in') {
     h = tabs + `<form onsubmit="contIn(event)" novalidate>${cField('g-email', 'Email', 'email', 'username email', CONT.email, 'inputmode="email"')}${cField('g-pass', 'Parolă', 'password', 'current-password')}${cMsg()}<button class="g-go" type="submit">Conectează-te</button></form>`
       + `<button type="button" class="g-link" onclick="contShow('reset')">Am uitat parola</button>`;
+  } else if (mode === 'up') {
+    h = tabs + `<form onsubmit="contUp(event)" novalidate>${cField('g-email', 'Email', 'email', 'username email', CONT.email, 'inputmode="email"')}${cField('g-pass', 'Parolă (cel puțin 8 caractere)', 'password', 'new-password', '', 'minlength="8"')}${cField('g-pass2', 'Repetă parola', 'password', 'new-password', '', 'minlength="8"')}${cMsg()}<button class="g-go" type="submit">Creează contul</button></form><p class="g-p g-small">Creând un cont accepți <a href="confidentialitate.html">politica de confidențialitate</a>. Îți trimitem un email de confirmare.</p>`;
   } else if (mode === 'reset') {
     h = `<h2 class="g-h">Resetează parola</h2><p class="g-p">Îți trimitem pe email un link. Îl deschizi pe acest dispozitiv și alegi o parolă nouă.</p><form onsubmit="contReset(event)" novalidate>${cField('g-email', 'Email', 'email', 'username email', CONT.email, 'inputmode="email"')}${cMsg()}<button class="g-go" type="submit">Trimite linkul</button></form><button type="button" class="g-link" onclick="contShow('in')">Înapoi la conectare</button>`;
   } else if (mode === 'new') {
@@ -170,7 +206,7 @@ function contShow(mode, keepMsg) {
   } else if (mode === 'retry') {
     h = `${cMsg()}<div class="g-two"><button class="g-go" type="button" onclick="${CONT.user ? 'contEnter(CONT.user)' : 'location.reload()'}">Încearcă din nou</button>${CONT.user ? '<button type="button" onclick="contOut()">Deconectează-te</button>' : ''}</div>`;
   }
-  if (mode === 'in' || mode === 'reset') f += '<div class="g-legal"><a href="confidentialitate.html">Confidențialitate</a> · <a href="sterge-cont.html">Ștergerea contului</a></div>';
+  if (mode === 'in' || mode === 'up' || mode === 'reset') f += '<div class="g-legal"><a href="confidentialitate.html">Confidențialitate</a> · <a href="sterge-cont.html">Ștergerea contului</a></div>';
   card.innerHTML = h; foot.innerHTML = f;
   const first = card.querySelector('input:not([value]), input[value=""]') || card.querySelector('input');
   if (first && window.innerWidth > 700) setTimeout(() => first.focus(), 30);
@@ -207,6 +243,21 @@ async function contIn(ev) {
   } finally {
     cBusy(false);
   }
+}
+async function contUp(ev) {
+  ev.preventDefault(); if (CONT.busy) return;
+  const email = cMail(); if (!email) return; const p1 = cVal('g-pass'), p2 = cVal('g-pass2');
+  if (p1.length < 8) return cSay('err', 'Parola trebuie să aibă cel puțin 8 caractere.');
+  if (p1 !== p2) return cSay('err', 'Parolele nu coincid.');
+  cBusy(true, 'Se creează contul…');
+  const { data, error } = await supabaseClient.auth.signUp({ email, password: p1, options: { emailRedirectTo: contHere() } }).catch(e => ({ error: e }));
+  cBusy(false);
+  if (error) return cSay('err', contErr(error));
+  /* Supabase nu spune direct că emailul e deja folosit: întoarce un utilizator fără identități */
+  if (data && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) return cSay('err', 'Există deja un cont cu acest email. Conectează-te.');
+  if (data && data.session) return contEnter(data.user);
+  CONT.msg = { t: 'ok', m: `Contul e creat. Ți-am trimis un email la <b>${cEsc(email)}</b>: deschide linkul din el, apoi conectează-te aici. Verifică și dosarul Spam.`, sticky: 1 };
+  contShow('in', true); CONT.msg.sticky = 0;
 }
 async function contResend() {
   const email = cVal('g-email').trim() || CONT.email; if (!email) return;
@@ -289,7 +340,7 @@ function contChip() {
   t.innerHTML = '👑 Cont' + (CONT.user && CONT.err ? ' <b class="acc-dot" title="Salvarea online a eșuat">!</b>' : '');
   const st = CONT.err ? `<span class="acc-bad">Salvarea online a eșuat: ${cEsc(CONT.err)} Progresul e păstrat pe acest dispozitiv.</span> <button type="button" onclick="contPush()">Reîncearcă</button>`
     : CONT.pushing || CONT.timer ? 'Se salvează online…' : CONT.lastOk ? 'Progresul e salvat online.' : 'Se pregătește salvarea online…';
-  p.innerHTML = `<div class="acc-env">🧪 BETA · exclusiv administratori</div><div class="acc-who">Conectat ca<b>${cEsc(CONT.user.email)}</b></div><p class="acc-st">${st}</p>${typeof nmPanel === 'function' ? nmPanel() : ''}<button type="button" id="acc-out" onclick="contOut()">Deconectează-te</button><div class="acc-legal"><a href="confidentialitate.html" target="_blank" rel="noopener">Confidențialitate</a> · <button type="button" class="acc-del" onclick="contShow('del')">Șterge contul</button></div>`;
+  p.innerHTML = `${CONT.admin ? '<div class="acc-env">🛠 Administrator</div>' : ''}<div class="acc-who">Conectat ca<b>${cEsc(CONT.user.email)}</b></div><p class="acc-st">${st}</p>${typeof nmPanel === 'function' ? nmPanel() : ''}<button type="button" id="acc-out" onclick="contOut()">Deconectează-te</button><div class="acc-legal"><a href="confidentialitate.html" target="_blank" rel="noopener">Confidențialitate</a> · <button type="button" class="acc-del" onclick="contShow('del')">Șterge contul</button></div>`;
 }
 /* tab ascuns (telefon blocat, altă aplicație): trimitem imediat ce aștepta */
 if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && CONT.timer) contPush(); });
@@ -328,7 +379,7 @@ html.gate-on,html.gate-on body{overflow:hidden}
 .g-link.in{display:inline;margin:0;padding:0}
 .g-msg{min-height:0;margin:0 0 10px;font-size:15px;line-height:1.4}.g-msg:empty{margin:0}
 .g-msg.err{color:#f0a49e}.g-msg.ok{color:#9be0a6}
-.g-h{font:700 20px Cinzel,serif;color:var(--gold2);margin:0 0 8px}.g-p{margin:0 0 12px;color:var(--ink);line-height:1.45}
+.g-h{font:700 20px Cinzel,serif;color:var(--gold2);margin:0 0 8px}.g-small{font-size:13px;opacity:.8;margin-top:10px}.g-small a{color:var(--gold2)}.g-p{margin:0 0 12px;color:var(--ink);line-height:1.45}
 .g-load{display:flex;align-items:center;justify-content:center;gap:12px;padding:18px 0;color:var(--mute)}
 .g-spin{width:22px;height:22px;border:3px solid #ffffff22;border-top-color:var(--gold2);border-radius:50%;animation:gSpin .8s linear infinite}
 @keyframes gSpin{to{transform:rotate(360deg)}}

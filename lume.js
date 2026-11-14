@@ -89,7 +89,7 @@ function lwUi() { try { if (lwOnWorld()) render(); else if (typeof hdr === 'func
 /* BETA: un administrator poate elimina doar pauza fata de ACELASI adversar.
    Optiunea este pastrata si verificata pe server; energia si restul
    conditiilor de atac raman obligatorii. LIVE nu o poate activa. */
-const lwTestCooldownAllowed = () => typeof CONT !== 'undefined' && !!CONT.user && !!CONT.booted;
+const lwTestCooldownAllowed = () => typeof CONT !== 'undefined' && !!CONT.user && !!CONT.booted && CONT.admin === true;   /* modul de test e doar pentru administratori (SQL29) */
 const lwTestCooldownOn = () => lwTestCooldownAllowed() && LUME.testCdReady && LUME.testCd === true;
 async function lwTestCooldownSync() {
   if (!lwTestCooldownAllowed() || LUME.testCdBusy || LUME.testCdLoaded) return;

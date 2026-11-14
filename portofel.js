@@ -7,6 +7,7 @@
    ========================================================================== */
 const PF = { busy: 0, off: 0, at: 0, n: 0 };
 async function pfSync() {
+  if (typeof CONT !== 'undefined' && CONT.saveRpc) return;   /* SQL46: save_game verifică deja portofelul la fiecare salvare */
   if (PF.busy || PF.off || typeof tronRpc !== 'function' || typeof CONT === 'undefined' || !CONT.user || !CONT.booted || !S) return;
   PF.busy = 1;
   const g0 = Math.floor(S.gold || 0), o0 = Math.floor(S.ore || 0), m0 = { ...(S.mat || {}) }, l0 = S.lvl;
