@@ -193,7 +193,7 @@ function contShow(mode, keepMsg) {
     h = tabs + `<form onsubmit="contIn(event)" novalidate>${cField('g-email', 'Email', 'email', 'username email', CONT.email, 'inputmode="email"')}${cField('g-pass', 'Parolă', 'password', 'current-password')}${cMsg()}<button class="g-go" type="submit">Conectează-te</button></form>`
       + `<button type="button" class="g-link" onclick="contShow('reset')">Am uitat parola</button>`;
   } else if (mode === 'up') {
-    h = tabs + `<form onsubmit="contUp(event)" novalidate>${cField('g-email', 'Email', 'email', 'username email', CONT.email, 'inputmode="email"')}${cField('g-pass', 'Parolă (cel puțin 8 caractere)', 'password', 'new-password', '', 'minlength="8"')}${cField('g-pass2', 'Repetă parola', 'password', 'new-password', '', 'minlength="8"')}${cMsg()}<button class="g-go" type="submit">Creează contul</button></form><p class="g-p g-small">Creând un cont accepți <a href="confidentialitate.html">politica de confidențialitate</a>. Îți trimitem un email de confirmare.</p>`;
+    h = tabs + `<form onsubmit="contUp(event)" novalidate>${cField('g-email', 'Email', 'email', 'username email', CONT.email, 'inputmode="email"')}${cField('g-pass', 'Parolă (cel puțin 8 caractere)', 'password', 'new-password', '', 'minlength="8"')}${cField('g-pass2', 'Repetă parola', 'password', 'new-password', '', 'minlength="8"')}<label class="g-ok"><input id="g-terms" type="checkbox"> <span>Am citit și accept <a href="termeni.html" target="_blank" rel="noopener">Termenii de utilizare</a> și <a href="confidentialitate.html" target="_blank" rel="noopener">Politica de confidențialitate</a>.</span></label>${cMsg()}<button class="g-go" type="submit">Creează contul</button></form><p class="g-p g-small">Îți trimitem un email de confirmare.</p>`;
   } else if (mode === 'reset') {
     h = `<h2 class="g-h">Resetează parola</h2><p class="g-p">Îți trimitem pe email un link. Îl deschizi pe acest dispozitiv și alegi o parolă nouă.</p><form onsubmit="contReset(event)" novalidate>${cField('g-email', 'Email', 'email', 'username email', CONT.email, 'inputmode="email"')}${cMsg()}<button class="g-go" type="submit">Trimite linkul</button></form><button type="button" class="g-link" onclick="contShow('in')">Înapoi la conectare</button>`;
   } else if (mode === 'new') {
@@ -206,7 +206,7 @@ function contShow(mode, keepMsg) {
   } else if (mode === 'retry') {
     h = `${cMsg()}<div class="g-two"><button class="g-go" type="button" onclick="${CONT.user ? 'contEnter(CONT.user)' : 'location.reload()'}">Încearcă din nou</button>${CONT.user ? '<button type="button" onclick="contOut()">Deconectează-te</button>' : ''}</div>`;
   }
-  if (mode === 'in' || mode === 'up' || mode === 'reset') f += '<div class="g-legal"><a href="confidentialitate.html">Confidențialitate</a> · <a href="sterge-cont.html">Ștergerea contului</a></div>';
+  if (mode === 'in' || mode === 'up' || mode === 'reset') f += '<div class="g-legal"><a href="termeni.html">Termeni</a> · <a href="confidentialitate.html">Confidențialitate</a> · <a href="rambursare.html">Rambursări</a> · <a href="sterge-cont.html">Ștergerea contului</a></div>';
   card.innerHTML = h; foot.innerHTML = f;
   const first = card.querySelector('input:not([value]), input[value=""]') || card.querySelector('input');
   if (first && window.innerWidth > 700) setTimeout(() => first.focus(), 30);
@@ -249,6 +249,8 @@ async function contUp(ev) {
   const email = cMail(); if (!email) return; const p1 = cVal('g-pass'), p2 = cVal('g-pass2');
   if (p1.length < 8) return cSay('err', 'Parola trebuie să aibă cel puțin 8 caractere.');
   if (p1 !== p2) return cSay('err', 'Parolele nu coincid.');
+  const terms = document.getElementById('g-terms');
+  if (terms && !terms.checked) return cSay('err', 'Ca să-ți faci cont, bifează că accepți Termenii de utilizare.');
   cBusy(true, 'Se creează contul…');
   const { data, error } = await supabaseClient.auth.signUp({ email, password: p1, options: { emailRedirectTo: contHere() } }).catch(e => ({ error: e }));
   cBusy(false);
@@ -379,7 +381,7 @@ html.gate-on,html.gate-on body{overflow:hidden}
 .g-link.in{display:inline;margin:0;padding:0}
 .g-msg{min-height:0;margin:0 0 10px;font-size:15px;line-height:1.4}.g-msg:empty{margin:0}
 .g-msg.err{color:#f0a49e}.g-msg.ok{color:#9be0a6}
-.g-h{font:700 20px Cinzel,serif;color:var(--gold2);margin:0 0 8px}.g-small{font-size:13px;opacity:.8;margin-top:10px}.g-small a{color:var(--gold2)}.g-p{margin:0 0 12px;color:var(--ink);line-height:1.45}
+.g-h{font:700 20px Cinzel,serif;color:var(--gold2);margin:0 0 8px}.g-small{font-size:13px;opacity:.8;margin-top:10px}.g-ok{display:flex;gap:8px;align-items:flex-start;margin:6px 0 10px;font-size:14px;line-height:1.4;cursor:pointer}.g-ok input{margin-top:3px;width:18px;height:18px;flex:none}.g-ok a{color:var(--gold2)}.g-small a{color:var(--gold2)}.g-p{margin:0 0 12px;color:var(--ink);line-height:1.45}
 .g-load{display:flex;align-items:center;justify-content:center;gap:12px;padding:18px 0;color:var(--mute)}
 .g-spin{width:22px;height:22px;border:3px solid #ffffff22;border-top-color:var(--gold2);border-radius:50%;animation:gSpin .8s linear infinite}
 @keyframes gSpin{to{transform:rotate(360deg)}}

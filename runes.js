@@ -133,7 +133,7 @@ ${RN.m ? `<p class="rn-m">${tEsc(RN.m)}</p>` : ''}
 <section class="rn-s"><h4>🎁 Pachetul de început <small class="mute">o singură dată</small></h4>
 ${s.starter ? '<p class="rn-on">L-ai folosit deja.</p>' : `<p class="mute">${c.starter_runes} Rune + ${c.starter_days} zile Premium + skinul Umbra Runelor.</p><div class="rn-bs">${pay(+c.starter_eur || 2.99, 'starter', 0, 'Pachetul de început a fost adăugat')}</div>`}</section>
 <section class="rn-s"><h4>${rnIco} Pachete de Rune</h4><div class="rn-pk">${(c.packs || []).map(p => `<div class="rn-pkc"><b>${rnFmt(p.n)}</b><small>Rune</small>${pay(+p.eur, 'pack', p.n, '+' + rnFmt(p.n) + ' Rune')}</div>`).join('')}</div>
-${adm ? '' : '<p class="mute">Cumpărarea cu bani reali se deschide la lansare.</p>'}</section>
+${adm ? '' : '<p class="mute">Cumpărarea cu bani reali se deschide la lansare.</p>'}<p class="mute rn-legal">Runele se livrează imediat în cont; la plată ești de acord cu livrarea imediată și renunți la dreptul de retragere de 14 zile. <a href="termeni.html" target="_blank" rel="noopener">Termeni</a> · <a href="rambursare.html" target="_blank" rel="noopener">Rambursări</a></p></section>
 <p class="mute rn-f">Grăbirea forjei și a expedițiilor apare direct lângă cronometru (⚡ 1 Rună la fiecare ${c.rush_per_min || 10} minute rămase).</p></div>`;
   if (document.getElementById('rn-shop') && document.getElementById('lgm')) { document.getElementById('rn-shop').outerHTML = h; return; }
   if (typeof mdl === 'function') mdl(h, 'rn-modal');
@@ -166,7 +166,7 @@ function rnAdminHtml() {
 .rn-skc.own{border-color:rgba(143,209,143,.5)}
 .rn-pk{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}.rn-pkc{display:flex;flex-direction:column;align-items:center;gap:4px;border:1px solid rgba(150,120,255,.3);border-radius:8px;padding:8px}
 .rn-pkc b{font-size:1.3em}.rn-rush{margin-left:auto;font-size:.85em;padding:2px 8px}.rn-rush.cf{border-color:#e8c66a}
-.rn-pact{margin:6px 0}.rn-pact.on{color:#c9b8ff}.rn-own{text-align:center}.rn-f{font-size:.85em}`;
+.rn-pact{margin:6px 0}.rn-legal{font-size:.8em}.rn-legal a{color:var(--gold2,#f0d27a)}.rn-pact.on{color:#c9b8ff}.rn-own{text-align:center}.rn-f{font-size:.85em}`;
   document.head.appendChild(st);
 })();
 if (typeof window !== 'undefined') { setTimeout(rnLoad, 3500); setInterval(() => { rnLoad(); rnApply(); }, 60000); }
