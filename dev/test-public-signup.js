@@ -14,7 +14,7 @@ assert(cont.includes('async function contUp(')&&cont.includes('supabaseClient.au
 assert(cont.includes("onclick=\"contShow('up')\">Cont nou</button>"),'Fila Cont nou');
 assert(!cont.includes('Acces exclusiv administratorilor')&&!cont.includes('exclusiv administratori'),'Fără mesajele de acces restrâns');
 assert(/p1\.length < 8/.test(cont),'Parolă de minimum 8 caractere la cont nou');
-assert(html.includes('cont.js?v=2026.11.14-1'),'cont.js cache-busted');
+assert(html.includes('cont.js?v=2026.11.15-1'),'cont.js cache-busted');
 
 // instrumentele de test rămân de administrator
 assert(lume.includes("CONT.admin === true"),'Modul de test al raidurilor doar pentru admini');
@@ -29,4 +29,7 @@ for(const f of ['world_join(jsonb)','guild_api(text,jsonb)','guild_chat_api(text
   assert(sql.includes("'"+f+"'"),f+' deschisă jucătorilor');
 assert(sql.includes("replace(d, 'public.is_beta_admin()', 'public.st_can_play()')"),'Se înlocuiește doar poarta');
 assert(/CREATE POLICY game_saves_update[\s\S]*st_can_play/.test(sql),'Salvările: propriul rând, fără poarta de admin');
+assert(cont.includes('id="g-terms"')&&cont.includes("terms && !terms.checked"),'Cont nou cere acceptarea Termenilor');
+for(const f of ['termeni.html','rambursare.html'])assert(fs.existsSync(path.join(__dirname,'..',f)),f+' există');
+assert(cont.includes('href="termeni.html"')&&cont.includes('href="rambursare.html"'),'Legături către Termeni și Rambursări');
 console.log('OK: înscriere publică; administrarea rămâne restrânsă.');
